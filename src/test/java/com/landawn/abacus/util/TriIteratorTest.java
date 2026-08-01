@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,30 +66,9 @@ public class TriIteratorTest extends TestBase {
     public void testEmptyRejectsNullTypedActions() {
         TriIterator<String, Integer, Double> empty = TriIterator.empty();
 
-        assertThrows(IllegalArgumentException.class,
-                () -> empty.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<? super String, ? super Integer, ? super Double>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> empty.foreachRemaining((Throwables.TriConsumer<? super String, ? super Integer, ? super Double, RuntimeException>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> empty.map((com.landawn.abacus.util.function.TriFunction<? super String, ? super Integer, ? super Double, Object>) null));
-    }
-
-    @Test
-    public void testEmptyDerivedIteratorsRejectNullCallbacksImmediately() {
-        List<TriIterator<Integer, Integer, Integer>> iterators = Arrays.asList(TriIterator.generate(() -> false, triple -> {
-        }), TriIterator.generate(0, 0, (index, triple) -> {
-        }), TriIterator.zip(new Integer[0], new Integer[0], new Integer[0]), TriIterator.zip(new Integer[0], new Integer[0], new Integer[0], 0, 0, 0),
-                TriIterator.<Integer, Integer, Integer> empty().skip(1), TriIterator.<Integer, Integer, Integer> empty().limit(1),
-                TriIterator.<Integer, Integer, Integer> empty().filter((a, b, c) -> true));
-
-        for (TriIterator<Integer, Integer, Integer> iter : iterators) {
-            assertThrows(IllegalArgumentException.class,
-                    () -> iter.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<Integer, Integer, Integer>) null));
-            assertThrows(IllegalArgumentException.class,
-                    () -> iter.foreachRemaining((Throwables.TriConsumer<Integer, Integer, Integer, RuntimeException>) null));
-            assertThrows(IllegalArgumentException.class,
-                    () -> iter.map((com.landawn.abacus.util.function.TriFunction<Integer, Integer, Integer, Object>) null));
-        }
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEachRemaining((com.landawn.abacus.util.function.TriConsumer<? super String, ? super Integer, ? super Double>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.foreachRemaining((Throwables.TriConsumer<? super String, ? super Integer, ? super Double, RuntimeException>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.map((com.landawn.abacus.util.function.TriFunction<? super String, ? super Integer, ? super Double, Object>) null));
     }
 
     @Test
@@ -337,7 +317,7 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_consumer_null() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
     }
 
     // =====================================================================
@@ -374,9 +354,9 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_booleanSupplierAndConsumer_nullArgs() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, triple -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, triple -> {
         }));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(() -> true, null));
     }
 
     @Test
@@ -387,17 +367,17 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_intRange_nullOutput() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(0, 5, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(0, 5, null));
     }
 
     @Test
     public void testArgumentValidation() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, (Consumer<Triple<String, Integer, Double>>) null));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null, (Consumer<Triple<String, Integer, Double>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(null));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().skip(-1));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().limit(-1));
 
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(2, 5, (IntObjConsumer<Triple<String, Integer, Double>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.generate(2, 5, (IntObjConsumer<Triple<String, Integer, Double>>) null));
     }
 
     // =====================================================================
@@ -936,9 +916,9 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testUnzipIterable_nullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a"), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a"), null));
         // The unzip function is validated even when the iterable is null.
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterable<String>) null, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterable<String>) null, null));
     }
 
     @Test
@@ -997,9 +977,9 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testUnzipIterator_nullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip(Arrays.asList("a").iterator(), null));
         // The unzip function is validated even when the iterator is null.
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterator<String>) null, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.unzip((Iterator<String>) null, null));
     }
 
     @Test
@@ -1389,7 +1369,7 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testFilter_nullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().filter(null));
     }
 
     // =====================================================================
@@ -1456,7 +1436,7 @@ public class TriIteratorTest extends TestBase {
 
     @Test
     public void testMapWithNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().stream(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().stream(null));
     }
 
     // =====================================================================

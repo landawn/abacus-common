@@ -144,7 +144,7 @@ public class IfTest extends TestBase {
 
     @Test
     public void testOrElseRunnable_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElse((Throwables.Runnable<Exception>) null));
     }
 
@@ -158,7 +158,7 @@ public class IfTest extends TestBase {
 
     @Test
     public void testOrElseWithInput_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElse("value", null));
     }
 
@@ -175,7 +175,7 @@ public class IfTest extends TestBase {
 
     @Test
     public void testOrElseThrow_Null() {
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElseThrow(null));
     }
 
@@ -208,29 +208,29 @@ public class IfTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> If.is(true).thenThrow(null));
 
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElse((Throwables.Runnable<?>) null));
 
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElse("value", null));
 
-        assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(true).then(() -> {
         }).orElseThrow(null));
     }
 
     @Test
     public void testNullArguments_FalseCondition() {
-        // Null checks should be enforced even when condition is false
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then((Throwables.Runnable<?>) null));
+        // A false branch does not evaluate its callbacks.
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(false).then((Throwables.Runnable<?>) null));
 
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).then("value", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(false).then("value", null));
 
-        assertThrows(IllegalArgumentException.class, () -> If.is(false).thenThrow(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> If.is(false).thenThrow(null));
     }
 
     @Test
     public void testOrElse_NullArguments_FalseCondition() {
-        // orElse null checks should be enforced even when the orElse branch is not taken
+        // The false condition selects the orElse branch, so null callbacks fail when invoked.
         assertThrows(IllegalArgumentException.class, () -> If.is(false).then(() -> {
         }).orElse((Throwables.Runnable<?>) null));
 

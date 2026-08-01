@@ -22,8 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -41,9 +41,13 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * This class provides convenient static methods for converting between Java objects and XML representations,
  * with support for various input/output formats and configuration options.
  *
+ * <p>The class maintains bounded caches of configuration-bound {@code XmlMapper} instances. A cached
+ * mapper is never reconfigured after its first use, preventing Jackson's serializer and root-deserializer
+ * caches from leaking one call's configuration into another.</p>
+ *
  * <p>Features include:</p>
  * <ul>
- *   <li>Object pooling for XmlMapper instances to improve performance</li>
+ *   <li>Configuration-bound XmlMapper caching to improve performance</li>
  *   <li>Support for pretty-printing XML output</li>
  *   <li>Configuration support for serialization and deserialization</li>
  *   <li>Multiple input/output formats (String, File, Stream, Reader/Writer, etc.)</li>
@@ -75,7 +79,18 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  */
 public final class XmlMappers {
     private static final int POOL_SIZE = 128;
-    private static final List<XmlMapper> mapperPool = new ArrayList<>(POOL_SIZE);
+    private static final Map<SerializationConfig, XmlMapper> serializationMapperPool = new LinkedHashMap<>(POOL_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<SerializationConfig, XmlMapper> eldest) {
+            return size() > POOL_SIZE;
+        }
+    };
+    private static final Map<DeserializationConfig, XmlMapper> deserializationMapperPool = new LinkedHashMap<>(POOL_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<DeserializationConfig, XmlMapper> eldest) {
+            return size() > POOL_SIZE;
+        }
+    };
 
     private static final XmlMapper defaultXmlMapper = newSecureXmlMapper();
     private static final XmlMapper defaultXmlMapperForPretty = (XmlMapper) newSecureXmlMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -1411,9 +1426,8 @@ public final class XmlMappers {
     }
 
     /**
-     * Retrieves an XmlMapper from the pool configured with the specified serialization configuration.
-     * If the pool is empty, a new XmlMapper is created. This method is used internally for object pooling
-     * to improve performance by reusing mapper instances.
+     * Retrieves the mapper permanently bound to the specified serialization configuration, creating a
+     * security-hardened mapper if this configuration has not been seen before.
      *
      * @param config the serialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified serialization config
@@ -1423,27 +1437,21 @@ public final class XmlMappers {
             return defaultXmlMapper;
         }
 
-        XmlMapper mapper = null;
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() > 0) {
-                mapper = mapperPool.remove(mapperPool.size() - 1);
+        synchronized (serializationMapperPool) {
+            XmlMapper mapper = serializationMapperPool.get(config);
+            if (mapper == null) {
+                mapper = newSecureXmlMapper();
+                mapper.setConfig(config);
+                serializationMapperPool.put(config, mapper);
             }
+
+            return mapper;
         }
-
-        if (mapper == null) {
-            mapper = newSecureXmlMapper();
-        }
-
-        mapper.setConfig(config);
-
-        return mapper;
     }
 
     /**
-     * Retrieves an XmlMapper from the pool configured with the specified deserialization configuration.
-     * If the pool is empty, a new XmlMapper is created. This method is used internally for object pooling
-     * to improve performance by reusing mapper instances.
+     * Retrieves the mapper permanently bound to the specified deserialization configuration, creating a
+     * security-hardened mapper if this configuration has not been seen before.
      *
      * @param config the deserialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified deserialization config
@@ -1453,46 +1461,26 @@ public final class XmlMappers {
             return defaultXmlMapper;
         }
 
-        XmlMapper mapper = null;
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() > 0) {
-                mapper = mapperPool.remove(mapperPool.size() - 1);
+        synchronized (deserializationMapperPool) {
+            XmlMapper mapper = deserializationMapperPool.get(config);
+            if (mapper == null) {
+                mapper = newSecureXmlMapper();
+                mapper.setConfig(config);
+                deserializationMapperPool.put(config, mapper);
             }
+
+            return mapper;
         }
-
-        if (mapper == null) {
-            mapper = newSecureXmlMapper();
-        }
-
-        mapper.setConfig(config);
-
-        return mapper;
     }
 
     /**
-     * Returns an XmlMapper to the pool for reuse after resetting it to default configuration.
-     * This method resets both serialization and deserialization configs to their defaults
-     * before returning the mapper to the pool. If the pool is full, the mapper is discarded.
-     * The two shared default mappers are never pooled, so passing either of them is a no-op.
+     * Configuration-bound mappers remain in the bounded caches above. They must not be reconfigured
+     * after use because Jackson retains serializers and root deserializers internally.
      *
-     * @param mapper the XmlMapper to return to the pool; {@code null} and the shared default
-     *               mappers are ignored
+     * @param mapper the mapper used by the completed operation; retained by its configuration cache
      */
-    private static void recycle(final XmlMapper mapper) {
-        if (mapper == null || mapper == defaultXmlMapper || mapper == defaultXmlMapperForPretty) {
-            return;
-        }
-
-        mapper.setConfig(defaultSerializationConfig);
-        mapper.setConfig(defaultDeserializationConfig);
-
-        synchronized (mapperPool) {
-            if (mapperPool.size() < POOL_SIZE) {
-
-                mapperPool.add(mapper);
-            }
-        }
+    private static void recycle(@SuppressWarnings("unused") final XmlMapper mapper) {
+        // No-op: see method documentation. The call sites retain their uniform finally blocks.
     }
 
     /**

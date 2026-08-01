@@ -151,7 +151,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * <p>The statistics include information such as:</p>
      * <ul>
      *   <li>Pool capacity and current size</li>
-     *   <li>Number of put and get operations</li>
+     *   <li>Number of put/add and get/poll operations (see {@link PoolStats} for naming)</li>
      *   <li>Hit and miss counts</li>
      *   <li>Number of evictions</li>
      *   <li>Memory usage (if applicable)</li>

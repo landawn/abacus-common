@@ -288,13 +288,14 @@ public final class Profiler {
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics including
      *         minimum, maximum, average, and percentile execution times for all test executions.
      *         The returned statistics represent the final round of testing
-     * @throws IllegalArgumentException if {@code threadNum <= 0} or {@code loopNum <= 0}, as these would
-     *                                  result in invalid test configurations with no actual profiling, or
-     *                                  if {@code command} is {@code null}
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @see #run(int, int, int, String, Throwables.Runnable)
      * @see #run(int, long, int, long, int, String, Throwables.Runnable)
      */
-    public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command) {
+    public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final Throwables.Runnable<? extends Exception> command)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+
         return run(threadNum, loopNum, roundNum, "run", command);
     }
 
@@ -364,12 +365,14 @@ public final class Profiler {
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
      *         for the labeled test, including execution times, percentiles, and statistical analysis.
      *         The statistics object includes the label for easy identification
-     * @throws IllegalArgumentException if {@code threadNum <= 0}, {@code loopNum <= 0}, or {@code command} is {@code null}
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @see #run(int, int, int, Throwables.Runnable)
      * @see #run(int, long, int, long, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final int loopNum, final int roundNum, final String label,
-            final Throwables.Runnable<? extends Exception> command) {
+            final Throwables.Runnable<? extends Exception> command) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+
         return run(threadNum, 0, loopNum, 0, roundNum, label, command);
     }
 
@@ -470,16 +473,13 @@ public final class Profiler {
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics
      *         including minimum, maximum, average, percentile execution times, and failure information.
      *         The statistics represent the final round of testing
-     * @throws IllegalArgumentException if {@code threadNum <= 0}, {@code loopNum <= 0},
-     *                                  {@code threadDelay < 0}, or {@code loopDelay < 0}.
-     *                                  These conditions indicate invalid test configurations; also thrown
-     *                                  if {@code command} is {@code null}
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @see #run(int, int, int, Throwables.Runnable)
      * @see #run(int, int, int, String, Throwables.Runnable)
      */
     public static MultiLoopsStatistics run(final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum,
-            final String label, final Throwables.Runnable<? extends Exception> command) {
-        N.checkArgNotNull(command, "command");
+            final String label, final Throwables.Runnable<? extends Exception> command) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
 
         // A null label is normalized to the string "null" so that statistics queries and report
         // rendering (which use the label as the method name) won't fail with NullPointerException.
@@ -1808,6 +1808,7 @@ public final class Profiler {
                 final int threadNum, final List<LoopStatistics> loopStatisticsList) {
             super(startTimeInMillis, endTimeInMillis, startTimeInNano, endTimeInNano);
             N.checkArgPositive(threadNum, "threadNum");
+
             this.threadNum = threadNum;
             this.loopStatisticsList = loopStatisticsList == null ? new ArrayList<>() : loopStatisticsList;
         }
@@ -1907,7 +1908,7 @@ public final class Profiler {
          * @throws IllegalArgumentException if {@code loopStatistics} is {@code null}
          */
         public void addLoopStatistics(final LoopStatistics loopStatistics) {
-            getLoopStatisticsList().add(N.checkArgNotNull(loopStatistics, "loopStatistics"));
+            getLoopStatisticsList().add(N.checkArgNotNull(loopStatistics, cs.loopStatistics));
         }
 
         @Override
@@ -2140,9 +2141,9 @@ public final class Profiler {
          *
          * <p><b>Output Format Details:</b>
          * The console output uses a tabular format with columns aligned for easy reading. All timing values
-         * are displayed in milliseconds with three decimal places of precision. The percentile columns show
-         * the execution time threshold that the given percentage of executions completed within, helping
-         * identify performance outliers and distribution patterns.
+         * are displayed in milliseconds with three decimal places of precision. The percentile columns show,
+         * for each listed percentage, the execution time that this fraction of executions reached or exceeded
+         * (see the interpretation below), helping identify performance outliers and distribution patterns.
          *
          * <p><b>Percentile Interpretation:</b>
          * The percentile columns are computed from executions sorted in descending order of elapsed time
@@ -2240,7 +2241,7 @@ public final class Profiler {
          * }
          * }</pre>
          *
-         * @param output the OutputStream to which performance results will be written. Must not be {@code null}.
+         * @param output the OutputStream to which performance results will be written.
          *               The stream will be flushed but NOT closed by this method
          * @throws NullPointerException if {@code output} is {@code null}
          * @see #writeResult(Writer) for character-stream based output
@@ -2320,7 +2321,7 @@ public final class Profiler {
          * }
          * }</pre>
          *
-         * @param output the Writer to which performance results will be written. Must not be {@code null}.
+         * @param output the Writer to which performance results will be written.
          *               The Writer will be flushed but NOT closed by this method. All timing data,
          *               statistics, and error information will be written in formatted text
          * @throws NullPointerException if {@code output} is {@code null}

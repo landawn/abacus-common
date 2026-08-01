@@ -101,13 +101,14 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * // Result: "Data: Range: [10, 20] Sum: 30"
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ObjBiIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ObjBiIntConsumer<T> andThen(final ObjBiIntConsumer<? super T> after) {
+    default ObjBiIntConsumer<T> andThen(final ObjBiIntConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, i, j) -> {
             accept(t, i, j);
             after.accept(t, i, j);

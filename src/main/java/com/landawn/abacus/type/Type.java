@@ -51,6 +51,7 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
+import com.landawn.abacus.util.cs;
 
 /**
  * The core type abstraction interface representing types in the abacus-common type system.
@@ -172,7 +173,8 @@ public interface Type<T> {
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param javaType the Java reflection type
-     * @return the corresponding Type instance
+     * @return the corresponding Type instance (never {@code null}; unrecognized types resolve to a
+     *         generic {@link Object}-backed handler rather than failing)
      * @throws IllegalArgumentException if {@code javaType} is {@code null}
      */
     static <T> Type<T> of(final java.lang.reflect.Type javaType) {
@@ -194,11 +196,11 @@ public interface Type<T> {
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeRef the type reference
-     * @return the corresponding Type instance
+     * @return the corresponding Type instance (never {@code null})
      * @throws IllegalArgumentException if {@code typeRef} is {@code null}
      */
     static <T> Type<T> of(final TypeReference<T> typeRef) {
-        return N.checkArgNotNull(typeRef, "typeRef").type();
+        return N.checkArgNotNull(typeRef, cs.typeRef).type();
     }
 
     /**
@@ -219,7 +221,8 @@ public interface Type<T> {
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param cls the class
-     * @return the corresponding Type instance
+     * @return the corresponding Type instance (never {@code null}; unrecognized classes resolve to a
+     *         generic {@link Object}-backed handler or a bean handler rather than failing)
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     static <T> Type<T> of(final Class<? extends T> cls) {
@@ -244,7 +247,8 @@ public interface Type<T> {
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeName the type name string; must not be {@code null} or empty
-     * @return the corresponding Type instance
+     * @return the corresponding Type instance (never {@code null}; unrecognized names resolve to a
+     *         generic {@link Object}-backed handler rather than failing)
      * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty
      */
     static <T> Type<T> of(final String typeName) {
@@ -254,6 +258,7 @@ public interface Type<T> {
     /**
      * Returns a list of Type instances for the given array of classes.
      * Convenient for obtaining multiple types at once.
+     * A {@code null} or empty array yields an empty list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -265,9 +270,10 @@ public interface Type<T> {
      * List<Type<Object>> customTypes = Type.ofAll(User.class, Order.class);
      * }</pre>
      *
-     * @param <T> the Java type represented by the returned {@code Type} instance
-     * @param classes the array of classes
-     * @return list of corresponding Type instances
+     * @param <T> the upper bound of the classes in {@code classes}; each list element is a
+     *            {@code Type} for one of those classes
+     * @param classes the array of classes; may be {@code null} or empty
+     * @return list of corresponding Type instances (never {@code null}; empty when {@code classes} is empty)
      */
     @SafeVarargs
     static <T> List<Type<T>> ofAll(final Class<? extends T>... classes) {
@@ -276,6 +282,7 @@ public interface Type<T> {
 
     /**
      * Returns a list of Type instances for the given collection of classes.
+     * A {@code null} or empty collection yields an empty list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -288,9 +295,10 @@ public interface Type<T> {
      * List<Type<Number>> numberTypes = Type.ofAll(numberClasses);
      * }</pre>
      *
-     * @param <T> the Java type represented by the returned {@code Type} instance
-     * @param classes the collection of classes
-     * @return list of corresponding Type instances
+     * @param <T> the upper bound of the classes in {@code classes}; each list element is a
+     *            {@code Type} for one of those classes
+     * @param classes the collection of classes; may be {@code null} or empty
+     * @return list of corresponding Type instances (never {@code null}; empty when {@code classes} is empty)
      */
     static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
@@ -842,8 +850,8 @@ public interface Type<T> {
 
     /**
      * Returns the XML-safe name of this type.
-     * Generic angle brackets are not used; instead, the XML form replaces them with
-     * a representation suitable for embedding inside XML element/attribute names.
+     * Generic angle brackets in the type name are escaped to XML entities
+     * ({@code &lt;} / {@code &gt;}) so the name can be embedded in XML text safely.
      *
      * @return the XML-safe type name
      */
@@ -1019,6 +1027,17 @@ public interface Type<T> {
     }
 
     /**
+     * Checks if this type represents a {@link java.time.temporal.Temporal} type
+     * (e.g. {@code Instant}, {@code LocalDate}, {@code LocalDateTime}, {@code LocalTime},
+     * {@code OffsetDateTime}, {@code ZonedDateTime}).
+     *
+     * @return {@code true} if this is a {@code Temporal} type, {@code false} otherwise
+     */
+    default boolean isTemporal() {
+        return false; // Default implementation, can be overridden by specific types
+    }
+
+    /**
      * Checks if this type represents a primitive array (int[], byte[], etc.).
      *
      * @return {@code true} if this is a primitive array type, {@code false} otherwise
@@ -1163,9 +1182,12 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this type represents an immutable type.
+     * Checks whether <em>values</em> of the represented Java type are immutable
+     * (for example {@link String}, {@link Integer}, or an enum constant).
+     * This describes the value type, not the {@code Type} handler instance itself
+     * (handlers are expected to be immutable regardless).
      *
-     * @return {@code true} if this is an immutable type, {@code false} otherwise
+     * @return {@code true} if values of this type are immutable, {@code false} otherwise
      */
     default boolean isImmutable() {
         return false; // Default implementation, can be overridden by specific types
@@ -1386,7 +1408,9 @@ public interface Type<T> {
      * Sets a parameter value in a PreparedStatement.
      *
      * @param stmt the PreparedStatement
-     * @param columnIndex the parameter index (1-based)
+     * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
+     *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
+     *                    {@link ResultSet} column index
      * @param x the value to set
      * @throws SQLException if a database access error occurs
      */
@@ -1406,7 +1430,9 @@ public interface Type<T> {
      * Sets a parameter value in a PreparedStatement with SQL type or length hint.
      *
      * @param stmt the PreparedStatement
-     * @param columnIndex the parameter index (1-based)
+     * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
+     *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
+     *                    {@link ResultSet} column index
      * @param x the value to set
      * @param sqlTypeOrLength the SQL type constant or length hint
      * @throws SQLException if a database access error occurs

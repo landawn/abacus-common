@@ -24,6 +24,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 public class DoubleIteratorTest extends TestBase {
+ 
 
     // =================================================
     // empty()
@@ -418,7 +419,7 @@ public class DoubleIteratorTest extends TestBase {
 
     @Test
     public void test_defer_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.defer(null));
     }
 
     @Test
@@ -539,7 +540,7 @@ public class DoubleIteratorTest extends TestBase {
 
     @Test
     public void test_generate_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null));
     }
 
     @Test
@@ -565,9 +566,9 @@ public class DoubleIteratorTest extends TestBase {
         DoubleSupplier supplier = () -> 0.0;
         BooleanSupplier hasNext = () -> true;
 
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate((DoubleSupplier) null));
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null, supplier));
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(hasNext, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate((DoubleSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null, supplier));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(hasNext, null));
     }
 
     @Test
@@ -579,12 +580,12 @@ public class DoubleIteratorTest extends TestBase {
 
     @Test
     public void test_generate_withCondition_nullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null, () -> 1.5));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(null, () -> 1.5));
     }
 
     @Test
     public void test_generate_withCondition_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.generate(() -> true, null));
     }
 
     @Test
@@ -962,7 +963,7 @@ public class DoubleIteratorTest extends TestBase {
 
     @Test
     public void test_filter_nullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).filter(null));
     }
 
     @Test
@@ -1013,7 +1014,7 @@ public class DoubleIteratorTest extends TestBase {
     public void testFilter_NullPredicate() {
         DoubleIterator iter = DoubleIterator.of(1.0, 2.0, 3.0);
 
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test
@@ -1443,7 +1444,7 @@ public class DoubleIteratorTest extends TestBase {
         Assertions.assertEquals(3, count.get());
         Assertions.assertArrayEquals(new double[] { 1.5, 2.5, 3.5 }, values);
 
-        Assertions.assertThrows(NullPointerException.class, () -> DoubleIterator.of(1.0).forEachRemaining((java.util.function.Consumer<? super Double>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).forEachRemaining((java.util.function.Consumer<? super Double>) null));
     }
 
     @Test

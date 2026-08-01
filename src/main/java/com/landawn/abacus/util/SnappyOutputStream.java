@@ -60,7 +60,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @throws IllegalArgumentException if {@code os} is {@code null}
      */
     public SnappyOutputStream(final OutputStream os) {
-        N.checkArgNotNull(os, "os");
+        N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new org.xerial.snappy.SnappyOutputStream(os);
     }
@@ -85,7 +85,7 @@ public final class SnappyOutputStream extends OutputStream {
      *         the supported range
      */
     public SnappyOutputStream(final OutputStream os, final int bufferSize) {
-        N.checkArgNotNull(os, "os");
+        N.checkArgNotNull(os, cs.os);
 
         if (bufferSize < org.xerial.snappy.SnappyOutputStream.MIN_BLOCK_SIZE || bufferSize > org.xerial.snappy.SnappyOutputStream.MAX_BLOCK_SIZE) {
             throw new IllegalArgumentException("bufferSize must be between " + org.xerial.snappy.SnappyOutputStream.MIN_BLOCK_SIZE + " and "

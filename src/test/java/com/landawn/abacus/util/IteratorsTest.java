@@ -19,9 +19,12 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -2210,7 +2213,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.merge((Iterator<Integer>) null, Arrays.asList(1).iterator(), selector);
         assertEquals(Arrays.asList(1), result.toList());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.merge(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.merge(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
     }
 
     @Test
@@ -2226,7 +2229,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.merge((Collection<Iterator<Integer>>) null, selector);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.merge(Arrays.asList(Arrays.asList(1).iterator()), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.merge(Arrays.asList(Arrays.asList(1).iterator()), null));
     }
 
     @Test
@@ -2273,7 +2276,7 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testMergeIterables() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.mergeIterables(Arrays.asList(Arrays.asList(1)), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.mergeIterables(Arrays.asList(Arrays.asList(1)), null));
 
         BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
 
@@ -2452,7 +2455,7 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testMergeSortedIteratorsWithComparator() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
 
         Comparator<String> cmp = (a, b) -> a.compareTo(b);
         Iterator<String> iter1 = Arrays.asList("a", "c", "e").iterator();
@@ -2470,7 +2473,7 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testMergeSortedWithComparator_NullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
     }
 
     @Test
@@ -2821,7 +2824,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.zip(Arrays.asList(1, 2).iterator(), Arrays.asList("a", "b", "c").iterator(), zipFn);
         assertEquals(Arrays.asList("1a", "2b"), result.toList());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.zip(Arrays.asList(1).iterator(), Arrays.asList("a").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.zip(Arrays.asList(1).iterator(), Arrays.asList("a").iterator(), null));
     }
 
     @Test
@@ -2924,13 +2927,12 @@ public class IteratorsTest extends TestBase {
         assertEquals("a", list.get(0).left());
         assertEquals(1, list.get(0).right());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.unzip(Arrays.asList("a1").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.unzip(Arrays.asList("a1").iterator(), null));
     }
 
     @Test
     public void testUnzip_NullUnzipFunction() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Iterators.unzip(Arrays.asList("a").iterator(), (com.landawn.abacus.util.function.BiConsumer<String, Pair<String, Integer>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.unzip(Arrays.asList("a").iterator(), (com.landawn.abacus.util.function.BiConsumer<String, Pair<String, Integer>>) null));
     }
 
     @Test
@@ -3026,7 +3028,7 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testUnzip3_NullUnzipFunction() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.unzip3(Arrays.asList("a").iterator(),
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.unzip3(Arrays.asList("a").iterator(),
                 (com.landawn.abacus.util.function.BiConsumer<String, Triple<String, Integer, Boolean>>) null));
     }
 
@@ -3646,7 +3648,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.distinctBy((Iterable<String>) null, String::length);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(Arrays.asList("a"), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(Arrays.asList("a"), null));
     }
 
     @Test
@@ -3658,12 +3660,12 @@ public class IteratorsTest extends TestBase {
         result = Iterators.distinctBy((Iterator<String>) null, String::length);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(Arrays.asList("a").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(Arrays.asList("a").iterator(), null));
     }
 
     @Test
     public void testDistinctByNullKeyExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(testList, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.distinctBy(testList, null));
     }
 
     @Test
@@ -3859,7 +3861,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.filter((Iterable<Integer>) null, isEven);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1), null));
     }
 
     @Test
@@ -3872,12 +3874,12 @@ public class IteratorsTest extends TestBase {
         result = Iterators.filter((Iterator<Integer>) null, isOdd);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1).iterator(), null));
     }
 
     @Test
     public void testFilter_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.filter(Arrays.asList(1).iterator(), null));
     }
 
     @Test
@@ -3958,7 +3960,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.takeWhile((Iterable<Integer>) null, lessThan4);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.takeWhile(Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.takeWhile(Arrays.asList(1), null));
     }
 
     @Test
@@ -4290,12 +4292,12 @@ public class IteratorsTest extends TestBase {
         result = Iterators.map((Iterable<Integer>) null, mapper);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.map(Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.map(Arrays.asList(1), null));
     }
 
     @Test
     public void testMap_NullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.map(Arrays.asList(1).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.map(Arrays.asList(1).iterator(), null));
     }
 
     @Test
@@ -4472,7 +4474,7 @@ public class IteratorsTest extends TestBase {
         result = Iterators.flatMap((Iterable<Integer>) null, mapper);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.flatMap(Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.flatMap(Arrays.asList(1), null));
     }
 
     @Test
@@ -4485,17 +4487,17 @@ public class IteratorsTest extends TestBase {
         result = Iterators.flatmap((Iterable<Integer>) null, mapper);
         assertFalse(result.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Iterators.flatmap(Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.flatmap(Arrays.asList(1), null));
     }
 
     @Test
     public void testFlatMap_NullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.flatMap(Arrays.asList(1).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.flatMap(Arrays.asList(1).iterator(), null));
     }
 
     @Test
     public void testFlatmap_NullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.flatmap(Arrays.asList(1).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.flatmap(Arrays.asList(1).iterator(), null));
     }
 
     @Test
@@ -5223,6 +5225,239 @@ public class IteratorsTest extends TestBase {
     }
 
     @Test
+    public void testInterruptedParallelForEachStopsWorkersAndPreservesInterrupt() throws Exception {
+        final CountDownLatch workersStarted = new CountDownLatch(2);
+        final CountDownLatch releaseWorkers = new CountDownLatch(1);
+        final CountDownLatch workersExited = new CountDownLatch(2);
+        final AtomicInteger interruptedWorkers = new AtomicInteger();
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final AtomicBoolean coordinatorInterrupted = new AtomicBoolean();
+
+        final Thread coordinator = new Thread(() -> {
+            try {
+                final Collection<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator());
+
+                Iterators.forEach(iterators, 0L, Long.MAX_VALUE, 0, 2, 0, (Throwables.Consumer<Integer, Exception>) value -> {
+                    workersStarted.countDown();
+
+                    try {
+                        releaseWorkers.await();
+                    } catch (final InterruptedException e) {
+                        interruptedWorkers.incrementAndGet();
+                        throw e;
+                    } finally {
+                        workersExited.countDown();
+                    }
+                }, (Throwables.Runnable<Exception>) () -> {
+                });
+            } catch (final Throwable e) {
+                failure.set(e);
+                coordinatorInterrupted.set(Thread.currentThread().isInterrupted());
+            }
+        }, "IteratorsTest-interrupted-coordinator");
+
+        coordinator.start();
+
+        try {
+            assertTrue(workersStarted.await(5, TimeUnit.SECONDS));
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+
+            assertFalse(coordinator.isAlive());
+            assertNotNull(failure.get());
+            assertTrue(coordinatorInterrupted.get());
+            assertTrue(workersExited.await(5, TimeUnit.SECONDS));
+            assertEquals(2, interruptedWorkers.get());
+        } finally {
+            // Also makes the regression fail cleanly against the old implementation, whose
+            // shutdown() left both workers blocked after the coordinator returned.
+            releaseWorkers.countDown();
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+            workersExited.await(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void testInterruptedParallelForEachKeepsPriorWorkerFailureReachable() throws Exception {
+        final CountDownLatch blockedWorkerStarted = new CountDownLatch(1);
+        final CountDownLatch workersStarted = new CountDownLatch(3);
+        final CountDownLatch releaseBlockedWorker = new CountDownLatch(1);
+        final AtomicReference<Throwable> coordinatorFailure = new AtomicReference<>();
+        final RuntimeException firstWorkerFailure = new RuntimeException("first prior worker failure");
+        final RuntimeException secondWorkerFailure = new RuntimeException("second prior worker failure");
+        final Thread coordinator = new Thread(() -> {
+            try {
+                final Collection<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
+
+                Iterators.forEach(iterators, 0L, Long.MAX_VALUE, 0, 3, 0, (Throwables.Consumer<Integer, Exception>) value -> {
+                    workersStarted.countDown();
+                    assertTrue(workersStarted.await(5, TimeUnit.SECONDS));
+
+                    if (value <= 2) {
+                        throw value == 1 ? firstWorkerFailure : secondWorkerFailure;
+                    }
+
+                    blockedWorkerStarted.countDown();
+                    releaseBlockedWorker.await();
+                }, (Throwables.Runnable<Exception>) () -> {
+                });
+            } catch (final Throwable e) {
+                coordinatorFailure.set(e);
+            }
+        }, "IteratorsTest-prior-failure-interrupted-coordinator");
+
+        try {
+            coordinator.start();
+            assertTrue(workersStarted.await(5, TimeUnit.SECONDS));
+            assertTrue(blockedWorkerStarted.await(5, TimeUnit.SECONDS));
+            final Throwable priorWorkerFailure = awaitAggregatedWorkerFailure(firstWorkerFailure, secondWorkerFailure, 5, TimeUnit.SECONDS);
+            assertNotNull(priorWorkerFailure, "Both worker failures must be recorded before interruption");
+
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+
+            assertFalse(coordinator.isAlive());
+            final Throwable interruption = findCause(coordinatorFailure.get(), InterruptedException.class);
+            assertNotNull(interruption);
+            assertTrue(Arrays.asList(interruption.getSuppressed()).contains(priorWorkerFailure),
+                    "The interruption returned to the caller must retain the earlier worker failure");
+        } finally {
+            releaseBlockedWorker.countDown();
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+        }
+    }
+
+    @Test
+    public void testInterruptedParallelForEachWaitingWorkerDoesNotPullAnotherElement() throws Exception {
+        final CountDownLatch firstHasNextEntered = new CountDownLatch(1);
+        final CountDownLatch releaseFirstHasNext = new CountDownLatch(1);
+        final AtomicReference<Thread> firstWorker = new AtomicReference<>();
+        final AtomicReference<Thread> waitingWorker = new AtomicReference<>();
+        final AtomicInteger hasNextCalls = new AtomicInteger();
+        final AtomicInteger consumerCalls = new AtomicInteger();
+        final Iterator<Integer> source = new Iterator<>() {
+            private int cursor;
+
+            @Override
+            public boolean hasNext() {
+                if (hasNextCalls.incrementAndGet() == 1) {
+                    firstWorker.set(Thread.currentThread());
+                    firstHasNextEntered.countDown();
+
+                    boolean released = false;
+                    while (!released) {
+                        try {
+                            releaseFirstHasNext.await();
+                            released = true;
+                        } catch (final InterruptedException ignored) {
+                            // Keep the first worker inside hasNext so the second remains queued on
+                            // the shared iterator monitor until the coordinator publishes cancellation.
+                        }
+                    }
+                }
+
+                return cursor < 2;
+            }
+
+            @Override
+            public Integer next() {
+                return ++cursor;
+            }
+        };
+        final AtomicReference<Throwable> coordinatorFailure = new AtomicReference<>();
+        final Thread coordinator = new Thread(() -> {
+            try {
+                Iterators.forEach(Arrays.asList(source), 0L, Long.MAX_VALUE, 0, 2, 0,
+                        (Throwables.Consumer<Integer, Exception>) value -> consumerCalls.incrementAndGet(), (Throwables.Runnable<Exception>) () -> {
+                        });
+            } catch (final Throwable e) {
+                coordinatorFailure.set(e);
+            }
+        }, "IteratorsTest-cancellation-race-coordinator");
+
+        try {
+            coordinator.start();
+            assertTrue(firstHasNextEntered.await(5, TimeUnit.SECONDS));
+            assertTrue(awaitBlockedIteratorsWorker(firstWorker.get(), waitingWorker, 5, TimeUnit.SECONDS),
+                    "Second worker must pass the cancellation check and contend for the iterator monitor");
+
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+            assertFalse(coordinator.isAlive());
+            assertNotNull(findCause(coordinatorFailure.get(), InterruptedException.class));
+        } finally {
+            releaseFirstHasNext.countDown();
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+
+            if (firstWorker.get() != null) {
+                firstWorker.get().join(TimeUnit.SECONDS.toMillis(5));
+            }
+
+            if (waitingWorker.get() != null) {
+                waitingWorker.get().join(TimeUnit.SECONDS.toMillis(5));
+            }
+        }
+
+        assertEquals(1, consumerCalls.get(), "Only the worker already inside iterator access may finish after cancellation");
+    }
+
+    private static Throwable awaitAggregatedWorkerFailure(final Throwable firstFailure, final Throwable secondFailure, final long timeout,
+            final TimeUnit unit) throws InterruptedException {
+        final long deadline = System.nanoTime() + unit.toNanos(timeout);
+
+        while (System.nanoTime() - deadline < 0) {
+            if (Arrays.asList(firstFailure.getSuppressed()).contains(secondFailure)) {
+                return firstFailure;
+            } else if (Arrays.asList(secondFailure.getSuppressed()).contains(firstFailure)) {
+                return secondFailure;
+            }
+
+            Thread.sleep(1);
+        }
+
+        return null;
+    }
+
+    private static boolean awaitBlockedIteratorsWorker(final Thread firstWorker, final AtomicReference<Thread> waitingWorker, final long timeout,
+            final TimeUnit unit) {
+        final long deadline = System.nanoTime() + unit.toNanos(timeout);
+
+        while (System.nanoTime() - deadline < 0) {
+            for (final Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
+                final Thread thread = entry.getKey();
+
+                if (thread == firstWorker || thread.getState() != Thread.State.BLOCKED) {
+                    continue;
+                }
+
+                for (final StackTraceElement frame : entry.getValue()) {
+                    if (Iterators.class.getName().equals(frame.getClassName())) {
+                        waitingWorker.set(thread);
+                        return true;
+                    }
+                }
+            }
+
+            Thread.yield();
+        }
+
+        return false;
+    }
+
+    private static Throwable findCause(final Throwable failure, final Class<? extends Throwable> causeType) {
+        Throwable current = failure;
+
+        while (current != null && !causeType.isInstance(current)) {
+            current = current.getCause();
+        }
+
+        return current;
+    }
+
+    @Test
     public void testLargeCountValue() throws Exception {
         List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator());
 
@@ -5474,8 +5709,9 @@ public class IteratorsTest extends TestBase {
     public void testForEachCollection_WithThreads() throws Exception {
         List<Iterator<? extends Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5).iterator());
         AtomicInteger count = new AtomicInteger(0);
-        Iterators.forEach(iterators, 0, Long.MAX_VALUE, 0, 0, 0, e -> count.incrementAndGet(), null);
-        assertEquals(5, count.get());
+        assertThrows(IllegalArgumentException.class,
+                () -> Iterators.forEach(iterators, 0, Long.MAX_VALUE, 0, 0, 0, e -> count.incrementAndGet(), null));
+        assertEquals(0, count.get());
     }
 
     @Test
@@ -5779,9 +6015,8 @@ public class IteratorsTest extends TestBase {
     }
 
     @Test
-    public void testForEachEmptyIteratorCollectionStillValidatesConsumer() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Iterators.forEach(Collections.<Iterator<Integer>> emptyList(), (Throwables.Consumer<Integer, RuntimeException>) null));
+    public void testForEachEmptyIteratorCollectionDoesNotEvaluateConsumer() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(Collections.<Iterator<Integer>> emptyList(), (Throwables.Consumer<Integer, RuntimeException>) null));
     }
 
     // --- tests for the IterateOptions builder + forEach(Collection, IterateOptions, ...) overloads (R-2) ---

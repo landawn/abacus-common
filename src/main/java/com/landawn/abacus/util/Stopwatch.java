@@ -219,7 +219,7 @@ public final class Stopwatch {
      * @throws IllegalArgumentException if {@code ticker} is {@code null}
      */
     Stopwatch(final Ticker ticker) {
-        this.ticker = N.checkArgNotNull(ticker, "ticker");
+        this.ticker = N.checkArgNotNull(ticker, cs.ticker);
     }
 
     /**

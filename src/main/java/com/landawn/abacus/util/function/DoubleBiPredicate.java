@@ -28,7 +28,6 @@ import com.landawn.abacus.util.cs;
  * NaN compares equal to itself and greater than all other {@code double} values, and {@code 0.0d}
  * and {@code -0.0d} are distinct.</p>
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -126,12 +125,13 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * boolean result = combined.test(5.0, 10.0);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default DoubleBiPredicate and(final DoubleBiPredicate other) {
+    default DoubleBiPredicate and(final DoubleBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -150,12 +150,13 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      * boolean result = combined.test(0.0, 5.0);   // Returns true (first is zero)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default DoubleBiPredicate or(final DoubleBiPredicate other) {
+    default DoubleBiPredicate or(final DoubleBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

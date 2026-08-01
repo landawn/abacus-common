@@ -266,8 +266,8 @@ public class FloatStreamTest extends TestBase {
     @Test
     @DisplayName("null arguments should throw")
     public void testNullArguments() {
-        assertThrows(NullPointerException.class, () -> createFloatStream(1.0f, 2.0f).map(null).count());
-        assertThrows(NullPointerException.class, () -> createFloatStream(1.0f, 2.0f).filter(null).count());
+        assertThrows(IllegalArgumentException.class, () -> createFloatStream(1.0f, 2.0f).map(null).count());
+        assertThrows(IllegalArgumentException.class, () -> createFloatStream(1.0f, 2.0f).filter(null).count());
     }
 
     @Test
@@ -1826,6 +1826,18 @@ public class FloatStreamTest extends TestBase {
     public void testDefer() {
         FloatStream stream = FloatStream.defer(() -> FloatStream.of(1.0f, 2.0f, 3.0f));
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, stream.toArray());
+    } 
+
+    @Test
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final FloatStream deferred = FloatStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
     }
 
     @Test
@@ -1853,7 +1865,7 @@ public class FloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testDefer_NullSupplier() {
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> FloatStream.defer(null));
     }
 
@@ -4672,7 +4684,7 @@ public class FloatStreamTest extends TestBase {
 
     @Test
     public void testGenerate_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> FloatStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> FloatStream.generate(null).limit(1).count());
     }
 
     @Test

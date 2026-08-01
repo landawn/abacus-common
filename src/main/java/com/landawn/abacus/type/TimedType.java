@@ -110,7 +110,8 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * The format is a JSON array: [timestamp, value].
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -128,9 +129,9 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * Creates a Timed object from its string representation.
      * Expects a JSON array format: [timestamp, value].
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
      * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null} or empty

@@ -1253,4 +1253,15 @@ public class XmlUtilTest extends TestBase {
         XmlUtil.NodeType result = XmlUtil.getNodeType("map", XmlUtil.NodeType.PROPERTY);
         Assertions.assertEquals(XmlUtil.NodeType.MAP, result);
     }
+
+    @Test
+    public void testCreateFilteredStreamReaderRejectsNullFilter() throws XMLStreamException {
+        final XMLStreamReader source = XmlUtil.createXMLStreamReader(new StringReader("<root/>"));
+
+        try {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> XmlUtil.createFilteredStreamReader(source, null));
+        } finally {
+            source.close();
+        }
+    }
 }

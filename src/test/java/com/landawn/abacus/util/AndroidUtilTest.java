@@ -3,8 +3,8 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;

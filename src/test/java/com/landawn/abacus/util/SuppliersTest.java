@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -20,6 +21,7 @@ import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.RandomAccess;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -1174,7 +1176,14 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testRegisterForCollection_NullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(ArrayList.class, null));
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final Class<? extends Collection> targetType = (Class) Proxy.getProxyClass(classLoader, List.class, RandomAccess.class, Serializable.class);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(targetType, null));
+        Assertions.assertTrue(Suppliers.registerForCollection((Class) targetType,
+                () -> (Collection) Proxy.newProxyInstance(classLoader, new Class<?>[] { List.class, RandomAccess.class, Serializable.class },
+                        new MarkerInvocationHandler(101))));
+        Assertions.assertTrue(targetType.isInstance(Suppliers.ofCollection(targetType).get()));
     }
 
     // --- registerForMap ---
@@ -1202,7 +1211,14 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testRegisterForMap_NullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(HashMap.class, null));
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final Class<? extends Map> targetType = (Class) Proxy.getProxyClass(classLoader, Map.class, Cloneable.class, Serializable.class);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(targetType, null));
+        Assertions.assertTrue(Suppliers.registerForMap((Class) targetType,
+                () -> (Map) Proxy.newProxyInstance(classLoader, new Class<?>[] { Map.class, Cloneable.class, Serializable.class },
+                        new MarkerInvocationHandler(102))));
+        Assertions.assertTrue(targetType.isInstance(Suppliers.ofMap(targetType).get()));
     }
 
     @Test
@@ -1437,7 +1453,7 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
-    public void testFactoryArgumentsAreValidatedEagerly() {
+    public void testFactoryArguments() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.of((Supplier<Object>) null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.of("value", null));
 
@@ -1446,8 +1462,7 @@ public class SuppliersTest extends TestBase {
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap.class, (Class<? extends List>) null));
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Suppliers.ofListMultimap((java.util.function.Supplier<Map<Object, List<Object>>>) null, ArrayList::new));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((java.util.function.Supplier<Map<Object, List<Object>>>) null, ArrayList::new));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap::new, (java.util.function.Supplier<List<Object>>) null));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));
@@ -1468,10 +1483,10 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testCustomBackingSuppliersRejectNullResults() {
-        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get());
-        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get());
-        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get());
-        Assertions.assertThrows(NullPointerException.class,
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get());
+        Assertions.assertThrows(IllegalArgumentException.class,
                 () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get());
 
         final ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, () -> null).get();
@@ -1479,9 +1494,9 @@ public class SuppliersTest extends TestBase {
         final Multimap<String, Integer, Collection<Integer>> multimap = Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null)
                 .get();
 
-        Assertions.assertThrows(NullPointerException.class, () -> listMultimap.put("key", 1));
-        Assertions.assertThrows(NullPointerException.class, () -> setMultimap.put("key", 1));
-        Assertions.assertThrows(NullPointerException.class, () -> multimap.put("key", 1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.put("key", 1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> setMultimap.put("key", 1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.put("key", 1));
     }
 
     @Test
@@ -1570,8 +1585,8 @@ public class SuppliersTest extends TestBase {
 
         Assertions.assertTrue(Suppliers.registerForCollection((Class) collectionType, () -> null));
         Assertions.assertTrue(Suppliers.registerForMap((Class) mapType, () -> null));
-        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofCollection(collectionType).get());
-        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofMap(mapType).get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(collectionType).get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(mapType).get());
     }
 
     @Test

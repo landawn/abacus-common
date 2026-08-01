@@ -107,13 +107,14 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
      * boolean result = combined.test((byte) 10, (byte) 20, (byte) 30);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ByteTriPredicate and(final ByteTriPredicate other) {
+    default ByteTriPredicate and(final ByteTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -132,13 +133,14 @@ public interface ByteTriPredicate extends Throwables.ByteTriPredicate<RuntimeExc
      * boolean result = combined.test((byte) 0, (byte) 5, (byte) 10);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ByteTriPredicate or(final ByteTriPredicate other) {
+    default ByteTriPredicate or(final ByteTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -1271,11 +1270,13 @@ public final class HttpHeaders {
      *     System.out.println(name + ": " + value));
      * }</pre>
      *
-     * @param action The action to be performed for each header; must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @param action The action to be performed for each header.
      * @throws java.util.ConcurrentModificationException if a header is added or removed while iterating
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
-    public void forEach(final BiConsumer<? super String, ? super Object> action) {
+    public void forEach(final BiConsumer<? super String, ? super Object> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         map.forEach(action);
     }
 
@@ -1366,7 +1367,24 @@ public final class HttpHeaders {
 
         for (final Map.Entry<String, Object> entry : map.entrySet()) {
             final String name = entry.getKey();
-            hashCode += Objects.hashCode(name == null ? null : name.toLowerCase(Locale.ROOT)) ^ Objects.hashCode(entry.getValue());
+            hashCode += caseInsensitiveHashCode(name) ^ Objects.hashCode(entry.getValue());
+        }
+
+        return hashCode;
+    }
+
+    private static int caseInsensitiveHashCode(final String value) {
+        if (value == null) {
+            return 0;
+        }
+
+        int hashCode = 0;
+
+        for (int i = 0, len = value.length(); i < len;) {
+            final int codePoint = value.codePointAt(i);
+            final int foldedCodePoint = Character.toLowerCase(Character.toUpperCase(codePoint));
+            hashCode = 31 * hashCode + foldedCodePoint;
+            i += Character.charCount(codePoint);
         }
 
         return hashCode;

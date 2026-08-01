@@ -979,6 +979,7 @@ public class StringsTest extends AbstractTest {
         assertEquals("supplied", Strings.defaultIfNull((String) null, Fn.s(() -> "supplied")));
         assertEquals("abc", Strings.defaultIfNull("abc", Fn.s(() -> "supplied")));
         assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfNull((CharSequence) null, (Supplier<? extends CharSequence>) () -> null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfNull("abc", (Supplier<String>) null));
     }
 
     @Test
@@ -8531,11 +8532,11 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    public void testStrUtilSubstringBetweenNullFunctionsReturnEmpty() {
-        assertFalse(StrUtil.substringBetween("hello", 0, (IntUnaryOperator) null).isPresent());
-        assertFalse(StrUtil.substringBetween("hello", (IntUnaryOperator) null, 5).isPresent());
-        assertFalse(StrUtil.substringBetween("hello", "h", (IntUnaryOperator) null).isPresent());
-        assertFalse(StrUtil.substringBetween("hello", (IntUnaryOperator) null, "o").isPresent());
+    public void testStrUtilSubstringBetweenRejectsNullFunctions() {
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.substringBetween("hello", 0, (IntUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.substringBetween("hello", (IntUnaryOperator) null, 5));
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.substringBetween("hello", "h", (IntUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.substringBetween("hello", (IntUnaryOperator) null, "o"));
     }
 
     @Test

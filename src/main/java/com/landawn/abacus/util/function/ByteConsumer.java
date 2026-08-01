@@ -24,7 +24,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(byte)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
@@ -65,12 +64,13 @@ public interface ByteConsumer extends Throwables.ByteConsumer<RuntimeException> 
      * combined.accept((byte) 5);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ByteConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ByteConsumer andThen(final ByteConsumer after) {
+    default ByteConsumer andThen(final ByteConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return value -> {
             accept(value);
             after.accept(value);

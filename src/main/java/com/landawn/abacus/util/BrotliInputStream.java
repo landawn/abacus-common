@@ -60,7 +60,7 @@ public final class BrotliInputStream extends InputStream {
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source) throws IOException {
-        N.checkArgNotNull(source, "source");
+        N.checkArgNotNull(source, cs.source);
 
         in = new org.brotli.dec.BrotliInputStream(source);
     }
@@ -84,7 +84,7 @@ public final class BrotliInputStream extends InputStream {
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IOException {
-        N.checkArgNotNull(source, "source");
+        N.checkArgNotNull(source, cs.source);
         N.checkArgPositive(byteReadBufferSize, "byteReadBufferSize");
 
         in = new org.brotli.dec.BrotliInputStream(source, byteReadBufferSize);

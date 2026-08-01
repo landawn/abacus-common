@@ -32,6 +32,7 @@ import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.ObjShortConsumer;
 import com.landawn.abacus.util.function.ShortBinaryOperator;
@@ -154,10 +155,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public ShortStream filter(final ShortPredicate predicate) throws IllegalStateException {
+    public ShortStream filter(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.filter(predicate);
@@ -179,10 +183,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public ShortStream takeWhile(final ShortPredicate predicate) throws IllegalStateException {
+    public ShortStream takeWhile(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.takeWhile(predicate);
@@ -204,10 +211,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public ShortStream dropWhile(final ShortPredicate predicate) throws IllegalStateException {
+    public ShortStream dropWhile(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.dropWhile(predicate);
@@ -228,10 +238,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ShortStream map(final ShortUnaryOperator mapper) throws IllegalStateException {
+    public ShortStream map(final ShortUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.map(mapper);
@@ -253,10 +266,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return the new {@code IntStream}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public IntStream mapToInt(final ShortToIntFunction mapper) throws IllegalStateException {
+    public IntStream mapToInt(final ShortToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToInt(mapper);
@@ -279,10 +295,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return the new {@code Stream}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> mapToObj(final ShortFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> mapToObj(final ShortFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToObj(mapper);
@@ -303,10 +322,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning a ShortStream
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ShortStream flatMap(final ShortFunction<? extends ShortStream> mapper) throws IllegalStateException {
+    public ShortStream flatMap(final ShortFunction<? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -331,10 +353,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning a Collection of Short
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ShortStream flatmap(final ShortFunction<? extends Collection<Short>> mapper) throws IllegalStateException {
+    public ShortStream flatmap(final ShortFunction<? extends Collection<Short>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -359,10 +384,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning a short array
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ShortStream flatMapArray(final ShortFunction<short[]> mapper) throws IllegalStateException {
+    public ShortStream flatMapArray(final ShortFunction<short[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -387,10 +415,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning an IntStream
      * @return the new {@code IntStream}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public IntStream flatMapToInt(final ShortFunction<? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final ShortFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -416,10 +447,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning a Stream
      * @return the new {@code Stream}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final ShortFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final ShortFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -443,10 +477,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapper a non-interfering, stateless function to apply to each element, returning a Collection
      * @return the new {@code Stream}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final ShortFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final ShortFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -470,10 +507,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param action a non-interfering action to perform on each element as it is consumed
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public ShortStream onEach(final ShortConsumer action) throws IllegalStateException {
+    public ShortStream onEach(final ShortConsumer action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
             return super.onEach(action);
@@ -497,10 +537,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
             super.forEach(action);
@@ -557,12 +600,18 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
             return super.toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -591,11 +640,15 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return a Map containing grouped stream elements
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, E {
+            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
             return super.groupTo(keyMapper, downstream, mapFactory);
@@ -619,10 +672,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param accumulator a non-interfering, stateless, associative function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public short reduce(final short identity, final ShortBinaryOperator accumulator) throws IllegalStateException {
+    public short reduce(final short identity, final ShortBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum)) {
             return super.reduce(identity, accumulator);
@@ -679,10 +735,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param accumulator a non-interfering, stateless, associative function for combining two values
      * @return an OptionalShort with the result of the reduction, or empty if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public OptionalShort reduce(final ShortBinaryOperator accumulator) throws IllegalStateException {
+    public OptionalShort reduce(final ShortBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum)) {
             return super.reduce(accumulator);
@@ -753,11 +812,16 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param combiner a function to combine two partial result containers
      * @return the result of the mutable reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         if (canBeSequential(maxThreadNum)) {
             return super.collect(supplier, accumulator, combiner);
@@ -808,10 +872,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.anyMatch(predicate);
@@ -867,10 +934,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return {@code true} if all elements match the predicate (or the stream is empty), otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.allMatch(predicate);
@@ -926,10 +996,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return {@code true} if no elements match the predicate (or the stream is empty), otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.noneMatch(predicate);
@@ -986,10 +1059,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return an OptionalShort with the first matching element in encounter order, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findFirst(predicate);
@@ -1051,10 +1128,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return an OptionalShort with some matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findAny(predicate);
@@ -1114,10 +1194,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @return an OptionalShort with the last matching element in encounter order, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findLast(predicate);
@@ -1175,10 +1259,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param zipFunction a function to combine pairs of elements
      * @return the new zipped stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public ShortStream zipWith(final ShortStream b, final ShortBinaryOperator zipFunction) throws IllegalStateException {
+    public ShortStream zipWith(final ShortStream b, final ShortBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorShortStream(ShortStream.zip(this, b, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -1202,10 +1289,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param zipFunction a function to combine triples of elements
      * @return the new zipped stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public ShortStream zipWith(final ShortStream b, final ShortStream c, final ShortTernaryOperator zipFunction) throws IllegalStateException {
+    public ShortStream zipWith(final ShortStream b, final ShortStream c, final ShortTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorShortStream(ShortStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -1231,11 +1322,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param zipFunction a function to combine pairs of elements
      * @return the new zipped stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public ShortStream zipWith(final ShortStream b, final short valueForNoneA, final short valueForNoneB, final ShortBinaryOperator zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorShortStream(ShortStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitStrategy,
@@ -1263,11 +1357,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param zipFunction a function to combine triples of elements
      * @return the new zipped stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public ShortStream zipWith(final ShortStream b, final ShortStream c, final short valueForNoneA, final short valueForNoneB, final short valueForNoneC,
-            final ShortTernaryOperator zipFunction) throws IllegalStateException {
+            final ShortTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorShortStream(ShortStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
@@ -1307,7 +1404,7 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                 tmp = sequential;
 
                 if (tmp == null) {
-                    tmp = new IteratorShortStream(elements, isSorted(), closeHandlers());
+                    tmp = new IteratorShortStream(elements, isSorted(), closeHandlersForNewStream());
                     sequential = tmp;
                 }
             }

@@ -1412,9 +1412,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
     @Test
     public void testOnCloseEmptyHandler() {
         IntStream stream = createIntStream(TEST_ARRAY);
-        IntStream newStream = stream.onClose(null);
-        assertSame(stream, newStream);
-        newStream.close();
+
+        assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
+        stream.close();
     }
 
     @Test

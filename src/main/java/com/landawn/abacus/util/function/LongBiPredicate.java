@@ -29,7 +29,6 @@ import com.landawn.abacus.util.cs;
  * <p>This is a functional interface whose functional method is
  * {@link #test(long, long)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -144,13 +143,14 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
-     *              Must not be {@code null}.
+     *
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default LongBiPredicate and(final LongBiPredicate other) {
+    default LongBiPredicate and(final LongBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -173,13 +173,14 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.
-     *              Must not be {@code null}.
+     *
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default LongBiPredicate or(final LongBiPredicate other) {
+    default LongBiPredicate or(final LongBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

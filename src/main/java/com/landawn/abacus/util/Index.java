@@ -5476,13 +5476,15 @@ public final class Index {
      *
      * @param <T> the type of elements in the array
      * @param source the array to be searched, may be {@code null}
-     * @param predicate the predicate to test elements; must not be {@code null}
+     * @param predicate the predicate to test elements
      * @return a BitSet containing the zero-based indices of all elements matching the predicate;
      *         returns an empty BitSet if no elements match or the array is {@code null} or empty
-     * @throws NullPointerException if {@code predicate} is {@code null} and the array is {@code non-null} and non-empty
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #allOf(Object[], Predicate, int)
      */
-    public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate) {
+    public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return allOf(source, predicate, 0);
     }
 
@@ -5504,14 +5506,16 @@ public final class Index {
      *
      * @param <T> the type of elements in the array
      * @param source the array to be searched, may be {@code null}
-     * @param predicate the predicate to test elements; must not be {@code null}
+     * @param predicate the predicate to test elements
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return a BitSet containing the zero-based indices of all elements at or after {@code fromIndex} matching the predicate;
      *         returns an empty BitSet if no elements match, the array is {@code null}, or {@code fromIndex >= array.length}
-     * @throws NullPointerException if {@code predicate} is {@code null} and the array is {@code non-null}, non-empty, and {@code fromIndex} is within range
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #allOf(Object[], Predicate)
      */
-    public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate, final int fromIndex) {
+    public static <T> BitSet allOf(final T[] source, final Predicate<? super T> predicate, final int fromIndex) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final BitSet bitSet = new BitSet();
         final int len = N.len(source);
 
@@ -5559,13 +5563,15 @@ public final class Index {
      *
      * @param <T> the type of elements in the collection
      * @param source the collection to be searched, may be {@code null}
-     * @param predicate the predicate to test elements; must not be {@code null}
+     * @param predicate the predicate to test elements
      * @return a BitSet containing the zero-based indices (in iteration order) of all elements matching the predicate;
      *         returns an empty BitSet if no elements match or the collection is {@code null} or empty
-     * @throws NullPointerException if {@code predicate} is {@code null} and the collection is {@code non-null} and non-empty
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #allOf(Collection, Predicate, int)
      */
-    public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate) {
+    public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return allOf(source, predicate, 0);
     }
 
@@ -5588,14 +5594,17 @@ public final class Index {
      *
      * @param <T> the type of the elements in the collection
      * @param source the collection to be searched, may be {@code null}
-     * @param predicate the predicate to test elements; must not be {@code null}
+     * @param predicate the predicate to test elements
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return a BitSet containing the zero-based indices (in iteration order) of all elements at or after {@code fromIndex} matching the predicate;
      *         returns an empty BitSet if no elements match, the collection is {@code null} or empty, or {@code fromIndex >= collection.size()}
-     * @throws NullPointerException if {@code predicate} is {@code null} and the collection is {@code non-null}, non-empty, and {@code fromIndex} is within range
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #allOf(Collection, Predicate)
      */
-    public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate, final int fromIndex) {
+    public static <T> BitSet allOf(final Collection<? extends T> source, final Predicate<? super T> predicate, final int fromIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final BitSet bitSet = new BitSet();
         final int size = N.size(source);
 

@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.cs;
 
 /**
  * Abstract base implementation of the {@link Logger} interface providing template-based logging methods.
@@ -345,9 +346,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void trace(final Supplier<String> supplier) {
+    public void trace(final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isTraceEnabled()) {
             trace(supplier.get());
         }
@@ -363,11 +367,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void trace(final Supplier<String> supplier, final Throwable t) {
+    public void trace(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isTraceEnabled()) {
             trace(t, supplier.get());
         }
@@ -383,9 +390,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void trace(final Throwable t, final Supplier<String> supplier) {
+    public void trace(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isTraceEnabled()) {
             trace(t, supplier.get());
         }
@@ -674,9 +684,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void debug(final Supplier<String> supplier) {
+    public void debug(final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isDebugEnabled()) {
             debug(supplier.get());
         }
@@ -692,11 +705,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void debug(final Supplier<String> supplier, final Throwable t) {
+    public void debug(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isDebugEnabled()) {
             debug(t, supplier.get());
         }
@@ -712,9 +728,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void debug(final Throwable t, final Supplier<String> supplier) {
+    public void debug(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isDebugEnabled()) {
             debug(t, supplier.get());
         }
@@ -1004,9 +1023,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void info(final Supplier<String> supplier) {
+    public void info(final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isInfoEnabled()) {
             info(supplier.get());
         }
@@ -1022,11 +1044,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @deprecated Use {@link #info(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void info(final Supplier<String> supplier, final Throwable t) {
+    public void info(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isInfoEnabled()) {
             info(t, supplier.get());
         }
@@ -1042,9 +1067,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void info(final Throwable t, final Supplier<String> supplier) {
+    public void info(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isInfoEnabled()) {
             info(t, supplier.get());
         }
@@ -1334,9 +1362,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void warn(final Supplier<String> supplier) {
+    public void warn(final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isWarnEnabled()) {
             warn(supplier.get());
         }
@@ -1352,11 +1383,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void warn(final Supplier<String> supplier, final Throwable t) {
+    public void warn(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isWarnEnabled()) {
             warn(t, supplier.get());
         }
@@ -1372,9 +1406,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void warn(final Throwable t, final Supplier<String> supplier) {
+    public void warn(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isWarnEnabled()) {
             warn(t, supplier.get());
         }
@@ -1668,9 +1705,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void error(final Supplier<String> supplier) {
+    public void error(final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isErrorEnabled()) {
             error(supplier.get());
         }
@@ -1686,11 +1726,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @deprecated Use {@link #error(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void error(final Supplier<String> supplier, final Throwable t) {
+    public void error(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isErrorEnabled()) {
             error(t, supplier.get());
         }
@@ -1706,9 +1749,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @Override
-    public void error(final Throwable t, final Supplier<String> supplier) {
+    public void error(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isErrorEnabled()) {
             error(t, supplier.get());
         }

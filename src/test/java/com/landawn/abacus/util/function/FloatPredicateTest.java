@@ -179,7 +179,7 @@ public class FloatPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         FloatPredicate instance = a -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((FloatPredicate) null));
     }

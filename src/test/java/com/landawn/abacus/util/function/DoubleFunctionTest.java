@@ -161,7 +161,7 @@ public class DoubleFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         DoubleFunction<String> instance = a -> null;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }

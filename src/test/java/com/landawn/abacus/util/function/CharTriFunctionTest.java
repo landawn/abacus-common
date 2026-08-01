@@ -80,7 +80,7 @@ public class CharTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         CharTriFunction<String> instance = (a, b, c) -> null;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }

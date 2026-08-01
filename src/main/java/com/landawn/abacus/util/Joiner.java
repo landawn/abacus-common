@@ -837,13 +837,14 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param b the condition to check
-     * @param supplier the supplier that provides the value to append when {@code b} is {@code true};
-     *        must not be {@code null} if {@code b} is {@code true}. The supplied value is appended via
+     * @param supplier the supplier that provides the value to append when {@code b} is {@code true}. The supplied value is appended via
      *        {@link #append(Object)}, so it is subject to the {@code skipNulls} and {@code useForNull} settings.
      * @return this Joiner instance for method chaining
-     * @throws NullPointerException if {@code b} is {@code true} and {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
-    public Joiner appendIf(final boolean b, final Supplier<?> supplier) {
+    public Joiner appendIf(final boolean b, final Supplier<?> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (b) {
             //noinspection resource
             append(supplier.get());
@@ -1924,12 +1925,14 @@ public final class Joiner implements Closeable {
      *
      * @param <T> the type of elements in the Iterable
      * @param c the Iterable to append from
-     * @param filter the predicate to test elements; only elements that pass are appended; must not be {@code null}
+     * @param filter the predicate to test elements; only elements that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter); //NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
+
+        //NOSONAR
 
         if (c != null) {
             StringBuilder sb = null;
@@ -2006,9 +2009,9 @@ public final class Joiner implements Closeable {
      *
      * @param <T> the type of elements from the Iterator
      * @param iter the Iterator to append from
-     * @param filter the predicate to test elements; only elements that pass are appended; must not be {@code null}
+     * @param filter the predicate to test elements; only elements that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2436,9 +2439,9 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param filter the predicate to test entries; only entries that pass are appended; must not be {@code null}
+     * @param filter the predicate to test entries; only entries that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2489,9 +2492,9 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param filter the bi-predicate to test keys and values; only entries that pass are appended; must not be {@code null}
+     * @param filter the bi-predicate to test keys and values; only entries that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -2544,10 +2547,10 @@ public final class Joiner implements Closeable {
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
      * @param m the Map to append entries from
-     * @param keyExtractor the function to transform keys before appending; must not be {@code null}
-     * @param valueExtractor the function to transform values before appending; must not be {@code null}
+     * @param keyExtractor the function to transform keys before appending
+     * @param valueExtractor the function to transform values before appending
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code keyExtractor} or {@code valueExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyExtractor, final Function<? super V, ?> valueExtractor)
             throws IllegalArgumentException {
@@ -2673,6 +2676,7 @@ public final class Joiner implements Closeable {
         N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+
         StringBuilder sb = null;
         Object propValue = null;
 
@@ -2802,14 +2806,14 @@ public final class Joiner implements Closeable {
      *     !prop.equals("stock") || (Integer)val > 0).toString();   // returns: "name=Laptop, price=999.99"
      * }</pre>
      *
-     * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged (after the {@code filter}
-     * {@code non-null} check).</p>
+     * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged.</p>
      *
      * @param bean the bean object whose properties to append; may be {@code null}
-     * @param filter the bi-predicate to test property names and values; only properties that pass are appended; must not be {@code null}
+     * @param filter the bi-predicate to test property names and values; only properties that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, or if {@code bean} is not {@code null}
-     *         and its class is not a valid JavaBean with getter/setter methods
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
+     *         with getter/setter methods
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #appendBean(Object)
      */
     public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
@@ -3075,14 +3079,16 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param <T> the type of the result
-     * @param mapper the function to apply to the joined string; must not be {@code null}
+     * @param mapper the function to apply to the joined string
      * @return the result of applying the mapper function to the value returned by {@link #toString()}
-     * @throws NullPointerException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #toString()
      * @see #mapIfNotEmpty(Function)
      */
     @Beta
-    public <T> T map(final Function<? super String, T> mapper) {
+    public <T> T map(final Function<? super String, T> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(toString());
     }
 
@@ -3102,12 +3108,12 @@ public final class Joiner implements Closeable {
      * @param <T> the type of the result
      * @param mapper the function to apply to the joined string if not empty
      * @return an Optional containing the result, or empty if no elements were appended
-     * @throws IllegalArgumentException if mapper is null
-     * @throws NullPointerException if the mapper returns {@code null} for a non-empty joiner
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws NullPointerException if a {@code null} result is produced for a non-empty joiner
      */
     @Beta
     public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper);
+        N.checkArgNotNull(mapper, cs.mapper);
 
         // latestToStringValue carries the content after a reuse-mode toString().
         return buffer == null && latestToStringValue == null ? Optional.empty() : Optional.of(mapper.apply(toString()));

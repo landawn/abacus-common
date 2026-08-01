@@ -311,12 +311,12 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * @param <T> the type of elements
      * @param iteratorSupplier the supplier that provides the iterator
      * @return a deferred ObjIteratorEx
-     * @throws IllegalArgumentException if iteratorSupplier is null
      * @throws IllegalStateException if the supplier returns {@code null} when initialized
      * @throws RuntimeException if the supplier throws a runtime exception when initialized;
      *         the same failure is rethrown on subsequent access attempts
      * @throws Error if the supplier throws an error when initialized;
      *         the same failure is rethrown on subsequent access attempts
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      */
     public static <T> ObjIteratorEx<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);

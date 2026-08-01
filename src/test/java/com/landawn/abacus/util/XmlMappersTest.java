@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -65,6 +67,56 @@ public class XmlMappersTest extends TestBase {
             this.age = age;
             this.city = city;
         }
+    }
+
+    public static class SerializationVisibilityBean {
+        private String value;
+
+        public SerializationVisibilityBean() {
+        }
+
+        SerializationVisibilityBean(final String value) {
+            this.value = value;
+        }
+    }
+
+    public static class DeserializationVisibilityBean {
+        private String value;
+
+        public DeserializationVisibilityBean() {
+        }
+
+        String value() {
+            return value;
+        }
+    }
+
+    @Test
+    public void testSerializationConfigDoesNotLeakCachedSerializer() {
+        final XmlMapper fieldMapper = new XmlMapper();
+        fieldMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        fieldMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
+        final String xml = XmlMappers.toXml(new SerializationVisibilityBean("secret"), fieldMapper.getSerializationConfig());
+        assertTrue(xml.contains("<value>secret</value>"));
+
+        final SerializationConfig defaultConfig = XmlMappers.createSerializationConfig();
+        assertThrows(RuntimeException.class, () -> XmlMappers.toXml(new SerializationVisibilityBean("secret"), defaultConfig));
+    }
+
+    @Test
+    public void testDeserializationConfigDoesNotLeakCachedRootDeserializer() {
+        final XmlMapper fieldMapper = new XmlMapper();
+        fieldMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        fieldMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        final String xml = "<DeserializationVisibilityBean><value>secret</value></DeserializationVisibilityBean>";
+
+        final DeserializationVisibilityBean bean = XmlMappers.fromXml(xml, DeserializationVisibilityBean.class,
+                fieldMapper.getDeserializationConfig());
+        assertEquals("secret", bean.value());
+
+        final DeserializationConfig defaultConfig = XmlMappers.createDeserializationConfig();
+        assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(xml, DeserializationVisibilityBean.class, defaultConfig));
     }
 
     @Test
@@ -1612,36 +1664,37 @@ public class XmlMappersTest extends TestBase {
         Assertions.assertTrue(xml.contains("DataOutput"));
     }
 
-    /**
-     * Regression: when a {@code null} SerializationConfig is passed, {@code getXmlMapper(null)}
-     * returns the shared {@code defaultXmlMapper}. The old {@code recycle(...)} only guarded
-     * against {@code null} and therefore added the shared default mapper into the pool (and
-     * mutated its config), corrupting it for concurrent {@code toXml(obj)} callers. The fix
-     * mirrors {@code JsonMappers.recycle} by also skipping the shared default mappers.
-     */
+    /** Regression: null configurations must keep using the shared default without adding it to a custom-config cache. */
     @Test
     @SuppressWarnings("unchecked")
     public void testRecycle_doesNotPoolSharedDefaultMapper_onNullConfig() throws Exception {
-        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("mapperPool");
-        poolField.setAccessible(true);
+        java.lang.reflect.Field serializationPoolField = XmlMappers.class.getDeclaredField("serializationMapperPool");
+        java.lang.reflect.Field deserializationPoolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
+        serializationPoolField.setAccessible(true);
+        deserializationPoolField.setAccessible(true);
         java.lang.reflect.Field defField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
         defField.setAccessible(true);
 
-        List<XmlMapper> pool = (List<XmlMapper>) poolField.get(null);
+        Map<SerializationConfig, XmlMapper> serializationPool = (Map<SerializationConfig, XmlMapper>) serializationPoolField.get(null);
+        Map<DeserializationConfig, XmlMapper> deserializationPool = (Map<DeserializationConfig, XmlMapper>) deserializationPoolField.get(null);
         XmlMapper sharedDefault = (XmlMapper) defField.get(null);
 
-        synchronized (pool) {
-            pool.clear();
+        synchronized (serializationPool) {
+            serializationPool.clear();
+        }
+        synchronized (deserializationPool) {
+            deserializationPool.clear();
         }
 
-        // Passing a null SerializationConfig is a documented-valid input that routes to
-        // getXmlMapper(null) -> shared defaultXmlMapper, then recycle(...) in finally.
         XmlMappers.toXml(new Person("Pooling", 1), (SerializationConfig) null);
 
-        synchronized (pool) {
-            for (XmlMapper m : pool) {
-                Assertions.assertNotSame(sharedDefault, m, "The shared defaultXmlMapper must never be placed into the mapper pool");
-            }
+        synchronized (serializationPool) {
+            Assertions.assertTrue(serializationPool.isEmpty());
+            Assertions.assertFalse(serializationPool.containsValue(sharedDefault));
+        }
+        synchronized (deserializationPool) {
+            Assertions.assertTrue(deserializationPool.isEmpty());
+            Assertions.assertFalse(deserializationPool.containsValue(sharedDefault));
         }
     }
 
@@ -1650,7 +1703,7 @@ public class XmlMappersTest extends TestBase {
     public void testLibraryOwnedXmlMappersUseHardenedInputFactories() throws Exception {
         java.lang.reflect.Field defaultField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
         java.lang.reflect.Field prettyField = XmlMappers.class.getDeclaredField("defaultXmlMapperForPretty");
-        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("mapperPool");
+        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
         defaultField.setAccessible(true);
         prettyField.setAccessible(true);
         poolField.setAccessible(true);
@@ -1658,7 +1711,7 @@ public class XmlMappersTest extends TestBase {
         assertSecureXmlInputFactory((XmlMapper) defaultField.get(null));
         assertSecureXmlInputFactory((XmlMapper) prettyField.get(null));
 
-        List<XmlMapper> pool = (List<XmlMapper>) poolField.get(null);
+        Map<DeserializationConfig, XmlMapper> pool = (Map<DeserializationConfig, XmlMapper>) poolField.get(null);
         synchronized (pool) {
             pool.clear();
         }
@@ -1668,7 +1721,7 @@ public class XmlMappersTest extends TestBase {
 
         synchronized (pool) {
             Assertions.assertEquals(1, pool.size());
-            assertSecureXmlInputFactory(pool.get(0));
+            assertSecureXmlInputFactory(pool.values().iterator().next());
         }
     }
 

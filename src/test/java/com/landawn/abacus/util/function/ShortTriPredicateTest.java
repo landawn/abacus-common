@@ -140,7 +140,7 @@ public class ShortTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         ShortTriPredicate instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((ShortTriPredicate) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.or((ShortTriPredicate) null));

@@ -1,6 +1,7 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -108,7 +109,7 @@ public class DoubleStreamTest extends TestBase {
 
     @Test
     public void testFilterWithNull() {
-        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).filter(null).count());
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.of(1.0, 2.0).filter(null).count());
     }
 
     @Test
@@ -168,7 +169,7 @@ public class DoubleStreamTest extends TestBase {
 
     @Test
     public void testMapWithNull() {
-        assertThrows(NullPointerException.class, () -> DoubleStream.of(1.0, 2.0).map(null).count());
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.of(1.0, 2.0).map(null).count());
     }
 
     @Test
@@ -1297,6 +1298,19 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(1, counter.get());
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
     }
+ 
+
+    @Test
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final DoubleStream deferred = DoubleStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
+    }
 
     @Test
     public void testStreamCreatedAfterDefer() {
@@ -1325,7 +1339,7 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testDeferWithNullSupplier() {
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> DoubleStream.defer(null));
     }
 
@@ -3581,12 +3595,12 @@ public class DoubleStreamTest extends TestBase {
 
     @Test
     public void testIterateWithNullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(null, () -> 1.0));
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(null, () -> 1.0).limit(1).count());
     }
 
     @Test
     public void testIterateWithNullNext() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(() -> true, null));
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.iterate(() -> true, null).limit(1).count());
     }
 
     @Test
@@ -3607,7 +3621,7 @@ public class DoubleStreamTest extends TestBase {
 
     @Test
     public void testGenerateWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.generate(null).limit(1).count());
     }
 
     @Test

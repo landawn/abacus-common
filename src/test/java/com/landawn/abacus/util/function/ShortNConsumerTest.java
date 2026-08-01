@@ -190,7 +190,7 @@ public class ShortNConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         ShortNConsumer instance = a -> {
         };
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ShortNConsumer) null));

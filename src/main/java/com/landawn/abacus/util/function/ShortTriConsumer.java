@@ -69,12 +69,13 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * combined.accept((short) 10, (short) 20, (short) 30);   // Logs then calculates sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ShortTriConsumer andThen(final ShortTriConsumer after) {
+    default ShortTriConsumer andThen(final ShortTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

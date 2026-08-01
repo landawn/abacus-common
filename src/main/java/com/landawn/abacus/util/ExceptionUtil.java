@@ -132,15 +132,17 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param <E> the type of exception to map
-     * @param exceptionClass the class of the exception to map
-     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException
+     * @param exceptionClass the class of the exception to map; must not be {@code null} and must not be a built-in class
+     * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
-     *         if {@code exceptionClass} is a built-in class (package starting with "java.", "javax.", or "com.landawn.abacus"),
-     *         or if a mapper for the specified exception class has already been registered
+     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."},
+     *         or {@code "com.landawn.abacus."}), or if a mapper is already registered for {@code exceptionClass}
      * @see #registerRuntimeExceptionMapper(Class, Function, boolean)
      */
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
-            final Function<E, RuntimeException> runtimeExceptionMapper) {
+            final Function<E, RuntimeException> runtimeExceptionMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(runtimeExceptionMapper, cs.runtimeExceptionMapper);
+
         registerRuntimeExceptionMapper(exceptionClass, runtimeExceptionMapper, false);
     }
 
@@ -159,13 +161,14 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param <E> the type of exception to map
-     * @param exceptionClass the class of the exception to map; must not be {@code null}
+     * @param exceptionClass the class of the exception to map; must not be {@code null} and must not be a built-in class
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
-     * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws an exception if a mapper already exists.
+     * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws if a mapper already exists.
      *              The check-and-register operation is atomic for concurrent registrations of the same class.
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
-     *         if trying to register a built-in class (package starting with "java.", "javax.", or "com.landawn.abacus"),
-     *         or if a mapper for the specified exception class already exists and {@code force} is {@code false}
+     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."},
+     *         or {@code "com.landawn.abacus."}), or if {@code force} is {@code false} and a mapper is already registered
+     *         for {@code exceptionClass}
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
@@ -477,9 +480,12 @@ public final class ExceptionUtil {
      * @param e the exception to check, which may be {@code null}
      * @param targetExceptionTester the predicate to test each exception in the cause chain
      * @return {@code true} if any exception in the cause chain matches the predicate; {@code false} if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code targetExceptionTester} is {@code null}.
      * @see #findCause(Throwable, Predicate)
      */
-    public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+    public static boolean hasCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) throws IllegalArgumentException {
+        N.checkArgNotNull(targetExceptionTester, cs.targetExceptionTester);
+
         if (e == null) {
             return false;
         }
@@ -714,9 +720,13 @@ public final class ExceptionUtil {
      * @param targetExceptionTester the predicate to match exceptions
      * @return an {@code Optional} containing the first exception in the cause chain that matches the predicate,
      *         or an empty {@code Optional} if none matches or {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code targetExceptionTester} is {@code null}.
      * @see #hasCause(Throwable, Predicate)
      */
-    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) {
+    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetExceptionTester, cs.targetExceptionTester);
+
         if (e == null) {
             return Optional.empty();
         }

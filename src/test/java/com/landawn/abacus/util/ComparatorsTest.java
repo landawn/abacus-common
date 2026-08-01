@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -119,11 +120,8 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_nullsFirst_withNullComparator() {
-        Comparator<String> comp = Comparators.nullsFirst(null);
-        assertNotNull(comp);
-        assertEquals(-1, comp.compare(null, "a"));
-        assertEquals(1, comp.compare("a", null));
+    public void test_nullsFirst_rejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsFirst(null));
     }
 
     @Test
@@ -153,10 +151,7 @@ public class ComparatorsTest extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(null, null, "cherry", "banana", "apple"), list);
 
-        Comparator<Integer> nullComp = Comparators.nullsFirst(null);
-        List<Integer> intList = new ArrayList<>(Arrays.asList(3, null, 1, 2));
-        intList.sort(nullComp);
-        assertEquals(Arrays.asList(null, 1, 2, 3), intList);
+        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsFirst(null));
     }
 
     @Test
@@ -175,7 +170,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_nullsFirstBy_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.nullsFirstBy(null);
         });
     }
@@ -214,11 +209,8 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_nullsLast_withNullComparator() {
-        Comparator<String> comp = Comparators.nullsLast(null);
-        assertNotNull(comp);
-        assertEquals(1, comp.compare(null, "a"));
-        assertEquals(-1, comp.compare("a", null));
+    public void test_nullsLast_rejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsLast(null));
     }
 
     @Test
@@ -244,10 +236,7 @@ public class ComparatorsTest extends TestBase {
         list.sort(comp);
         assertEquals(Arrays.asList(4, 3, 2, 1, null, null), list);
 
-        Comparator<String> nullComp = Comparators.nullsLast(null);
-        List<String> strList = new ArrayList<>(Arrays.asList("b", null, "a"));
-        strList.sort(nullComp);
-        assertEquals(Arrays.asList("a", "b", null), strList);
+        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsLast(null));
     }
 
     @Test
@@ -266,7 +255,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_nullsLastBy_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.nullsLastBy(null);
         });
     }
@@ -338,7 +327,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_emptiesFirst_withComparator_nullArg() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.emptiesFirst(null);
         });
     }
@@ -363,7 +352,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals("a", list2.get(1).get());
         assertEquals("long", list2.get(2).get());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.emptiesFirst(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.emptiesFirst(null));
     }
 
     @Test
@@ -409,7 +398,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_emptiesLast_withComparator_nullArg() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.emptiesLast(null);
         });
     }
@@ -434,7 +423,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals(1, list2.get(1).get());
         assertTrue(list2.get(2).isEmpty());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.emptiesLast(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.emptiesLast(null));
     }
 
     @Test
@@ -461,21 +450,21 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingBy_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingBy((Function<String, String>) null);
         });
     }
 
     @Test
     public void test_comparingBy_withComparator_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingBy(null, Comparator.naturalOrder());
         });
     }
 
     @Test
     public void test_comparingBy_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingBy(p -> p, null);
         });
     }
@@ -492,7 +481,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals(30, list.get(1).age);
         assertEquals(35, list.get(2).age);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(null));
     }
 
     @Test
@@ -508,8 +497,8 @@ public class ComparatorsTest extends TestBase {
         assertEquals("BOB", list.get(1).name);
         assertEquals("Charlie", list.get(2).name);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(nameExtractor, null));
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(null, ignoreCaseComp));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(nameExtractor, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingBy(null, ignoreCaseComp));
     }
 
     @Test
@@ -555,21 +544,21 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsFirst_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsFirst(null);
         });
     }
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsFirst_withComparator_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsFirst(null, Comparator.naturalOrder());
         });
     }
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsFirst_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsFirst(p -> p, null);
         });
     }
@@ -615,21 +604,21 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsLast_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsLast(null);
         });
     }
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsLast_withComparator_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsLast(null, Comparator.naturalOrder());
         });
     }
 
     @Test
     public void test_comparingByIfNotNullOrElseNullsLast_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByIfNotNullOrElseNullsLast(p -> p, null);
         });
     }
@@ -649,7 +638,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingBoolean_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingBoolean(null);
         });
     }
@@ -776,7 +765,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingFloat_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingFloat(null);
         });
     }
@@ -834,7 +823,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingIgnoreCase_withExtractor_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingIgnoreCase(null);
         });
     }
@@ -852,7 +841,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals("charlie", list.get(2).name);
         assertEquals("john", list.get(3).name);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIgnoreCase(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIgnoreCase(null));
     }
 
     @Test
@@ -879,7 +868,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingByKey_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByKey(null);
         });
     }
@@ -897,7 +886,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals("apple", entries.get(1).getKey());
         assertTrue(entries.get(2).getKey().equals("banana") || entries.get(2).getKey().equals("cherry"));
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByKey(null));
     }
 
     @Test
@@ -924,7 +913,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingByValue_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingByValue(null);
         });
     }
@@ -941,7 +930,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals(2, entries.get(1).getValue());
         assertEquals(1, entries.get(2).getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingByValue(null));
     }
 
     @Test
@@ -1075,7 +1064,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingObjArray_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingObjArray(null);
         });
     }
@@ -1095,7 +1084,7 @@ public class ComparatorsTest extends TestBase {
         assertSame(arr3, arrays.get(1));
         assertSame(arr2, arrays.get(2));
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingObjArray(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingObjArray(null));
     }
 
     @Test
@@ -1154,7 +1143,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingArray_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingArray(null);
         });
     }
@@ -1175,7 +1164,7 @@ public class ComparatorsTest extends TestBase {
         assertTrue(comp2.compare(intArr1, null) > 0);
         assertEquals(0, comp2.compare(null, null));
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingArray(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingArray(null));
     }
 
     @Test
@@ -1201,7 +1190,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingCollection_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingCollection(null);
         });
     }
@@ -1218,7 +1207,7 @@ public class ComparatorsTest extends TestBase {
         List<String> strList2 = Arrays.asList("APPLE", "banana", "cherry");
         assertTrue(comp2.compare(strList1, strList2) < 0);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingCollection(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingCollection(null));
     }
 
     @Test
@@ -1258,7 +1247,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingIterable_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingIterable(null);
         });
     }
@@ -1275,7 +1264,7 @@ public class ComparatorsTest extends TestBase {
         Iterable<Integer> intIter2 = Arrays.asList(1, 2, 3, 4);
         assertTrue(comp2.compare(intIter1, intIter2) < 0);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIterable(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIterable(null));
     }
 
     @Test
@@ -1311,7 +1300,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingIterator_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingIterator(null);
         });
     }
@@ -1331,7 +1320,7 @@ public class ComparatorsTest extends TestBase {
         assertFalse(strIter1.hasNext());
         assertTrue(strIter2.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIterator(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingIterator(null));
     }
 
     @Test
@@ -1389,7 +1378,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingMapByKey_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingMapByKey(null);
         });
     }
@@ -1416,7 +1405,7 @@ public class ComparatorsTest extends TestBase {
 
         assertTrue(comp2.compare(map1, map3) == 0);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingMapByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingMapByKey(null));
     }
 
     @Test
@@ -1457,7 +1446,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_comparingMapByValue_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.comparingMapByValue(null);
         });
     }
@@ -1480,7 +1469,7 @@ public class ComparatorsTest extends TestBase {
 
         assertTrue(comp2.compare(map1, map2) > 0);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.comparingMapByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.comparingMapByValue(null));
     }
 
     @Test
@@ -1540,17 +1529,13 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_reverseOrder_withNullComparator() {
-        Comparator<String> comp = Comparators.reverseOrder(null);
-        assertNotNull(comp);
+    public void test_reverseOrder_rejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Comparators.reverseOrder(null));
     }
 
     @Test
     public void testReverseOrderWithComparator() {
-        Comparator<String> comp1 = Comparators.reverseOrder(null);
-        List<String> list1 = Arrays.asList("b", "a", "c");
-        list1.sort(comp1);
-        assertEquals(Arrays.asList("c", "b", "a"), list1);
+        assertThrows(IllegalArgumentException.class, () -> Comparators.reverseOrder(null));
 
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<String> reversed = Comparators.reverseOrder(lengthComp);
@@ -1575,7 +1560,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingBoolean_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingBoolean(null);
         });
     }
@@ -1591,7 +1576,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingChar_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingChar(null);
         });
     }
@@ -1607,7 +1592,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingByte_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingByte(null);
         });
     }
@@ -1623,14 +1608,14 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingShort_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingShort(null);
         });
     }
 
     @Test
     public void test_reversedComparingInt_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingInt(null);
         });
     }
@@ -1647,7 +1632,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals(30, list.get(1).age);
         assertEquals(25, list.get(2).age);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingInt(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingInt(null));
     }
 
     @Test
@@ -1661,7 +1646,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingLong_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingLong(null);
         });
     }
@@ -1677,7 +1662,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingFloat_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingFloat(null);
         });
     }
@@ -1693,14 +1678,14 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingDouble_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingDouble(null);
         });
     }
 
     @Test
     public void test_reversedComparingBy_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingBy(null);
         });
     }
@@ -1717,7 +1702,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals("Bob", list.get(1).name);
         assertEquals("Alice", list.get(2).name);
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingBy(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingBy(null));
     }
 
     @Test
@@ -1732,7 +1717,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingByIfNotNullOrElseNullsFirst_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingByIfNotNullOrElseNullsFirst(null);
         });
     }
@@ -1749,7 +1734,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingByIfNotNullOrElseNullsLast_nullExtractor() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingByIfNotNullOrElseNullsLast(null);
         });
     }
@@ -1778,7 +1763,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingByKey_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingByKey(null);
         });
     }
@@ -1795,7 +1780,7 @@ public class ComparatorsTest extends TestBase {
         assertTrue(entries.get(1).getKey().equals("banana") || entries.get(1).getKey().equals("cherry"));
         assertEquals("a", entries.get(2).getKey());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByKey(null));
     }
 
     @Test
@@ -1822,7 +1807,7 @@ public class ComparatorsTest extends TestBase {
 
     @Test
     public void test_reversedComparingByValue_withComparator_nullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Comparators.reversedComparingByValue(null);
         });
     }
@@ -1839,7 +1824,7 @@ public class ComparatorsTest extends TestBase {
         assertEquals(-2, entries.get(1).getValue());
         assertEquals(1, entries.get(2).getValue());
 
-        assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Comparators.reversedComparingByValue(null));
     }
 
     @Test

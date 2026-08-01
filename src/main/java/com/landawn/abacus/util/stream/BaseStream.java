@@ -45,9 +45,11 @@ import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u;
+import com.landawn.abacus.util.cs;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.*;
+import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
@@ -208,6 +210,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #filter(Object, Object)
      * @see #takeWhile(Object)
      * @see #dropWhile(Object)
@@ -246,6 +249,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *        therefore excluded from the resulting stream
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} or {@code onDrop} is {@code null}
      * @see #filter(Object)
      * @see #takeWhile(Object)
      * @see #dropWhile(Object)
@@ -310,6 +314,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a new stream consisting of elements from this stream until an element
      *         is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #dropWhile(Object)
      * @see #filter(Object)
      * @see #skipUntil(Object)
@@ -375,6 +380,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #dropWhile(Object, Object)
      * @see #takeWhile(Object)
      * @see #filter(Object)
@@ -444,6 +450,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} or {@code onDrop} is {@code null}
      * @see #dropWhile(Object)
      * @see #filter(Object, Object)
      * @see #takeWhile(Object)
@@ -507,6 +514,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a new stream consisting of the elements starting from the first element
      *         that matches the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #dropWhile(Object)
      * @see #takeWhile(Object)
      * @see #filter(Object)
@@ -1915,14 +1923,16 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param supplier the supplier that provides an alternative stream if this stream is empty.
-     *                 Must not be {@code null}.
      * @return a new stream consisting of the elements of this stream if not empty, or the elements from the supplied stream if this stream was empty.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see #appendIfEmpty(Supplier)
      */
     @SequentialOnly
     @IntermediateOp
-    default S defaultIfEmpty(final Supplier<? extends S> supplier) {
+    default S defaultIfEmpty(final Supplier<? extends S> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return appendIfEmpty(supplier);
     }
 
@@ -1980,6 +1990,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *         empty when a terminal operation is executed.
      * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException the exception provided by the supplier if the stream is empty when a terminal operation is executed
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
@@ -3026,6 +3037,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
      * @return a new stream configured for parallel execution with the specified executor
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3075,6 +3087,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
      * @return a new stream configured for parallel execution with the specified parameters
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3111,6 +3124,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *        including maximum thread number, split strategy and executor
      * @return a new stream configured for parallel execution with the specified settings
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code ps} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3183,7 +3197,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param ops the function that defines the operations to be performed in parallel mode
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
+     * @throws IllegalArgumentException if {@code ops} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Executor, Function)
      * @see #parallel()
@@ -3226,7 +3241,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param ops the function that defines the operations to be performed in parallel mode
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
+     * @throws IllegalArgumentException if {@code executor} or {@code ops} is {@code null}
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3308,7 +3324,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param transfer the transformation function that takes the current stream and returns a new stream
      * @return a new stream transformed by the provided function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the provided function is {@code null}
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -3322,6 +3338,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>If the stream contains at least one element, the function is applied to the entire stream.
      * If the stream is empty, an empty Optional is returned without invoking the function.
+     * If the function itself returns {@code null}, an empty Optional is returned as well.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3342,9 +3359,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <E> the type of exception that the function can throw
      * @param func the function to be applied to the stream if it's not empty
      * @return an Optional containing the result of the function if the stream is not empty,
-     *         or an empty Optional if the stream is empty
+     *         or an empty Optional if the stream is empty or the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code func} is {@code null}
      * @throws E if the function throws an exception
      */
     @SequentialOnly
@@ -3379,7 +3395,6 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param action the consumer to be applied to the stream if it's not empty
      * @return an OrElse instance which can be used to perform further actions if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the consumer throws an exception
      */
     @SequentialOnly
@@ -3412,9 +3427,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param closeHandler the Runnable to be invoked when the stream is closed
+     * @param closeHandler the Runnable to be invoked when the stream is closed; must not be {@code null}
      * @return a stream with the close handler registered. This may be the same stream instance.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code closeHandler} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp

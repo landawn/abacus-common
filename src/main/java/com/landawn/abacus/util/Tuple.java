@@ -424,7 +424,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the action to be performed for each element, must not be {@code null}.
+     * @param consumer the action to be performed for each element.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @throws ClassCastException if the consumer cannot accept the runtime type of an element
      * @throws E if the consumer throws an exception.
@@ -445,12 +445,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed on this tuple, must not be {@code null}.
-     * @throws NullPointerException if {@code action} is {@code null}.
+     * @param action the action to be performed on this tuple.
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept((TP) this);
     }
 
@@ -472,13 +474,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <R> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapper may throw.
-     * @param mapper the mapping function to apply to this tuple, must not be {@code null}.
+     * @param mapper the mapping function to apply to this tuple.
      * @return the result of applying the mapping function to this tuple.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E {
+    public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply((TP) this);
     }
 
@@ -501,14 +505,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate to test this tuple against, must not be {@code null}.
+     * @param predicate the predicate to test this tuple against.
      * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional.
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
     @SuppressWarnings("unchecked")
-    public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E {
+    public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.empty();
     }
 
@@ -1375,8 +1381,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * Performs the given action for each element of this tuple.
          *
-         * <p>For Tuple0, this method validates that {@code consumer} is not {@code null}
-         * but performs no further action since there are no elements to iterate over.</p>
+         * <p>For Tuple0, this method performs no action (the {@code consumer} is never invoked)
+         * since there are no elements to iterate over.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1385,13 +1391,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * }</pre>
          *
          * @param <E> the type of exception that the consumer may throw.
-         * @param consumer the action to be performed for each element; must not be {@code null}.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @param consumer the action to be performed for each element.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
+
             // do nothing.
         }
 
@@ -1607,13 +1614,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to be performed on the element.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -1997,13 +2004,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to be performed for each element.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -2026,10 +2033,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the action may throw.
          * @param action the bi-consumer action to be performed on the tuple elements.
-         * @throws NullPointerException if {@code action} is {@code null}.
          * @throws E if the action throws an exception.
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(_1, _2);
         }
 
@@ -2052,10 +2061,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the bi-function to apply to the tuple elements.
          * @return the result of applying the bi-function to this tuple's elements.
-         * @throws NullPointerException if {@code mapper} is {@code null}.
          * @throws E if the mapper throws an exception.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E {
+        public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E, IllegalArgumentException {
+            N.checkArgNotNull(mapper, cs.mapper);
+
             return mapper.apply(_1, _2);
         }
 
@@ -2078,10 +2089,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the bi-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
-         * @throws NullPointerException if {@code predicate} is {@code null}.
          * @throws E if the predicate throws an exception.
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate) throws E {
+        public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate)
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
+
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.empty();
         }
 
@@ -2383,13 +2397,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -2411,10 +2425,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the action may throw.
          * @param action the tri-consumer action to be performed on the tuple elements.
-         * @throws NullPointerException if {@code action} is {@code null}.
          * @throws E if the action throws an exception.
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action) throws E {
+        public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action)
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(_1, _2, _3);
         }
 
@@ -2434,10 +2451,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the tri-function to apply to the tuple elements.
          * @return the result of applying the tri-function to this tuple's elements.
-         * @throws NullPointerException if {@code mapper} is {@code null}.
          * @throws E if the mapper throws an exception.
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper) throws E {
+        public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper)
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(mapper, cs.mapper);
+
             return mapper.apply(_1, _2, _3);
         }
 
@@ -2456,11 +2476,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the tri-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
-         * @throws NullPointerException if {@code predicate} is {@code null}.
          * @throws E if the predicate throws an exception.
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
-                throws E {
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
+
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.empty();
         }
 
@@ -2669,13 +2691,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -2895,13 +2917,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -3128,13 +3150,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -3371,13 +3393,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -3624,13 +3646,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -4016,14 +4038,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * }</pre>
          *
          * @param <E> the type of exception that the consumer may throw.
-         * @param consumer the action to perform on each element, must not be {@code null}.
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @param consumer the action to perform on each element.
          * @throws E if the consumer throws an exception.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-            N.checkArgNotNull(consumer);
+        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
 
             final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 

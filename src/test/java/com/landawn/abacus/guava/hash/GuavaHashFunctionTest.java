@@ -813,7 +813,7 @@ public class GuavaHashFunctionTest extends TestBase {
         };
 
         hf.hash(null, funnel);
-        assertThrows(NullPointerException.class, () -> hf.hash(obj, null));
+        assertThrows(IllegalArgumentException.class, () -> hf.hash(obj, null));
     }
 
     // Test bits() method

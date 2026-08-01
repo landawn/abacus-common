@@ -110,12 +110,13 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * ByteBiPredicate combined = bothPositive.and(sumUnder100);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ByteBiPredicate and(final ByteBiPredicate other) {
+    default ByteBiPredicate and(final ByteBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -134,12 +135,13 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      * ByteBiPredicate combined = eitherZero.or(eitherNegative);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ByteBiPredicate or(final ByteBiPredicate other) {
+    default ByteBiPredicate or(final ByteBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

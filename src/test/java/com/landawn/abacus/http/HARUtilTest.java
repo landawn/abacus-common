@@ -283,6 +283,49 @@ public class HARUtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void testSendRequestByRequestEntryPreservesDeleteBody() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("deleted"));
+
+            final Map<String, Object> requestEntry = new HashMap<>();
+            requestEntry.put("url", server.url("/resource?source=har").toString());
+            requestEntry.put("method", "DELETE");
+            requestEntry.put("headers", List.of(Map.of("name", "Accept", "value", "application/json")));
+            requestEntry.put("postData", Map.of("text", "{\"reason\":\"duplicate\"}", "mimeType", "application/json"));
+
+            assertEquals("deleted", HARUtil.sendRequestByRequestEntry(requestEntry, String.class));
+
+            final RecordedRequest recordedRequest = server.takeRequest();
+            assertEquals("DELETE", recordedRequest.getMethod());
+            assertEquals("/resource?source=har", recordedRequest.getPath());
+            assertEquals("application/json", recordedRequest.getHeader("Content-Type"));
+            assertEquals("{\"reason\":\"duplicate\"}", recordedRequest.getBody().readUtf8());
+        }
+    }
+
+    @Test
+    public void testSendRequestByRequestEntryPreservesOptionsBody() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("options"));
+
+            final Map<String, Object> requestEntry = new HashMap<>();
+            requestEntry.put("url", server.url("/capabilities").toString());
+            requestEntry.put("method", "OPTIONS");
+            requestEntry.put("headers", List.of());
+            requestEntry.put("postData", Map.of("text", "feature=upload", "mimeType", "text/plain"));
+
+            assertEquals("options", HARUtil.sendRequestByRequestEntry(requestEntry, String.class));
+
+            final RecordedRequest recordedRequest = server.takeRequest();
+            assertEquals("OPTIONS", recordedRequest.getMethod());
+            assertEquals("text/plain", recordedRequest.getHeader("Content-Type"));
+            assertEquals("feature=upload", recordedRequest.getBody().readUtf8());
+        }
+    }
+
     // --- findRequestEntry(File, Predicate) ---
 
     @Test

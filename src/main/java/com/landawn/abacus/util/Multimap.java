@@ -1100,11 +1100,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param value the value to be removed from matching collections
      * @return {@code true} if at least one value was removed from any collection,
      *         {@code false} if no values were removed (either no keys matched or value not found)
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      * @see #removeEntry(Object, Object)
      * @see #removeValuesIf(Predicate, Collection)
      */
-    public boolean removeEntriesIf(final Predicate<? super K> keyPredicate, final E value) {
+    public boolean removeEntriesIf(final Predicate<? super K> keyPredicate, final E value) throws IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         Set<K> removingKeys = null;
@@ -1153,12 +1153,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param value the value to be removed from the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one value was successfully removed from the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      * @see #removeEntriesIf(Predicate, Object)
      * @see #removeEntry(Object, Object)
      * @see Collection#remove(Object)
      */
-    public boolean removeEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E value) {
+    public boolean removeEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E value) throws IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         Set<K> removingKeys = null;
@@ -1214,11 +1214,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param valuesToRemove the collection of values to remove from matching collections
      * @return {@code true} if any values were removed from any collection,
      *         {@code false} if no changes were made (no keys matched, values not found, or values collection empty)
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      * @see #removeValues(Object, Collection)
      * @see #removeKeysIf(Predicate)
      */
-    public boolean removeValuesIf(final Predicate<? super K> keyPredicate, final Collection<?> valuesToRemove) {
+    public boolean removeValuesIf(final Predicate<? super K> keyPredicate, final Collection<?> valuesToRemove) throws IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         if (N.isEmpty(valuesToRemove)) {
@@ -1271,12 +1271,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param valuesToRemove the collection of elements to be removed from the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one element was successfully removed from the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      * @see #removeValuesIf(Predicate, Collection)
      * @see #removeValues(Object, Collection)
      * @see Collection#removeAll(Collection)
      */
-    public boolean removeValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<?> valuesToRemove) {
+    public boolean removeValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<?> valuesToRemove) throws IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         if (N.isEmpty(valuesToRemove)) {
@@ -1337,11 +1337,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param keyPredicate the predicate that determines which entries to remove
      * @return {@code true} if any entries were removed from the Multimap,
      *         {@code false} if no entries matched the predicate
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      * @see #removeAll(Object)
      * @see #removeKeysIf(BiPredicate)
      */
-    public boolean removeKeysIf(final Predicate<? super K> keyPredicate) {
+    public boolean removeKeysIf(final Predicate<? super K> keyPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         Set<K> removingKeys = null;
@@ -1395,10 +1395,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param entryPredicate the bi-predicate that accepts a key and its value collection
      * @return {@code true} if any entries were removed, {@code false} if no entries matched
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      * @see #removeKeysIf(Predicate)
      */
-    public boolean removeKeysIf(final BiPredicate<? super K, ? super V> entryPredicate) {
+    public boolean removeKeysIf(final BiPredicate<? super K, ? super V> entryPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         Set<K> removingKeys = null;
@@ -1618,13 +1618,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param newValue the replacement value
      * @return {@code true} if at least one replacement was made,
      *         {@code false} if no keys matched or old value was not found
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}
      * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      * @see #replaceEntriesIf(BiPredicate, Object, Object)
      * @see #replaceEntry(Object, Object, Object)
      * @see #replaceValuesIf(Predicate, Collection)
      */
-    public boolean replaceEntriesIf(final Predicate<? super K> keyPredicate, final E oldValue, final E newValue) throws IllegalStateException {
+    public boolean replaceEntriesIf(final Predicate<? super K> keyPredicate, final E oldValue, final E newValue)
+            throws IllegalStateException, IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         boolean wasModified = false;
@@ -1661,12 +1662,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param oldValue the old value to be replaced in the collections of values associated with the keys that satisfy the predicate
      * @param newValue the new value to replace the old value in the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one old value was successfully replaced in the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}
      * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      * @see #replaceEntriesIf(Predicate, Object, Object)
      * @see #replaceEntry(Object, Object, Object)
      */
-    public boolean replaceEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E oldValue, final E newValue) throws IllegalStateException {
+    public boolean replaceEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E oldValue, final E newValue)
+            throws IllegalStateException, IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         boolean wasModified = false;
@@ -1755,11 +1757,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param keyPredicate the predicate to be applied to each key in the Multimap
      * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}
      * @throws IllegalStateException if a configured value collection rejects the replacement;
      *         that key's previous contents are restored when the collection permits it
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      */
-    public boolean replaceValuesIf(final Predicate<? super K> keyPredicate, final Collection<? extends E> newValues) throws IllegalStateException {
+    public boolean replaceValuesIf(final Predicate<? super K> keyPredicate, final Collection<? extends E> newValues)
+            throws IllegalStateException, IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         boolean wasModified = false;
@@ -1811,12 +1814,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}
      * @throws IllegalStateException if a configured value collection rejects the replacement;
      *         that key's previous contents are restored when the collection permits it
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      */
     public boolean replaceValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<? extends E> newValues)
-            throws IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         boolean wasModified = false;
@@ -1885,17 +1888,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * entry is left unchanged. If the function empties the collection in place and returns it, the
      * empty-result rule above applies and the key is removed.</p>
      *
-     * @param function the function applied to each key and its current value collection; it should
-     *                 return the new collection of values for that key (or {@code null}/empty to
-     *                 remove the key)
-     * @throws IllegalArgumentException if {@code function} is {@code null}
+     * @param function the function that transforms each key's value collection; must not be {@code null}.
      * @throws IllegalStateException if the returned non-empty collection of values cannot be added
      *         back into the existing value collection for a key
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #compute(Object, BiFunction)
      * @see #replaceValuesIf(BiPredicate, Collection)
      */
-    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException, IllegalStateException {
-        N.checkArgNotNull(function);
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
         List<K> keyToRemove = null;
         V value = null;
@@ -1968,12 +1969,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param mappingFunction the function to compute the initial collection, called only if key is absent
      * @return the existing collection if key was present, or the newly computed and stored collection,
      *         or {@code null} if the mapping function returned null/empty
-     * @throws IllegalArgumentException if the mappingFunction is null
+     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}.
      * @see #computeIfPresent(Object, BiFunction)
      * @see #compute(Object, BiFunction)
      */
     public V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(mappingFunction);
+        N.checkArgNotNull(mappingFunction, cs.mappingFunction);
 
         final V oldValue = get(key);
 
@@ -2030,13 +2031,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose value collection should be remapped
      * @param remappingFunction the function that computes a new collection based on key and current collection
      * @return the updated collection, or {@code null} if the key was not present or the function returned null/empty
-     * @throws IllegalArgumentException if the remappingFunction is null
      * @throws IllegalStateException if the configured value collection rejects the computed replacement
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @see #computeIfAbsent(Object, Function)
      * @see #compute(Object, BiFunction)
      */
     public V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
 
@@ -2095,11 +2096,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose associated value is to be computed
      * @param remappingFunction the function to compute a value
      * @return the new value associated with the specified key, or {@code null} if the remapping function returns {@code null} or an empty collection
-     * @throws IllegalArgumentException if the remappingFunction is {@code null}
      * @throws IllegalStateException if the configured value collection rejects the computed replacement
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      */
     public V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         V ret = null;
         final V oldValue = get(key);
@@ -2169,15 +2170,16 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param remappingFunction the function that defines how to merge old and new collections
      * @return the updated collection associated with the key, or {@code null} if the key was removed,
      *         or {@code null} if the key was absent and {@code elements} is empty (nothing is stored)
-     * @throws IllegalArgumentException if remappingFunction or elements is null
+     * @throws IllegalArgumentException if {@code elements} is {@code null}
      * @throws IllegalStateException if the configured value collection rejects the merged replacement
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @see #merge(Object, Object, BiFunction)
      * @see #compute(Object, BiFunction)
      */
     public <C extends Collection<? extends E>> V merge(final K key, final C elements, final BiFunction<? super V, ? super C, ? extends V> remappingFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(elements);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
 
@@ -2246,14 +2248,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param e the element to merge with existing values
      * @param remappingFunction the function that defines how to merge the collection with the new element
      * @return the updated collection associated with the key, or {@code null} if the key was removed
-     * @throws IllegalArgumentException if remappingFunction or e is null
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @throws IllegalStateException if the configured value collection rejects the merged replacement
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @see #merge(Object, Collection, BiFunction)
      * @see #compute(Object, BiFunction)
      */
     public V merge(final K key, final E e, final BiFunction<? super V, ? super E, ? extends V> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
         N.checkArgNotNull(e);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
 
@@ -2324,9 +2327,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *                         receives this Multimap's total value count as a capacity hint,
      *                         saturated at {@link Integer#MAX_VALUE}
      * @return a new inverted Multimap with keys and values swapped
+     * @throws IllegalArgumentException if {@code multimapSupplier} is {@code null}.
      * @see #copy()
      */
-    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M invert(final IntFunction<? extends M> multimapSupplier) {
+    public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M invert(final IntFunction<? extends M> multimapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(multimapSupplier, cs.multimapSupplier);
+
         final Multimap<K, E, V> multimap = this;
         final M res = multimapSupplier.apply(multimap.saturatedTotalValueCount());
 
@@ -2514,13 +2520,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * is O(n) where n is the total number of elements across all collections.</p>
      *
      * @param action the action to be performed for each key-element pair
-     * @throws IllegalArgumentException if action is null
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #allValues()
      * @see #entryStream()
      */
     @Beta
     public void forEach(final BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action);
+        N.checkArgNotNull(action, cs.action);
 
         K key = null;
 
@@ -2663,10 +2669,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <C> the type of collection to return
      * @param supplier function that creates the collection, receives total value count as parameter
      * @return a new collection of the specified type containing all values from this Multimap
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #allValues()
      */
     @Beta
-    public <C extends Collection<E>> C flatValues(final IntFunction<C> supplier) {
+    public <C extends Collection<E>> C flatValues(final IntFunction<C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final C result = supplier.apply(saturatedTotalValueCount());
 
         for (final V v : backingMap.values()) {
@@ -2899,9 +2908,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <M> the specific Map type to create
      * @param supplier function that creates a new Map instance, receives Multimap size as parameter
      * @return a new Map of the specified type containing all key-collection pairs
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #toMap()
      */
-    public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) {
+    public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final M result = supplier.apply(keyCount());
 
         // result.putAll(backingMap);
@@ -3116,10 +3128,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param func the function to apply to this Multimap
      * @return the result of applying the function
      * @throws X if the function throws an exception
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #applyIfNotEmpty(Throwables.Function)
      * @see #accept(Throwables.Consumer)
      */
-    public <R, X extends Exception> R apply(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
+    public <R, X extends Exception> R apply(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return func.apply(this);
     }
 
@@ -3159,10 +3174,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return an Optional containing the result if this Multimap is not empty, otherwise an empty
      *         Optional. An empty Optional is also returned when the function itself returns {@code null}.
      * @throws X if the function throws an exception
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #apply(Throwables.Function)
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
-    public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X {
+    public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multimap<K, E, V>, R, X> func)
+            throws X, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -3196,10 +3215,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <X> the type of exception that may be thrown
      * @param action the consumer action to perform on this Multimap
      * @throws X if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      * @see #apply(Throwables.Function)
      */
-    public <X extends Exception> void accept(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
+    public <X extends Exception> void accept(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(this);
     }
 
@@ -3243,10 +3265,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param action the consumer action to perform if the Multimap is not empty
      * @return an OrElse instance for chaining an alternative action for the empty case
      * @throws X if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #accept(Throwables.Consumer)
      * @see #applyIfNotEmpty(Throwables.Function)
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X {
+    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return If.is(!isEmpty()).then(this, action);
     }
 

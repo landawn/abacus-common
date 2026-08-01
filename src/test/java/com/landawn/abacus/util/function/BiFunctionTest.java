@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.function;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -114,9 +115,9 @@ public class BiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenRejectsNullFunctionImmediately() {
+    public void testAndThenRejectsNullFunctionAtComposition() {
         BiFunction<String, Integer, String> biFunction = (s, i) -> s + ":" + i;
-        assertThrows(NullPointerException.class, () -> biFunction.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> biFunction.andThen(null));
     }
 
     @Test
@@ -149,8 +150,8 @@ public class BiFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         BiFunction<String, String, String> instance = (a, b) -> null;
-        assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Function) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }
 }

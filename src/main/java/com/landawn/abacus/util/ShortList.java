@@ -376,7 +376,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * new ShortList((short[]) null);   // throws NullPointerException
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @throws NullPointerException if the specified array is {@code null}
      */
     public ShortList(final short[] a) {
@@ -397,7 +397,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * new ShortList(a, 5);   // throws IndexOutOfBoundsException (5 > a.length)
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
@@ -498,7 +498,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * ShortList.copyOf(a, 0, 6);          // throws IndexOutOfBoundsException (6 > a.length)
      * }</pre>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied.
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new ShortList containing a copy of the elements in the specified range
@@ -1017,12 +1017,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
-     * @throws NullPointerException if {@code p} is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final ShortPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final ShortPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final ShortList tmp = new ShortList(size());
 
@@ -1275,6 +1275,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1420,13 +1421,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.replaceAll(e -> (short) (e + 1));   // list is now [3, 5, 7]
      * }</pre>
      *
-     * @param operator the operator to apply to each element; must not be {@code null}
-     * @throws NullPointerException if {@code operator} is {@code null}
+     * @param operator the operator to apply to each element;
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @see #replaceAll(short, short)
      * @see #replaceIf(ShortPredicate, short)
      */
-    public void replaceAll(final ShortUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final ShortUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsShort(elementData[i]);
@@ -1444,15 +1445,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.replaceIf(e -> e > 100, (short) 0);                   // returns false; list is unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element;
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced; {@code false} otherwise
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #replaceAll(short, short)
      * @see #replaceAll(ShortUnaryOperator)
      */
-    public boolean replaceIf(final ShortPredicate predicate, final short newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final ShortPredicate predicate, final short newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2202,8 +2203,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * new ShortList().forEach(e -> sum[0]++);   // no-op on empty list; sum[0] stays 6
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element;
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ShortConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2235,9 +2236,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param action the action to be performed for each element
      * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range,
      *         considering the supported forward and backward iteration semantics
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2747,15 +2748,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new collection instance with the specified initial capacity
      * @return a new collection containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} or the collection it returns is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C collection = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C collection = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             collection.add(elementData[i]);
@@ -2773,14 +2774,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new Multiset instance with the specified initial capacity
      * @return a new Multiset containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} or the multiset it returns is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier) throws IndexOutOfBoundsException {
+    public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Short> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Short> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

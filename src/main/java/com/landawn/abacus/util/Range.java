@@ -470,17 +470,17 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * }</pre>
      *
      * @param <U> the type of elements in the resulting range, must implement {@code Comparable}.
-     * @param mapper the function to apply to both endpoints, must not be {@code null} and must not return {@code null} values.
+     * @param mapper the function to apply to both endpoints, and must not return {@code null} values.
      * @return a new {@code Range<U>} with transformed endpoints maintaining the same bound types.
      * @throws IllegalArgumentException if the mapped lower endpoint is greater than the mapped upper endpoint.
-     * @throws NullPointerException if {@code mapper} is {@code null}, or if {@code mapper} returns {@code null} for either endpoint.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #boundType()
      */
-    public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) {
-        N.requireNonNull(mapper, "mapper");
+    public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
 
-        final U newLower = N.requireNonNull(mapper.apply(lowerEndpoint.value), "mapper returned null for the lower endpoint");
-        final U newUpper = N.requireNonNull(mapper.apply(upperEndpoint.value), "mapper returned null for the upper endpoint");
+        final U newLower = N.checkArgNotNull(mapper.apply(lowerEndpoint.value), "mapper returned null for the lower endpoint");
+        final U newUpper = N.checkArgNotNull(mapper.apply(upperEndpoint.value), "mapper returned null for the upper endpoint");
 
         if (newLower.compareTo(newUpper) > 0) {
             throw new IllegalArgumentException(

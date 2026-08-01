@@ -27,7 +27,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, Object)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <A> the type of the first argument to the predicate
@@ -101,13 +100,14 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * boolean test3 = combined.test(-1, 5, 7);   // returns false (not all positive)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this
      *         predicate and the other predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) {
+    default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -132,13 +132,14 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * boolean test3 = combined.test("short", "text", "here");              // returns false
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this
      *         predicate and the other predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) {
+    default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

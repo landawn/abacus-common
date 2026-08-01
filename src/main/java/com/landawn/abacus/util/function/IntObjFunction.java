@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts an {@code int}-valued and an object-valued argument and produces a result.
+ * Represents a function that accepts an {@code int}-valued argument and an object-valued argument and produces a result.
  * This is the {@code (int, reference)} specialization of {@link java.util.function.BiFunction}.
  *
  * <p>The parameter order follows the {@code IntObj*} convention: the {@code int} argument comes
@@ -72,13 +72,14 @@ public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, Ru
      * }</pre>
      *
      * @param <V> the type of output of the {@code after} function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after}
      *         function
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default <V> IntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+    default <V> IntObjFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (i, t) -> after.apply(apply(i, t));
     }
 

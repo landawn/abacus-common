@@ -60,6 +60,15 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
         return true;
     }
 
+    /**
+     * Compares two {@link OptionalInt} values using the ordering
+     * {@code null < empty < present}, with present values compared numerically.
+     *
+     * @param x the first value; may be {@code null}
+     * @param y the second value; may be {@code null}
+     * @return a negative integer, zero, or a positive integer as {@code x} is less than, equal to,
+     *         or greater than {@code y}
+     */
     @Override
     public int compare(final OptionalInt x, final OptionalInt y) {
         if (x == null) {
@@ -102,7 +111,8 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Otherwise, returns the string representation of the contained int value.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -121,9 +131,9 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * Empty or {@code null} strings result in an empty OptionalInt.
      * Non-empty strings are parsed as int values and wrapped in OptionalInt.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
      * @return OptionalInt.empty() if the string is {@code null} or empty, otherwise OptionalInt containing the parsed value

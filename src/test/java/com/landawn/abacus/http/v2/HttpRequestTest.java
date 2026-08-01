@@ -7,8 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +36,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -1679,6 +1685,79 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testExecuteRejectsNullBodyHandlerBeforeBuildingOwnedClient() {
+        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest request = new HttpRequest(TEST_URL, null, null, clientBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        verify(clientBuilder, never()).build();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecutePreservesIOExceptionWhenOwnedClientCloseThrowsError() throws Exception {
+        final IOException failure = new IOException("send failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown.getCause());
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecutePreservesRuntimeFailureWhenOwnedClientCloseThrowsError() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("send failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecutePreservesResponseBodyFailureAndClosesOwnedClientOnce() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("response body failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.body()).thenThrow(failure);
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((HttpResponse) response);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
     public void testExecuteWithNullMethodAndBodyHandler() {
         assertThrows(IllegalArgumentException.class, () -> {
             HttpRequest.url(testUrl).execute(null, BodyHandlers.ofString());
@@ -2114,6 +2193,103 @@ public class HttpRequestTest extends TestBase {
         }
     }
 
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecuteBodyHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("synchronous send failure");
+        final AssertionError cleanupFailure = new AssertionError("body-handler cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecuteNonStreamCleanupErrorClosesOwnedClientOnce() throws Exception {
+        final AssertionError cleanupFailure = new AssertionError("async cleanup failure");
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.body()).thenReturn("body");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
+
+        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
+
+        assertSame(cleanupFailure, thrown.getCause());
+        assertEquals(0, cleanupFailure.getSuppressed().length);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecuteCancellationStillCleansOwnedClientAfterUpstreamFailure() throws Exception {
+        final IOException failure = new IOException("upstream failure after cancellation");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure after cancellation");
+        final CompletableFuture<HttpResponse<String>> upstream = new CompletableFuture<>();
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((CompletableFuture) upstream);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
+
+        assertTrue(future.cancel(false));
+        assertTrue(future.isCancelled());
+        assertTrue(upstream.completeExceptionally(failure));
+
+        assertTrue(future.isCancelled());
+        assertEquals(1, failure.getSuppressed().length);
+        assertSame(cleanupFailure, failure.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecuteCancellationClosesOrphanedInputStreamResponse() throws Exception {
+        final AtomicInteger delegateCloseCount = new AtomicInteger();
+        final InputStream delegate = new InputStream() {
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public void close() {
+                delegateCloseCount.incrementAndGet();
+            }
+        };
+        final HttpResponse<InputStream> response = mock(HttpResponse.class);
+        when(response.body()).thenReturn(delegate);
+        final CompletableFuture<HttpResponse<InputStream>> upstream = new CompletableFuture<>();
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((CompletableFuture) upstream);
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<HttpResponse<InputStream>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
+
+        assertTrue(future.cancel(false));
+        assertTrue(future.isCancelled());
+        assertTrue(upstream.complete(response));
+
+        assertTrue(future.isCancelled());
+        assertEquals(1, delegateCloseCount.get());
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
     // ==================== asyncExecute(HttpMethod, Class) ====================
 
     @Test
@@ -2132,6 +2308,49 @@ public class HttpRequestTest extends TestBase {
         });
     }
 
+    @Test
+    public void testAsyncExecuteResultClassClosesOwnedClientOnSynchronousBuildFailure() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("synchronous build failure");
+        final AssertionError cleanupFailure = new AssertionError("result-class cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+        final java.net.http.HttpRequest.Builder requestBuilder = mock(java.net.http.HttpRequest.Builder.class);
+        when(requestBuilder.uri(any(URI.class))).thenReturn(requestBuilder);
+        when(requestBuilder.method(any(String.class), any(BodyPublisher.class))).thenReturn(requestBuilder);
+        when(requestBuilder.build()).thenThrow(failure);
+
+        final HttpRequest request = newOwnedRequest(ownedClient, requestBuilder);
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.asyncExecute(HttpMethod.GET, String.class));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecuteResultProcessingFailureDoesNotRepeatCompletedCleanup() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("result processing failure");
+        final HttpResponse<byte[]> response = mock(HttpResponse.class);
+        when(response.body()).thenReturn(new byte[] { 1 }).thenThrow(failure);
+        when(response.headers()).thenReturn(java.net.http.HttpHeaders.of(Map.of(), (name, value) -> true));
+        when(response.statusCode()).thenReturn(200);
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class);
+
+        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
+
+        assertSame(failure, thrown.getCause());
+        assertEquals(0, failure.getSuppressed().length);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
     // ==================== asyncExecute(HttpMethod, BodyHandler, PushPromiseHandler) ====================
 
     @Test
@@ -2148,6 +2367,74 @@ public class HttpRequestTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             HttpRequest.url(testUrl).asyncExecute(null, BodyHandlers.ofString(), null);
         });
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecutePushHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("synchronous push send failure");
+        final AssertionError cleanupFailure = new AssertionError("push-handler cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class),
+                any(HttpResponse.PushPromiseHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final HttpResponse.PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
+            // no-op
+        };
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), pushHandler));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    public void testAsyncExecuteRejectsNullBodyHandlersBeforeBuildingOwnedClient() {
+        final HttpClient.Builder twoArgBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest twoArgRequest = new HttpRequest(TEST_URL, null, null, twoArgBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        verify(twoArgBuilder, never()).build();
+
+        final HttpClient.Builder pushBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest pushRequest = new HttpRequest(TEST_URL, null, null, pushBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
+        verify(pushBuilder, never()).build();
+
+        final HttpClient.Builder nullPushHandlerBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder,
+                java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
+        verify(nullPushHandlerBuilder, never()).build();
+    }
+
+    private static HttpRequest newOwnedRequest(final HttpClient ownedClient, final java.net.http.HttpRequest.Builder requestBuilder) {
+        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
+        when(clientBuilder.build()).thenReturn(ownedClient);
+
+        return new HttpRequest(TEST_URL, null, null, clientBuilder, requestBuilder).closeHttpClientAfterExecution(true);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static HttpRequest newOwnedAsyncInputStreamRequest(final HttpClient ownedClient, final InputStream delegate) {
+        final HttpResponse<InputStream> response = mock(HttpResponse.class);
+        when(response.body()).thenReturn(delegate);
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+
+        return newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
     }
 
     // ==================== Comprehensive integration / edge case tests ====================
@@ -2220,11 +2507,66 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testCleanupInputStreamRunsCleanupOnceWhenClosedConcurrently() throws Exception {
-        final int threadCount = 32;
-        final CountDownLatch allClosing = new CountDownLatch(threadCount);
+    public void testAsyncCleanupInputStreamClosesDelegateAndOwnedClientOnceConcurrently() throws Exception {
+        final int threadCount = 16;
+        final AtomicInteger delegateCloseCount = new AtomicInteger();
+        final InputStream delegate = new InputStream() {
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public void close() {
+                delegateCloseCount.incrementAndGet();
+            }
+        };
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        final HttpRequest request = newOwnedAsyncInputStreamRequest(ownedClient, delegate);
+        final InputStream stream = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream()).get(2, TimeUnit.SECONDS).body();
+        final CountDownLatch allReady = new CountDownLatch(threadCount);
         final CountDownLatch releaseClose = new CountDownLatch(1);
-        final AtomicInteger cleanupCount = new AtomicInteger();
+        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            final Future<?>[] closes = new Future<?>[threadCount];
+
+            for (int i = 0; i < threadCount; i++) {
+                closes[i] = executor.submit(() -> {
+                    allReady.countDown();
+
+                    try {
+                        releaseClose.await();
+                        stream.close();
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(e);
+                    } catch (final IOException e) {
+                        throw new AssertionError(e);
+                    }
+                });
+            }
+
+            assertTrue(allReady.await(5, TimeUnit.SECONDS));
+            releaseClose.countDown();
+
+            for (final Future<?> close : closes) {
+                close.get(5, TimeUnit.SECONDS);
+            }
+
+            assertEquals(1, delegateCloseCount.get());
+            verify((AutoCloseable) ownedClient, times(1)).close();
+        } finally {
+            releaseClose.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testAsyncCleanupInputStreamPreservesDelegateCloseFailureWhenClientCleanupThrowsError() throws Exception {
+        final IOException delegateFailure = new IOException("delegate close failure");
+        final AssertionError cleanupFailure = new AssertionError("owned-client cleanup failure");
+        final AtomicInteger delegateCloseCount = new AtomicInteger();
         final InputStream delegate = new InputStream() {
             @Override
             public int read() {
@@ -2233,14 +2575,38 @@ public class HttpRequestTest extends TestBase {
 
             @Override
             public void close() throws IOException {
-                allClosing.countDown();
+                delegateCloseCount.incrementAndGet();
+                throw delegateFailure;
+            }
+        };
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+        final HttpRequest request = newOwnedAsyncInputStreamRequest(ownedClient, delegate);
+        final InputStream stream = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream()).get(2, TimeUnit.SECONDS).body();
 
-                try {
-                    releaseClose.await();
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException(e);
-                }
+        final IOException thrown = assertThrows(IOException.class, stream::close);
+
+        assertSame(delegateFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        assertEquals(1, delegateCloseCount.get());
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    public void testCleanupInputStreamRunsCleanupOnceWhenClosedConcurrently() throws Exception {
+        final int threadCount = 32;
+        final AtomicInteger delegateCloseCount = new AtomicInteger();
+        final AtomicInteger cleanupCount = new AtomicInteger();
+        final InputStream delegate = new InputStream() {
+            @Override
+            public int read() {
+                return -1;
+            }
+
+            @Override
+            public void close() {
+                delegateCloseCount.incrementAndGet();
             }
         };
 
@@ -2263,16 +2629,13 @@ public class HttpRequestTest extends TestBase {
                 });
             }
 
-            assertEquals(true, allClosing.await(5, TimeUnit.SECONDS), "all close calls should reach the delegate");
-            releaseClose.countDown();
-
             for (final Future<?> close : closes) {
                 close.get(5, TimeUnit.SECONDS);
             }
 
+            assertEquals(1, delegateCloseCount.get(), "the delegate stream must be closed exactly once");
             assertEquals(1, cleanupCount.get(), "per-request client cleanup must run exactly once");
         } finally {
-            releaseClose.countDown();
             executor.shutdownNow();
         }
     }

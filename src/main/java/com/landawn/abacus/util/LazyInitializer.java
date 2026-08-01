@@ -39,15 +39,15 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
     private Supplier<T> supplier;
     private volatile boolean initialized = false;
     private volatile T value = null; //NOSONAR
+    private boolean initializing = false;
+    private IllegalStateException recursiveFailure = null;
 
     /**
      * Constructs a new {@code LazyInitializer} with the specified supplier.
      *
-     * @param supplier the supplier used to produce the value on first access; must not be {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @param supplier the supplier used to produce the value on first access
      */
     LazyInitializer(final Supplier<T> supplier) {
-        N.checkArgNotNull(supplier, cs.supplier);
 
         this.supplier = supplier;
     }
@@ -63,13 +63,13 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * }</pre>
      *
      * @param <T> the type of the lazily initialized object
-     * @param supplier the supplier that will provide the value when first requested; must not be {@code null}
+     * @param supplier the supplier that will provide the value when first requested
      * @return a {@code LazyInitializer} wrapping the supplier, or the supplier itself cast to
      *         {@code LazyInitializer} if it is already an instance of {@code LazyInitializer}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static <T> LazyInitializer<T> of(final Supplier<T> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         if (supplier instanceof LazyInitializer) {
             return (LazyInitializer<T>) supplier;
@@ -108,9 +108,31 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    value = supplier.get();
-                    supplier = null;
-                    initialized = true;
+                    if (initializing) {
+                        if (recursiveFailure == null) {
+                            recursiveFailure = new IllegalStateException("Recursive initialization of deferred value");
+                        }
+
+                        throw recursiveFailure;
+                    }
+
+                    initializing = true;
+
+                    try {
+                        value = supplier.get();
+
+                        // A supplier may catch the recursive-access exception. Do not publish a value
+                        // from an initialization attempt that already violated the invariant.
+                        if (recursiveFailure != null) {
+                            throw recursiveFailure;
+                        }
+
+                        supplier = null;
+                        initialized = true;
+                    } finally {
+                        initializing = false;
+                        recursiveFailure = null;
+                    }
                 }
             }
         }

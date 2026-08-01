@@ -1576,10 +1576,22 @@ public class LongStreamTest extends TestBase {
         long[] result = stream.toArray();
         assertEquals(1, counter.get());
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
+    } 
+
+    @Test
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final LongStream deferred = LongStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
     }
 
     @Test
-    public void testDeferWithNullSupplier() {
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> LongStream.defer(null));
     }
 
@@ -3457,7 +3469,7 @@ public class LongStreamTest extends TestBase {
 
     @Test
     public void testIterateWithNullOperator() {
-        assertThrows(IllegalArgumentException.class, () -> LongStream.iterate(1L, null));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.iterate(1L, null).limit(2).count());
     }
 
     @Test
@@ -3469,7 +3481,7 @@ public class LongStreamTest extends TestBase {
 
     @Test
     public void testGenerateWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> LongStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> LongStream.generate(null).limit(1).count());
     }
 
     @Test

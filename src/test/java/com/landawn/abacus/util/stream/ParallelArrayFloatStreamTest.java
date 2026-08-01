@@ -1364,9 +1364,9 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     @Test
     public void testOnCloseEmptyHandler() {
         FloatStream stream = createFloatStream(TEST_ARRAY);
-        FloatStream newStream = stream.onClose(null);
-        assertSame(stream, newStream);
-        newStream.close();
+
+        assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
+        stream.close();
     }
 
     @Test

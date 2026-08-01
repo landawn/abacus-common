@@ -254,7 +254,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * @param charQuotation the character to use for quoting char values
      * @return {@code this} instance for method chaining
      * @deprecated this method should not be called as JSON has specific quotation requirements.
-     *             JSON always uses double quotes for string values.
+     *             JSON always uses double quotes for string and character values.
      */
     @Deprecated
     @Override

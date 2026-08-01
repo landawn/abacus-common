@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 
 import okhttp3.CacheControl;
+import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -51,6 +54,8 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import okio.BufferedSource;
+import okio.ForwardingSource;
+import okio.Okio;
 
 public class OkHttpRequestTest extends TestBase {
 
@@ -1444,6 +1449,176 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testExecuteResponseClassClosesBuilderClientWhenBodyStringIsConsumed() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
+        final Response response = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+
+        try {
+            assertEquals("raw body", response.body().string());
+            assertTrue(client.dispatcher().executorService().isShutdown());
+            assertNull(getField(request, "pendingPerRequestClient"));
+        } finally {
+            IOUtil.close(response);
+        }
+    }
+
+    @Test
+    public void testExecuteResponseClassClosesBuilderClientWhenBodyBytesAreConsumed() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
+        final Response response = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+
+        try {
+            assertArrayEquals("raw body".getBytes(), response.body().bytes());
+            assertTrue(client.dispatcher().executorService().isShutdown());
+            assertNull(getField(request, "pendingPerRequestClient"));
+        } finally {
+            IOUtil.close(response);
+        }
+    }
+
+    @Test
+    public void testExecuteResponseClassClosesBuilderClientWhenBodySourceIsClosed() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
+        final Response response = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+
+        try {
+            final BufferedSource source = response.body().source();
+            assertEquals("raw body", source.readUtf8());
+            source.close();
+
+            assertTrue(client.dispatcher().executorService().isShutdown());
+            assertNull(getField(request, "pendingPerRequestClient"));
+        } finally {
+            IOUtil.close(response);
+        }
+    }
+
+    @Test
+    public void testExecuteResponseClassCleansUpWhenAttachingBodySourceFails() throws Exception {
+        final IllegalStateException sourceFailure = new IllegalStateException("source failure");
+        final IllegalStateException closeFailure = new IllegalStateException("close failure");
+        final AtomicInteger closeCount = new AtomicInteger();
+        final ResponseBody failingBody = new ResponseBody() {
+            @Override
+            public MediaType contentType() {
+                return null;
+            }
+
+            @Override
+            public long contentLength() {
+                return 0;
+            }
+
+            @Override
+            public BufferedSource source() {
+                throw sourceFailure;
+            }
+
+            @Override
+            public void close() {
+                closeCount.incrementAndGet();
+                throw closeFailure;
+            }
+        };
+        final OkHttpClient baseClient = new OkHttpClient.Builder().addInterceptor(chain -> new Response.Builder().request(chain.request())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(failingBody)
+                .build()).build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, baseClient).connectTimeout(5_000L);
+
+        try {
+            final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                    () -> request.execute(HttpMethod.GET, Response.class));
+            final OkHttpClient.Builder perRequestBuilder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
+            final OkHttpClient lifecycleProbe = perRequestBuilder.build();
+
+            try {
+                assertSame(sourceFailure, thrown);
+                assertEquals(1, closeCount.get());
+                assertEquals(1, thrown.getSuppressed().length);
+                assertSame(closeFailure, thrown.getSuppressed()[0]);
+                assertTrue(lifecycleProbe.dispatcher().executorService().isShutdown());
+                assertNull(getField(request, "pendingPerRequestClient"));
+            } finally {
+                lifecycleProbe.dispatcher().executorService().shutdown();
+                lifecycleProbe.connectionPool().evictAll();
+            }
+        } finally {
+            request.doAfterExecution();
+
+            if (closeCount.get() == 0) {
+                try {
+                    failingBody.close();
+                } catch (final RuntimeException e) {
+                    // expected test-body failure
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPerRequestClientIsClosedWhenInterceptorThrowsError() throws Exception {
+        final AssertionError failure = new AssertionError("interceptor failure");
+        final OkHttpClient baseClient = new OkHttpClient.Builder().addInterceptor(chain -> {
+            throw failure;
+        }).build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, baseClient).connectTimeout(5_000L);
+
+        assertSame(failure, assertThrows(AssertionError.class, () -> request.execute(HttpMethod.GET, String.class)));
+
+        final OkHttpClient.Builder perRequestBuilder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
+        final OkHttpClient lifecycleProbe = perRequestBuilder.build();
+
+        try {
+            assertTrue(lifecycleProbe.dispatcher().executorService().isShutdown());
+        } finally {
+            lifecycleProbe.dispatcher().executorService().shutdown();
+            lifecycleProbe.connectionPool().evictAll();
+        }
+    }
+
+    @Test
+    public void testOverlappingRawResponsesCloseTheirOwnPerRequestClients() throws Exception {
+        server.enqueue(new MockResponse().setBody("first").setResponseCode(200));
+        server.enqueue(new MockResponse().setBody("second").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
+        final Response firstResponse = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient firstClient = (OkHttpClient) getField(request, "pendingPerRequestClient");
+        final Response secondResponse = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient secondClient = (OkHttpClient) getField(request, "pendingPerRequestClient");
+
+        try {
+            assertNotSame(firstClient, secondClient);
+            assertFalse(firstClient.dispatcher().executorService().isShutdown());
+            assertFalse(secondClient.dispatcher().executorService().isShutdown());
+
+            IOUtil.close(firstResponse);
+
+            assertTrue(firstClient.dispatcher().executorService().isShutdown());
+            assertFalse(secondClient.dispatcher().executorService().isShutdown());
+            assertSame(secondClient, getField(request, "pendingPerRequestClient"));
+        } finally {
+            IOUtil.close(firstResponse);
+            IOUtil.close(secondResponse);
+        }
+
+        assertTrue(secondClient.dispatcher().executorService().isShutdown());
+        assertNull(getField(request, "pendingPerRequestClient"));
+    }
+
+    @Test
     public void testAttachedResponseRunsClientCleanupOnceWhenClosedConcurrently() throws Exception {
         final int threadCount = 16;
         final CountDownLatch allClosing = new CountDownLatch(threadCount);
@@ -1487,9 +1662,9 @@ public class OkHttpRequestTest extends TestBase {
                 .message("OK")
                 .body(body)
                 .build();
-        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class);
+        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class, OkHttpClient.class);
         attachCleanup.setAccessible(true);
-        final Response response = (Response) attachCleanup.invoke(request, rawResponse);
+        final Response response = (Response) attachCleanup.invoke(request, rawResponse, null);
         final ExecutorService closerExecutor = Executors.newFixedThreadPool(threadCount);
 
         try {
@@ -1511,6 +1686,179 @@ public class OkHttpRequestTest extends TestBase {
             releaseClose.countDown();
             closerExecutor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testAttachedResponsePreservesBodyCloseFailureWhenClientCleanupFails() throws Exception {
+        final IOException bodyFailure = new IOException("body close failure");
+        final IllegalStateException cleanupFailure = new IllegalStateException("client cleanup failure");
+        final AtomicInteger bodyCloseCount = new AtomicInteger();
+        final ExecutorService clientExecutor = mock(ExecutorService.class);
+        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client);
+        final ResponseBody body = new ResponseBody() {
+            private final BufferedSource source = new Buffer();
+
+            @Override
+            public MediaType contentType() {
+                return null;
+            }
+
+            @Override
+            public long contentLength() {
+                return 0;
+            }
+
+            @Override
+            public BufferedSource source() {
+                return source;
+            }
+
+            @Override
+            public void close() {
+                bodyCloseCount.incrementAndGet();
+                throw new com.landawn.abacus.exception.UncheckedIOException(bodyFailure);
+            }
+        };
+        final Response response = attachCleanup(request, body, client);
+
+        final com.landawn.abacus.exception.UncheckedIOException thrown = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                response::close);
+
+        assertSame(bodyFailure, thrown.getCause());
+        assertEquals(1, bodyCloseCount.get());
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify(clientExecutor, times(1)).shutdown();
+    }
+
+    @Test
+    public void testAttachedResponsePreservesSourceCloseFailureWhenClientCleanupFails() throws Exception {
+        final IOException sourceFailure = new IOException("source close failure");
+        final IllegalStateException cleanupFailure = new IllegalStateException("client cleanup failure");
+        final AtomicInteger sourceCloseCount = new AtomicInteger();
+        final ExecutorService clientExecutor = mock(ExecutorService.class);
+        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client);
+        final BufferedSource failingSource = Okio.buffer(new ForwardingSource(new Buffer()) {
+            @Override
+            public void close() throws IOException {
+                sourceCloseCount.incrementAndGet();
+                throw sourceFailure;
+            }
+        });
+        final ResponseBody body = new ResponseBody() {
+            @Override
+            public MediaType contentType() {
+                return null;
+            }
+
+            @Override
+            public long contentLength() {
+                return 0;
+            }
+
+            @Override
+            public BufferedSource source() {
+                return failingSource;
+            }
+
+            @Override
+            public void close() {
+                // The test exercises the source handoff directly.
+            }
+        };
+        final Response response = attachCleanup(request, body, client);
+
+        final IOException thrown = assertThrows(IOException.class, () -> response.body().source().close());
+
+        assertSame(sourceFailure, thrown);
+        assertEquals(1, sourceCloseCount.get());
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify(clientExecutor, times(1)).shutdown();
+    }
+
+    @Test
+    public void testShutdownClientPreservesDispatcherFailureWhenPoolEvictionFails() throws Exception {
+        final IllegalStateException shutdownFailure = new IllegalStateException("dispatcher shutdown failure");
+        final AssertionError evictionFailure = new AssertionError("pool eviction failure");
+        final ExecutorService clientExecutor = mock(ExecutorService.class);
+        final ConnectionPool connectionPool = mock(ConnectionPool.class);
+        org.mockito.Mockito.doThrow(shutdownFailure).when(clientExecutor).shutdown();
+        org.mockito.Mockito.doThrow(evictionFailure).when(connectionPool).evictAll();
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).connectionPool(connectionPool).build();
+        final Method shutdownClient = OkHttpRequest.class.getDeclaredMethod("shutdownClient", OkHttpClient.class);
+        shutdownClient.setAccessible(true);
+
+        final java.lang.reflect.InvocationTargetException invocationFailure = assertThrows(java.lang.reflect.InvocationTargetException.class,
+                () -> shutdownClient.invoke(null, client));
+        final Throwable thrown = invocationFailure.getCause();
+
+        assertSame(shutdownFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(evictionFailure, thrown.getSuppressed()[0]);
+        verify(clientExecutor, times(1)).shutdown();
+        verify(connectionPool, times(1)).evictAll();
+    }
+
+    @Test
+    public void testExecutePreservesBodyReadFailureWhenClientCleanupFails() {
+        final IllegalStateException bodyReadFailure = new IllegalStateException("body read failure");
+        final AssertionError cleanupFailure = new AssertionError("client cleanup failure");
+        final ExecutorService clientExecutor = mock(ExecutorService.class);
+        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
+        final ResponseBody body = new ResponseBody() {
+            @Override
+            public MediaType contentType() {
+                return null;
+            }
+
+            @Override
+            public long contentLength() {
+                return 0;
+            }
+
+            @Override
+            public BufferedSource source() {
+                throw bodyReadFailure;
+            }
+
+            @Override
+            public void close() {
+                // Keep response cleanup successful so this test isolates client-cleanup suppression.
+            }
+        };
+        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor))
+                .addInterceptor(chain -> new Response.Builder().request(chain.request())
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(200)
+                        .message("OK")
+                        .body(body)
+                        .build())
+                .build();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client).closeHttpClientAfterExecution(true);
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, String.class));
+
+        assertSame(bodyReadFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify(clientExecutor, times(1)).shutdown();
+    }
+
+    private Response attachCleanup(final OkHttpRequest request, final ResponseBody body, final OkHttpClient perRequestClient) throws Exception {
+        final Response rawResponse = new Response.Builder().request(new okhttp3.Request.Builder().url(baseUrl).build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("OK")
+                .body(body)
+                .build();
+        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class, OkHttpClient.class);
+        attachCleanup.setAccessible(true);
+        return (Response) attachCleanup.invoke(request, rawResponse, perRequestClient);
     }
 
     private void enqueueResponses(final int count) {

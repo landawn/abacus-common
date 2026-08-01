@@ -1,13 +1,13 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -9012,8 +9012,7 @@ public class IOUtilTest extends TestBase {
     public void testForLinesValidatesEmptyInputsAndMissingFiles() {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), -1, 0, 0, 0, line -> {
         }));
-        assertThrows(IllegalArgumentException.class,
-                () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
         assertThrows(UncheckedIOException.class, () -> IOUtil.forLines(tempFolder.resolve("missing-lines.txt").toFile(), line -> {
         }));
     }

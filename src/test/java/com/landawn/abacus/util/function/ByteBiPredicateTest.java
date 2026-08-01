@@ -168,7 +168,7 @@ public class ByteBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         ByteBiPredicate instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((ByteBiPredicate) null));
     }

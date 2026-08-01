@@ -43,6 +43,12 @@ public class BlobTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsNotSerializable() {
+        assertFalse(type.isSerializable());
+        assertEquals(Type.SerializationType.UNKNOWN, type.serializationType());
+    }
+
+    @Test
     public void test_clazz() {
         assertNotNull(type.javaType());
     }

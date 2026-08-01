@@ -4570,6 +4570,7 @@ public final class IOUtil {
     public static long write(final File source, final long offset, final long count, final File output) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(count, cs.count);
+
         // Guard against a self-copy: opening output truncates it to 0 before source is read, wiping the
         // file and returning 0 (data loss). Peer copyFile(...) rejects the same-file case identically.
         requireCanonicalPathsNotEquals(source, output);
@@ -7463,7 +7464,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param closeable        the AutoCloseable object to be closed. It can be {@code null}.
-     * @param exceptionHandler the Consumer to handle any exceptions thrown during the close operation. Must not be {@code null}.
+     * @param exceptionHandler the Consumer to handle any exceptions thrown during the close operation.
      * @throws IllegalArgumentException if {@code exceptionHandler} is {@code null}.
      */
     public static void close(final AutoCloseable closeable, final Consumer<Exception> exceptionHandler) throws IllegalArgumentException {
@@ -7709,16 +7710,15 @@ public final class IOUtil {
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
      * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied. A rejected subdirectory is still descended into, so that its own matching entries are copied.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      * @throws E if the filter throws an exception.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <E extends Exception> void copyToDirectory(File srcFile, File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IllegalArgumentException, IOException, E {
-        N.checkArgNotNull(filter, cs.filter);
-
         checkFileExists(srcFile, true);
         checkDestDirectory(destDir);
+        N.checkArgNotNull(filter, cs.filter);
 
         srcFile = srcFile.getCanonicalFile();
         destDir = destDir.getCanonicalFile();
@@ -7756,14 +7756,12 @@ public final class IOUtil {
      * @param srcDir           the validated source directory, must not be {@code null}.
      * @param destDir          the validated destination directory, must not be {@code null}.
      * @param preserveFileDate whether to preserve the file date.
-     * @param filter           the filter to apply; must not be {@code null}.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
+     * @param filter           the filter to apply
      * @throws IOException if an I/O error occurs.
      * @throws E           if filter throws an exception during file filtering.
      */
     private static <E extends Exception> void doCopyDirectory(final File srcDir, final File destDir, final boolean preserveFileDate,
             final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IOException, E {
-        N.checkArgNotNull(filter, cs.filter);
 
         checkDestDirectory(destDir);
 
@@ -7933,6 +7931,7 @@ public final class IOUtil {
     private static boolean setTimes(final File sourceFile, final File targetFile) {
         N.checkArgNotNull(sourceFile, cs.sourceFile);
         N.checkArgNotNull(targetFile, cs.targetFile);
+
         try {
             // Set creation, modified, last accessed to match source file
             final BasicFileAttributes srcAttr = Files.readAttributes(sourceFile.toPath(), BasicFileAttributes.class);
@@ -8649,8 +8648,8 @@ public final class IOUtil {
      * @return {@code true} if all matching files and directories were deleted successfully;
      *         {@code false} if {@code dir} is {@code null}, does not exist, is actually a file or a symbolic link,
      *         or some files could not be deleted or if the operation failed.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception during evaluation.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see File#delete()
      * @see Files#delete(Path)
      * @see Files#deleteIfExists(Path)
@@ -8658,7 +8657,7 @@ public final class IOUtil {
      * @see #deleteRecursivelyIfExists(File)
      */
     public static <E extends Exception> boolean deleteFilesFromDirectory(final File dir, final Throwables.BiPredicate<? super File, ? super File, E> filter)
-            throws E {
+            throws E, IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
 
         if ((dir == null) || !dir.exists() || dir.isFile() || Files.isSymbolicLink(dir.toPath())) {
@@ -9381,6 +9380,7 @@ public final class IOUtil {
               // Validate the source BEFORE opening the target: newFileOutputStream creates/truncates
               // the target file, which would destroy an existing target when the source is invalid.
             checkFileExists(sourceFile, true);
+
             // Reject writing the archive onto its own source (same path or hard-link alias): opening the
             // target truncates it, destroying the source before it can be read.
             requireCanonicalPathsNotEquals(sourceFile, targetFile);
@@ -9421,6 +9421,7 @@ public final class IOUtil {
               // truncated before being read (silent data loss).
             for (final File sourceFile : sourceFiles) {
                 checkFileExists(sourceFile, true);
+
                 requireCanonicalPathsNotEquals(sourceFile, targetFile);
             }
 
@@ -9875,6 +9876,7 @@ public final class IOUtil {
      */
     public static void splitBySize(final File file, final long sizeOfPart, final File destDir) throws IllegalArgumentException, IOException {
         checkFileExists(file);
+
         // Validate sizeOfPart BEFORE checkDestDirectory, which creates the destination directory as a side effect.
         N.checkArgPositive(sizeOfPart, "sizeOfPart");
         checkDestDirectory(destDir);
@@ -9966,7 +9968,7 @@ public final class IOUtil {
      */
     static void splitByLine(final File file, final int numOfParts, final File destDir, final Charset charset) throws UncheckedIOException {
         N.checkArgPositive(numOfParts, cs.numOfParts);
-        N.checkArgNotNull(charset, "charset");
+        N.checkArgNotNull(charset, cs.charset);
 
         final int suffixLen = String.valueOf(numOfParts).length();
 
@@ -10157,6 +10159,7 @@ public final class IOUtil {
             // read (silent data loss), or read back the freshly merged bytes instead of its old content.
             for (final File file : sourceFiles) {
                 checkFileExists(file);
+
                 requireCanonicalPathsNotEquals(file, destFile);
             }
 
@@ -10272,14 +10275,14 @@ public final class IOUtil {
      * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed. Symbolic links to directories are never descended into.
      * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed. A rejected subdirectory is still descended into when {@code recursively} is {@code true}.
      * @return a new, modifiable list of the matching files in the specified directory and possibly its subdirectories.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws E if the filter throws an exception.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see Stream#listFiles(File, boolean, boolean)
      * @see Fn#isFile()
      * @see Fn#isDirectory()
      */
     public static <E extends Exception> List<File> listFiles(final File parentPath, final boolean recursively,
-            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws IllegalArgumentException, E {
+            final Throwables.BiPredicate<? super File, ? super File, E> filter) throws E, IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
 
         final List<File> files = new ArrayList<>();
@@ -11063,11 +11066,14 @@ public final class IOUtil {
      * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if the lineAction throws an exception.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> lineAction)
-            throws UncheckedIOException, E {
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineAction, Fn.emptyAction());
     }
 
@@ -11094,11 +11100,15 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final Throwables.Consumer<? super String, E> lineAction,
-            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
@@ -11119,11 +11129,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
@@ -11151,11 +11164,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
@@ -11187,11 +11205,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11222,16 +11243,18 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if the lineAction throws an exception.
      * @throws E2                   if the onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
         N.checkArgument(processThreadNum >= 0 && queueSize >= 0, "'processThreadNum'=%s and 'queueSize'=%s cannot be negative", processThreadNum, queueSize);
-        N.checkArgNotNull(lineAction, "lineAction");
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         try {
             checkFileExists(source, true);
@@ -11259,11 +11282,14 @@ public final class IOUtil {
      * @param lineAction a Consumer that takes a line of the file as a String and performs the desired operation.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if the lineAction throws an exception.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Collection<File> files, final Throwables.Consumer<? super String, E> lineAction)
-            throws UncheckedIOException, E {
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(files, lineAction, Fn.emptyAction());
     }
 
@@ -11290,11 +11316,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E if lineAction throws an exception while processing a line.
      * @throws E2 if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files,
-            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(files, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
@@ -11316,11 +11347,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(files, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
@@ -11349,11 +11383,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(files, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
@@ -11377,11 +11416,14 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(files, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11466,23 +11508,23 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if the lineAction throws an exception.
      * @throws E2                   if the onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
         N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
         N.checkArgument(processThreadNum >= 0 && queueSize >= 0, "'processThreadNum'=%s and 'queueSize'=%s cannot be negative", processThreadNum, queueSize);
-        N.checkArgNotNull(lineAction, "lineAction");
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         if (N.isEmpty(files)) {
             // No files to read still counts as successful completion, so honor the onComplete callback
             // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
-            if (onComplete != null) {
-                onComplete.run();
-            }
+            onComplete.run();
 
             return;
         }
@@ -11536,11 +11578,14 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final File source, final int readThreadNum, final int processThreadNum, final int queueSize,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11570,12 +11615,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
     }
 
@@ -11600,11 +11649,15 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final File source, final long lineOffset, final long count, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction)
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11636,17 +11689,19 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final File source, final long lineOffset, final long count, final int readThreadNum,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
         N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
                 "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
-        N.checkArgNotNull(lineAction, "lineAction");
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         try {
             checkFileExists(source, true);
@@ -11677,11 +11732,14 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Collection<File> files, final int readThreadNum, final int processThreadNum, final int queueSize,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(files, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11711,12 +11769,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final int readThreadNum, final int processThreadNum,
             final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(files, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, lineAction, onComplete);
     }
 
@@ -11741,11 +11803,15 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction)
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(files, lineOffset, count, readThreadNum, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -11777,24 +11843,24 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception, E2 extends Exception> void forLines(final Collection<File> files, final long lineOffset, final long count,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction,
-            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2, IllegalArgumentException {
         N.checkArgument(lineOffset >= 0 && count >= 0, "'lineOffset'=%s and 'count'=%s cannot be negative", lineOffset, count);
         N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
                 "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
-        N.checkArgNotNull(lineAction, "lineAction");
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         if (N.isEmpty(files)) {
             // No files to read still counts as successful completion, so honor the onComplete callback
             // (consistent with the non-empty path, where Iterators.forEach runs it after the last line).
-            if (onComplete != null) {
-                onComplete.run();
-            }
+            onComplete.run();
 
             return;
         }
@@ -11848,11 +11914,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final InputStream source, final Throwables.Consumer<? super String, E> lineAction)
-            throws UncheckedIOException, E {
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineAction, Fn.emptyAction());
     }
 
@@ -11882,11 +11951,15 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final Throwables.Consumer<? super String, E> lineAction,
-            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
@@ -11911,11 +11984,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
@@ -11947,11 +12023,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
@@ -11978,11 +12059,14 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final InputStream source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -12016,12 +12100,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final InputStream source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         final BufferedReader br = Objectory.createBufferedReader(source);
 
         try {
@@ -12050,11 +12138,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> lineAction)
-            throws UncheckedIOException, E {
+            throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineAction, Fn.emptyAction());
     }
 
@@ -12084,11 +12175,15 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final Throwables.Consumer<? super String, E> lineAction,
-            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, 0, Long.MAX_VALUE, lineAction, onComplete);
     }
 
@@ -12113,11 +12208,14 @@ public final class IOUtil {
      * @param lineAction the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, lineAction, Fn.emptyAction());
     }
 
@@ -12149,11 +12247,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
-            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete) throws UncheckedIOException, E, E2 {
+            final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forLines(source, lineOffset, count, 0, 0, lineAction, onComplete);
     }
 
@@ -12180,11 +12283,14 @@ public final class IOUtil {
      * @param lineAction       the action to perform on each line.
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
+     * @throws IllegalArgumentException if {@code lineAction} is {@code null}.
      * @see #forLines(Reader, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     public static <E extends Exception> void forLines(final Reader source, final long lineOffset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E {
+            final int queueSize, final Throwables.Consumer<? super String, E> lineAction) throws UncheckedIOException, E, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+
         forLines(source, lineOffset, count, processThreadNum, queueSize, lineAction, Fn.emptyAction());
     }
 
@@ -12218,12 +12324,16 @@ public final class IOUtil {
      * @throws UncheckedIOException if an I/O error occurs.
      * @throws E                    if lineAction throws an exception while processing a line.
      * @throws E2                   if onComplete throws an exception.
+     * @throws IllegalArgumentException if any of {@code lineAction}, {@code onComplete} is {@code null}.
      * @see Iterators#forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)
      */
     @SuppressWarnings("deprecation")
     public static <E extends Exception, E2 extends Exception> void forLines(final Reader source, final long lineOffset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super String, E> lineAction, final Throwables.Runnable<E2> onComplete)
-            throws UncheckedIOException, E, E2 {
+            throws UncheckedIOException, E, E2, IllegalArgumentException {
+        N.checkArgNotNull(lineAction, cs.lineAction);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         Iterators.forEach(new LineIterator(source), lineOffset, count, processThreadNum, queueSize, lineAction, onComplete);
     }
 

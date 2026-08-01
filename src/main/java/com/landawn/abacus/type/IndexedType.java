@@ -108,7 +108,8 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * Serializes an {@link Indexed} object to its JSON array representation ({@code [index, value]}).
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -124,17 +125,17 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
     /**
      * Deserializes a JSON array string into an {@link Indexed} instance.
-     * The string must be a JSON array of at least two elements: {@code [index, value]},
+     * The string must be a JSON array of exactly two elements: {@code [index, value]},
      * where the first element is converted to a {@code long} index.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
      * @return the deserialized indexed value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than two elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly two elements
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)
      */
@@ -147,8 +148,8 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
-        if (a == null || a.length < 2) {
-            throw new IllegalArgumentException("Invalid Indexed format. Expected array with at least 2 elements [index, value] but got: " + str);
+        if (a == null || a.length != 2) {
+            throw new IllegalArgumentException("Invalid Indexed format. Expected an array with exactly 2 elements [index, value] but got: " + str);
         }
 
         final long index = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));

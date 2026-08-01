@@ -509,11 +509,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param action the action to be executed asynchronously; must not be {@code null}.
+     * @param action the action to be executed asynchronously;
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see N#asyncExecute(Throwables.Runnable)
      */
-    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action) {
+    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return run(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -537,11 +540,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param action the action to be executed asynchronously; must not be {@code null}.
+     * @param action the action to be executed asynchronously;
      * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
+     * @throws IllegalArgumentException if any of {@code action}, {@code executor} is {@code null}.
      */
-    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor) {
+    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(executor, cs.executor);
+
         final FutureTask<Void> futureTask = new FutureTask<>(() -> {
             action.run();
             return null;
@@ -571,11 +578,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously; must not be {@code null}.
+     * @param action the callable action to be executed asynchronously;
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see N#asyncExecute(Callable)
      */
-    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) {
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return call(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -597,11 +607,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously; must not be {@code null}.
+     * @param action the callable action to be executed asynchronously;
      * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
+     * @throws IllegalArgumentException if any of {@code action}, {@code executor} is {@code null}.
      */
-    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action, final Executor executor) {
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(executor, cs.executor);
+
         final FutureTask<? extends T> futureTask = new FutureTask<>(action);
 
         executor.execute(futureTask);
@@ -1096,9 +1110,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws ExecutionException if the computation threw an exception.
      * @throws E if the function throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U, E extends Exception> U getThenApply(final Throwables.Function<? super T, ? extends U, E> action)
-            throws InterruptedException, ExecutionException, E {
+            throws InterruptedException, ExecutionException, E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return action.apply(get());
     }
 
@@ -1130,9 +1147,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws ExecutionException if the computation threw an exception.
      * @throws TimeoutException if the wait timed out.
      * @throws E if the function throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit, final Throwables.Function<? super T, ? extends U, E> action)
-            throws InterruptedException, ExecutionException, TimeoutException, E {
+            throws InterruptedException, ExecutionException, TimeoutException, E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return action.apply(get(timeout, unit));
     }
 
@@ -1164,9 +1184,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
      * @throws E if the bi-function throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
-    public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E {
+    public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final Result<T, Exception> result = getAsResult();
         return action.apply(result.orElseIfFailure(null), result.getException());
     }
@@ -1197,10 +1221,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
      * @throws E if the bi-function throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult(long, TimeUnit)
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final Result<T, Exception> result = getAsResult(timeout, unit);
         return action.apply(result.orElseIfFailure(null), result.getException());
     }
@@ -1228,8 +1255,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws ExecutionException if the computation threw an exception.
      * @throws E if the consumer throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void getThenAccept(final Throwables.Consumer<? super T, E> action) throws InterruptedException, ExecutionException, E {
+    public <E extends Exception> void getThenAccept(final Throwables.Consumer<? super T, E> action)
+            throws InterruptedException, ExecutionException, E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(get());
     }
 
@@ -1260,9 +1291,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws ExecutionException if the computation threw an exception.
      * @throws TimeoutException if the wait timed out.
      * @throws E if the consumer throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit, final Throwables.Consumer<? super T, E> action)
-            throws InterruptedException, ExecutionException, TimeoutException, E {
+            throws InterruptedException, ExecutionException, TimeoutException, E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(get(timeout, unit));
     }
 
@@ -1292,9 +1326,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E> the type of exception the bi-consumer may throw.
      * @param action the bi-consumer to execute with the result and exception.
      * @throws E if the bi-consumer throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
-    public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
+    public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final Result<T, Exception> result = getAsResult();
         action.accept(result.orElseIfFailure(null), result.getException());
     }
@@ -1324,10 +1361,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the timeout argument.
      * @param action the bi-consumer to execute with the result and exception.
      * @throws E if the bi-consumer throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult(long, TimeUnit)
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
-            final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E {
+            final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final Result<T, Exception> result = getAsResult(timeout, unit);
         action.accept(result.orElseIfFailure(null), result.getException());
     }
@@ -1359,10 +1399,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the type of the transformed result.
      * @param func the function to apply to the result.
      * @return a new {@code ContinuableFuture} that lazily applies the function on {@code get()}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #thenCallAsync(Throwables.Function)
      */
     @Beta
-    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) {
+    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<U>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
             @Override
@@ -1434,8 +1477,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param action the action to execute after this future completes.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public ContinuableFuture<Void> thenRunAsync(final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Runnable<? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             get();
             action.run();
@@ -1464,8 +1510,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param action the consumer to execute with the result.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public ContinuableFuture<Void> thenRunAsync(final Throwables.Consumer<? super T, ? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             action.accept(get());
             return null;
@@ -1500,9 +1549,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param action the bi-consumer to execute with the result and exception.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
-    public ContinuableFuture<Void> thenRunAsync(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             action.accept(result.orElseIfFailure(null), result.getException());
@@ -1532,8 +1585,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <R> the type of the result returned by the callable.
      * @param action the callable to execute after this future completes.
      * @return a new {@code ContinuableFuture<R>} with the result of the callable.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <R> ContinuableFuture<R> thenCallAsync(final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Callable<? extends R> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             get();
             return action.call();
@@ -1562,11 +1618,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the type of the result returned by the function.
-     * @param action the function to apply to the result; must not be {@code null}.
+     * @param action the function to apply to the result;
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #map(Throwables.Function)
      */
-    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.Function<? super T, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> action.apply(get()));
     }
 
@@ -1596,9 +1656,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <R> the type of the result returned by the bi-function.
      * @param action the bi-function to apply to the result and exception.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
-    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
+    public <R> ContinuableFuture<R> thenCallAsync(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             return action.apply(result.orElseIfFailure(null), result.getException());
@@ -1628,8 +1692,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the action to execute after both futures complete.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = awaitResult(this);
             final Result<?, Exception> result2 = awaitResult(other);
@@ -1665,9 +1733,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the bi-consumer to execute with both results.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) {
+            final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = awaitResult(this);
             final Result<U, Exception> result2 = awaitResult(other);
@@ -1711,10 +1782,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the consumer to execute with the tuple of results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends Exception> action) {
+            final Throwables.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             final Result<U, Exception> result2 = other.getAsResult();
@@ -1751,10 +1825,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param other the other future to wait for.
      * @param action the quad-consumer to execute with both results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.QuadConsumer<? super T, ? super Exception, ? super U, ? super Exception, ? extends Exception> action) {
+            final Throwables.QuadConsumer<? super T, ? super Exception, ? super U, ? super Exception, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             final Result<U, Exception> result2 = other.getAsResult();
@@ -1787,10 +1865,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the type of the result returned by the callable.
      * @param other the other future to wait for completion; must not be {@code null}.
-     * @param action the callable to execute after both futures complete; must not be {@code null}.
+     * @param action the callable to execute after both futures complete;
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = awaitResult(this);
             final Result<?, Exception> result2 = awaitResult(other);
@@ -1824,11 +1905,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the bi-function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture that must complete before executing the action; must not be {@code null}.
-     * @param action the bi-function to execute with both results; must not be {@code null}.
+     * @param action the bi-function to execute with both results;
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = awaitResult(this);
             final Result<U, Exception> result2 = awaitResult(other);
@@ -1871,12 +1955,16 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the function that processes the tuple of results and exceptions; must not be {@code null}.
+     * @param action the function that processes the tuple of results and exceptions;
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, ? extends Exception> action) {
+            final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             final Result<U, Exception> result2 = other.getAsResult();
@@ -1913,11 +2001,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the QuadFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the QuadFunction that processes both results and exceptions; must not be {@code null}.
+     * @param action the QuadFunction that processes both results and exceptions;
      * @return a new ContinuableFuture that completes with the result of the QuadFunction.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action) {
+            final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = getAsResult();
             final Result<U, Exception> result2 = other.getAsResult();
@@ -1945,10 +2037,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Runnable to execute after either future completes; must not be {@code null}.
+     * @param action the Runnable to execute after either future completes;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -1981,11 +2077,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Consumer to execute with the first available result; must not be {@code null}.
+     * @param action the Consumer to execute with the first available result;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.Consumer<? super T, ? extends Exception> action) {
+            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -2021,12 +2120,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
+     * @param action the BiConsumer to execute with the result and exception;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
+            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).getAsResult();
 
@@ -2055,10 +2157,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Callable to execute after either future completes; must not be {@code null}.
+     * @param action the Callable to execute after either future completes;
      * @return a new ContinuableFuture that completes with the result of the callable.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -2087,11 +2192,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the function to transform the first available result; must not be {@code null}.
+     * @param action the function to transform the first available result;
      * @return a new ContinuableFuture that completes with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
+            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -2129,13 +2237,16 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the BiFunction to transform the result and exception; must not be {@code null}.
+     * @param action the BiFunction to transform the result and exception;
      * @return a new ContinuableFuture that completes with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      * @see #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
 
@@ -2164,10 +2275,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Runnable to execute after the first successful completion; must not be {@code null}.
+     * @param action the Runnable to execute after the first successful completion;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action) {
+    public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
@@ -2214,11 +2329,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Consumer to execute with the first successful result; must not be {@code null}.
+     * @param action the Consumer to execute with the first successful result;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.Consumer<? super T, ? extends Exception> action) {
+            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
@@ -2285,12 +2403,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
+     * @param action the BiConsumer to execute with the result and exception;
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) {
+            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
@@ -2335,10 +2456,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Callable to execute after the first successful completion; must not be {@code null}.
+     * @param action the Callable to execute after the first successful completion;
      * @return a new ContinuableFuture that completes with the result of the callable.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Callable<? extends R> action) {
+    public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Callable<? extends R> action)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<Object, Exception> firstResult = iter.next();
@@ -2385,11 +2510,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the function to transform the first successful result; must not be {@code null}.
+     * @param action the function to transform the first successful result;
      * @return a new ContinuableFuture that completes with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) {
+            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
@@ -2447,12 +2575,15 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the BiFunction to transform based on result and exception; must not be {@code null}.
+     * @param action the BiFunction to transform based on result and exception;
      * @return a new ContinuableFuture that completes with the transformed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
             final Result<T, Exception> firstResult = iter.next();
@@ -2580,7 +2711,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @SuppressWarnings("deprecation")
-    public ContinuableFuture<T> thenUse(final Executor executor) {
+    public ContinuableFuture<T> thenUse(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return with(executor, 0, TimeUnit.MILLISECONDS);
     }
 
@@ -2967,7 +3100,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Beta
     public CompletableFuture<T> toCompletableFuture(final Executor executor) throws IllegalArgumentException {
-        N.checkArgNotNull(executor);
+        N.checkArgNotNull(executor, cs.executor);
 
         return CompletableFuture.supplyAsync(() -> {
             try {

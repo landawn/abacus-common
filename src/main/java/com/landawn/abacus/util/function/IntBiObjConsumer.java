@@ -69,13 +69,14 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * to the caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code IntBiObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) {
+    default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (i, t, u) -> {
             accept(i, t, u);
             after.accept(i, t, u);

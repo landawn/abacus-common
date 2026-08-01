@@ -1,11 +1,11 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -849,7 +849,7 @@ public class SetMultimapTest extends TestBase {
     @Test
     public void test_wrap_withSupplier_nullSupplier() {
         Map<String, Set<Integer>> map = new HashMap<>();
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             SetMultimap.wrap(map, null);
         });
     }

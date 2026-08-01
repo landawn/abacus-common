@@ -417,7 +417,7 @@ public class HasherTest extends TestBase {
         assertEquals(hash1, hash3);
 
         Hasher hasher4 = Hashing.sha256().newHasher();
-        assertThrows(NullPointerException.class, () -> hasher4.put(person, null));
+        assertThrows(IllegalArgumentException.class, () -> hasher4.put(person, null));
         assertThrows(NullPointerException.class, () -> hasher4.put(null, personFunnel));
     }
 

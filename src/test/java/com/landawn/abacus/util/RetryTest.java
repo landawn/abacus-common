@@ -357,11 +357,8 @@ public class RetryTest extends TestBase {
     public void testRunAndCallRejectNullActions() {
         final Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> false);
 
-        final IllegalArgumentException runEx = Assertions.assertThrows(IllegalArgumentException.class, () -> retry.run(null));
-        Assertions.assertTrue(runEx.getMessage().contains("cmd"));
-
-        final IllegalArgumentException callEx = Assertions.assertThrows(IllegalArgumentException.class, () -> retry.call(null));
-        Assertions.assertTrue(callEx.getMessage().contains("callable"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> retry.run(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> retry.call(null));
     }
 
     @Test

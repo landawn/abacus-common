@@ -187,8 +187,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from a file using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * The root element's name is looked up in the nodeTypes map to determine which class to
-     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * The root element's <i>name</i> attribute (or, when that attribute is absent or empty, its
+     * tag name) is looked up in the nodeTypes map to determine which class to instantiate
+     * (nested elements are not resolved through the map). This is useful when the
      * target type cannot be determined statically.
      *
      * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
@@ -220,8 +221,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * The root element's name is looked up in the nodeTypes map to determine which class to
-     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * The root element's <i>name</i> attribute (or, when that attribute is absent or empty, its
+     * tag name) is looked up in the nodeTypes map to determine which class to instantiate
+     * (nested elements are not resolved through the map). This is useful when the
      * target type cannot be determined statically.
      *
      * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime
@@ -254,8 +256,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * Deserializes XML from a reader using node class mappings for dynamic type resolution.
      *
      * <p>This method enables polymorphic deserialization by mapping XML element names to types.
-     * The root element's name is looked up in the nodeTypes map to determine which class to
-     * instantiate (nested elements are not resolved through the map). This is useful when the
+     * The root element's <i>name</i> attribute (or, when that attribute is absent or empty, its
+     * tag name) is looked up in the nodeTypes map to determine which class to instantiate
+     * (nested elements are not resolved through the map). This is useful when the
      * target type cannot be determined statically.
      *
      * <p><b>Note on the return type:</b> although the signature declares {@code <T> T}, the concrete runtime

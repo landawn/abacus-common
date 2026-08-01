@@ -1324,6 +1324,6 @@ public class ArrayCharStreamTest extends TestBase {
 
     @Test
     public void testIterateBooleanSupplierCharSupplierNull() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a'));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a').count());
     }
 }

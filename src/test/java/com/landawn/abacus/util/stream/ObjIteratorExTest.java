@@ -1,7 +1,7 @@
 package com.landawn.abacus.util.stream;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -416,6 +416,8 @@ public class ObjIteratorExTest extends TestBase {
         Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::next));
         Assertions.assertEquals(1, invocationCount[0]);
     }
+ 
+   
 
     @Test
     public void testDeferRejectsNullIteratorFromSupplier() {
@@ -452,7 +454,7 @@ public class ObjIteratorExTest extends TestBase {
 
     @Test
     public void testDeferNullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIteratorEx.defer(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIteratorEx.defer(null).hasNext());
     }
 
     @Test

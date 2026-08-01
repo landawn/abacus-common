@@ -3,7 +3,6 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -95,9 +94,9 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndRejectsNullPredicateImmediately() {
+    public void testAndRejectsNullPredicateAtComposition() {
         Predicate<Integer> positive = n -> n > 0;
-        assertThrows(NullPointerException.class, () -> positive.and(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> positive.and(null));
     }
 
     @Test
@@ -129,9 +128,9 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testOrRejectsNullPredicateImmediately() {
+    public void testOrRejectsNullPredicateAtComposition() {
         Predicate<Integer> negative = n -> n < 0;
-        assertThrows(NullPointerException.class, () -> negative.or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> negative.or(null));
     }
 
     @Test
@@ -142,8 +141,8 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         Predicate<String> instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.Predicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.Predicate) null));
     }
 }

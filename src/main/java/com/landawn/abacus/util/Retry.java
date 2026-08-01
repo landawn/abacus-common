@@ -95,15 +95,16 @@ public final class Retry<R> {
      *
      * @param retryTimes the maximum number of times to retry the operation if it fails. Must be non-negative. A value of 0 means no retries.
      * @param retryIntervalInMillis the interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
-     * @param retryCondition a predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried. Must not be {@code null}.
+     * @param retryCondition a predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried.
      * @return a new {@code Retry<Void>} instance configured with the specified parameters.
-     * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative.
+     * @throws IllegalArgumentException if {@code retryCondition} is {@code null}.
      */
     public static Retry<Void> withFixedDelay(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, "retryTimes");
         N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
-        N.checkArgNotNull(retryCondition, "retryCondition");
+        N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         return new Retry<>(retryTimes, retryIntervalInMillis, retryCondition, null);
     }
@@ -133,17 +134,18 @@ public final class Retry<R> {
      * @param <T> the type of the result returned by the operation to be retried.
      * @param retryTimes the maximum number of times to retry the operation if it fails or returns an unsatisfactory result. Must be non-negative. A value of 0 means no retries.
      * @param retryIntervalInMillis the interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
-     * @param retryCondition a bi-predicate that tests both the result and the exception. The first parameter is the result (or {@code null} if an exception occurred),
-     *                       and the second parameter is the exception (or {@code null} if no exception occurred). If it returns {@code true}, the operation will be retried.
-     *                       Must not be {@code null}.
+     * @param retryCondition a bi-predicate tested with {@code (result, exception)} after each attempt;
+     *        returns {@code true} to retry. On success the exception argument is {@code null}; on failure
+     *        the result argument is {@code null}. Must not be {@code null}.
      * @return a new {@code Retry<T>} instance configured with the specified parameters.
-     * @throws IllegalArgumentException if {@code retryTimes} is negative, {@code retryIntervalInMillis} is negative, or {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative,
+     *         or if {@code retryCondition} is {@code null}.
      */
     public static <T> Retry<T> withFixedDelay(final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super T, ? super Exception> retryCondition) throws IllegalArgumentException {
         N.checkArgNotNegative(retryTimes, "retryTimes");
         N.checkArgNotNegative(retryIntervalInMillis, "retryIntervalInMillis");
-        N.checkArgNotNull(retryCondition, "retryCondition");
+        N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         return new Retry<>(retryTimes, retryIntervalInMillis, null, retryCondition);
     }
@@ -175,15 +177,15 @@ public final class Retry<R> {
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
-     * @param cmd the runnable operation to execute; must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}
+     * @param cmd the runnable operation to execute;
      * @throws RuntimeException if a configured retry predicate throws a runtime exception; predicate
      *         failures are propagated immediately
      * @throws Exception the exception thrown by {@code cmd} if the retry condition is not satisfied,
      *                   or the last exception thrown if all retry attempts are exhausted.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
-    public void run(final Throwables.Runnable<? extends Exception> cmd) throws IllegalArgumentException, Exception {
-        N.checkArgNotNull(cmd, "cmd");
+    public void run(final Throwables.Runnable<? extends Exception> cmd) throws Exception, IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
 
         if (retryTimes > 0) {
             try {
@@ -257,19 +259,19 @@ public final class Retry<R> {
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *
-     * @param callable the callable operation to execute; must not be {@code null}.
+     * @param callable the callable operation to execute;
      * @return the result of the first invocation whose outcome does not satisfy the retry condition.
-     * @throws IllegalArgumentException if {@code callable} is {@code null}
      * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
      *                          a result that still satisfies {@code retryCondition2},
      *                          or if a configured retry predicate itself throws a runtime exception. Predicate failures
      *                          are propagated immediately and do not trigger another operation attempt.
      * @throws Exception the exception thrown by {@code callable} if the retry condition is not
      *                   satisfied, or the last exception thrown if all retry attempts are exhausted.
+     * @throws IllegalArgumentException if {@code callable} is {@code null}.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    public R call(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException, Exception {
-        N.checkArgNotNull(callable, "callable");
+    public R call(final java.util.concurrent.Callable<? extends R> callable) throws Exception, IllegalArgumentException {
+        N.checkArgNotNull(callable, cs.callable);
 
         if (retryTimes > 0) {
             R result = null;

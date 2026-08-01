@@ -1,7 +1,7 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;

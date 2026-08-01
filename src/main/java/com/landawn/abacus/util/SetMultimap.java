@@ -509,13 +509,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
      * @param c the collection of elements to be added to the SetMultimap, may be {@code null} or empty
-     * @param keyExtractor the function to extract keys from elements; must not be null
+     * @param keyExtractor the function to extract keys from elements;
      * @return a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
-     * @throws IllegalArgumentException if the keyExtractor is null
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T, K> SetMultimap<K, T> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         final SetMultimap<K, T> multimap = N.newSetMultimap(N.size(c));
 
@@ -557,15 +557,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the SetMultimap
      * @param <E> the type of the values in the SetMultimap
      * @param c the collection of elements to be transformed, may be {@code null} or empty
-     * @param keyExtractor the function to extract keys from elements; must not be null
-     * @param valueExtractor the function to extract values from elements; must not be null
+     * @param keyExtractor the function to extract keys from elements;
+     * @param valueExtractor the function to extract values from elements;
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
-     * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T, K, E> SetMultimap<K, E> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyExtractor);
-        N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         final SetMultimap<K, E> multimap = N.newSetMultimap(N.size(c));
 
@@ -783,17 +783,18 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <E> the type of the elements in the set
      * @param <V> the type of the value set, which must extend {@code Set<E>}
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
-     * @param valueSupplier the supplier that provides the set to be used as the value collection; must not be {@code null}
+     * @param valueSupplier the supplier that provides the set to be used as the value collection;
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map or {@code valueSupplier} is {@code null}, or if the map contains a {@code null} or empty value
+     * @throws IllegalArgumentException if the provided map is {@code null}, contains a {@code null} or empty value,
+     *         or if {@code valueSupplier} is {@code null}.
      * @see #wrap(Map)
      */
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
-        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
         N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
         return new SetMultimap<>((Map<K, Set<E>>) map, valueSupplier);
     }
@@ -937,13 +938,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;
-     *                    the function receives the number of keys in this multimap as its argument; must not be {@code null}
+     *                    the function receives the number of keys in this multimap as its argument;
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
-     * @throws NullPointerException if {@code mapSupplier} is {@code null}
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #toImmutableMap()
      */
-    public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) {
+    public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {

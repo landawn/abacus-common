@@ -78,12 +78,13 @@ public interface ShortNConsumer {
      * combined.accept((short) 1, (short) 2, (short) 3);   // Logs count then sum
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ShortNConsumer andThen(final ShortNConsumer after) {
+    default ShortNConsumer andThen(final ShortNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> {
             accept(args);
             after.accept(args);

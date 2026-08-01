@@ -18,6 +18,8 @@ import java.nio.file.DirectoryIteratorException;
 import java.nio.file.Path;
 import java.util.function.Function;
 
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -246,9 +248,12 @@ public final class Traverser<T> {
      *     one path between any two nodes. The function takes a node and returns its children
      *     (an empty {@link Iterable} for leaf nodes; must not return {@code null}).
      * @return a new Traverser for the specified tree structure
+     * @throws IllegalArgumentException if {@code tree} is {@code null}
      * @see #forGraph(Function)
      */
-    public static <T> Traverser<T> forTree(final Function<? super T, ? extends Iterable<T>> tree) {
+    public static <T> Traverser<T> forTree(final Function<? super T, ? extends Iterable<T>> tree) throws IllegalArgumentException {
+        N.checkArgNotNull(tree, cs.tree);
+
         return new Traverser<>(com.google.common.graph.Traverser.forTree(tree::apply));
     }
 
@@ -299,9 +304,12 @@ public final class Traverser<T> {
      *     The function takes a node and returns its adjacent nodes (successors); return an empty
      *     {@link Iterable} for nodes with no successors (must not return {@code null}).
      * @return a new Traverser for the specified graph structure
+     * @throws IllegalArgumentException if {@code graph} is {@code null}
      * @see #forTree(Function)
      */
-    public static <T> Traverser<T> forGraph(final Function<? super T, ? extends Iterable<T>> graph) {
+    public static <T> Traverser<T> forGraph(final Function<? super T, ? extends Iterable<T>> graph) throws IllegalArgumentException {
+        N.checkArgNotNull(graph, cs.graph);
+
         return new Traverser<>(com.google.common.graph.Traverser.forGraph(graph::apply));
     }
 

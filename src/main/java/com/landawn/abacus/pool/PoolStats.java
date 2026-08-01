@@ -21,7 +21,7 @@ package com.landawn.abacus.pool;
  * <p>The statistics include:
  * <ul>
  *   <li>Capacity and size information</li>
- *   <li>Operation counts (puts, gets)</li>
+ *   <li>Operation counts (put/add and get/poll)</li>
  *   <li>Cache performance metrics (hits, misses)</li>
  *   <li>Eviction statistics</li>
  *   <li>Memory usage (when applicable)</li>

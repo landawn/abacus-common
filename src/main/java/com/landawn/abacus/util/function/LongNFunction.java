@@ -106,14 +106,15 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * @param <V> the type of output of the {@code after} function, and of the
      *           composed function
      * @param after the function to apply after this function is applied.
-     *              Must not be {@code null}.
+     *
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
     @Override
-    default <V> LongNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+    default <V> LongNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> after.apply(apply(args));
     }
 

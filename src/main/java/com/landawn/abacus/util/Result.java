@@ -676,11 +676,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw.
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
-     * @throws IllegalArgumentException if {@code actionOnFailure} is {@code null}.
+     * @param actionOnFailure the action to execute if this Result contains an exception,
      * @throws E2 if {@code actionOnFailure} is executed and throws an exception of type {@code E2}.
+     * @throws IllegalArgumentException if {@code actionOnFailure} is {@code null}.
      */
-    public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2 {
+    public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2, IllegalArgumentException {
+        N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
+
         ifFailureOrElse(actionOnFailure, Fn.emptyConsumer());
     }
 
@@ -700,14 +702,14 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that {@code actionOnFailure} might throw.
      * @param <E3> the type of exception that {@code actionOnSuccess} might throw.
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
-     * @throws IllegalArgumentException if either {@code actionOnFailure} or {@code actionOnSuccess} is {@code null}.
+     * @param actionOnFailure the action to execute if this Result contains an exception,
+     * @param actionOnSuccess the action to execute if this Result is successful,
      * @throws E2 if {@code actionOnFailure} is executed and throws an exception of type {@code E2}.
      * @throws E3 if {@code actionOnSuccess} is executed and throws an exception of type {@code E3}.
+     * @throws IllegalArgumentException if any of {@code actionOnFailure}, {@code actionOnSuccess} is {@code null}.
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
-            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
+            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws E2, E3, IllegalArgumentException {
         N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
         N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
 
@@ -729,11 +731,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw.
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
-     * @throws IllegalArgumentException if {@code actionOnSuccess} is {@code null}.
+     * @param actionOnSuccess the action to execute if this Result is successful,
      * @throws E2 if {@code actionOnSuccess} is executed and throws an exception of type {@code E2}.
+     * @throws IllegalArgumentException if {@code actionOnSuccess} is {@code null}.
      */
-    public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2 {
+    public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2, IllegalArgumentException {
+        N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
+
         ifSuccessOrElse(actionOnSuccess, Fn.emptyConsumer());
     }
 
@@ -753,14 +757,14 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that {@code actionOnSuccess} might throw.
      * @param <E3> the type of exception that {@code actionOnFailure} might throw.
-     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
-     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
-     * @throws IllegalArgumentException if either {@code actionOnSuccess} or {@code actionOnFailure} is {@code null}.
+     * @param actionOnSuccess the action to execute if this Result is successful,
+     * @param actionOnFailure the action to execute if this Result contains an exception,
      * @throws E2 if {@code actionOnSuccess} is executed and throws an exception of type {@code E2}.
      * @throws E3 if {@code actionOnFailure} is executed and throws an exception of type {@code E3}.
+     * @throws IllegalArgumentException if any of {@code actionOnSuccess}, {@code actionOnFailure} is {@code null}.
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
-            final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {
+            final Throwables.Consumer<? super E, E3> actionOnFailure) throws E2, E3, IllegalArgumentException {
         N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
         N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
 
@@ -801,7 +805,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseGetIfFailure(() -> computeDefault());
      * }</pre>
      *
-     * @param otherIfErrorOccurred the supplier that provides the value to return if this Result contains an exception, must not be {@code null}.
+     * @param otherIfErrorOccurred the supplier that provides the value to return if this Result contains an exception,
      * @return the value contained in this Result if successful, otherwise the value provided by the supplier.
      * @throws IllegalArgumentException if {@code otherIfErrorOccurred} is {@code null}.
      */
@@ -849,12 +853,12 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown.
-     * @param exceptionSupplierIfErrorOccurred the function that maps the contained exception to a new exception to be thrown, must not be {@code null}.
+     * @param exceptionSupplierIfErrorOccurred the function that maps the contained exception to a new exception to be thrown,
      * @return the value contained in this Result if successful.
-     * @throws IllegalArgumentException if {@code exceptionSupplierIfErrorOccurred} is {@code null}.
      * @throws E2 if this Result is a failure; the exception is produced by applying {@code exceptionSupplierIfErrorOccurred} to the contained exception.
+     * @throws IllegalArgumentException if {@code exceptionSupplierIfErrorOccurred} is {@code null}.
      */
-    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws IllegalArgumentException, E2 {
+    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2, IllegalArgumentException {
         N.checkArgNotNull(exceptionSupplierIfErrorOccurred, cs.exceptionSupplierIfErrorOccurred);
 
         if (exception == null) {
@@ -878,12 +882,12 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception to be thrown.
-     * @param exceptionSupplier the supplier that provides the exception to throw if this Result contains an exception, must not be {@code null}.
+     * @param exceptionSupplier the supplier that provides the exception to throw if this Result contains an exception,
      * @return the value contained in this Result if successful.
-     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      * @throws E2 if this Result is a failure; the exception is obtained from {@code exceptionSupplier}.
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
-    public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws IllegalArgumentException, E2 {
+    public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws E2, IllegalArgumentException {
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         if (exception == null) {

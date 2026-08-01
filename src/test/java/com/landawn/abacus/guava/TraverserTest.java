@@ -145,7 +145,7 @@ public class TraverserTest extends TestBase {
 
     @Test
     public void testForTree_NullFunction() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             Traverser.forTree(null);
         });
     }
@@ -180,7 +180,7 @@ public class TraverserTest extends TestBase {
 
     @Test
     public void testForGraph_NullFunction() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             Traverser.forGraph(null);
         });
     }

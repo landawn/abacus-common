@@ -115,7 +115,7 @@ public class ObjCharConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         ObjCharConsumer<String> instance = (a, b) -> {
         };
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ObjCharConsumer) null));

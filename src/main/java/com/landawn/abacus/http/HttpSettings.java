@@ -408,8 +408,9 @@ public final class HttpSettings {
     /**
      * Sets whether the connection will be used for output.
      * When disabled, {@link HttpClient} does not write a configured request body. The default is
-     * {@code true}, but output is enabled on the underlying connection only for methods that send
-     * a body ({@code POST}, {@code PUT}, and {@code PATCH}).
+     * {@code true}, but output is enabled on the underlying connection only for requests that carry
+     * a body: methods {@code POST}, {@code PUT}, {@code PATCH} and {@code OPTIONS}, or an explicit
+     * request body set through {@code HttpRequest.body(...)}.
      *
      * <p><b>Note:</b> Only for {@code HttpClient}, not for {@code OkHttpClient}.
      *

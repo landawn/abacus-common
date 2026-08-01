@@ -378,7 +378,7 @@ public class RangeTest extends AbstractTest {
     public void testMapRejectsNullEndpointsEvenForNullTolerantComparable() {
         final Range<Integer> range = Range.closed(1, 2);
 
-        Assertions.assertThrows(NullPointerException.class, () -> range.map(value -> value == 1 ? new NullTolerantComparable(value) : null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> range.map(value -> value == 1 ? new NullTolerantComparable(value) : null));
     }
 
     private static final class NullTolerantComparable implements Comparable<NullTolerantComparable> {

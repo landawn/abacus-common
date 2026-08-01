@@ -129,7 +129,7 @@ public class BooleanUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testComposeNullThrowsImmediately() {
+    public void testComposeRejectsNullImmediately() {
         BooleanUnaryOperator instance = a -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((BooleanUnaryOperator) null));
     }

@@ -546,8 +546,8 @@ public class EnumerationsTest extends TestBase {
 
     @Test
     public void testToCollection_rejectsNullSupplierAndResult() {
-        Assertions.assertThrows(NullPointerException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, null));
-        Assertions.assertThrows(NullPointerException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, () -> null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, () -> null));
     }
 
     /** Direct nextElement() without prior hasMoreElements() must still work and not skip elements. */

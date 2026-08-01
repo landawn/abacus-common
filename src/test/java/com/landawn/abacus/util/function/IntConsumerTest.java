@@ -128,9 +128,9 @@ public class IntConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         IntConsumer instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.IntConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.IntConsumer) null));
     }
 }

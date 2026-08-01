@@ -17,8 +17,8 @@ import javax.xml.stream.XMLStreamReader;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.InputSource;
+import org.xml.sax.helpers.AttributesImpl;
 
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.entity.PersonType;

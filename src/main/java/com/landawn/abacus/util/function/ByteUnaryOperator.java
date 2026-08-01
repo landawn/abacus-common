@@ -23,7 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.UnaryOperator
@@ -59,15 +58,15 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * byte result = incrementThenDouble.applyAsByte((byte) 3);   // Returns 8 ((3+1)*2)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
-     *
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(ByteUnaryOperator)
      */
-    default ByteUnaryOperator compose(final ByteUnaryOperator before) {
+    default ByteUnaryOperator compose(final ByteUnaryOperator before) throws IllegalArgumentException {
         N.checkArgNotNull(before, cs.before);
+
         return v -> applyAsByte(before.applyAsByte(v));
     }
 
@@ -84,15 +83,15 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * byte result = doubleThenIncrement.applyAsByte((byte) 3);   // Returns 7 ((3*2)+1)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
-     *
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(ByteUnaryOperator)
      */
-    default ByteUnaryOperator andThen(final ByteUnaryOperator after) {
+    default ByteUnaryOperator andThen(final ByteUnaryOperator after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return t -> after.applyAsByte(applyAsByte(t));
     }
 

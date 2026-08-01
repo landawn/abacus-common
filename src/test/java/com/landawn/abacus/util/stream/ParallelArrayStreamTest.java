@@ -485,7 +485,7 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     @DisplayName("map() should handle null mapper gracefully")
     public void testMapWithNull() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             stream.map(null).toList();
         });
     }
@@ -2753,6 +2753,31 @@ public class ParallelArrayStreamTest extends TestBase {
                 .toList();
 
         assertEquals(Arrays.asList("first:1", "other:2", "other:3"), result);
+    }
+
+    @Test
+    public void testClosingSequentialFallbackDerivedStreamClosesParallelParent() {
+        final Stream<Integer> parent = Stream.of(1).parallel(2);
+        final Stream<Integer> derived = parent.slidingMap(1, false, (a, b) -> a);
+
+        derived.close();
+
+        assertThrows(IllegalStateException.class, parent::count);
+
+        final Stream<Integer> triParent = Stream.of(1).parallel(2);
+        triParent.slidingMap(1, false, (a, b, c) -> a).close();
+        assertThrows(IllegalStateException.class, triParent::count);
+    }
+
+    @Test
+    public void testClosingPrimitiveMappingClosesParallelObjectParent() {
+        final Stream<Integer> arrayParent = Stream.of(1, 2).parallel(2);
+        arrayParent.mapToInt(Integer::intValue).close();
+        assertThrows(IllegalStateException.class, arrayParent::count);
+
+        final Stream<Integer> iteratorParent = Stream.of(Arrays.asList(1, 2).iterator()).parallel(2);
+        iteratorParent.mapToLong(Integer::longValue).close();
+        assertThrows(IllegalStateException.class, iteratorParent::count);
     }
 
     @Test

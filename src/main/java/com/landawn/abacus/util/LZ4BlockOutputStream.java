@@ -68,7 +68,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @throws IllegalArgumentException if {@code os} is {@code null}
      */
     public LZ4BlockOutputStream(final OutputStream os) {
-        N.checkArgNotNull(os, "os");
+        N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
     }
@@ -97,7 +97,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      *         is less than 64 or greater than 32 MB
      */
     public LZ4BlockOutputStream(final OutputStream os, final int blockSize) {
-        N.checkArgNotNull(os, "os");
+        N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
     }

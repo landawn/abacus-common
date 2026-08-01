@@ -81,8 +81,11 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      *
      * @param predicate the predicate to return
      * @return the same predicate instance
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static BytePredicate of(final BytePredicate predicate) {
+    static BytePredicate of(final BytePredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 
@@ -115,12 +118,13 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * BytePredicate isPositiveAndEven = isPositive.and(isEven);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BytePredicate and(final BytePredicate other) {
+    default BytePredicate and(final BytePredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) && other.test(t);
     }
 
@@ -137,12 +141,13 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * BytePredicate isNonPositive = isNegative.or(isZero);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BytePredicate or(final BytePredicate other) {
+    default BytePredicate or(final BytePredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) || other.test(t);
     }
 

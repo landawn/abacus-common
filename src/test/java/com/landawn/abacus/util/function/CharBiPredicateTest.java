@@ -168,7 +168,7 @@ public class CharBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         CharBiPredicate instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((CharBiPredicate) null));
     }

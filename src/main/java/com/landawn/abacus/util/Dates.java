@@ -813,7 +813,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code true} if the date creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
      *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
-     * @throws IllegalArgumentException if {@code dateClass} or {@code dateCreator} is {@code null}.
+     * @throws IllegalArgumentException if {@code dateCreator} is {@code null}.
      * @see #registerCalendarCreator(Class, LongObjFunction)
      */
     public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator)
@@ -858,7 +858,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code true} if the calendar creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
      *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
-     * @throws IllegalArgumentException if {@code calendarClass} or {@code calendarCreator} is {@code null}.
+     * @throws IllegalArgumentException if {@code calendarCreator} is {@code null}.
      * @see #registerDateCreator(Class, LongFunction)
      */
     public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
@@ -4811,8 +4811,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the date object, which must be a subclass of java.util.Date.
-     * @param date the date to be rounded. Must not be {@code null}.
-     * @param field the CalendarField to which the date is to be rounded. Must not be {@code null}.
+     * @param date the date to be rounded.
+     * @param field the CalendarField to which the date is to be rounded.
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field.
      * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -4920,8 +4920,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the calendar object, which must be a subclass of java.util.Calendar.
-     * @param calendar the calendar to be rounded. Must not be {@code null}.
-     * @param field the CalendarField to which the calendar is to be rounded. Must not be {@code null}.
+     * @param calendar the calendar to be rounded.
+     * @param field the CalendarField to which the calendar is to be rounded.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the field.
      * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5004,8 +5004,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the date object, which must be a subclass of java.util.Date.
-     * @param date the date to be truncated. Must not be {@code null}.
-     * @param field the CalendarField to which the date is to be truncated. Must not be {@code null}.
+     * @param date the date to be truncated.
+     * @param field the CalendarField to which the date is to be truncated.
      * @return a new date object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5091,8 +5091,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the calendar object, which must be a subclass of java.util.Calendar.
-     * @param calendar the calendar to be truncated. Must not be {@code null}.
-     * @param field the CalendarField to which the calendar is to be truncated. Must not be {@code null}.
+     * @param calendar the calendar to be truncated.
+     * @param field the CalendarField to which the calendar is to be truncated.
      * @return a new calendar object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5170,8 +5170,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the date object, which must be a subclass of {@code java.util.Date}.
-     * @param date the date to be adjusted. Must not be {@code null}.
-     * @param field the CalendarField to which the date is to be adjusted. Must not be {@code null}.
+     * @param date the date to be adjusted.
+     * @param field the CalendarField to which the date is to be adjusted.
      * @return a new date object of type T, adjusted to the nearest future unit as specified by the field.
      * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5254,8 +5254,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * fixed intra-month/year ordering, not week-based boundaries.</p>
      *
      * @param <T> the type of the calendar object, which must extend {@code java.util.Calendar}.
-     * @param calendar the original calendar object to be adjusted. Must not be {@code null}.
-     * @param field the field to be used for the ceiling operation, as a CalendarField. Must not be {@code null}.
+     * @param calendar the original calendar object to be adjusted.
+     * @param field the field to be used for the ceiling operation, as a CalendarField.
      * @return a new calendar object representing the adjusted time.
      * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported.
      * @throws ArithmeticException if the year is over 280 million.
@@ -5699,7 +5699,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
+        return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -5748,7 +5748,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
+        return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.SECONDS);
     }
 
     /**
@@ -5797,7 +5797,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
+        return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MINUTES);
     }
 
     /**
@@ -5846,7 +5846,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
+        return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.HOURS);
     }
 
     /**
@@ -5895,7 +5895,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(date, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
+        return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.DAYS);
     }
 
     /**
@@ -5965,7 +5965,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MILLISECONDS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -6015,7 +6015,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.SECONDS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.SECONDS);
     }
 
     /**
@@ -6065,7 +6065,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.MINUTES);
+        return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MINUTES);
     }
 
     /**
@@ -6115,7 +6115,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.HOURS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.HOURS);
     }
 
     /**
@@ -6167,7 +6167,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
      */
     public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
-        return getFragment(calendar, N.checkArgNotNull(fragment, "fragment").value(), TimeUnit.DAYS);
+        return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.DAYS);
     }
 
     /**
@@ -6479,6 +6479,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static boolean isSameInstant(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
         N.checkArgNotNull(date1, cs.date1);
         N.checkArgNotNull(date2, cs.date2);
+
         return date1.getTime() == date2.getTime();
     }
 
@@ -6930,7 +6931,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isLastDayOfMonth((java.util.Date) null);           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date the date to check. Must not be {@code null}.
+     * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its month.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
@@ -6955,7 +6956,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isLastDayOfYear((java.util.Date) null);           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date the date to check. Must not be {@code null}.
+     * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its year.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
@@ -6980,7 +6981,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.getLastDayOfMonth((java.util.Date) null);           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date the date to be evaluated. Must not be {@code null}.
+     * @param date the date to be evaluated.
      * @return the last day of the month for the given date as an integer.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
@@ -7005,7 +7006,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.getLastDayOfYear((java.util.Date) null);           // throws IllegalArgumentException
      * }</pre>
      *
-     * @param date the date to be evaluated. Must not be {@code null}.
+     * @param date the date to be evaluated.
      * @return the last day of the year for the given date as an integer.
      * @throws IllegalArgumentException if the date is {@code null}.
      */
@@ -7106,9 +7107,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isBetween(null, start, end);                        // throws IllegalArgumentException (null argument)
      * }</pre>
      *
-     * @param date the date to check. Must not be {@code null}.
-     * @param startDate the start of the range (inclusive). Must not be {@code null}.
-     * @param endDate the end of the range (inclusive). Must not be {@code null}.
+     * @param date the date to check.
+     * @param startDate the start of the range (inclusive).
+     * @param endDate the end of the range (inclusive).
      * @return {@code true} if the date is within the specified range (inclusive).
      * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after {@code endDate}.
      * @see N#geAndLe(Comparable, Comparable, Comparable)
@@ -7140,9 +7141,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Dates.isBetween(Dates.createCalendar(4000L), start, end);   // returns false (after the end)
      * }</pre>
      *
-     * @param date the calendar to check. Must not be {@code null}.
-     * @param startDate the start of the range (inclusive). Must not be {@code null}.
-     * @param endDate the end of the range (inclusive). Must not be {@code null}.
+     * @param date the calendar to check.
+     * @param startDate the start of the range (inclusive).
+     * @param endDate the end of the range (inclusive).
      * @return {@code true} if the calendar is within the specified range (inclusive).
      * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after {@code endDate}.
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
@@ -8528,7 +8529,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * LocalDateTime ldt = LocalDateTime.from(temporal);
          * }</pre>
          *
-         * @param text the CharSequence to parse. Must not be {@code null}.
+         * @param text the CharSequence to parse.
          * @return a TemporalAccessor instance representing the parsed date and time.
          * @throws DateTimeParseException if the text cannot be parsed according to the format pattern.
          * @see DateTimeFormatter#parse(CharSequence)

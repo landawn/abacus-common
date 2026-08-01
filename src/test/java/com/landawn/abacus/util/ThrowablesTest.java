@@ -1,9 +1,11 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -100,13 +102,13 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testRun_WithErrorHandler_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.run(null, e -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.run(null, e -> {
         }));
     }
 
     @Test
     public void testRun_WithErrorHandler_NullErrorHandler() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.run(() -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.run(() -> {
         }, null));
     }
 
@@ -263,12 +265,12 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testCall_WithErrorFunction_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, (java.util.function.Function<Throwable, String>) e -> "Error"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, (java.util.function.Function<Throwable, String>) e -> "Error"));
     }
 
     @Test
     public void testCall_WithErrorFunction_NullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", (java.util.function.Function<Throwable, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", (java.util.function.Function<Throwable, String>) null));
     }
 
     @Test
@@ -288,12 +290,12 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testCall_WithSupplier_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, (java.util.function.Supplier<String>) () -> "Default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, (java.util.function.Supplier<String>) () -> "Default"));
     }
 
     @Test
     public void testCall_WithSupplier_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", (java.util.function.Supplier<String>) null));
     }
 
     @Test
@@ -313,7 +315,7 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testCall_WithDefaultValue_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, 0));
     }
 
     @Test
@@ -349,17 +351,17 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testCall_WithPredicateAndSupplier_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, e -> true, (java.util.function.Supplier<String>) () -> "Default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, e -> true, (java.util.function.Supplier<String>) () -> "Default"));
     }
 
     @Test
     public void testCall_WithPredicateAndSupplier_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", null, (java.util.function.Supplier<String>) () -> "Default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", null, (java.util.function.Supplier<String>) () -> "Default"));
     }
 
     @Test
     public void testCall_WithPredicateAndSupplier_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", e -> true, (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> "Success", e -> true, (java.util.function.Supplier<String>) null));
     }
 
     @Test
@@ -386,12 +388,12 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testCall_WithPredicateAndDefaultValue_NullCommand() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, e -> true, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(null, e -> true, 0));
     }
 
     @Test
     public void testCall_WithPredicateAndDefaultValue_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> 42, null, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.call(() -> 42, null, 0));
     }
 
     @Test
@@ -894,13 +896,13 @@ public class ThrowablesTest extends TestBase {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     closed.set(true);
                 }
             };
         });
 
-        iter.close();
+        iter.closeResource();
         assertFalse(initialized.get(), "Should not initialize on close");
         assertFalse(closed.get(), "Underlying iterator should not be closed if not initialized");
         assertThrows(IllegalStateException.class, iter::hasNext, "a closed deferred iterator must not acquire a resource after its one-shot close");
@@ -923,20 +925,20 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closed.set(true);
             }
         });
 
         iter.hasNext();
-        iter.close();
+        iter.closeResource();
         assertTrue(closed.get(), "Underlying iterator should be closed if initialized");
         assertThrows(IllegalStateException.class, iter::hasNext);
     }
 
     @Test
     public void testIterator_Defer_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Iterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterator.defer(null));
     }
 
     @Test
@@ -968,6 +970,8 @@ public class ThrowablesTest extends TestBase {
         assertEquals("value", iter.next());
         assertEquals(2, attempts.get());
     }
+ 
+  
 
     @Test
     public void testIterator_Defer_RejectsNullIterator() {
@@ -1066,7 +1070,7 @@ public class ThrowablesTest extends TestBase {
         Iterator<String, Exception> concatenated = Iterator.concat(first, second);
 
         assertTrue(concatenated.hasNext());
-        concatenated.close();
+        concatenated.closeResource();
 
         assertEquals(2, closeCount.get());
         assertFalse(concatenated.hasNext());
@@ -1082,7 +1086,7 @@ public class ThrowablesTest extends TestBase {
         Iterator<String, Exception> concatenated = Iterator.concat(closeFailingIterator(closeCount, primary), closeFailingIterator(closeCount, primary),
                 closeFailingIterator(closeCount, secondary), closeTrackingIterator(closeCount));
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::close);
+        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::closeResource);
         assertSame(primary, thrown);
         assertEquals(4, closeCount.get());
         assertArrayEquals(new Throwable[] { secondary }, thrown.getSuppressed());
@@ -1150,8 +1154,8 @@ public class ThrowablesTest extends TestBase {
         StringReader reader = new StringReader("line1\nline2\nline3");
         Iterator<String, IOException> iter = Iterator.ofLines(reader);
         iter.next();
-        iter.close();
-        iter.close();
+        iter.closeResource();
+        iter.closeResource();
         assertNotNull(iter);
     }
 
@@ -1170,7 +1174,7 @@ public class ThrowablesTest extends TestBase {
             }
         };
 
-        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> Iterator.ofLines(reader).close());
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> Iterator.ofLines(reader).closeResource());
         assertSame(closeFailure, thrown.getCause());
     }
 
@@ -1268,14 +1272,14 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closeCount.incrementAndGet();
             }
         };
 
-        iter.close();
-        iter.close();
-        iter.close();
+        iter.closeResource();
+        iter.closeResource();
+        iter.closeResource();
 
         assertEquals(1, closeCount.get(), "closeResource should only be called once");
     }
@@ -1296,12 +1300,12 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closed.set(true);
             }
         };
 
-        iter.close();
+        iter.closeResource();
         assertTrue(closed.get());
     }
 
@@ -1345,11 +1349,11 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testIteratorTransformationsValidateCallbacksEagerly() {
+    public void testIteratorTransformationsDoNotValidateCallbacksEagerly() {
         final Iterator<Integer, Exception> iter = Iterator.empty();
 
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
-        assertThrows(IllegalArgumentException.class, () -> iter.map(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.map(null));
     }
 
     @Test
@@ -1378,7 +1382,7 @@ public class ThrowablesTest extends TestBase {
         Iterator<String, Exception> filtered = closeTrackingIterator(closeCount).filter(value -> true);
 
         assertTrue(filtered.hasNext()); // buffer an element before close
-        filtered.close();
+        filtered.closeResource();
 
         assertEquals(1, closeCount.get());
         assertFalse(filtered.hasNext());
@@ -1430,7 +1434,7 @@ public class ThrowablesTest extends TestBase {
         AtomicInteger closeCount = new AtomicInteger();
         Iterator<Integer, Exception> mapped = closeTrackingIterator(closeCount).map(String::length);
 
-        mapped.close();
+        mapped.closeResource();
 
         assertEquals(1, closeCount.get());
         assertFalse(mapped.hasNext());
@@ -1438,12 +1442,12 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testIteratorTerminalCallbacksAreValidatedEvenWhenEmpty() {
+    public void testIteratorTerminalCallbacksAreNotEvaluatedWhenEmpty() {
         final Iterator<String, Exception> iter = Iterator.empty();
 
-        assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining(null));
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
     }
 
     private static Iterator<String, Exception> closeTrackingIterator(final AtomicInteger closeCount) {
@@ -1466,7 +1470,7 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closeCount.incrementAndGet();
             }
         };
@@ -1485,7 +1489,7 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closeCount.incrementAndGet();
                 throw failure;
             }
@@ -1827,7 +1831,7 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testLazyInitializer_Of_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> LazyInitializer.of(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LazyInitializer.of(null));
     }
 
     @Test
@@ -1907,6 +1911,26 @@ public class ThrowablesTest extends TestBase {
         });
 
         assertThrows(IOException.class, lazy::get);
+    }
+
+    @Test
+    public void testLazyInitializer_Get_RecursiveInitializationFailsFastAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final LazyInitializer<String, Exception>[] holder = new LazyInitializer[1];
+
+        holder[0] = LazyInitializer.of(() -> {
+            attempts.incrementAndGet();
+            return holder[0].get();
+        });
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, holder[0]::get);
+        final IllegalStateException second = assertThrows(IllegalStateException.class, holder[0]::get);
+
+        assertEquals("Recursive initialization of deferred value", first.getMessage());
+        assertEquals("Recursive initialization of deferred value", second.getMessage());
+        assertNotSame(first, second);
+        assertEquals(2, attempts.get());
     }
 
     @Test
@@ -2182,16 +2206,16 @@ public class ThrowablesTest extends TestBase {
     }
 
     @Test
-    public void testNFunctions_AndThen_ValidateAfterEagerly() {
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.BooleanNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.CharNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.ByteNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.ShortNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.IntNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.LongNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.FloatNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.DoubleNFunction<Integer, Exception>) args -> args.length).andThen(null));
-        assertThrows(IllegalArgumentException.class, () -> ((Throwables.NFunction<String, Integer, Exception>) args -> args.length).andThen(null));
+    public void testNFunctions_AndThen_DoesNotValidateAfterEagerly() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.BooleanNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.CharNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.ByteNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.ShortNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.IntNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.LongNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.FloatNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.DoubleNFunction<Integer, Exception>) args -> args.length).andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ((Throwables.NFunction<String, Integer, Exception>) args -> args.length).andThen(null));
     }
 
     @Test
@@ -2293,13 +2317,14 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closed.set(true);
             }
         };
 
-        try (closableIterator) {
+        try {
             assertEquals(3, closableIterator.count());
+            closableIterator.closeResource();
         } catch (Throwable e) {
             fail("Should not throw exception on close");
         }
@@ -2939,12 +2964,12 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 resourceClosed.set(true);
             }
         };
 
-        iter.close();
+        iter.closeResource();
         assertTrue(resourceClosed.get(), "Resource should be closed");
     }
 
@@ -3324,13 +3349,13 @@ public class ThrowablesTest extends TestBase {
             }
 
             @Override
-            protected void closeResource() {
+            protected void closeResourceInternal() {
                 closeCalled.set(true);
             }
         };
 
         Throwables.Iterator<String, Exception> deferred = Throwables.Iterator.defer(() -> innerIter);
-        deferred.close();
+        deferred.closeResource();
 
         assertFalse(closeCalled.get(), "Closing before initialization must not invoke the supplier or close an iterator it never acquired");
     }
@@ -3356,9 +3381,9 @@ public class ThrowablesTest extends TestBase {
 
     @Test
     public void testStaticFactoryMethods_RejectNull() {
-        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjConsumer.of(null));
-        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjFunction.of(null));
-        assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjPredicate.of(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjConsumer.of(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjFunction.of(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjPredicate.of(null));
     }
 
     @Test

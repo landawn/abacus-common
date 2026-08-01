@@ -107,7 +107,7 @@ final class ThreadMonitor implements Runnable {
      * @throws IllegalArgumentException if {@code thread} is {@code null}
      */
     public static Thread start(final Thread thread, final long timeout) throws IllegalArgumentException {
-        N.checkArgNotNull(thread, "thread");
+        N.checkArgNotNull(thread, cs.thread);
 
         Thread monitor = null;
         if (timeout > 0) {

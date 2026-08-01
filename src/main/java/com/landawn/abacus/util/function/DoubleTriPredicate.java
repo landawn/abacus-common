@@ -108,12 +108,13 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * DoubleTriPredicate combined = isPositive.and(sumLessThan100);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default DoubleTriPredicate and(final DoubleTriPredicate other) {
+    default DoubleTriPredicate and(final DoubleTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -134,12 +135,13 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      * DoubleTriPredicate specialCase = allZero.or(allOne);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default DoubleTriPredicate or(final DoubleTriPredicate other) {
+    default DoubleTriPredicate or(final DoubleTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

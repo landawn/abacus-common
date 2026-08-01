@@ -112,4 +112,18 @@ public abstract class AbstractTemporalType<T extends Temporal> extends AbstractT
     public boolean isComparable() {
         return true;
     }
+
+    /**
+     * Indicates whether this type is a {@link java.time.temporal.Temporal} type.
+     * <p>
+     * Every type in this hierarchy represents a {@code Temporal} value (e.g., {@code Instant},
+     * {@code LocalDate}, {@code LocalDateTime}, {@code LocalTime}, {@code OffsetDateTime}, {@code ZonedDateTime}).
+     * </p>
+     *
+     * @return {@code true}, as all types in this hierarchy implement {@link Temporal}
+     */
+    @Override
+    public boolean isTemporal() {
+        return true;
+    }
 }

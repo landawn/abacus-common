@@ -34,7 +34,7 @@ public class FloatTriFunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         FloatTriFunction<String> instance = (a, b, c) -> null;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Function) null));
     }

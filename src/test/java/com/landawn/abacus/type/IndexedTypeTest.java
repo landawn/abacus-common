@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -70,6 +71,12 @@ public class IndexedTypeTest extends TestBase {
         assertNull(indexedType.valueOf(null));
         assertNull(indexedType.valueOf(""));
 
+    }
+
+    @Test
+    public void testValueOfRequiresExactlyTwoElements() {
+        assertThrows(IllegalArgumentException.class, () -> indexedType.valueOf("[5]"));
+        assertThrows(IllegalArgumentException.class, () -> indexedType.valueOf("[5, \"value\", \"unexpected\"]"));
     }
 
     @SuppressWarnings("unchecked")

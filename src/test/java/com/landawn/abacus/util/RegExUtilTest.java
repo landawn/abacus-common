@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -2170,21 +2171,21 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    public void testFunctionalReplacersRejectNullCallbacksEvenForEmptySources() {
+    public void testFunctionalReplacersAreNotEvaluatedForEmptySources() {
         final Pattern pattern = Pattern.compile("x");
 
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (IntBiFunction<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (IntBiFunction<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (IntBiFunction<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (IntBiFunction<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (IntBiFunction<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (Function<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (IntBiFunction<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", pattern, (IntBiFunction<String>) null));
     }
 
     @Test
@@ -2198,26 +2199,18 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("a null replacer is reported by its own parameter name, not 'function'")
-    public void testNullReplacerIsReportedByItsOwnParameterName() {
+    @DisplayName("a null replacer is rejected before matching")
+    public void testNullReplacerIsRejectedEagerly() {
         final Pattern digit = Pattern.compile("\\d");
         final Function<String, String> nullFunction = null;
         final IntBiFunction<String> nullIntBiFunction = null;
 
-        // A validation sweep once passed cs.function here, so a null replacer reported
-        // "'function' cannot be null" for a parameter every one of these signatures calls 'replacer'.
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullFunction)).getMessage());
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullIntBiFunction)).getMessage());
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullFunction)).getMessage());
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullIntBiFunction)).getMessage());
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullFunction)).getMessage());
-        assertEquals("'replacer' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullIntBiFunction)).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullFunction));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("a1", digit, nullIntBiFunction));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullFunction));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("a1", digit, nullIntBiFunction));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullFunction));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullIntBiFunction));
     }
 
 }

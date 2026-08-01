@@ -90,13 +90,14 @@ public interface ObjByteConsumer<T> extends Throwables.ObjByteConsumer<T, Runtim
      * writeAndLog.accept(new byte[1], (byte) 9);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ObjByteConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ObjByteConsumer<T> andThen(final ObjByteConsumer<? super T> after) {
+    default ObjByteConsumer<T> andThen(final ObjByteConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);

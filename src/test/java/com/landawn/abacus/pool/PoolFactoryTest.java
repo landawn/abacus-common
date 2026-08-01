@@ -176,11 +176,8 @@ public class PoolFactoryTest extends TestBase {
     }
 
     @Test
-    public void testObjectPoolWithNullMemoryMeasure() {
-        ObjectPool<TestPoolable> pool = PoolFactory.createObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 0, null);
-
-        assertNotNull(pool);
-        pool.close();
+    public void testObjectPoolRejectsNullMemoryMeasure() {
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.<TestPoolable> createObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 0, null));
     }
 
     @Test
@@ -390,11 +387,9 @@ public class PoolFactoryTest extends TestBase {
     }
 
     @Test
-    public void testKeyedObjectPoolWithNullMemoryMeasure() {
-        KeyedObjectPool<String, TestPoolable> pool = PoolFactory.createKeyedObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 0, null);
-
-        assertNotNull(pool);
-        pool.close();
+    public void testKeyedObjectPoolRejectsNullMemoryMeasure() {
+        assertThrows(IllegalArgumentException.class,
+                () -> PoolFactory.<String, TestPoolable> createKeyedObjectPool(100, 3000, EvictionPolicy.LAST_ACCESS_TIME, 0, null));
     }
 
     @Test

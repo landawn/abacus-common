@@ -372,7 +372,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * new IntList((int[]) null);      // throws NullPointerException
      * }</pre>
      *
-     * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
+     * @param a the array whose elements are to be placed into this list.
      * @throws NullPointerException if the specified array is {@code null}
      */
     public IntList(final int[] a) {
@@ -395,7 +395,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * new IntList(src, 6);               // throws IndexOutOfBoundsException (size > length)
      * }</pre>
      *
-     * @param a the array to be used as the element array for this list. Must not be {@code null}.
+     * @param a the array to be used as the element array for this list.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws NullPointerException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
@@ -489,7 +489,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * IntList.copyOf(src, 0, 10);              // throws IndexOutOfBoundsException (toIndex > length)
      * }</pre>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied.
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new IntList containing a copy of the elements in the specified range
@@ -1070,12 +1070,12 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
-     * @throws NullPointerException if {@code p} is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final IntPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final IntPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final IntList tmp = new IntList(size());
 
@@ -1321,6 +1321,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1472,11 +1473,11 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * new IntList().replaceAll(e -> e + 1);   // empty list remains empty
      * }</pre>
      *
-     * @param operator the operator to apply to each element; must not be {@code null}
-     * @throws NullPointerException if {@code operator} is {@code null}
+     * @param operator the operator to apply to each element
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final IntUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final IntUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsInt(elementData[i]);
@@ -1495,13 +1496,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * b.replaceIf(e -> e > 10, -1);      // returns false, b unchanged [1, 3, 5]
      * }</pre>
      *
-     * @param predicate the predicate which returns {@code true} for elements to be replaced; must not be {@code null}
+     * @param predicate the predicate which returns {@code true} for elements to be replaced
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final IntPredicate predicate, final int newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final IntPredicate predicate, final int newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2249,8 +2250,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * new IntList().forEach(e -> sum[0]++);   // action never invoked, sum[0] unchanged
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final IntConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2281,13 +2282,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param fromIndex the starting index (inclusive); for backward traversal, {@code size()} is
      *        accepted and clamped to the last logical element
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element; must not be {@code null}
+     * @param action the action to be performed for each element
      * @throws IndexOutOfBoundsException if the specified range is out of bounds, i.e. if
      *         {@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0} or
      *         {@code max(fromIndex, toIndex) > size()} (except for the special {@code toIndex == -1} case)
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final IntConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2974,14 +2975,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param supplier a function that creates a new Collection instance with the given initial capacity
      * @return a Collection containing Integer objects from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Integer>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -3000,14 +3002,15 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing Integer objects from the specified range with their counts
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public Multiset<Integer> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Integer>> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Integer> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Integer> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

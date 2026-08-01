@@ -1081,12 +1081,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean noChange = list.removeIf(c -> c > 'z');   // returns false, list unchanged
      * }</pre>
      *
-     * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}
+     * @param p a predicate which returns {@code true} for elements to be removed;
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
-     * @throws NullPointerException if {@code p} is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final CharPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final CharPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final CharList tmp = new CharList(size());
 
@@ -1357,6 +1357,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1518,11 +1519,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * new CharList().replaceAll(c -> c);                // empty list unchanged
      * }</pre>
      *
-     * @param operator the operator to apply to each element; must not be {@code null}
-     * @throws NullPointerException if {@code operator} is {@code null}
+     * @param operator the operator to apply to each element;
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final CharUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final CharUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsChar(elementData[i]);
@@ -1539,13 +1540,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean noChange = list.replaceIf(c -> c > 'z', 'x');   // returns false, list unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test elements; must not be {@code null}
+     * @param predicate the predicate to test elements;
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final CharPredicate predicate, final char newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final CharPredicate predicate, final char newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2270,8 +2271,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.forEach(sb::append);   // sb is now "abc"
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element;
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final CharConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2301,11 +2302,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start
-     * @param action the action to be performed for each element; must not be {@code null}
+     * @param action the action to be performed for each element;
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2948,14 +2949,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a collection containing the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Character>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2975,14 +2977,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a Multiset containing the specified range of elements with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public Multiset<Character> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Character>> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Character> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Character> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

@@ -97,12 +97,12 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *   <li>Date/time strings: parsed according to standard date formats</li>
      * </ul>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse into a {@code GregorianCalendar}; may be {@code null} or empty
-     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code str} is {@code null} or empty
+     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Calendar)
      */

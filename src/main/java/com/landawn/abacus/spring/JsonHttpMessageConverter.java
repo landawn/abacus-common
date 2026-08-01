@@ -27,6 +27,7 @@ import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
@@ -170,8 +171,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @see com.landawn.abacus.parser.Exclusion
      */
     public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc) throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, "jsc");
-        N.checkArgNotNull(jdc, "jdc");
+        N.checkArgNotNull(jsc, cs.jsc);
+        N.checkArgNotNull(jdc, cs.jdc);
 
         this.jsc = jsc;
         this.jdc = jdc;
@@ -233,8 +234,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      */
     public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes)
             throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, "jsc");
-        N.checkArgNotNull(jdc, "jdc");
+        N.checkArgNotNull(jsc, cs.jsc);
+        N.checkArgNotNull(jdc, cs.jdc);
 
         this.jsc = jsc;
         this.jdc = jdc;
@@ -263,8 +264,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      */
     public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final List<MediaType> supportedMediaTypes)
             throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, "jsc");
-        N.checkArgNotNull(jdc, "jdc");
+        N.checkArgNotNull(jsc, cs.jsc);
+        N.checkArgNotNull(jdc, cs.jdc);
 
         this.jsc = jsc;
         this.jdc = jdc;

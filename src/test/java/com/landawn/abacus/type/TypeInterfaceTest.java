@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -444,6 +444,14 @@ public class TypeInterfaceTest extends TestBase {
     @DisplayName("Test isJodaDateTime()")
     public void testIsJodaDateTime() {
         assertFalse(stringType.isJodaDateTime());
+    }
+
+    @Test
+    @DisplayName("Test isTemporal()")
+    public void testIsTemporal() {
+        Type<java.time.LocalDateTime> localDateTimeType = createType(java.time.LocalDateTime.class);
+        assertTrue(localDateTimeType.isTemporal());
+        assertFalse(stringType.isTemporal());
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.landawn.abacus.parser;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,6 +18,41 @@ import com.landawn.abacus.TestBase;
 public class ParserFactoryTest extends TestBase {
 
     private static final class ReplacementRegistrationTarget {
+    }
+
+    private static final class DuplicateIdRegistrationTargetA {
+    }
+
+    private static final class DuplicateIdRegistrationTargetB {
+    }
+
+    private static final class DuplicateIdRegistrationTargetC {
+    }
+
+    private static final class DuplicateIdRegistrationTargetD {
+    }
+
+    private static final class ImplicitGlobalRegistrationTarget {
+    }
+
+    private static final class ExplicitGlobalRegistrationTarget {
+    }
+
+    private static final class ImplicitGlobalSerializerTarget {
+    }
+
+    private static final class ExplicitGlobalSerializerTarget {
+    }
+
+    private static final class EmptySerializer<T> extends Serializer<T> {
+        @Override
+        public void write(final Kryo kryo, final Output output, final T object) {
+        }
+
+        @Override
+        public T read(final Kryo kryo, final Input input, final Class<? extends T> type) {
+            return null;
+        }
     }
 
     // Simple Kryo Serializer for testing
@@ -328,9 +364,13 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void test_registerKryo_class() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class);
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+        }
     }
 
     @Test
@@ -340,10 +380,15 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void testRegisterKryo() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class);
-            ParserFactory.registerKryo(Integer.class, 100);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class);
+                ParserFactory.registerKryo(Integer.class, 100);
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+            unregisterKryoForTest(Integer.class);
+        }
     }
 
     @Test
@@ -359,9 +404,13 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void test_registerKryo_classWithId() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(Integer.class, 100);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(Integer.class, 100);
+            });
+        } finally {
+            unregisterKryoForTest(Integer.class);
+        }
     }
 
     @Test
@@ -373,6 +422,98 @@ public class ParserFactoryTest extends TestBase {
     public void test_registerKryo_rejectsNegativeIdsImmediately() {
         assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, -1));
         assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, new TestStringSerializer(), -1));
+    }
+
+    @Test
+    public void test_registerKryo_rejectsDuplicateExplicitIds() {
+        final int classRegistrationId = 1_900_001;
+        final int serializerRegistrationId = 1_900_002;
+        final int retainedClassRegistrationId = 1_900_003;
+        final int retainedSerializerRegistrationId = 1_900_004;
+        final Serializer<DuplicateIdRegistrationTargetD> retainedSerializer = new Serializer<>() {
+            @Override
+            public void write(final Kryo kryo, final Output output, final DuplicateIdRegistrationTargetD object) {
+            }
+
+            @Override
+            public DuplicateIdRegistrationTargetD read(final Kryo kryo, final Input input,
+                    final Class<? extends DuplicateIdRegistrationTargetD> type) {
+                return new DuplicateIdRegistrationTargetD();
+            }
+        };
+
+        try {
+            ParserFactory.registerKryo(DuplicateIdRegistrationTargetA.class, classRegistrationId);
+            ParserFactory.registerKryo(DuplicateIdRegistrationTargetB.class, retainedClassRegistrationId);
+            assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetB.class, classRegistrationId));
+            assertThrows(IllegalArgumentException.class,
+                    () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetB.class, new TestStringSerializer(), classRegistrationId));
+            assertEquals(retainedClassRegistrationId, ParserFactory._kryoClassIdMap.get(DuplicateIdRegistrationTargetB.class).intValue());
+            assertTrue(!ParserFactory._kryoClassSerializerIdMap.containsKey(DuplicateIdRegistrationTargetB.class));
+
+            ParserFactory.registerKryo(DuplicateIdRegistrationTargetC.class, new TestStringSerializer(), serializerRegistrationId);
+            ParserFactory.registerKryo(DuplicateIdRegistrationTargetD.class, retainedSerializer, retainedSerializerRegistrationId);
+            assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetD.class, serializerRegistrationId));
+            assertThrows(IllegalArgumentException.class,
+                    () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetD.class, new TestStringSerializer(), serializerRegistrationId));
+            assertEquals(retainedSerializerRegistrationId,
+                    ParserFactory._kryoClassSerializerIdMap.get(DuplicateIdRegistrationTargetD.class)._2.intValue());
+            assertSame(retainedSerializer, ParserFactory._kryoClassSerializerIdMap.get(DuplicateIdRegistrationTargetD.class)._1);
+            assertTrue(!ParserFactory._kryoClassIdMap.containsKey(DuplicateIdRegistrationTargetD.class));
+        } finally {
+            unregisterKryoForTest(DuplicateIdRegistrationTargetA.class);
+            unregisterKryoForTest(DuplicateIdRegistrationTargetB.class);
+            unregisterKryoForTest(DuplicateIdRegistrationTargetC.class);
+            unregisterKryoForTest(DuplicateIdRegistrationTargetD.class);
+        }
+    }
+
+    @Test
+    public void testCreateKryoRejectsGlobalExplicitIdAlreadyAssignedImplicitly() {
+        final KryoParser parser = new KryoParser();
+
+        try {
+            ParserFactory.registerKryo(ImplicitGlobalRegistrationTarget.class);
+            final Kryo initialKryo = parser.createKryo();
+            final int implicitId;
+
+            try {
+                implicitId = initialKryo.getRegistration(ImplicitGlobalRegistrationTarget.class).getId();
+            } finally {
+                parser.recycle(initialKryo);
+            }
+
+            ParserFactory.registerKryo(ExplicitGlobalRegistrationTarget.class, implicitId);
+
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+        } finally {
+            unregisterKryoForTest(ImplicitGlobalRegistrationTarget.class);
+            unregisterKryoForTest(ExplicitGlobalRegistrationTarget.class);
+        }
+    }
+
+    @Test
+    public void testCreateKryoRejectsGlobalExplicitSerializerIdAlreadyAssignedImplicitly() {
+        final KryoParser parser = new KryoParser();
+
+        try {
+            ParserFactory.registerKryo(ImplicitGlobalSerializerTarget.class, new EmptySerializer<>());
+            final Kryo initialKryo = parser.createKryo();
+            final int implicitId;
+
+            try {
+                implicitId = initialKryo.getRegistration(ImplicitGlobalSerializerTarget.class).getId();
+            } finally {
+                parser.recycle(initialKryo);
+            }
+
+            ParserFactory.registerKryo(ExplicitGlobalSerializerTarget.class, new EmptySerializer<>(), implicitId);
+
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+        } finally {
+            unregisterKryoForTest(ImplicitGlobalSerializerTarget.class);
+            unregisterKryoForTest(ExplicitGlobalSerializerTarget.class);
+        }
     }
 
     @Test
@@ -388,9 +529,13 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void testRegisterKryo_classWithSerializer() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class, new TestStringSerializer());
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class, new TestStringSerializer());
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+        }
     }
 
     @Test
@@ -413,9 +558,13 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void testRegisterKryo_classWithSerializerAndId() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class, new TestStringSerializer(), 300);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class, new TestStringSerializer(), 300);
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+        }
     }
 
     @Test
@@ -431,11 +580,15 @@ public class ParserFactoryTest extends TestBase {
             }
         };
 
-        ParserFactory.registerKryo(ReplacementRegistrationTarget.class, serializer, 990);
-        ParserFactory.registerKryo(ReplacementRegistrationTarget.class, 991);
+        try {
+            ParserFactory.registerKryo(ReplacementRegistrationTarget.class, serializer, 990);
+            ParserFactory.registerKryo(ReplacementRegistrationTarget.class, 991);
 
-        assertEquals(991, ParserFactory._kryoClassIdMap.get(ReplacementRegistrationTarget.class).intValue());
-        assertTrue(!ParserFactory._kryoClassSerializerIdMap.containsKey(ReplacementRegistrationTarget.class));
+            assertEquals(991, ParserFactory._kryoClassIdMap.get(ReplacementRegistrationTarget.class).intValue());
+            assertTrue(!ParserFactory._kryoClassSerializerIdMap.containsKey(ReplacementRegistrationTarget.class));
+        } finally {
+            unregisterKryoForTest(ReplacementRegistrationTarget.class);
+        }
     }
 
     @Test
@@ -459,20 +612,32 @@ public class ParserFactoryTest extends TestBase {
 
     @Test
     public void testRegisterKryo_multipleClasses() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class);
-            ParserFactory.registerKryo(Integer.class);
-            ParserFactory.registerKryo(Double.class);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class);
+                ParserFactory.registerKryo(Integer.class);
+                ParserFactory.registerKryo(Double.class);
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+            unregisterKryoForTest(Integer.class);
+            unregisterKryoForTest(Double.class);
+        }
     }
 
     @Test
     public void testRegisterKryo_classWithIdMultiple() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.registerKryo(String.class, 1000);
-            ParserFactory.registerKryo(Integer.class, 1001);
-            ParserFactory.registerKryo(Double.class, 1002);
-        });
+        try {
+            assertDoesNotThrow(() -> {
+                ParserFactory.registerKryo(String.class, 1000);
+                ParserFactory.registerKryo(Integer.class, 1001);
+                ParserFactory.registerKryo(Double.class, 1002);
+            });
+        } finally {
+            unregisterKryoForTest(String.class);
+            unregisterKryoForTest(Integer.class);
+            unregisterKryoForTest(Double.class);
+        }
     }
 
     @Test
@@ -480,6 +645,16 @@ public class ParserFactoryTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> {
             ParserFactory.registerKryo(String.class, (Serializer<?>) null, 400);
         });
+    }
+
+    private static void unregisterKryoForTest(final Class<?> type) {
+        synchronized (ParserFactory._kryoRegistrationLock) {
+            ParserFactory._kryoClassSet.remove(type);
+            ParserFactory._kryoClassIdMap.remove(type);
+            ParserFactory._kryoClassSerializerMap.remove(type);
+            ParserFactory._kryoClassSerializerIdMap.remove(type);
+            ParserFactory._kryoRegistrationVersion.incrementAndGet();
+        }
     }
 
 }

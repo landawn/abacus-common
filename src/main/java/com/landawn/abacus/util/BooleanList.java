@@ -919,12 +919,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeIf(b -> b);   // removes all true values, list is now [false, false]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
+     * @param p the predicate which returns {@code true} for elements to be removed;
      * @return {@code true} if any elements were removed; {@code false} otherwise
-     * @throws NullPointerException if {@code p} is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final BooleanPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final BooleanPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final BooleanList tmp = new BooleanList(size());
 
@@ -1116,8 +1116,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
     /**
      * Removes the elements at the specified positions from this list.
-     * The indices array will be sorted internally, and elements are removed in descending
-     * order to maintain consistency.
+     * The indices array does not need to be sorted and may contain duplicates;
+     * the relative order of the remaining elements is preserved.
      *
      * <p>This method is more efficient than removing elements one by one when multiple
      * elements need to be removed.</p>
@@ -1211,6 +1211,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1367,11 +1368,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, true, false, true]
      * }</pre>
      *
-     * @param operator the operator to apply to each element; must not be {@code null}
-     * @throws NullPointerException if {@code operator} is {@code null}
+     * @param operator the operator to apply to each element;
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final BooleanUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final BooleanUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsBoolean(elementData[i]);
@@ -1391,13 +1392,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, false, false, false], modified is true
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element;
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} otherwise
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final BooleanPredicate predicate, final boolean newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final BooleanPredicate predicate, final boolean newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -1987,8 +1988,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * empty.forEach(b -> trueCount[0]++);   // action not invoked; trueCount[0] unchanged
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element;
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final BooleanConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2019,13 +2020,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
      *                from {@code fromIndex} down to and including index 0
-     * @param action the action to be performed for each element; must not be {@code null}
+     * @param action the action to be performed for each element;
      * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
      *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
      *         {@code max(fromIndex, toIndex) > size()})
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final BooleanConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final BooleanConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2481,14 +2482,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return a Collection containing the boxed boolean values from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Boolean>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2509,14 +2511,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return a Multiset containing the boxed boolean values from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public Multiset<Boolean> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Boolean>> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Boolean> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Boolean> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

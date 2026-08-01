@@ -268,7 +268,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
     /**
      * Writes the character representation of a number to a {@link CharacterWriter} by delegating
-     * to {@link #appendTo(Appendable, Object)}.
+     * to {@link #appendTo(Appendable, Number)}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. If {@code x} is {@code null} and the config requests

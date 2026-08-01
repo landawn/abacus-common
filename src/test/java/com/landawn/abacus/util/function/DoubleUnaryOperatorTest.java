@@ -3,7 +3,6 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -143,9 +142,9 @@ public class DoubleUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testComposeNullThrowsImmediately() {
+    public void testComposeRejectsNullImmediately() {
         DoubleUnaryOperator instance = a -> 0d;
-        assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.DoubleUnaryOperator) null));
-        assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.DoubleUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((java.util.function.DoubleUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.DoubleUnaryOperator) null));
     }
 }

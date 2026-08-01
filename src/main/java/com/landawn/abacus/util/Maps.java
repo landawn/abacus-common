@@ -808,19 +808,19 @@ public final class Maps {
      * @param <M> the type of the resulting Map.
      * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
      * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
      *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
-            final IntFunction<? extends M> mapSupplier) {
-        N.requireNonNull(mapSupplier, "mapSupplier");
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         if (N.isEmptyCollection(keys) || N.isEmptyCollection(values)) {
-            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
+            return N.checkArgNotNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
@@ -829,7 +829,7 @@ public final class Maps {
         final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
         final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
         final int minLen = N.min(keysSize, valuesSize);
-        final M result = N.requireNonNull(mapSupplier.apply(minLen), "mapSupplier returned null");
+        final M result = N.checkArgNotNull(mapSupplier.apply(minLen), "mapSupplier returned null");
 
         while (keyIter.hasNext() && valueIter.hasNext()) {
             result.put(keyIter.next(), valueIter.next());
@@ -861,22 +861,22 @@ public final class Maps {
      * @param <M> the type of the resulting Map.
      * @param keys an Iterable of keys for the resulting Map; may be {@code null} or empty.
      * @param values an Iterable of values for the resulting Map; may be {@code null} or empty.
-     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered; must not be {@code null}.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param mergeFunction a function used to resolve conflicts when duplicate keys are encountered
+     * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
      *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
-     * @throws NullPointerException if {@code mergeFunction} or {@code mapSupplier} is {@code null},
+     * @throws IllegalArgumentException if any of {@code mergeFunction}, {@code mapSupplier} is {@code null},
      *         or if {@code mapSupplier} returns {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
     public static <K, V, M extends Map<K, V>> M zip(final Iterable<? extends K> keys, final Iterable<? extends V> values,
-            final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) {
-        N.requireNonNull(mergeFunction, "mergeFunction");
-        N.requireNonNull(mapSupplier, "mapSupplier");
+            final BiFunction<? super V, ? super V, ? extends V> mergeFunction, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         if (N.isEmptyCollection(keys) || N.isEmptyCollection(values)) {
-            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
+            return N.checkArgNotNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
         final Iterator<? extends K> keyIter = keys.iterator();
@@ -885,7 +885,7 @@ public final class Maps {
         final int keysSize = keys instanceof Collection ? ((Collection<K>) keys).size() : 0;
         final int valuesSize = values instanceof Collection ? ((Collection<V>) values).size() : 0;
         final int minLen = N.min(keysSize, valuesSize);
-        final M result = N.requireNonNull(mapSupplier.apply(minLen), "mapSupplier returned null");
+        final M result = N.checkArgNotNull(mapSupplier.apply(minLen), "mapSupplier returned null");
 
         while (keyIter.hasNext() && valueIter.hasNext()) {
             result.merge(keyIter.next(), valueIter.next(), mergeFunction);
@@ -1682,21 +1682,20 @@ public final class Maps {
      * @param key the key whose associated value is to be returned
      * @param defaultValueSupplier supplies the value to return if the key is absent
      * @return the mapped value, or the value supplied by {@code defaultValueSupplier} if absent
-     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
-     * @throws NullPointerException if {@code defaultValueSupplier} returns {@code null}.
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} returns {@code null}.
      */
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final Supplier<? extends V> defaultValueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(defaultValueSupplier, cs.defaultValueSupplier);
 
         if (N.isEmpty(map)) {
-            return N.requireNonNull(defaultValueSupplier.get());
+            return N.checkArgNotNull(defaultValueSupplier.get());
         }
 
         final V val = map.get(key);
 
         if (val == null) {
-            return N.requireNonNull(defaultValueSupplier.get());
+            return N.checkArgNotNull(defaultValueSupplier.get());
         } else {
             return val;
         }
@@ -1838,7 +1837,7 @@ public final class Maps {
      * The supplier is invoked only when the key is absent, and exactly once.
      *
      * <p><b>Note:</b> The supplier must return a non-{@code null} value. If it returns {@code null},
-     * a {@link NullPointerException} is thrown and the map is left unchanged - consistent with
+     * an {@link IllegalArgumentException} is thrown and the map is left unchanged - consistent with
      * {@link #getOrDefaultIfAbsent(Map, Object, Supplier)}. This guarantees that both the value
      * stored in the map and the value returned are never {@code null}.</p>
      *
@@ -1867,9 +1866,8 @@ public final class Maps {
      * @return the existing non-{@code null} value associated with the specified key, or the
      *         non-{@code null} value newly created by {@code defaultValueSupplier} (now stored in the
      *         map) if the key was absent.
-     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
-     * @throws NullPointerException if {@code map} is {@code null}, or if {@code defaultValueSupplier}
-     *         returns {@code null}.
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null} or returns {@code null}.
+     * @throws NullPointerException if {@code map} is {@code null}.
      */
     // @ai-ignore getOrPut*IfAbsent variants - get-or-create pattern that inserts a new collection (List/Set/LinkedHashSet/Map/LinkedHashMap) when key is absent. Do not suggest consolidation.
     public static <K, V> V getOrPutIfAbsent(final Map<K, V> map, final K key, final Supplier<? extends V> defaultValueSupplier)
@@ -1879,7 +1877,7 @@ public final class Maps {
         V val = map.get(key);
 
         if (val == null) {
-            val = N.requireNonNull(defaultValueSupplier.get());
+            val = N.checkArgNotNull(defaultValueSupplier.get());
             map.put(key, val);
         }
 
@@ -3435,12 +3433,12 @@ public final class Maps {
      * @param <V> the value type.
      * @param map the map to put the value in; must not be {@code null}.
      * @param key the key to associate the value with.
-     * @param supplier the supplier to get the value from if the key is absent; must not be {@code null}.
+     * @param supplier the supplier to get the value from if the key is absent
      * @return the existing {@code non-null} value associated with the specified key, or {@code null} if the
      *         key was absent or mapped to {@code null} (in which case the supplier is invoked and its
      *         value is put).
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @throws NullPointerException if {@code map} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Map#putIfAbsent(Object, Object)
      * @see #getOrPutIfAbsent(Map, Object, Supplier)
      */
@@ -3481,7 +3479,7 @@ public final class Maps {
      * @param <V> the value type.
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
-     * @param keyFilter a predicate that filters keys to be added to the target map; must not be {@code null}.
+     * @param keyFilter a predicate that filters keys to be added to the target map
      * @return {@code true} if any source entry passed the filter and was put into the target map,
      *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
      *         target map's contents changed (an equal existing mapping may have been replaced).
@@ -3532,7 +3530,7 @@ public final class Maps {
      * @param <V> the value type.
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
-     * @param entryFilter a predicate that filters keys and values to be added to the target map; must not be {@code null}.
+     * @param entryFilter a predicate that filters keys and values to be added to the target map
      * @return {@code true} if any source entry passed the filter and was put into the target map,
      *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
      *         target map's contents changed (an equal existing mapping may have been replaced).
@@ -3591,10 +3589,11 @@ public final class Maps {
      * @param value the non-{@code null} value to merge with the existing value, or to store directly if the key
      *        is absent.
      * @param mergeFunction the function combining the existing value and {@code value} when the key is present;
-     *        must not be {@code null}. A {@code null} result removes the key.
+     * A {@code null} result removes the key.
      * @return the new value associated with the key, or {@code null} if the key was removed (because
      *         {@code mergeFunction} returned {@code null}).
-     * @throws IllegalArgumentException if {@code map}, {@code value} or {@code mergeFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code map} or {@code value} is {@code null}.
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
      * @see Map#merge(Object, Object, BiFunction)
      */
     @MayReturnNull
@@ -3801,7 +3800,9 @@ public final class Maps {
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
+
+        // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3858,7 +3859,9 @@ public final class Maps {
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> boolean removeIf(final Map<K, V> map, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
+
+        // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3915,7 +3918,9 @@ public final class Maps {
      * @see #filterByKey(Map, Predicate)
      */
     public static <K> boolean removeIfKey(final Map<K, ?> map, final Predicate<? super K> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
+
+        // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -3973,7 +3978,9 @@ public final class Maps {
      * @see #filterByValue(Map, Predicate)
      */
     public static <V> boolean removeIfValue(final Map<?, V> map, final Predicate<? super V> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter); // NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
+
+        // NOSONAR
 
         if (N.isEmpty(map)) {
             return false;
@@ -4100,12 +4107,12 @@ public final class Maps {
      * @param <V> the type of mapped values.
      * @param map the map in which the entries are to be replaced.
      * @param function the function to apply to each entry to compute a new value.
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @throws ConcurrentModificationException if an entry is removed from the map during iteration
      *         (detected when {@link Map.Entry#setValue} throws {@link IllegalStateException}).
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     public static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException {
-        N.checkArgNotNull(function);
+        N.checkArgNotNull(function, cs.function);
 
         if (N.isEmpty(map)) {
             return;
@@ -4157,7 +4164,9 @@ public final class Maps {
      * @see Iterators#filter(Iterator, Predicate)
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -4204,7 +4213,9 @@ public final class Maps {
      * @see Iterators#filter(Iterator, Predicate)
      */
     public static <K, V> Map<K, V> filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -4246,24 +4257,26 @@ public final class Maps {
      * @param <V> the type of mapped values.
      * @param <M> the type of the resulting map.
      * @param map the map to be filtered.
-     * @param predicate the predicate used to filter the entries; must not be {@code null}.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param predicate the predicate used to filter the entries
+     * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a new map (created by {@code mapSupplier}) containing only the entries that match the predicate;
      *         an empty map (from {@code mapSupplier.apply(0)}) if {@code map} is {@code null}.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
+     * @throws IllegalArgumentException if any of {@code predicate}, {@code mapSupplier} is {@code null}.
      * @see #filter(Map, BiPredicate)
      */
     public static <K, V, M extends Map<K, V>> M filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate,
             final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
-        N.requireNonNull(mapSupplier, "mapSupplier");
+        N.checkArgNotNull(predicate, cs.predicate);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
+        // NOSONAR
 
         if (map == null) {
-            return N.requireNonNull(mapSupplier.apply(0), "mapSupplier returned null");
+            return N.checkArgNotNull(mapSupplier.apply(0), "mapSupplier returned null");
         }
 
-        final M result = N.requireNonNull(mapSupplier.apply(map.size()), "mapSupplier returned null");
+        final M result = N.checkArgNotNull(mapSupplier.apply(map.size()), "mapSupplier returned null");
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue())) {
@@ -4304,7 +4317,9 @@ public final class Maps {
      * @see Iterators#filter(Iterator, Predicate)
      */
     public static <K, V> Map<K, V> filterByKey(final Map<K, V> map, final Predicate<? super K> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -4351,7 +4366,9 @@ public final class Maps {
      * @see Iterators#filter(Iterator, Predicate)
      */
     public static <K, V> Map<K, V> filterByValue(final Map<K, V> map, final Predicate<? super V> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); // NOSONAR
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        // NOSONAR
 
         if (map == null) {
             return new HashMap<>();
@@ -4633,14 +4650,17 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     * @param mapSupplier a function that creates a new Map instance given an expected size;
      *        and must return a distinct map on every invocation.
      * @return a new map which is the flattened version of the input map.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
      * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure
      *         is encountered, or two input paths produce the same flattened key.
      */
-    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return flatten(map, ".", mapSupplier);
     }
 
@@ -4668,18 +4688,19 @@ public final class Maps {
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
      * @param delimiter the non-empty delimiter to be used when concatenating keys.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}.
+     * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a new map which is the flattened version of the input map.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
      * @throws IllegalArgumentException if {@code delimiter} is {@code null} or empty, a key (at any level)
-     *         is {@code null}, {@code mapSupplier} returns the input map, a cyclic map structure is
-     *         encountered, or two input paths produce the same flattened key.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     *         is {@code null}, a cyclic map structure is encountered, or two input paths produce the same
+     *         flattened key.
      */
-    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter");
-        N.requireNonNull(mapSupplier, "mapSupplier");
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
-        final M result = N.requireNonNull(mapSupplier.apply(N.size(map)), "mapSupplier returned null");
+        final M result = N.checkArgNotNull(mapSupplier.apply(N.size(map)), "mapSupplier returned null");
 
         if (result == map) {
             throw new IllegalArgumentException("mapSupplier must create a new map");
@@ -4787,15 +4808,16 @@ public final class Maps {
      *
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     * @param mapSupplier a function that creates a new Map instance given an expected size;
      *        and must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
-     * @throws IllegalArgumentException if a key is {@code null}, flat keys conflict (for example,
-     *         both {@code "a"} and {@code "a.b"} are present), or {@code mapSupplier} returns the
-     *         input map or reuses a map instance.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, a key is {@code null},
+     *         or flat keys conflict (for example, both {@code "a"} and {@code "a.b"} are present).
      */
-    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return unflatten(map, ".", mapSupplier);
     }
 
@@ -4819,20 +4841,18 @@ public final class Maps {
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
      * @param delimiter the non-empty delimiter that was used in the flattening process to concatenate keys.
-     * @param mapSupplier a function that creates a new Map instance given an expected size; must not be {@code null}
+     * @param mapSupplier a function that creates a new Map instance given an expected size;
      *        and must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map. Keys without the delimiter
      *         are copied as-is; no error is raised when the delimiter is absent.
-     * @throws IllegalArgumentException if {@code delimiter} is {@code null} or empty, a key is
-     *         {@code null}, flat keys conflict (for example, both {@code "a"} and
-     *         {@code "a.b"} are present), or {@code mapSupplier} returns the input map or reuses a
-     *         map instance.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, {@code delimiter} is
+     *         {@code null} or empty, a key is {@code null}, or flat keys conflict (for example, both
+     *         {@code "a"} and {@code "a.b"} are present).
      */
-    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter,
-            final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, "delimiter");
-        N.requireNonNull(mapSupplier, "mapSupplier");
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final IdentityHashMap<Map<String, Object>, Boolean> suppliedMaps = new IdentityHashMap<>();
 
@@ -4894,7 +4914,7 @@ public final class Maps {
 
     private static <M extends Map<String, Object>> M newUnflattenMap(final IntFunction<? extends M> mapSupplier, final int expectedSize,
             final IdentityHashMap<Map<String, Object>, Boolean> suppliedMaps) {
-        final M newMap = N.requireNonNull(mapSupplier.apply(expectedSize), "mapSupplier returned null");
+        final M newMap = N.checkArgNotNull(mapSupplier.apply(expectedSize), "mapSupplier returned null");
 
         if (suppliedMaps.put(newMap, Boolean.TRUE) != null) {
             throw new IllegalArgumentException("mapSupplier must return a distinct new map on every invocation and must not return the input map");
@@ -4949,13 +4969,12 @@ public final class Maps {
      *
      * @param <K> the key type
      * @param map the map whose keys are to be replaced; modified in-place. If {@code null} or empty, no action is taken.
-     * @param keyConverter the function applied to each existing key to produce the new key; must not be {@code null}
-     * @throws IllegalArgumentException if {@code keyConverter} is {@code null}.
+     * @param keyConverter the function applied to each existing key to produce the new key
      * @throws IllegalStateException if the converted keys contain duplicates (including multiple {@code null} values)
-     * @throws NullPointerException if the map implementation does not support {@code null} keys and {@code keyConverter} returns {@code null}.
+     * @throws IllegalArgumentException if {@code keyConverter} is {@code null}.
      */
     public static <K> void replaceKeys(final Map<K, ?> map, final Function<? super K, ? extends K> keyConverter)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         N.checkArgNotNull(keyConverter, cs.keyConverter);
 
         if (N.isEmpty(map)) {
@@ -5051,12 +5070,11 @@ public final class Maps {
      * @param <K> the key type
      * @param <V> the value type
      * @param map the map whose keys are to be replaced; modified in-place. If {@code null} or empty, no action is taken.
-     * @param keyConverter converts each existing key to its replacement key; must not be {@code null}
+     * @param keyConverter converts each existing key to its replacement key
      * @param mergeFunction merges values when multiple entries map to the same converted key. The function receives
      *        {@code (existingValue, incomingValue)} and returns the merged value. If it returns {@code null},
-     *        the entry is removed. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code keyConverter} or {@code mergeFunction} is {@code null}.
-     * @throws NullPointerException if the map implementation does not support {@code null} keys and {@code keyConverter} returns {@code null}.
+     *        the entry is removed.
+     * @throws IllegalArgumentException if any of {@code keyConverter}, {@code mergeFunction} is {@code null}.
      * @see #replaceKeys(Map, Function)
      */
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,

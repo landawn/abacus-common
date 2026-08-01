@@ -93,13 +93,14 @@ public interface ObjBooleanConsumer<T> extends Throwables.ObjBooleanConsumer<T, 
      * markln.accept(new StringBuilder(), true);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ObjBooleanConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ObjBooleanConsumer<T> andThen(final ObjBooleanConsumer<? super T> after) {
+    default ObjBooleanConsumer<T> andThen(final ObjBooleanConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);

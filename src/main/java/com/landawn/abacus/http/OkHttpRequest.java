@@ -58,6 +58,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.BufferedSource;
+import okio.ForwardingSource;
+import okio.Okio;
 
 /**
  * A fluent HTTP request builder and executor based on OkHttp.
@@ -122,6 +124,16 @@ public final class OkHttpRequest {
     private RequestBody body;
 
     private boolean closeHttpClientAfterExecution = false;
+
+    private static final class ExecutedResponse {
+        final Response response;
+        final OkHttpClient perRequestClient;
+
+        ExecutedResponse(final Response response, final OkHttpClient perRequestClient) {
+            this.response = response;
+            this.perRequestClient = perRequestClient;
+        }
+    }
 
     /**
      * Constructs an {@code OkHttpRequest} for the given target and client.
@@ -1421,22 +1433,29 @@ public final class OkHttpRequest {
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(httpMethod, "httpMethod");
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(resultClass, cs.resultClass);
         N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
 
         final boolean returningResponse = Response.class.equals(resultClass);
 
         Response resp = null;
+        ExecutedResponse executedResponse = null;
+        Throwable primaryFailure = null;
+        boolean responseCleanupManaged = false;
 
         try {
             final Request request = createRequest(httpMethod);
             // Defer per-request client shutdown when handing the Response back to the caller —
             // they need the client's dispatcher/connection-pool alive while reading the body.
-            resp = execute(request);
+            executedResponse = execute(request);
+            resp = executedResponse.response;
 
             if (returningResponse) {
-                return (T) attachCleanup(resp);
+                // attachCleanup either transfers cleanup to the returned response or performs it
+                // itself before propagating a construction failure.
+                responseCleanupManaged = true;
+                return (T) attachCleanup(resp, executedResponse.perRequestClient);
             }
 
             final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
@@ -1501,106 +1520,220 @@ public final class OkHttpRequest {
             // Parity with com.landawn.abacus.http.HttpRequest and http.v2.HttpRequest: surface
             // I/O failures (including non-2xx responses) as an unchecked UncheckedIOException so
             // callers are not forced into try/catch on the fluent API.
-            throw new UncheckedIOException(e);
+            final UncheckedIOException uncheckedFailure = new UncheckedIOException(e);
+            primaryFailure = uncheckedFailure;
+            throw uncheckedFailure;
+        } catch (final RuntimeException | Error e) {
+            primaryFailure = e;
+            throw e;
         } finally {
-            try {
-                if (!returningResponse && resp != null) {
-                    IOUtil.close(resp);
+            if (primaryFailure == null) {
+                // Preserve the established success-path cleanup behavior, including which cleanup
+                // failure is surfaced when more than one cleanup action fails.
+                try {
+                    if (!responseCleanupManaged && resp != null) {
+                        IOUtil.close(resp);
+                    }
+                } finally {
+                    if (!responseCleanupManaged) {
+                        doAfterExecution(executedResponse == null ? null : executedResponse.perRequestClient);
+                    }
                 }
-            } finally {
-                if (!returningResponse || resp == null) {
-                    doAfterExecution();
+            } else {
+                if (!responseCleanupManaged && resp != null) {
+                    try {
+                        IOUtil.close(resp);
+                    } catch (final RuntimeException | Error cleanupFailure) {
+                        if (cleanupFailure != primaryFailure) {
+                            primaryFailure.addSuppressed(cleanupFailure);
+                        }
+                    }
+                }
+
+                if (!responseCleanupManaged) {
+                    try {
+                        doAfterExecution(executedResponse == null ? null : executedResponse.perRequestClient);
+                    } catch (final RuntimeException | Error cleanupFailure) {
+                        if (cleanupFailure != primaryFailure) {
+                            primaryFailure.addSuppressed(cleanupFailure);
+                        }
+                    }
                 }
             }
         }
     }
 
-    private Response attachCleanup(final Response response) {
+    private Response attachCleanup(final Response response, final OkHttpClient perRequestClient) {
         final ResponseBody body = response.body();
 
         if (body == null) {
-            doAfterExecution();
+            doAfterExecution(perRequestClient);
             return response;
         }
 
-        return response.newBuilder().body(new ResponseBody() {
-            private final AtomicBoolean closed = new AtomicBoolean();
+        try {
+            return response.newBuilder().body(new ResponseBody() {
+                private final AtomicBoolean closed = new AtomicBoolean();
+                private final BufferedSource source = Okio.buffer(new ForwardingSource(body.source()) {
+                    @Override
+                    public void close() throws IOException {
+                        try {
+                            super.close();
+                        } catch (final IOException | RuntimeException | Error primaryFailure) {
+                            try {
+                                closeOnce();
+                            } catch (final RuntimeException | Error cleanupFailure) {
+                                if (cleanupFailure != primaryFailure) {
+                                    primaryFailure.addSuppressed(cleanupFailure);
+                                }
+                            }
 
-            @Override
-            public MediaType contentType() {
-                return body.contentType();
-            }
+                            throw primaryFailure;
+                        }
 
-            @Override
-            public long contentLength() {
-                return body.contentLength();
-            }
+                        closeOnce();
+                    }
+                });
 
-            @Override
-            public BufferedSource source() {
-                return body.source();
-            }
+                @Override
+                public MediaType contentType() {
+                    return body.contentType();
+                }
 
-            @Override
-            public void close() {
-                try {
-                    body.close();
-                } finally {
+                @Override
+                public long contentLength() {
+                    return body.contentLength();
+                }
+
+                @Override
+                public BufferedSource source() {
+                    return source;
+                }
+
+                @Override
+                public void close() {
+                    try {
+                        body.close();
+                    } catch (final RuntimeException | Error primaryFailure) {
+                        try {
+                            closeOnce();
+                        } catch (final RuntimeException | Error cleanupFailure) {
+                            if (cleanupFailure != primaryFailure) {
+                                primaryFailure.addSuppressed(cleanupFailure);
+                            }
+                        }
+
+                        throw primaryFailure;
+                    }
+
                     closeOnce();
                 }
-            }
 
-            private void closeOnce() {
-                // Response.close() may be reached concurrently through normal completion,
-                // cancellation, and error handling. Claim cleanup atomically so the per-request
-                // client is released exactly once.
-                if (closed.compareAndSet(false, true)) {
-                    doAfterExecution();
+                private void closeOnce() {
+                    // Response.close() may be reached concurrently through normal completion,
+                    // cancellation, and error handling. Claim cleanup atomically so the per-request
+                    // client is released exactly once.
+                    if (closed.compareAndSet(false, true)) {
+                        doAfterExecution(perRequestClient);
+                    }
+                }
+            }).build();
+        } catch (final RuntimeException | Error e) {
+            // The caller never received this response, so close both sides of the handoff here.
+            // Preserve the construction failure even if either cleanup operation also fails.
+            try {
+                response.close();
+            } catch (final RuntimeException | Error cleanupFailure) {
+                if (cleanupFailure != e) {
+                    e.addSuppressed(cleanupFailure);
                 }
             }
-        }).build();
+
+            try {
+                doAfterExecution(perRequestClient);
+            } catch (final RuntimeException | Error cleanupFailure) {
+                if (cleanupFailure != e) {
+                    e.addSuppressed(cleanupFailure);
+                }
+            }
+
+            throw e;
+        }
     }
 
-    private Response execute(final Request request) throws IOException {
+    private ExecutedResponse execute(final Request request) throws IOException {
         if (httpClientBuilder != null) {
-            final OkHttpClient builtClient = httpClientBuilder.build();
+            // OkHttpClient.Builder otherwise reuses the same Dispatcher and ConnectionPool in
+            // every client it builds. Raw responses may overlap sequentially, so each execution
+            // must own independent lifecycle resources that its response can safely shut down.
+            final OkHttpClient builtClient = httpClientBuilder.dispatcher(new Dispatcher()).connectionPool(new ConnectionPool()).build();
             try {
                 final Response response = builtClient.newCall(request).execute();
                 // clientBuilder() installs a request-owned dispatcher and connection pool. Defer
                 // their release until a typed response is consumed or a raw response is closed.
                 pendingPerRequestClient = builtClient;
 
-                return response;
-            } catch (final IOException | RuntimeException e) {
+                return new ExecutedResponse(response, builtClient);
+            } catch (final IOException | RuntimeException | Error e) {
                 // Failure path: the response was never returned, so cleanup must happen here.
-                builtClient.dispatcher().executorService().shutdown();
-                builtClient.connectionPool().evictAll();
+                try {
+                    shutdownClient(builtClient);
+                } catch (final RuntimeException | Error cleanupFailure) {
+                    if (cleanupFailure != e) {
+                        e.addSuppressed(cleanupFailure);
+                    }
+                }
 
                 throw e;
             }
         } else {
-            return httpClient.newCall(request).execute();
+            return new ExecutedResponse(httpClient.newCall(request).execute(), null);
         }
     }
 
-    /** Stash for a per-request built {@link OkHttpClient} that must outlive {@code execute()} so that
-     *  the caller can drain a returned {@code Response.class} body. {@link #doAfterExecution()} clears it. */
-    private OkHttpClient pendingPerRequestClient;
+    /** Most recently built per-request client, retained only for lifecycle visibility. Cleanup is
+     *  driven by the client captured in each {@link ExecutedResponse}, never by this shared slot. */
+    private volatile OkHttpClient pendingPerRequestClient;
 
     void doAfterExecution() {
-        if (pendingPerRequestClient != null) {
+        doAfterExecution(pendingPerRequestClient);
+    }
+
+    private void doAfterExecution(final OkHttpClient perRequestClient) {
+        if (perRequestClient != null) {
             try {
-                pendingPerRequestClient.dispatcher().executorService().shutdown();
-                pendingPerRequestClient.connectionPool().evictAll();
+                shutdownClient(perRequestClient);
             } finally {
-                pendingPerRequestClient = null;
+                // A later overlapping raw response may already own a newer per-request client.
+                // Closing this response must not clear or shut down that newer client's state.
+                if (pendingPerRequestClient == perRequestClient) {
+                    pendingPerRequestClient = null;
+                }
             }
         }
+
         if (closeHttpClientAfterExecution && httpClientBuilder == null && httpClient != DEFAULT_CLIENT) {
             // Timeout factories create and own this client; create(..., client) leaves this flag false.
-            httpClient.dispatcher().executorService().shutdown();
-            httpClient.connectionPool().evictAll();
+            shutdownClient(httpClient);
         }
+    }
+
+    private static void shutdownClient(final OkHttpClient client) {
+        try {
+            client.dispatcher().executorService().shutdown();
+        } catch (final RuntimeException | Error primaryFailure) {
+            try {
+                client.connectionPool().evictAll();
+            } catch (final RuntimeException | Error cleanupFailure) {
+                if (cleanupFailure != primaryFailure) {
+                    primaryFailure.addSuppressed(cleanupFailure);
+                }
+            }
+
+            throw primaryFailure;
+        }
+
+        client.connectionPool().evictAll();
     }
 
     private Request createRequest(final HttpMethod httpMethod) {
@@ -1668,8 +1801,11 @@ public final class OkHttpRequest {
      *
      * @param executor the executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response when the request finishes; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncGet(final Executor executor) {
+    public ContinuableFuture<Response> asyncGet(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::get, executor);
     }
 
@@ -1710,8 +1846,11 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> get(resultClass), executor);
     }
 
@@ -1750,8 +1889,11 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncPost(final Executor executor) {
+    public ContinuableFuture<Response> asyncPost(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::post, executor);
     }
 
@@ -1791,8 +1933,11 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> post(resultClass), executor);
     }
 
@@ -1831,8 +1976,11 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncPut(final Executor executor) {
+    public ContinuableFuture<Response> asyncPut(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::put, executor);
     }
 
@@ -1872,8 +2020,11 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> put(resultClass), executor);
     }
 
@@ -1912,8 +2063,11 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncPatch(final Executor executor) {
+    public ContinuableFuture<Response> asyncPatch(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::patch, executor);
     }
 
@@ -1953,8 +2107,11 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> patch(resultClass), executor);
     }
 
@@ -1991,8 +2148,11 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncDelete(final Executor executor) {
+    public ContinuableFuture<Response> asyncDelete(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::delete, executor);
     }
 
@@ -2030,8 +2190,11 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> delete(resultClass), executor);
     }
 
@@ -2068,8 +2231,11 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<Response> asyncHead(final Executor executor) {
+    public ContinuableFuture<Response> asyncHead(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(this::head, executor);
     }
 
@@ -2109,9 +2275,12 @@ public final class OkHttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) {
+    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> execute(httpMethod), executor);
     }
 
@@ -2152,9 +2321,13 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return ContinuableFuture.call(() -> execute(httpMethod, resultClass), executor);
     }
 }

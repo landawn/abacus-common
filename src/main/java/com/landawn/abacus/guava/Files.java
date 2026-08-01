@@ -145,9 +145,9 @@ import com.landawn.abacus.util.ImmutableList;
  *     .forEach(file -> processFile(file));
  *
  * // Path-based operations
- * List<Path> files = Files.listFiles(directory);
+ * ImmutableList<Path> entries = Files.listFiles(Paths.get("/home/user"));
  * Predicate<Path> isRegularFile = Files.isRegularFile();
- * files.stream().filter(isRegularFile).forEach(this::processPath);
+ * entries.stream().filter(isRegularFile).forEach(this::processPath);
  * }</pre>
  *
  * <p><b>Integration with Guava Sources and Sinks:</b>
@@ -1272,12 +1272,12 @@ public abstract class Files { //NOSONAR
      * }
      * }</pre>
      *
-     * @param dir the directory whose files should be listed.
-     * @return an immutable list of paths to files in the directory.
-     * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>.
+     * @param dir the directory whose entries should be listed
+     * @return an immutable list of paths to the entries (files and immediate subdirectories) in the directory
+     * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>
      * @throws NotDirectoryException if the file could not be opened because it is not a directory
-     *     <i>(optional specific exception)</i>.
-     * @throws IOException if an I/O error occurs.
+     *     <i>(optional specific exception)</i>
+     * @throws IOException if an I/O error occurs
      * @see IOUtil#listFiles(File)
      */
     public static ImmutableList<Path> listFiles(final Path dir) throws IOException {

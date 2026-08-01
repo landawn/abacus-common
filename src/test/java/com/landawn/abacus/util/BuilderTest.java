@@ -4331,11 +4331,10 @@ public class BuilderTest extends TestBase {
         assertTrue(result > 0);
     }
 
-    // --- ComparisonBuilder compare with Comparator when null ---
+    // --- ComparisonBuilder compare rejects a null Comparator ---
     @Test
-    public void testComparisonBuilder_compare_nullComparator() {
-        int result = Builder.compare("a", "a").compare("a", "b", (Comparator<String>) null).result();
-        assertTrue(result < 0);
+    public void testComparisonBuilder_compare_rejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Builder.compare("a", "a").compare("a", "b", (Comparator<String>) null));
     }
 
     // --- CompareNullLess with non-null values ---

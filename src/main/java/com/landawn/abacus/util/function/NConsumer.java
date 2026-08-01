@@ -113,13 +113,14 @@ public interface NConsumer<T> {
      * // Then stores each item
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code NConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default NConsumer<T> andThen(final NConsumer<? super T> after) {
+    default NConsumer<T> andThen(final NConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> {
             accept(args);
             after.accept(args);

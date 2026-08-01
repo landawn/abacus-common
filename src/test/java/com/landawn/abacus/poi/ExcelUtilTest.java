@@ -580,10 +580,8 @@ public class ExcelUtilTest extends TestBase {
         List<Object> headers = Arrays.asList("H");
         List<List<Object>> rows = Arrays.asList(Arrays.asList("V"));
 
-        ExcelUtil.writeRowsToSheet("Test", headers, rows, (Consumer<Sheet>) null, tempFile);
-
-        List<List<Object>> readRows = ExcelUtil.readRowsFromSheet(tempFile);
-        Assertions.assertEquals(2, readRows.size());
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ExcelUtil.writeRowsToSheet("Test", headers, rows, (Consumer<Sheet>) null, tempFile));
     }
 
     // ========== writeDatasetToSheet(String, Dataset, File) ==========
@@ -646,10 +644,8 @@ public class ExcelUtilTest extends TestBase {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("C"), N.toList(N.toList(3)));
 
-        ExcelUtil.writeDatasetToSheet("DS2", dataset, (Consumer<Sheet>) null, tempFile);
-
-        Dataset loaded = ExcelUtil.readDatasetFromSheet(tempFile);
-        Assertions.assertEquals(1, loaded.size());
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ExcelUtil.writeDatasetToSheet("DS2", dataset, (Consumer<Sheet>) null, tempFile));
     }
 
     @Test
@@ -659,9 +655,9 @@ public class ExcelUtilTest extends TestBase {
         Dataset dataset = N.newDataset(N.toList("A"), N.toList(N.toList(1)));
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> ExcelUtil.writeRowsToSheet("Rows", headers, rows, null, new ByteArrayOutputStream(), null));
+                () -> ExcelUtil.writeRowsToSheet("Rows", headers, rows, sheet -> { }, new ByteArrayOutputStream(), null));
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> ExcelUtil.writeDatasetToSheet("Dataset", dataset, null, new ByteArrayOutputStream(), null));
+                () -> ExcelUtil.writeDatasetToSheet("Dataset", dataset, sheet -> { }, new ByteArrayOutputStream(), null));
     }
 
     // ========== writeRowsToSheet - Various data types ==========
@@ -1509,7 +1505,7 @@ public class ExcelUtilTest extends TestBase {
 
     private byte[] writeXlsxToBytes(String sheetName, List<Object> headers, List<List<Object>> rows) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ExcelUtil.writeRowsToSheet(sheetName, headers, rows, (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+        ExcelUtil.writeRowsToSheet(sheetName, headers, rows, sheet -> { }, baos, ExcelFormat.XLSX);
         return baos.toByteArray();
     }
 
@@ -1669,7 +1665,7 @@ public class ExcelUtilTest extends TestBase {
     @Test
     public void test_writeRowsToSheet_OutputStream_Xlsx() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), sheet -> { }, baos, ExcelFormat.XLSX);
 
         try (InputStream is = new ByteArrayInputStream(baos.toByteArray())) {
             Dataset loaded = ExcelUtil.readDatasetFromSheet(is, 0, RowExtractors.DEFAULT);
@@ -1682,7 +1678,7 @@ public class ExcelUtilTest extends TestBase {
     public void test_writeRowsToSheet_OutputStream_Xls() throws Exception {
         // Explicit XLS format selection, independent of any filename.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), (Consumer<Sheet>) null, baos, ExcelFormat.XLS);
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), sheet -> { }, baos, ExcelFormat.XLS);
 
         byte[] bytes = baos.toByteArray();
         Assertions.assertTrue(bytes.length > 0);
@@ -1700,7 +1696,7 @@ public class ExcelUtilTest extends TestBase {
     public void test_writeRowsToSheet_OutputStream_NotClosed() throws Exception {
         CloseTrackingOutputStream os = new CloseTrackingOutputStream();
 
-        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), (Consumer<Sheet>) null, os, ExcelFormat.XLSX);
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a"), Arrays.asList(Arrays.asList("v")), sheet -> { }, os, ExcelFormat.XLSX);
 
         Assertions.assertTrue(os.flushed);
         Assertions.assertFalse(os.closed);
@@ -1711,7 +1707,7 @@ public class ExcelUtilTest extends TestBase {
         Dataset dataset = N.newDataset(N.toList("A", "B"), N.toList(N.toList(1, 2), N.toList(3, 4)));
 
         CloseTrackingOutputStream baos = new CloseTrackingOutputStream();
-        ExcelUtil.writeDatasetToSheet("DS", dataset, (Consumer<Sheet>) null, baos, ExcelFormat.XLSX);
+        ExcelUtil.writeDatasetToSheet("DS", dataset, sheet -> { }, baos, ExcelFormat.XLSX);
 
         Assertions.assertTrue(baos.flushed);
         Assertions.assertFalse(baos.closed);
@@ -1726,7 +1722,7 @@ public class ExcelUtilTest extends TestBase {
     @Test
     public void test_writeRowsToSheet_Path() throws Exception {
         File tempFile = createTempFile(".xlsx");
-        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), (Consumer<Sheet>) null, tempFile.toPath());
+        ExcelUtil.writeRowsToSheet("S", Arrays.asList("a", "b"), Arrays.asList(Arrays.asList("1", "2")), sheet -> { }, tempFile.toPath());
 
         Dataset loaded = ExcelUtil.readDatasetFromSheet(tempFile);
         Assertions.assertEquals(2, loaded.columnCount());
@@ -1737,7 +1733,7 @@ public class ExcelUtilTest extends TestBase {
     public void test_writeDatasetToSheet_Path() throws Exception {
         File tempFile = createTempFile(".xlsx");
         Dataset dataset = N.newDataset(N.toList("A"), N.toList(N.toList("v")));
-        ExcelUtil.writeDatasetToSheet("DS", dataset, (Consumer<Sheet>) null, tempFile.toPath());
+        ExcelUtil.writeDatasetToSheet("DS", dataset, sheet -> { }, tempFile.toPath());
 
         Dataset loaded = ExcelUtil.readDatasetFromSheet(tempFile);
         Assertions.assertEquals(1, loaded.columnCount());

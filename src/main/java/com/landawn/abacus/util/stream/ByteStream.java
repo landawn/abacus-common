@@ -671,7 +671,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -705,7 +705,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -1847,10 +1847,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the stream to merge with
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the merged stream
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -1876,7 +1875,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the ByteStream to be combined with the current ByteStream. Must be {@code non-null}.
-     * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
+     * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStream
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(ByteStream, byte, byte, ByteBinaryOperator)
@@ -1904,7 +1903,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param b the second ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param c the third ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
-     * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
+     * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStreams
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(ByteStream, ByteStream, byte, byte, byte, ByteTernaryOperator)
@@ -1932,7 +1931,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param b the ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param valueForNoneA the default value to use for the current ByteStream when it runs out of elements
      * @param valueForNoneB the default value to use for the given ByteStream when it runs out of elements
-     * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
+     * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStream
      * @throws IllegalStateException if the stream is already closed
      */
@@ -1963,7 +1962,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneA the default value to use for the current ByteStream when it runs out of elements
      * @param valueForNoneB the default value to use for the second ByteStream when it runs out of elements
      * @param valueForNoneC the default value to use for the third ByteStream when it runs out of elements
-     * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream. Must be {@code non-null}.
+     * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStreams
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2045,8 +2044,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * Returns a ByteStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier is memoized and invoked at most once. Closing the returned stream before traversal may still
-     * invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
+     * the supplier so the supplied stream can be closed.
      *
      * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToByte(it -> it.get())}.
      *
@@ -2062,21 +2062,21 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     return ByteStream.of(data);
      * });
      * // loadBytesFromNetwork() is not called until deferred is consumed or closed
-     *
-     * // Null supplier throws IllegalArgumentException
-     * ByteStream.defer(null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param supplier the supplier that provides the ByteStream
      * @return a new ByteStream supplied by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see Stream#defer(Supplier)
      */
     public static ByteStream defer(final Supplier<ByteStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<ByteStream> s = Fn.memoize(supplier);
-        return Stream.just(s).flatMapToByte(Supplier::get).onClose(newCloseHandler(s));
+        return ByteStream.of(ByteIterator.defer(() -> {
+            final ByteStream source = s.get();
+            return source == null ? ByteIterator.empty() : source.iteratorEx();
+        })).onClose(newCloseHandler(s));
     }
 
     /**
@@ -3013,12 +3013,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a ByteSupplier that provides the next byte in the iteration
      * @return a ByteStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>next</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static ByteStream iterate(final BooleanSupplier hasNext, final ByteSupplier next) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(next);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(next, cs.next);
 
         return new IteratorByteStream(new ByteIteratorEx() {
             private boolean hasMore = true;
@@ -3066,12 +3066,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a ByteStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, BooleanSupplier, UnaryOperator)
      */
     public static ByteStream iterate(final byte init, final BooleanSupplier hasNext, final ByteUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte cur = 0;
@@ -3125,12 +3125,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param hasNext determines if the returned stream has next by hasNext.test(init) for the first time and hasNext.test(f.apply(previous)) for remaining.
      * @param f a function to apply to the previous element to generate the next element
      * @return a ByteStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, Predicate, UnaryOperator)
      */
     public static ByteStream iterate(final byte init, final BytePredicate hasNext, final ByteUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte cur = 0;
@@ -3179,11 +3179,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an infinite ByteStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>f</i> is null
+     * @throws IllegalArgumentException if {@code f} is {@code null}
      * @see Stream#iterate(Object, UnaryOperator)
      */
     public static ByteStream iterate(final byte init, final ByteUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte cur = 0;
@@ -3219,11 +3219,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param s the ByteSupplier that provides the elements of the stream
      * @return an infinite ByteStream generated by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code s} is {@code null}
      * @see Stream#generate(Supplier)
      */
     public static ByteStream generate(final ByteSupplier s) throws IllegalArgumentException {
-        N.checkArgNotNull(s);
+        N.checkArgNotNull(s, cs.s);
 
         return new IteratorByteStream(new ByteIteratorEx() {
             @Override
@@ -3468,13 +3468,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first byte array (may be {@code null} or empty — yields an empty stream)
      * @param b the second byte array (may be {@code null} or empty — yields an empty stream)
-     * @param zipFunction the function to combine elements from both arrays; must be non-null
-     *        if both input arrays are non-empty
+     * @param zipFunction the function to combine elements from both arrays
      * @return a stream of combined values, or an empty stream if either input array is
      *         {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], BiFunction)
      */
-    public static ByteStream zip(final byte[] a, final byte[] b, final ByteBinaryOperator zipFunction) {
+    public static ByteStream zip(final byte[] a, final byte[] b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b)) {
             return empty();
         }
@@ -3519,13 +3521,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first byte array (may be {@code null} or empty — yields an empty stream)
      * @param b the second byte array (may be {@code null} or empty — yields an empty stream)
      * @param c the third byte array (may be {@code null} or empty — yields an empty stream)
-     * @param zipFunction the function to combine elements from all three arrays; must be non-null
-     *        if all input arrays are non-empty
+     * @param zipFunction the function to combine elements from all three arrays
      * @return a stream of combined values, or an empty stream if any input array is
      *         {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], TriFunction)
      */
-    public static ByteStream zip(final byte[] a, final byte[] b, final byte[] c, final ByteTernaryOperator zipFunction) {
+    public static ByteStream zip(final byte[] a, final byte[] b, final byte[] c, final ByteTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b) || N.isEmpty(c)) {
             return empty();
         }
@@ -3568,11 +3572,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first ByteIterator. Can be {@code null} (treated as empty)
      * @param b the second ByteIterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine elements from both iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, BiFunction)
      */
-    public static ByteStream zip(final ByteIterator a, final ByteIterator b, final ByteBinaryOperator zipFunction) {
+    public static ByteStream zip(final ByteIterator a, final ByteIterator b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorByteStream(new ByteIteratorEx() {
             private final ByteIterator iterA = a == null ? ByteIterator.empty() : a;
             private final ByteIterator iterB = b == null ? ByteIterator.empty() : b;
@@ -3609,11 +3616,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first ByteIterator. Can be {@code null} (treated as empty)
      * @param b the second ByteIterator. Can be {@code null} (treated as empty)
      * @param c the third ByteIterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine elements from all three iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, TriFunction)
      */
-    public static ByteStream zip(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteTernaryOperator zipFunction) {
+    public static ByteStream zip(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorByteStream(new ByteIteratorEx() {
             private final ByteIterator iterA = a == null ? ByteIterator.empty() : a;
             private final ByteIterator iterB = b == null ? ByteIterator.empty() : b;
@@ -3649,11 +3660,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first ByteStream
      * @param b the second ByteStream
-     * @param zipFunction the function to combine elements from both streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteBinaryOperator zipFunction) {
+    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -3677,11 +3691,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first ByteStream
      * @param b the second ByteStream
      * @param c the third ByteStream
-     * @param zipFunction the function to combine elements from all three streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
-    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction) {
+    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
@@ -3705,11 +3723,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * @param streams the collection of ByteStream instances to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all streams.
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, Function)
      */
-    public static ByteStream zip(final Collection<? extends ByteStream> streams, final ByteNFunction<Byte> zipFunction) {
+    public static ByteStream zip(final Collection<? extends ByteStream> streams, final ByteNFunction<Byte> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, zipFunction).mapToByte(ToByteFunction.UNBOX);
     }
@@ -3734,11 +3755,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param b the second byte array
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
-     * @param zipFunction the function to combine elements from both arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      */
-    public static ByteStream zip(final byte[] a, final byte[] b, final byte valueForNoneA, final byte valueForNoneB, final ByteBinaryOperator zipFunction) {
+    public static ByteStream zip(final byte[] a, final byte[] b, final byte valueForNoneA, final byte valueForNoneB, final ByteBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b)) {
             return empty();
         }
@@ -3789,12 +3814,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
      * @param valueForNoneC the default value to use if the third array is shorter
-     * @param zipFunction the function to combine elements from all three arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      */
     public static ByteStream zip(final byte[] a, final byte[] b, final byte[] c, final byte valueForNoneA, final byte valueForNoneB, final byte valueForNoneC,
-            final ByteTernaryOperator zipFunction) {
+            final ByteTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b) && N.isEmpty(c)) {
             return empty();
         }
@@ -3843,12 +3871,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param b the second ByteIterator, may be {@code null} (treated as empty)
      * @param valueForNoneA the default value to use if the first iterator is shorter
      * @param valueForNoneB the default value to use if the second iterator is shorter
-     * @param zipFunction the function to combine elements from both iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static ByteStream zip(final ByteIterator a, final ByteIterator b, final byte valueForNoneA, final byte valueForNoneB,
-            final ByteBinaryOperator zipFunction) {
+            final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorByteStream(new ByteIteratorEx() {
             private final ByteIterator iterA = a == null ? ByteIterator.empty() : a;
             private final ByteIterator iterB = b == null ? ByteIterator.empty() : b;
@@ -3892,12 +3923,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneA the default value to use if the first iterator is shorter
      * @param valueForNoneB the default value to use if the second iterator is shorter
      * @param valueForNoneC the default value to use if the third iterator is shorter
-     * @param zipFunction the function to combine elements from all three iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static ByteStream zip(final ByteIterator a, final ByteIterator b, final ByteIterator c, final byte valueForNoneA, final byte valueForNoneB,
-            final byte valueForNoneC, final ByteTernaryOperator zipFunction) {
+            final byte valueForNoneC, final ByteTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorByteStream(new ByteIteratorEx() {
             private final ByteIterator iterA = a == null ? ByteIterator.empty() : a;
             private final ByteIterator iterB = b == null ? ByteIterator.empty() : b;
@@ -3942,12 +3976,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param b the second ByteStream
      * @param valueForNoneA the default value to use if the first stream is shorter
      * @param valueForNoneB the default value to use if the second stream is shorter
-     * @param zipFunction the function to combine elements from both streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final byte valueForNoneA, final byte valueForNoneB,
-            final ByteBinaryOperator zipFunction) {
+            final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -3974,12 +4011,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneA the default value to use if the first stream is shorter
      * @param valueForNoneB the default value to use if the second stream is shorter
      * @param valueForNoneC the default value to use if the third stream is shorter
-     * @param zipFunction the function to combine elements from all three streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB,
-            final byte valueForNoneC, final ByteTernaryOperator zipFunction) {
+            final byte valueForNoneC, final ByteTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
@@ -4006,12 +4046,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param streams the collection of ByteStream instances to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the default values to use for exhausted streams, must have the same size as the streams collection
-     * @param zipFunction the function to combine elements from all streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all streams.
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams collection
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, List, Function)
      */
-    public static ByteStream zip(final Collection<? extends ByteStream> streams, final byte[] valuesForNone, final ByteNFunction<Byte> zipFunction) {
+    public static ByteStream zip(final Collection<? extends ByteStream> streams, final byte[] valuesForNone, final ByteNFunction<Byte> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, valuesForNone, zipFunction).mapToByte(ToByteFunction.UNBOX);
     }
@@ -4030,13 +4074,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first byte array
      * @param b the second byte array
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the two input arrays
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
-    public static ByteStream merge(final byte[] a, final byte[] b, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final byte[] a, final byte[] b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
@@ -4089,13 +4133,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first byte array
      * @param b the second byte array
      * @param c the third byte array
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the three input arrays
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
-    public static ByteStream merge(final byte[] a, final byte[] b, final byte[] c, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final byte[] a, final byte[] b, final byte[] c, final ByteBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), ByteStream.of(c).iteratorEx(), nextSelector);
     }
@@ -4114,13 +4161,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first ByteIterator
      * @param b the second ByteIterator
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the two input iterators
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
-    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new IteratorByteStream(new ByteIteratorEx() {
@@ -4201,13 +4248,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first ByteIterator
      * @param b the second ByteIterator
      * @param c the third ByteIterator
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the three input iterators
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
-    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
@@ -4226,13 +4276,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param a the first ByteStream
      * @param b the second ByteStream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the two input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
@@ -4254,13 +4304,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param a the first ByteStream
      * @param b the second ByteStream
      * @param c the third ByteStream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the three input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
-    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteStream c, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteStream c, final ByteBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -4280,13 +4333,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * @param streams the collection of ByteStream instances to merge; a {@code null} collection and {@code null} elements are treated as empty
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the input ByteStreams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
-    public static ByteStream merge(final Collection<? extends ByteStream> streams, final ByteBiFunction<MergeResult> nextSelector) {
+    public static ByteStream merge(final Collection<? extends ByteStream> streams, final ByteBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {

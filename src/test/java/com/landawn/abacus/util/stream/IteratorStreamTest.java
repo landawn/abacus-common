@@ -466,7 +466,7 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testSplitWithNullCollectionSupplier() {
         Stream<Integer> stream = createStream(Arrays.asList(1, 2, 3, 4, 5));
-        assertThrows(IllegalArgumentException.class, () -> stream.split(2, (IntFunction<List<Integer>>) null));
+        assertThrows(IllegalArgumentException.class, () -> stream.split(2, (IntFunction<List<Integer>>) null).first());
     }
 
     @Test
@@ -760,6 +760,15 @@ public class IteratorStreamTest extends TestBase {
         List<Integer> result = createStream(Arrays.asList(3, 1, 2)).top(Integer.MAX_VALUE, Comparator.naturalOrder()).toList();
         assertEquals(3, result.size());
         assertTrue(result.containsAll(Arrays.asList(1, 2, 3)));
+    }
+
+    @Test
+    public void testTopSupportsNullWhenComparatorDoes() {
+        List<Integer> result = createStream(Arrays.asList(1, null, 2)).top(2, Comparator.nullsLast(Comparator.naturalOrder())).toList();
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(null));
     }
 
     @Test
@@ -1214,19 +1223,12 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testMinMaxKthLargest_NullComparatorWithNullElements() {
+    public void testMinMaxKthLargest_RejectNullComparator() {
         List<Integer> values = Arrays.asList(null, 2, null, 1);
 
-        Optional<Integer> min = createStream(values).min(null);
-        Optional<Integer> max = createStream(values).max(null);
-        Optional<Integer> kth = createStream(Arrays.asList(3, 2, 1)).kthLargest(2, null);
-
-        assertTrue(min.isPresent());
-        assertEquals(Integer.valueOf(1), min.get());
-        assertTrue(max.isPresent());
-        assertEquals(Integer.valueOf(2), max.get());
-        assertTrue(kth.isPresent());
-        assertEquals(Integer.valueOf(2), kth.get());
+        assertThrows(IllegalArgumentException.class, () -> createStream(values).min(null));
+        assertThrows(IllegalArgumentException.class, () -> createStream(values).max(null));
+        assertThrows(IllegalArgumentException.class, () -> createStream(Arrays.asList(3, 2, 1)).kthLargest(2, null));
     }
 
     @Test
@@ -1269,6 +1271,13 @@ public class IteratorStreamTest extends TestBase {
     @Test
     public void testKthLargestHugeRankDoesNotPreallocateFromRank() {
         assertFalse(createStream(Arrays.asList(3, 1, 2)).kthLargest(Integer.MAX_VALUE, Comparator.naturalOrder()).isPresent());
+    }
+
+    @Test
+    public void testKthLargestSupportsNonSelectedNull() {
+        Optional<Integer> result = createStream(Arrays.asList(1, null, 3, 2)).kthLargest(2, Comparator.nullsFirst(Comparator.naturalOrder()));
+
+        assertEquals(Integer.valueOf(2), result.get());
     }
 
     @Test

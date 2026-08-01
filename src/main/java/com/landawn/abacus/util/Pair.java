@@ -467,14 +467,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the condition to evaluate against the current left and right values;
-     *                  must not be {@code null}
+     *
      * @param newLeft the new value to assign to the left element if the predicate passes;
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setLeftIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft) throws E {
+    public <E extends Exception> boolean setLeftIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, right)) {
             setLeft(newLeft);
             return true;
@@ -506,14 +509,17 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the condition to evaluate against the current left and right values;
-     *                  must not be {@code null}
+     *
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setRightIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final R newRight) throws E {
+    public <E extends Exception> boolean setRightIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final R newRight)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, right)) {
             setRight(newRight);
             return true;
@@ -551,16 +557,19 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the condition to evaluate against the current left and right values;
-     *                  must not be {@code null}
+     *
      * @param newLeft  the new value to assign to the left element if the predicate passes;
      *                 may be {@code null}
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if both elements were updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft, final R newRight) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft, final R newRight)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, right)) {
             setLeft(newLeft);
             setRight(newRight);
@@ -704,13 +713,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed on each element; must accept a common
-     *                 supertype of both L and R (typically {@code Object}); must not be {@code null}.
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     *                 supertype of both L and R (typically {@code Object});
      * @throws E if the consumer throws an exception.
      * @throws ClassCastException if the consumer cannot accept the runtime types of the elements.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-        N.checkArgNotNull(consumer);
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer);
 
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -738,11 +747,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with the left and right elements as arguments;
-     *               must not be {@code null}.
-     * @throws NullPointerException if {@code action} is {@code null}.
+     *               must not be {@code null}
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(left, right);
     }
 
@@ -767,12 +778,13 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with this pair as the argument;
-     *               must not be {@code null}.
-     * @throws NullPointerException if {@code action} is {@code null}.
+     * @param action the action to be performed with this pair as the argument; must not be {@code null}
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(this);
     }
 
@@ -794,12 +806,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper function may throw.
-     * @param mapper the function to apply to the left and right elements; must not be {@code null}.
+     * @param mapper the function to apply to the left and right elements; must not be {@code null}
      * @return the result of applying the mapper function to both elements.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper function throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(left, right);
     }
 
@@ -820,12 +834,14 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper function may throw.
-     * @param mapper the function to apply to this pair; must not be {@code null}.
+     * @param mapper the function to apply to this pair; must not be {@code null}
      * @return the result of applying the mapper function to this pair.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper function throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(this);
     }
 
@@ -851,13 +867,16 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with the left and right elements; must not be {@code null}.
+     * @param predicate the condition to test with the left and right elements;
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate) throws E {
+    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate.test(left, right) ? Optional.of(this) : Optional.empty();
     }
 
@@ -884,13 +903,15 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with this pair; must not be {@code null}.
+     * @param predicate the condition to test with this pair;
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E {
+    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
     }
 

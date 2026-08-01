@@ -228,6 +228,12 @@ public class AbstractTypeTest extends TestBase {
     }
 
     @Test
+    @DisplayName("Test isTemporal()")
+    public void testIsTemporal() {
+        assertFalse(stringType.isTemporal());
+    }
+
+    @Test
     @DisplayName("Test isPrimitiveArray()")
     public void testIsPrimitiveArray() {
         assertFalse(stringType.isPrimitiveArray());

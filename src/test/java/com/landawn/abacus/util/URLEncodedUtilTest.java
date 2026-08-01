@@ -688,8 +688,8 @@ public class URLEncodedUtilTest extends AbstractTest {
 
     @Test
     public void testDecodeMapSupplierValidationIsEager() {
-        assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, (Supplier<Map<String, String>>) null));
-        assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, () -> null));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, (Supplier<Map<String, String>>) null));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, () -> null));
     }
 
     @Test
@@ -1162,6 +1162,15 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals("http://h/s?q=a%20b", URLEncodedUtil.encode("http://h/s", "q=a%20b"));
         assertEquals("http://h/s?q=a+b", URLEncodedUtil.encode("http://h/s", "q=a+b"));
         assertEquals("http://h/s?x=1&q=2", URLEncodedUtil.encode("http://h/s?x=1", "q=2")); // existing query joined with &
+    }
+
+    @Test
+    public void testEncodeStandaloneParameterStringPreservesDuplicateNames() {
+        assertEquals("a=1&a=2&q=hello+world", URLEncodedUtil.encode((Object) " a = 1 & a = 2 & q = hello world "));
+
+        final StringBuilder output = new StringBuilder();
+        URLEncodedUtil.encode("a=1&a=2", StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, output);
+        assertEquals("a=1&a=2", output.toString());
     }
 
 }

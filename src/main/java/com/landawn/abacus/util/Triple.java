@@ -532,9 +532,12 @@ public final class Triple<L, M, R> implements Mutable {
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setLeftIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft) throws E {
+    public <E extends Exception> boolean setLeftIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, middle, right)) {
             setLeft(newLeft);
             return true;
@@ -573,9 +576,12 @@ public final class Triple<L, M, R> implements Mutable {
      *                  may be {@code null}
      * @return {@code true} if the middle element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setMiddleIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final M newMiddle) throws E {
+    public <E extends Exception> boolean setMiddleIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final M newMiddle)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, middle, right)) {
             setMiddle(newMiddle);
             return true;
@@ -614,9 +620,12 @@ public final class Triple<L, M, R> implements Mutable {
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setRightIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final R newRight) throws E {
+    public <E extends Exception> boolean setRightIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final R newRight)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, middle, right)) {
             setRight(newRight);
             return true;
@@ -665,10 +674,12 @@ public final class Triple<L, M, R> implements Mutable {
      *                  may be {@code null}
      * @return {@code true} if all three elements were updated, {@code false} otherwise
      * @throws E if the predicate throws an exception
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public <E extends Exception> boolean setIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft, final M newMiddle,
-            final R newRight) throws E {
+            final R newRight) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(left, middle, right)) {
             setLeft(newLeft);
             setMiddle(newMiddle);
@@ -801,15 +812,15 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the consumer function to apply to each element; must accept
-     *                 a common supertype of L, M, and R; must not be {@code null}.
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     *                 a common supertype of L, M, and R;
      * @throws ClassCastException if the consumer's accepted type is not a common supertype of
      *         the runtime types of all three elements
      * @throws E if the consumer throws an exception.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws IllegalArgumentException, E {
-        N.checkArgNotNull(consumer);
+    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer);
 
         final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
 
@@ -834,10 +845,12 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the tri-consumer action to apply to the three elements.
-     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(left, middle, right);
     }
 
@@ -856,10 +869,12 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the consumer action to apply to this Triple.
-     * @throws NullPointerException if {@code action} is {@code null}.
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Triple<L, M, R>, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Triple<L, M, R>, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(this);
     }
 
@@ -878,10 +893,13 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the tri-function to apply to the three elements.
      * @return the result of applying the mapper function, may be {@code null}.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> mapper)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(left, middle, right);
     }
 
@@ -902,10 +920,12 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the function to apply to this Triple.
      * @return the result of applying the mapper function, may be {@code null}.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapper throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(this);
     }
 
@@ -926,10 +946,13 @@ public final class Triple<L, M, R> implements Mutable {
      * @param predicate the tri-predicate to test the three elements.
      * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate) throws E {
+    public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate.test(left, middle, right) ? Optional.of(this) : Optional.empty();
     }
 
@@ -950,10 +973,13 @@ public final class Triple<L, M, R> implements Mutable {
      * @param predicate the predicate to test this Triple.
      * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.Predicate<? super Triple<L, M, R>, E> predicate) throws E {
+    public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.Predicate<? super Triple<L, M, R>, E> predicate)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
     }
 

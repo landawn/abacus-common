@@ -4148,7 +4148,7 @@ public class EntryStreamTest extends TestBase {
         assertFalse(called.get());
         assertEquals(5, stream.count());
         assertTrue(called.get());
-    }
+    } 
 
     @Test
     public void testOfNullable() {

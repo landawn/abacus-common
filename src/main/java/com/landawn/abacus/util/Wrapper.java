@@ -176,11 +176,11 @@ public abstract class Wrapper<T> implements Immutable {
      * @param value the value to be wrapped; can be {@code null}, in which case the supplied
      *              functions must accept {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
-     *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
+     * and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;
-     *                       must not be {@code null} and must implement symmetric/transitive equality.
+     * and must implement symmetric/transitive equality.
      * @return a Wrapper instance with the specified custom hash and equals behavior.
-     * @throws IllegalArgumentException if {@code hashFunction} or {@code equalsFunction} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code hashFunction}, {@code equalsFunction} is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction)
             throws IllegalArgumentException {
@@ -232,14 +232,12 @@ public abstract class Wrapper<T> implements Immutable {
      * @param value the value to be wrapped; can be {@code null}, in which case all supplied
      *              functions must accept {@code null}.
      * @param hashFunction the function to calculate the hash code of the wrapped value;
-     *                     must not be {@code null} and must be consistent with {@code equalsFunction}.
+     * and must be consistent with {@code equalsFunction}.
      * @param equalsFunction the function to compare the wrapped value with other objects;
-     *                       must not be {@code null} and must implement symmetric/transitive equality.
-     * @param toStringFunction the function to generate string representation of the wrapped value;
-     *                         must not be {@code null}.
+     * and must implement symmetric/transitive equality.
+     * @param toStringFunction the function to generate string representation of the wrapped value.
      * @return a Wrapper instance with the specified custom hash, equals, and toString behavior.
-     * @throws IllegalArgumentException if any of the function parameters ({@code hashFunction},
-     *                                  {@code equalsFunction}, or {@code toStringFunction}) is {@code null}.
+     * @throws IllegalArgumentException if any of {@code hashFunction}, {@code equalsFunction}, {@code toStringFunction} is {@code null}.
      */
     public static <T> Wrapper<T> of(final T value, final ToIntFunction<? super T> hashFunction, final BiPredicate<? super T, ? super T> equalsFunction,
             final Function<? super T, String> toStringFunction) throws IllegalArgumentException {

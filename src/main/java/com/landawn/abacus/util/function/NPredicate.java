@@ -137,13 +137,14 @@ public interface NPredicate<T> {
      * combined.test(10, 20, 30);   // returns true (all positive AND sum < 100)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default NPredicate<T> and(final NPredicate<? super T> other) {
+    default NPredicate<T> and(final NPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) && other.test(t);
     }
 
@@ -176,13 +177,14 @@ public interface NPredicate<T> {
      * anyInvalid.test("hello", "", "world");   // returns true (one is empty)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default NPredicate<T> or(final NPredicate<? super T> other) {
+    default NPredicate<T> or(final NPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) || other.test(t);
     }
 }

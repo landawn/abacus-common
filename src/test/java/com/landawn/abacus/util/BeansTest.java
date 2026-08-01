@@ -4795,15 +4795,14 @@ public class BeansTest extends TestBase {
 
     @Test
     public void testCopyAs_SelectProps_NullConverter() {
-        assertThrows(NullPointerException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name", "age"), null, SimpleBean.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name", "age"), null, SimpleBean.class));
     }
 
     @Test
     public void testCopyAs_selectPropNames_nullConverter() {
         SimpleBean source = new SimpleBean("Ivan", 50);
-        // When converter is null, use identity
-        // Test that NullPointerException is thrown for null converter
-        assertThrows(NullPointerException.class, () -> Beans.copyAs(source, Arrays.asList("name"), null, SimpleBean.class));
+        // A null converter is rejected as an invalid argument.
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(source, Arrays.asList("name"), null, SimpleBean.class));
     }
 
     // ===== copyAs/copy exception behavior documented in @throws clauses =====

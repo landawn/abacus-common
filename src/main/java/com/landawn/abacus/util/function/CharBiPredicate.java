@@ -173,13 +173,14 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = combined.test('A', 'B');   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default CharBiPredicate and(final CharBiPredicate other) {
+    default CharBiPredicate and(final CharBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -198,13 +199,14 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result = combined.test('1', '2');   // Returns true (both are digits)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default CharBiPredicate or(final CharBiPredicate other) {
+    default CharBiPredicate or(final CharBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

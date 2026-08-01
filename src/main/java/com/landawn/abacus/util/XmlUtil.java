@@ -16,8 +16,6 @@ package com.landawn.abacus.util;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +24,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1044,12 +1044,15 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param source The source XMLStreamReader to be filtered
-     * @param filter The StreamFilter to apply to the source
+     * @param filter The StreamFilter to apply to the source. Must not be {@code null}.
      * @return The filtered XMLStreamReader
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws RuntimeException if an XMLStreamException occurs
      * @see XMLInputFactory#createFilteredReader(XMLStreamReader, StreamFilter)
      */
-    public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter) {
+    public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter) throws IllegalArgumentException {
+        N.checkArgNotNull(filter, cs.filter);
+
         synchronized (xmlInputFactory) {
             try {
                 return xmlInputFactory.createFilteredReader(source, filter);

@@ -55,13 +55,14 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * BooleanUnaryOperator doubleNot = not.compose(not);   // Identity operation
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(BooleanUnaryOperator)
      */
-    default BooleanUnaryOperator compose(final BooleanUnaryOperator before) {
+    default BooleanUnaryOperator compose(final BooleanUnaryOperator before) throws IllegalArgumentException {
         N.checkArgNotNull(before, cs.before);
+
         return v -> applyAsBoolean(before.applyAsBoolean(v));
     }
 
@@ -75,13 +76,14 @@ public interface BooleanUnaryOperator extends Throwables.BooleanUnaryOperator<Ru
      * BooleanUnaryOperator doubleNot = not.andThen(not);   // Identity operation
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(BooleanUnaryOperator)
      */
-    default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) {
+    default BooleanUnaryOperator andThen(final BooleanUnaryOperator after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return t -> after.applyAsBoolean(applyAsBoolean(t));
     }
 

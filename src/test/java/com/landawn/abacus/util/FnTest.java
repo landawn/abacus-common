@@ -231,7 +231,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMemoizeFunctionRejectsNullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.memoize((java.util.function.Function<Object, Object>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.memoize((java.util.function.Function<Object, Object>) null));
     }
 
     @Test
@@ -263,6 +263,197 @@ public class FnTest extends TestBase {
         assertEquals("null", memoized.apply(null));
         assertEquals("null", memoized.apply(null));
         assertEquals("HELLO", memoized.apply("hello"));
+    }
+
+    @Test
+    public void testMemoizeFunction_recursiveNullKeyFailsFastAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Function<String, String>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> {
+            attempts.incrementAndGet();
+            return holder[0].apply(key);
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertEquals(2, attempts.get(), "Failed null-key computations must remain retryable");
+    }
+
+    @Test
+    public void testMemoizeFunction_recursiveNonNullKeyAlreadyFailsFastAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Function<String, String>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> {
+            attempts.incrementAndGet();
+            return holder[0].apply(key);
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertEquals(2, attempts.get(), "Failed keyed computations must remain retryable");
+    }
+
+    @Test
+    public void testMemoizeFunction_swallowedRecursiveNullKeyStillFailsAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Function<String, String>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> {
+            attempts.incrementAndGet();
+
+            try {
+                holder[0].apply(key);
+            } catch (final IllegalStateException ignored) {
+                // A recursive failure must invalidate the outer computation even if caught here.
+            }
+
+            return "must-not-be-cached";
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
+    public void testMemoizeFunction_swallowedRecursiveNonNullKeyStillFailsAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Function<String, String>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> {
+            attempts.incrementAndGet();
+
+            try {
+                holder[0].apply(key);
+            } catch (final IllegalStateException ignored) {
+                // A recursive failure must invalidate the outer computation even if caught here.
+            }
+
+            return "must-not-be-cached";
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
+    public void testMemoizeFunction_distinctKeyRecursionRemainsSupported() {
+        @SuppressWarnings("unchecked")
+        final Function<Integer, Integer>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> key == 0 ? 0 : holder[0].apply(key - 1) + 1);
+
+        assertEquals(4, holder[0].apply(4));
+        assertEquals(4, holder[0].apply(4));
+    }
+
+    @Test
+    public void testMemoizeFunction_distinctCollidingKeyRecursionRemainsSupported() {
+        final class CollidingKey {
+            private final int value;
+
+            private CollidingKey(final int value) {
+                this.value = value;
+            }
+
+            @Override
+            public int hashCode() {
+                return 1;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                return obj instanceof CollidingKey && value == ((CollidingKey) obj).value;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        final Function<CollidingKey, Integer>[] holder = new Function[1];
+        holder[0] = Fn.memoize(key -> key.value == 0 ? 0 : holder[0].apply(new CollidingKey(key.value - 1)) + 1);
+
+        assertEquals(4, holder[0].apply(new CollidingKey(4)));
+        assertEquals(4, holder[0].apply(new CollidingKey(4)));
+    }
+
+    @Test
+    public void testMemoizeFunction_nullAndNonNullCrossCallsDoNotDeadlock() throws Exception {
+        final CountDownLatch nullCallbackEntered = new CountDownLatch(1);
+        final CountDownLatch nonNullWorkerStarted = new CountDownLatch(1);
+        final CountDownLatch nonNullCallbackEntered = new CountDownLatch(1);
+        final AtomicReference<Thread> dedicatedNonNullWorker = new AtomicReference<>();
+        final AtomicReference<String> nullResult = new AtomicReference<>();
+        final AtomicReference<String> nonNullResult = new AtomicReference<>();
+        final AtomicReference<Throwable> nullFailure = new AtomicReference<>();
+        final AtomicReference<Throwable> nonNullFailure = new AtomicReference<>();
+        @SuppressWarnings("unchecked")
+        final Function<String, String>[] holder = new Function[1];
+
+        holder[0] = Fn.memoize(key -> {
+            if (key == null) {
+                nullCallbackEntered.countDown();
+
+                try {
+                    assertTrue(nonNullWorkerStarted.await(5, TimeUnit.SECONDS));
+                    nonNullCallbackEntered.await(1, TimeUnit.SECONDS);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw ExceptionUtil.toRuntimeException(e);
+                }
+
+                return "null->" + holder[0].apply("key");
+            }
+
+            nonNullCallbackEntered.countDown();
+
+            if (Thread.currentThread() == dedicatedNonNullWorker.get()) {
+                return "key->" + holder[0].apply(null);
+            }
+
+            return "key";
+        });
+
+        final Thread nullWorker = new Thread(() -> {
+            try {
+                nullResult.set(holder[0].apply(null));
+            } catch (final Throwable e) {
+                nullFailure.set(e);
+            }
+        }, "FnTest-memoize-null-worker");
+        nullWorker.setDaemon(true);
+        nullWorker.start();
+        assertTrue(nullCallbackEntered.await(5, TimeUnit.SECONDS));
+
+        final Thread nonNullWorker = new Thread(() -> {
+            nonNullWorkerStarted.countDown();
+
+            try {
+                nonNullResult.set(holder[0].apply("key"));
+            } catch (final Throwable e) {
+                nonNullFailure.set(e);
+            }
+        }, "FnTest-memoize-non-null-worker");
+        dedicatedNonNullWorker.set(nonNullWorker);
+        nonNullWorker.setDaemon(true);
+        nonNullWorker.start();
+
+        nullWorker.join(TimeUnit.SECONDS.toMillis(3));
+        nonNullWorker.join(TimeUnit.SECONDS.toMillis(3));
+
+        assertFalse(nullWorker.isAlive(), "Null/non-null memoization lock inversion deadlocked the null worker");
+        assertFalse(nonNullWorker.isAlive(), "Null/non-null memoization lock inversion deadlocked the non-null worker");
+        assertNull(nullFailure.get());
+        assertNull(nonNullFailure.get());
+        assertEquals("null->key", nullResult.get());
+        assertEquals("key", nonNullResult.get());
+        assertEquals("null->key", holder[0].apply(null));
+        assertEquals("key", holder[0].apply("key"));
     }
 
     @Test
@@ -400,6 +591,24 @@ public class FnTest extends TestBase {
 
         assertTrue(results.stream().allMatch(r -> r.equals(1)));
         assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void testMemoizeWithExpiration_recursiveComputationFailsFastAndRetries() {
+        final AtomicInteger attempts = new AtomicInteger();
+        final AtomicReference<Supplier<Integer>> holder = new AtomicReference<>();
+
+        holder.set(Fn.memoizeWithExpiration(() -> {
+            attempts.incrementAndGet();
+            return holder.get().get();
+        }, 1, TimeUnit.HOURS));
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, holder.get()::get);
+        final IllegalStateException second = assertThrows(IllegalStateException.class, holder.get()::get);
+
+        assertEquals("Recursive computation of memoized value", first.getMessage());
+        assertEquals("Recursive computation of memoized value", second.getMessage());
+        assertEquals(2, attempts.get(), "Failed refreshes must remain retryable");
     }
 
     @Test
@@ -749,7 +958,7 @@ public class FnTest extends TestBase {
     @Test
     public void testThrowException() {
         assertThrows(IllegalStateException.class, () -> Fn.throwException(IllegalStateException::new).accept("test"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.throwException(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.throwException(null));
     }
 
     @Test
@@ -1086,9 +1295,9 @@ public class FnTest extends TestBase {
 
     @Test
     public void testFunctionsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.keyed(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.wrap(null, (a, b) -> true));
-        assertThrows(IllegalArgumentException.class, () -> Fn.wrap(String::hashCode, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.keyed(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.wrap(null, (a, b) -> true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.wrap(String::hashCode, null));
         assertThrows(IllegalArgumentException.class, () -> Fn.cast(null));
         assertThrows(IllegalArgumentException.class, () -> Fn.instanceOf(null));
         assertThrows(IllegalArgumentException.class, () -> Fn.subtypeOf(null));
@@ -1324,8 +1533,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testEntryFunctionsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.entryByKeyMapper(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.entryByValueMapper(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.entryByKeyMapper(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.entryByValueMapper(null));
     }
 
     @Test
@@ -1699,7 +1908,7 @@ public class FnTest extends TestBase {
         BiPredicate<String, Integer> notLengthEq = Fn.not(lengthEq);
         assertFalse(notLengthEq.test("hello", 5));
         assertTrue(notLengthEq.test("hello", 4));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.BiPredicate<?, ?>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.BiPredicate<?, ?>) null));
     }
 
     @Test
@@ -3666,17 +3875,17 @@ public class FnTest extends TestBase {
 
     @Test
     public void testLogicalOperationsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((Predicate<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((BiPredicate<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((TriPredicate<String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.not((Predicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.not((BiPredicate<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.not((TriPredicate<String, String, String>) null));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.and((BooleanSupplier) null, () -> true));
-        assertThrows(IllegalArgumentException.class, () -> Fn.and(() -> true, (BooleanSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.and((BooleanSupplier) null, () -> true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.and(() -> true, (BooleanSupplier) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.and((Collection<Predicate<String>>) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.and(Collections.<Predicate<String>> emptyList()));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.or((BooleanSupplier) null, () -> true));
-        assertThrows(IllegalArgumentException.class, () -> Fn.or(() -> true, (BooleanSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.or((BooleanSupplier) null, () -> true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.or(() -> true, (BooleanSupplier) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.or((Collection<Predicate<String>>) null));
         assertThrows(IllegalArgumentException.class, () -> Fn.or(Collections.<Predicate<String>> emptyList()));
     }
@@ -3690,7 +3899,7 @@ public class FnTest extends TestBase {
         assertTrue(notPositive.test(-5));
         assertTrue(notPositive.test(0));
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.not((Throwables.Predicate<?, ?>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.not((Throwables.Predicate<?, ?>) null));
     }
 
     @Test
@@ -4079,17 +4288,17 @@ public class FnTest extends TestBase {
 
     @Test
     public void testMapEntryFunctionsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.testByKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.testByValue(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptByKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptByValue(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyByKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyByValue(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.mapKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.mapValue(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.testKeyVal(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptKeyVal(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyKeyVal(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.testByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.testByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyByKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyByValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.mapKey(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.mapValue(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.testKeyVal(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptKeyVal(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyKeyVal(null));
     }
 
     @Test
@@ -4301,12 +4510,12 @@ public class FnTest extends TestBase {
 
     @Test
     public void testConditionalFunctionsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfNotNull(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIf(null, System.out::println));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIf(x -> true, null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(null, System.out::println, System.out::println));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(x -> true, null, System.out::println));
-        assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(x -> true, System.out::println, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfNotNull(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIf(null, System.out::println));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIf(x -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(null, System.out::println, System.out::println));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(x -> true, null, System.out::println));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.acceptIfOrElse(x -> true, System.out::println, null));
     }
 
     @Test
@@ -4371,7 +4580,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrEmptyRejectsNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrEmpty(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrEmpty(null));
     }
 
     @Test
@@ -4453,14 +4662,14 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrDefaultWithNullMappers() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::length, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::trim, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, String::length, 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, null, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, String::trim, String::length, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, null, String::length, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(String::trim, String::toUpperCase, null, 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, s -> s, s -> s, s -> s, 'a'));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, s -> s, s -> s, s -> s, 'a'));
     }
 
     @Test
@@ -4526,17 +4735,17 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyIfNotNullOrElseGetWithNullMappers() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::length, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::length, () -> 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, () -> 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::length, null));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::trim, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, String::length, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, null, () -> 0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, String::length, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, String::trim, String::length, () -> 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, null, String::length, () -> 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, null, () -> 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, String::length, null));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, s -> s, s -> s, s -> s, () -> 'a'));
-        assertThrows(IllegalArgumentException.class,
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(null, s -> s, s -> s, s -> s, () -> 'a'));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> Fn.applyIfNotNullOrElseGet(String::trim, String::toUpperCase, s -> s.substring(0, 1), s -> s.charAt(0), null));
     }
 
@@ -4571,11 +4780,11 @@ public class FnTest extends TestBase {
 
     @Test
     public void testApplyIfFunctionsWithNullArguments() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseDefault(null, x -> x, "default"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseDefault(x -> true, null, "default"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(null, x -> x, () -> "default"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(x -> true, null, () -> "default"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(x -> true, x -> x, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseDefault(null, x -> x, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseDefault(x -> true, null, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(null, x -> x, () -> "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(x -> true, null, () -> "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.applyIfOrElseGet(x -> true, x -> x, null));
     }
 
     @Test
@@ -4809,7 +5018,7 @@ public class FnTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(-1, i -> true));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(1, (Predicate<Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(1, (Predicate<Integer>) null));
     }
 
     @Test
@@ -4825,7 +5034,7 @@ public class FnTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(-1, (BiPredicate<Integer, String>) (i, s) -> true));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(1, (BiPredicate<Integer, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.limitThenFilter(1, (BiPredicate<Integer, String>) null));
     }
 
     @Test
@@ -4883,7 +5092,7 @@ public class FnTest extends TestBase {
         Predicate<String> zeroLimitPredicate = Fn.filterThenLimit(s -> true, 0);
         assertFalse(zeroLimitPredicate.test("test"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit((Predicate) null, 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit((Predicate) null, 1));
 
         assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit(i -> true, -1));
     }
@@ -4897,7 +5106,7 @@ public class FnTest extends TestBase {
         assertTrue(biPredicate.test(4, "test"));
         assertFalse(biPredicate.test(5, "hello"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit((BiPredicate<Integer, String>) null, 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit((BiPredicate<Integer, String>) null, 1));
 
         assertThrows(IllegalArgumentException.class, () -> Fn.filterThenLimit((i, s) -> true, -1));
     }
@@ -5401,8 +5610,7 @@ public class FnTest extends TestBase {
         assertEquals(0, compareToHello.apply("world"));
         assertTrue(compareToHello.apply("goodbye") > 0);
 
-        Function<Integer, Integer> compareToFive = Fn.compareTo(5, null);
-        assertEquals(0, compareToFive.apply(5));
+        assertThrows(IllegalArgumentException.class, () -> Fn.compareTo(5, null));
     }
 
     @Test
@@ -5429,8 +5637,7 @@ public class FnTest extends TestBase {
         assertEquals(0, compareByLength.apply("hello", "world"));
         assertTrue(compareByLength.apply("goodbye", "hi") > 0);
 
-        BiFunction<Integer, Integer, Integer> compareNatural = Fn.compare(null);
-        assertEquals(0, compareNatural.apply(5, 5));
+        assertThrows(IllegalArgumentException.class, () -> Fn.compare(null));
     }
 
     @Test
@@ -5745,8 +5952,7 @@ public class FnTest extends TestBase {
         Assertions.assertFalse(biPred.test(5, false));
         Assertions.assertFalse(biPred.test(3, true));
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Fnn.p("hello", (Throwables.TriPredicate<String, Integer, Boolean, RuntimeException>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.p("hello", (Throwables.TriPredicate<String, Integer, Boolean, RuntimeException>) null));
     }
 
     @Test
@@ -5762,7 +5968,7 @@ public class FnTest extends TestBase {
         assertTrue(biPredicate.test("hello", 5));
         assertFalse(biPredicate.test("world", 5));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.p("test", (TriPredicate<String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.p("test", (TriPredicate<String, String, String>) null));
     }
 
     @Test
@@ -5784,7 +5990,7 @@ public class FnTest extends TestBase {
             fail("Should not throw exception");
         }
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.p("a", (Throwables.BiPredicate<String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.p("a", (Throwables.BiPredicate<String, String, Exception>) null));
     }
 
     @Test
@@ -5801,7 +6007,7 @@ public class FnTest extends TestBase {
             fail("Should not throw exception");
         }
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.p("a", "b", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.p("a", "b", null));
     }
 
     @Test
@@ -5911,7 +6117,7 @@ public class FnTest extends TestBase {
         biConsumer.accept("hello", " world");
         assertEquals("hello world", sb.toString());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c("test", (TriConsumer<String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c("test", (TriConsumer<String, String, String>) null));
     }
 
     @Test
@@ -6294,8 +6500,7 @@ public class FnTest extends TestBase {
         Throwables.BiFunction<Integer, Boolean, String, RuntimeException> biFunc = Fnn.f("test", triFunc);
         Assertions.assertEquals("test123true", biFunc.apply(123, true));
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Fnn.f("test", (Throwables.TriFunction<String, Integer, Boolean, String, RuntimeException>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.f("test", (Throwables.TriFunction<String, Integer, Boolean, String, RuntimeException>) null));
     }
 
     @Test
@@ -6310,7 +6515,7 @@ public class FnTest extends TestBase {
         BiFunction<Integer, Integer, String> biFunction = Fn.f("hello world", triFunction);
         assertEquals("hello", biFunction.apply(0, 5));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.f("test", (TriFunction<String, String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.f("test", (TriFunction<String, String, String, String>) null));
     }
 
     @Test
@@ -6340,7 +6545,7 @@ public class FnTest extends TestBase {
         Throwables.UnaryOperator<String, Exception> operator = s -> s.toUpperCase();
         assertSame(operator, Fnn.o(operator));
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.o((Throwables.UnaryOperator<?, ?>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.o((Throwables.UnaryOperator<?, ?>) null));
     }
 
     @Test
@@ -6348,7 +6553,7 @@ public class FnTest extends TestBase {
         Throwables.BinaryOperator<Integer, Exception> operator = Integer::sum;
         assertSame(operator, Fnn.o(operator));
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.o((Throwables.BinaryOperator<?, ?>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.o((Throwables.BinaryOperator<?, ?>) null));
     }
 
     @Test
@@ -6401,7 +6606,7 @@ public class FnTest extends TestBase {
         Supplier<String> errorSupplier = Fn.ss(exceptionSupplier);
         assertThrows(RuntimeException.class, errorSupplier::get);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ss((Throwables.Supplier<String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ss((Throwables.Supplier<String, Exception>) null));
     }
 
     @Test
@@ -6416,7 +6621,7 @@ public class FnTest extends TestBase {
         Supplier<Integer> errorSupplier = Fn.ss("test", exceptionFunc);
         assertThrows(RuntimeException.class, errorSupplier::get);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ss("test", (Throwables.Function<String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ss("test", (Throwables.Function<String, String, Exception>) null));
     }
 
     @Test
@@ -6548,7 +6753,7 @@ public class FnTest extends TestBase {
         Predicate<String> errorPredicate = Fn.pp(exceptionPred);
         assertThrows(RuntimeException.class, () -> errorPredicate.test("test"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.Predicate<String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.Predicate<String, Exception>) null));
     }
 
     @Test
@@ -6558,7 +6763,7 @@ public class FnTest extends TestBase {
         assertTrue(biPredicate.test("hello", 5));
         assertFalse(biPredicate.test("hello", 3));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.BiPredicate<String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.BiPredicate<String, String, Exception>) null));
     }
 
     @Test
@@ -6568,7 +6773,7 @@ public class FnTest extends TestBase {
         assertTrue(biPredicate.test("hello", 5));
         assertFalse(biPredicate.test("world", 5));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.pp("test", (Throwables.TriPredicate<String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.pp("test", (Throwables.TriPredicate<String, String, String, Exception>) null));
     }
 
     @Test
@@ -6578,7 +6783,7 @@ public class FnTest extends TestBase {
         assertTrue(triPredicate.test("hello", 5, true));
         assertFalse(triPredicate.test("hello", 5, false));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.TriPredicate<String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.pp((Throwables.TriPredicate<String, String, String, Exception>) null));
     }
 
     @Test
@@ -6696,7 +6901,7 @@ public class FnTest extends TestBase {
         Consumer<String> errorConsumer = Fn.cc(exceptionConsumer);
         assertThrows(RuntimeException.class, () -> errorConsumer.accept("test"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.Consumer<String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.Consumer<String, Exception>) null));
     }
 
     @Test
@@ -6707,7 +6912,7 @@ public class FnTest extends TestBase {
         biConsumer.accept("key", 5);
         assertEquals(1, map.size());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.BiConsumer<String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.BiConsumer<String, String, Exception>) null));
     }
 
     @Test
@@ -6718,7 +6923,7 @@ public class FnTest extends TestBase {
         biConsumer.accept("hello", " world");
         assertEquals("hello world", sb.toString());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.cc("test", (Throwables.TriConsumer<String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.cc("test", (Throwables.TriConsumer<String, String, String, Exception>) null));
     }
 
     @Test
@@ -6728,7 +6933,7 @@ public class FnTest extends TestBase {
         TriConsumer<String, Integer, Boolean> triConsumer = Fn.cc(throwableTriConsumer);
         assertNotNull(triConsumer);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.TriConsumer<String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.TriConsumer<String, String, String, Exception>) null));
     }
 
     @Test
@@ -6742,7 +6947,7 @@ public class FnTest extends TestBase {
         };
         Callable<String> errorCallable = Fn.cc(exceptionCallable);
         assertThrows(RuntimeException.class, errorCallable::call);
-        assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.Callable<String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.cc((Throwables.Callable<String, Exception>) null));
     }
 
     @Test
@@ -6946,7 +7151,7 @@ public class FnTest extends TestBase {
         Function<String, Integer> errorFunction = Fn.ff(exceptionFunc);
         assertThrows(RuntimeException.class, () -> errorFunction.apply("test"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.Function<String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.Function<String, String, Exception>) null));
     }
 
     @Test
@@ -6961,7 +7166,7 @@ public class FnTest extends TestBase {
         Function<String, Integer> errorFunction = Fn.ff(exceptionFunc, -1);
         assertEquals(-1, errorFunction.apply("test"));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.Function<String, Integer, Exception>) null, -1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.Function<String, Integer, Exception>) null, -1));
     }
 
     @Test
@@ -6970,7 +7175,7 @@ public class FnTest extends TestBase {
         BiFunction<String, Integer, Character> biFunction = Fn.ff(throwableBiFunc);
         assertEquals('e', biFunction.apply("hello", 1));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.BiFunction<String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.BiFunction<String, String, String, Exception>) null));
     }
 
     @Test
@@ -6985,7 +7190,7 @@ public class FnTest extends TestBase {
         BiFunction<String, Integer, Character> errorFunction = Fn.ff(exceptionFunc, '?');
         assertEquals('?', errorFunction.apply("test", 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.BiFunction<String, Integer, Character, Exception>) null, '?'));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.BiFunction<String, Integer, Character, Exception>) null, '?'));
     }
 
     @Test
@@ -6994,7 +7199,7 @@ public class FnTest extends TestBase {
         BiFunction<Integer, Integer, String> biFunction = Fn.ff("hello world", throwableTriFunc);
         assertEquals("hello", biFunction.apply(0, 5));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff("test", (Throwables.TriFunction<String, String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff("test", (Throwables.TriFunction<String, String, String, String, Exception>) null));
     }
 
     @Test
@@ -7004,7 +7209,7 @@ public class FnTest extends TestBase {
         assertEquals("llo", triFunction.apply("hello", 2, true));
         assertEquals("hello", triFunction.apply("hello", 2, false));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.TriFunction<String, String, String, String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.TriFunction<String, String, String, String, Exception>) null));
     }
 
     @Test
@@ -7019,7 +7224,7 @@ public class FnTest extends TestBase {
         TriFunction<String, Integer, Boolean, String> errorFunction = Fn.ff(exceptionFunc, "default");
         assertEquals("default", errorFunction.apply("test", 0, true));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.TriFunction<String, Integer, Boolean, String, Exception>) null, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.ff((Throwables.TriFunction<String, Integer, Boolean, String, Exception>) null, "default"));
     }
 
     @Test
@@ -7143,7 +7348,7 @@ public class FnTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> Fn.sp(null, triPred));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.sp(mutex, (TriPredicate<String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.sp(mutex, (TriPredicate<String, String, String>) null));
     }
 
     @Test
@@ -7221,7 +7426,7 @@ public class FnTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> Fn.sc(null, triConsumer));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (TriConsumer<String, String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (TriConsumer<String, String, String>) null));
     }
 
     @Test
@@ -7388,7 +7593,7 @@ public class FnTest extends TestBase {
         assertNull(function.apply("test"));
         assertEquals(1, list.size());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.Consumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.Consumer<String>) null));
     }
 
     @Test
@@ -7399,7 +7604,7 @@ public class FnTest extends TestBase {
         assertEquals(42, function.apply("test"));
         assertEquals(1, list.size());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.Consumer<String>) null, 42));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.Consumer<String>) null, 42));
     }
 
     @Test
@@ -7410,7 +7615,7 @@ public class FnTest extends TestBase {
         assertNull(biFunction.apply("key", 5));
         assertEquals(1, map.size());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.BiConsumer<String, Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.BiConsumer<String, Integer>) null));
     }
 
     @Test
@@ -7421,7 +7626,7 @@ public class FnTest extends TestBase {
         assertEquals("done", biFunction.apply("key", 5));
         assertEquals(1, map.size());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.BiConsumer<String, Integer>) null, "done"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((java.util.function.BiConsumer<String, Integer>) null, "done"));
     }
 
     @Test
@@ -7431,7 +7636,7 @@ public class FnTest extends TestBase {
         TriFunction<String, Integer, Boolean, Void> triFunction = Fn.c2f(triConsumer);
         assertNull(triFunction.apply("test", 1, true));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((TriConsumer<String, Integer, Boolean>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((TriConsumer<String, Integer, Boolean>) null));
     }
 
     @Test
@@ -7445,7 +7650,7 @@ public class FnTest extends TestBase {
         assertEquals("result", triFunction.apply("test", 1, true));
         assertEquals("test1", sb.toString());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((TriConsumer<String, Integer, Boolean>) null, "result"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.c2f((TriConsumer<String, Integer, Boolean>) null, "result"));
     }
 
     @Test
@@ -7458,7 +7663,7 @@ public class FnTest extends TestBase {
         assertNull(function.apply("test"));
         assertEquals(Arrays.asList("test"), consumed);
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.c2f((Throwables.Consumer<?, ?>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.c2f((Throwables.Consumer<?, ?>) null));
     }
 
     @Test
@@ -7471,7 +7676,7 @@ public class FnTest extends TestBase {
         assertEquals(123, function.apply("test"));
         assertEquals(Arrays.asList("test"), consumed);
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.c2f((Throwables.Consumer<String, Exception>) null, 123));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.c2f((Throwables.Consumer<String, Exception>) null, 123));
     }
 
     @Test
@@ -7563,7 +7768,7 @@ public class FnTest extends TestBase {
         };
         Runnable errorRunnable = Fn.rr(exceptionRunnable);
         assertThrows(RuntimeException.class, errorRunnable::run);
-        assertThrows(IllegalArgumentException.class, () -> Fn.rr((Throwables.Runnable<Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.rr((Throwables.Runnable<Exception>) null));
     }
 
     @Test
@@ -7601,7 +7806,7 @@ public class FnTest extends TestBase {
         };
         assertSame(javaRunnable, Fn.jr(javaRunnable));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.jr(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.jr(null));
     }
 
     @Test
@@ -7609,7 +7814,7 @@ public class FnTest extends TestBase {
         java.util.concurrent.Callable<String> javaCallable = () -> "test";
         assertSame(javaCallable, Fn.jc(javaCallable));
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.jc(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.jc(null));
     }
 
     @Test
@@ -7644,7 +7849,7 @@ public class FnTest extends TestBase {
         assertNull(callable.call());
         assertTrue(executed.get());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.r2c((java.lang.Runnable) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.r2c((java.lang.Runnable) null));
     }
 
     @Test
@@ -7655,7 +7860,7 @@ public class FnTest extends TestBase {
         assertEquals("done", callable.call());
         assertTrue(executed.get());
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.r2c((java.lang.Runnable) null, "done"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.r2c((java.lang.Runnable) null, "done"));
     }
 
     @Test
@@ -7668,7 +7873,7 @@ public class FnTest extends TestBase {
         assertNull(callable.call());
         assertEquals(1, counter.get());
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.r2c(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.r2c(null));
     }
 
     @Test
@@ -7681,7 +7886,7 @@ public class FnTest extends TestBase {
         assertEquals("done", callable.call());
         assertEquals(1, counter.get());
 
-        assertThrows(IllegalArgumentException.class, () -> Fnn.r2c(null, "done"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.r2c(null, "done"));
     }
 
     @Test
@@ -7745,7 +7950,7 @@ public class FnTest extends TestBase {
         java.util.concurrent.Callable<String> javaCallable = () -> "result";
         Callable<String> abacusCallable = Fn.jc2c(javaCallable);
         assertEquals("result", abacusCallable.call());
-        assertThrows(IllegalArgumentException.class, () -> Fn.jc2c(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.jc2c(null));
     }
 
     @Test
@@ -7765,7 +7970,7 @@ public class FnTest extends TestBase {
         Runnable errorRunnable = Fn.jc2r(exceptionCallable);
         assertThrows(RuntimeException.class, errorRunnable::run);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.jc2r(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.jc2r(null));
     }
 
     @Test
@@ -9473,7 +9678,7 @@ public class FnTest extends TestBase {
             fail("Should not throw exception");
         }
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ef(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ef(null));
     }
 
     @Test
@@ -9491,7 +9696,7 @@ public class FnTest extends TestBase {
             fail("Should not throw exception");
         }
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ep(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ep(null));
     }
 
     @Test
@@ -9509,7 +9714,7 @@ public class FnTest extends TestBase {
 
         assertEquals(Arrays.asList("key:123"), consumed);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ec(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.Entries.ec(null));
     }
 
     @Test
@@ -9832,7 +10037,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testNot_npeOnNull() {
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.Predicate<Object>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.Predicate<Object>) null));
     }
 
     // --- close: Runnable should close at most once even under concurrent invocation ---
@@ -9929,7 +10134,7 @@ public class FnTest extends TestBase {
         result.accept("ab", consumer);
         assertEquals(Arrays.asList('a', 'b'), chars);
 
-        assertThrows(IllegalArgumentException.class, () -> Fn.mc(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fn.mc(null));
 
         String mapperType = java.util.Arrays.stream(Fn.class.getDeclaredMethods())
                 .filter(method -> method.getName().equals("mc"))

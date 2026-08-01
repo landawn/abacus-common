@@ -364,10 +364,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <T> the type of elements returned by this iterator
      * @param iteratorSupplier a {@code Supplier} that produces the {@code Iterator} when needed
      * @return an {@code ObjIterator} that lazily initializes using the supplier
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier recursively accesses this deferred iterator while it is being initialized
      * @throws RuntimeException if the supplier throws a runtime exception when initialized
      * @throws Error if the supplier throws an error when initialized
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -451,11 +451,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <T> the type of elements returned by this iterator
      * @param supplier a {@code Supplier} that produces the next element on each call
      * @return an infinite {@code ObjIterator}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #generate(BooleanSupplier, Supplier)
      */
     public static <T> ObjIterator<T> generate(final Supplier<? extends T> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ObjIterator<>() {
             @Override
@@ -492,11 +492,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param hasNext a {@code BooleanSupplier} that returns {@code true} if more elements should be generated
      * @param supplier a {@code Supplier} that produces the next element
      * @return an {@code ObjIterator} that generates elements conditionally
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static <T> ObjIterator<T> generate(final BooleanSupplier hasNext, final Supplier<? extends T> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ObjIterator<>() {
             private boolean hasNextCached = false;
@@ -553,12 +553,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param hasNext a {@code Predicate} that tests the state to determine if more elements exist
      * @param supplier a {@code Function} that generates the next element from the state
      * @return an {@code ObjIterator} that generates elements based on state
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ObjIterator<>() {
             private boolean hasNextCached = false;
@@ -614,12 +614,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param supplier a {@code BiFunction} that generates the next element from the state and previous value;
      *                 its second argument is {@code null} before the first element has been generated
      * @return an {@code ObjIterator} that generates elements based on state and previous values
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ObjIterator<>() {
             private T prev = null;
@@ -795,10 +795,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param predicate the predicate to apply to each element
      * @return a new {@code ObjIterator} yielding only the matching elements
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see Iterators#filter(Iterator, Predicate)
      */
-    public ObjIterator<T> filter(final Predicate<? super T> predicate) {
+    public ObjIterator<T> filter(final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return Iterators.filter(this, predicate);
     }
 
@@ -817,11 +819,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param <U> the type of elements in the returned iterator
      * @param mapper the function to apply to each element
      * @return a new {@code ObjIterator} with transformed elements
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see Iterators#map(Iterator, Function)
      */
     @Beta
-    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) {
+    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return Iterators.map(this, mapper);
     }
 
@@ -867,12 +871,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * // Iterates over: Person[name=Alice, age=30], Person[name=Bob, age=25]
      * }</pre>
      *
-     * @param keyExtractor the function to extract the comparison key from each element; must not be {@code null}
+     * @param keyExtractor the function to extract the comparison key from each element
      * @return a new {@code ObjIterator} with elements distinct by the extracted key
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #distinct()
      */
-    public ObjIterator<T> distinctBy(final Function<? super T, ?> keyExtractor) {
+    public ObjIterator<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         final Set<Object> elements = new HashSet<>();
@@ -1120,12 +1124,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining element
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachIndexed(Throwables.IntObjConsumer)
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {
             action.accept(next());
@@ -1150,14 +1154,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws IllegalStateException if a remaining element would require an index greater than
      *         {@link Integer#MAX_VALUE}
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachRemaining(Throwables.Consumer)
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

@@ -101,13 +101,14 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * processAndNotify.accept(newOrder, customer, product, 5);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code QuadConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) {
+    default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c, d) -> {
             accept(a, b, c, d);
             after.accept(a, b, c, d);

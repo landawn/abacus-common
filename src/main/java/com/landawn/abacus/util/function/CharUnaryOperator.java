@@ -23,7 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.UnaryOperator
@@ -62,15 +61,15 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * char result = composed.applyAsChar('A');   // Returns 'b' (toLower then rotate)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
-     *
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(CharUnaryOperator)
      */
-    default CharUnaryOperator compose(final CharUnaryOperator before) {
+    default CharUnaryOperator compose(final CharUnaryOperator before) throws IllegalArgumentException {
         N.checkArgNotNull(before, cs.before);
+
         return v -> applyAsChar(before.applyAsChar(v));
     }
 
@@ -87,15 +86,15 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * char result = combined.applyAsChar('a');   // Returns 'B' (toUpper then rotate)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
-     *
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(CharUnaryOperator)
      */
-    default CharUnaryOperator andThen(final CharUnaryOperator after) {
+    default CharUnaryOperator andThen(final CharUnaryOperator after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return t -> after.applyAsChar(applyAsChar(t));
     }
 

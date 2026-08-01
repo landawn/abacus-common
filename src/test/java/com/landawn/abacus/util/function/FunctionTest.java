@@ -3,7 +3,6 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,9 +41,9 @@ public class FunctionTest extends TestBase {
     }
 
     @Test
-    public void testComposeRejectsNullFunctionImmediately() {
+    public void testComposeRejectsNullFunctionAtComposition() {
         Function<Integer, String> toString = n -> String.valueOf(n);
-        assertThrows(NullPointerException.class, () -> toString.compose(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> toString.compose(null));
     }
 
     @Test
@@ -71,9 +70,9 @@ public class FunctionTest extends TestBase {
     }
 
     @Test
-    public void testAndThenRejectsNullFunctionImmediately() {
+    public void testAndThenRejectsNullFunctionAtComposition() {
         Function<String, Integer> length = String::length;
-        assertThrows(NullPointerException.class, () -> length.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> length.andThen(null));
     }
 
     @Test

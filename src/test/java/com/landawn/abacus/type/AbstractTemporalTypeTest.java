@@ -1,6 +1,7 @@
 package com.landawn.abacus.type;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.time.temporal.Temporal;
 
@@ -21,5 +22,10 @@ public class AbstractTemporalTypeTest extends TestBase {
     @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(temporalType.isCsvQuoteRequired());
+    }
+
+    @Test
+    public void test_isTemporal() {
+        assertTrue(temporalType.isTemporal());
     }
 }

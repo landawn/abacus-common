@@ -2042,7 +2042,7 @@ public sealed interface Dataset permits RowDataset {
      * dataset.addRow(Arrays.asList(101, "John Doe", 30));
      * }</pre>
      *
-     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods. Must not be {@code null}.
+     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code row} is {@code null} or its structure does not match the required type - Object array, List, Map, or Bean.
      */
@@ -2061,7 +2061,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param newRowPosition the position at which the new row should be added. Must be in the range {@code [0, size()]}; passing {@code size()} appends.
-     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods. Must not be {@code null}.
+     * @param row the new row to be added to the Dataset. It can be an Object array, List, Map, or a Bean with getter/setter methods.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
      * @throws IllegalArgumentException if {@code row} is {@code null} or its structure does not match the required type - Object array, List, Map, or Bean.
@@ -2548,7 +2548,7 @@ public sealed interface Dataset permits RowDataset {
      * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, "Alice", null, 95}, {3, "Charlie", null, 85}
      * }</pre>
      *
-     * @param other the Dataset to merge with this Dataset. Must not be {@code null}.
+     * @param other the Dataset to merge with this Dataset.
      * @param requiresSameColumns a boolean value that determines whether the merge operation requires both Datasets to have the same columns.
      *                           If {@code true}, both Datasets must have identical column structures. If {@code false}, columns from both Datasets are combined.
      * @throws IllegalStateException if this Dataset is frozen (read-only).
@@ -2589,7 +2589,7 @@ public sealed interface Dataset permits RowDataset {
      * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {3, null, null, 85}
      * }</pre>
      *
-     * @param other the Dataset to merge selected columns from. Must not be {@code null}.
+     * @param other the Dataset to merge selected columns from.
      * @param selectColumnNamesFromOtherToMerge the collection of column names to select from the other Dataset for merging. Must not be {@code null} or empty.
      * @throws IllegalStateException if this Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code selectColumnNamesFromOtherToMerge} is {@code null} or empty, or if any of the specified column names doesn't exist in the other Dataset.
@@ -2629,7 +2629,7 @@ public sealed interface Dataset permits RowDataset {
      * // dataset1 now contains rows: {1, "Alice", 25, null}, {2, "Bob", 30, null}, {1, null, null, 95}, {2, null, null, 90}
      * }</pre>
      *
-     * @param other the Dataset to merge selected columns from. Must not be {@code null}.
+     * @param other the Dataset to merge selected columns from.
      * @param fromRowIndexFromOther the starting index (inclusive) of the row range from the other Dataset to be included in the merge operation.
      * @param toRowIndexFromOther the ending index (exclusive) of the row range from the other Dataset to be included in the merge operation.
      * @param selectColumnNamesFromOtherToMerge the collection of column names to select from the other Dataset for merging. Must not be {@code null} or empty.
@@ -5825,10 +5825,10 @@ public sealed interface Dataset permits RowDataset {
      * // +------------+--------------+
      * }</pre>
      *
-     * @param keyColumnName the name of the column to group by. Must not be {@code null}.
-     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
+     * @param keyColumnName the name of the column to group by.
+     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}. It must be different from {@code keyColumnName}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation.
      * @return a new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code aggregateResultColumnName} is equal to {@code keyColumnName}, or if {@code keyColumnName}, {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
      * @see #groupBy(Collection)
@@ -6053,12 +6053,12 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param <T> the type of the elements being grouped after row mapping.
-     * @param keyColumnName the name of the column to group by. Must not be {@code null}.
-     * @param keyExtractor a function that transforms the key column values before grouping. Must not be {@code null}.
+     * @param keyColumnName the name of the column to group by.
+     * @param keyExtractor a function that transforms the key column values before grouping.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}. It must be different from {@code keyColumnName}.
-     * @param rowMapper a function that transforms the aggregated rows into a specific type {@code T}. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param rowMapper a function that transforms the aggregated rows into a specific type {@code T}.
+     * @param collector the collector that defines the aggregate operation.
      * @return a new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code keyExtractor}, {@code aggregateOnColumnNames}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty, or if {@code aggregateResultColumnName} is equal to {@code keyColumnName}.
      * @see #groupBy(Collection)
@@ -6396,11 +6396,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <T> the type of the elements being grouped after row mapping.
      * @param keyColumnNames the names of the columns to group by. Must not be {@code null} or empty.
-     * @param keyExtractor a function that transforms the key column values before grouping. Must not be {@code null}.
+     * @param keyExtractor a function that transforms the key column values before grouping.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}. It must be different from all the key column names.
-     * @param rowMapper a function that transforms the aggregated rows into a specific type {@code T}. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param rowMapper a function that transforms the aggregated rows into a specific type {@code T}.
+     * @param collector the collector that defines the aggregate operation.
      * @return a new Dataset with the grouped and aggregated data - collected by the specified {@code collector}.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code keyColumnNames}, {@code keyExtractor}, {@code aggregateOnColumnNames}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code keyColumnNames} or {@code aggregateOnColumnNames} is empty, or if {@code aggregateResultColumnName} is equal to any of the key column names.
      * @see #groupBy(Collection)
@@ -6565,9 +6565,9 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -6652,7 +6652,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
      * @param rowType the class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName} or {@code rowType} is {@code null}, or if the specified {@code rowType} is not a supported type.
@@ -6741,8 +6741,8 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName} or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -6832,9 +6832,9 @@ public sealed interface Dataset permits RowDataset {
      * @param <T> the type of the object that the row data will be mapped to.
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param rowMapper the function to transform the DisposableObjArray to a custom type T. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper the function to transform the DisposableObjArray to a custom type T.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -6921,7 +6921,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code keyExtractor} is {@code null}.
      * @see #rollup(Collection)
@@ -7011,10 +7011,10 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
-     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes.
+     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateOnColumnName}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -7107,10 +7107,10 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param rowType the class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param rowType the class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, or {@code rowType} is {@code null}, or if the specified {@code rowType} is not a supported type - Object[], Collection, Map, or Bean class.
      * @see #rollup(Collection)
@@ -7206,10 +7206,10 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, or {@code collector} is {@code null}.
      * @see #rollup(Collection)
@@ -7306,11 +7306,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <T> the type of elements produced by the row mapper function.
      * @param keyColumnNames the names of the columns on which the rollup operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param rowMapper the function to transform the DisposableObjArray to a custom row before aggregation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper the function to transform the DisposableObjArray to a custom row before aggregation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code rowMapper}, {@code collector}, or {@code aggregateResultColumnName} is {@code null}.
      * @see #rollup(Collection)
@@ -7719,11 +7719,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <T> the type of the object that the row data will be mapped to by the row mapper function.
      * @param keyColumnNames the names of the columns on which the cube operation is to be performed. Must not be {@code null} or empty.
-     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes. Must not be {@code null}.
+     * @param keyExtractor the function to transform the DisposableObjArray to a custom key for grouping purposes.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null}.
-     * @param rowMapper the function to transform the DisposableObjArray to a mapped object before applying the collector. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation.
+     * @param rowMapper the function to transform the DisposableObjArray to a mapped object before applying the collector.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Stream of Datasets, each representing a level of the cube operation, covering all possible combinations of the specified columns. The Stream is evaluated lazily, so invalid arguments may only be reported when the Stream is consumed.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or {@code keyColumnNames} is {@code null} or empty, or {@code aggregateOnColumnNames} is {@code null} or empty, or if {@code keyExtractor}, {@code aggregateResultColumnName}, {@code rowMapper}, or {@code collector} is {@code null}.
      * @see #rollup(Collection, Function, Collection, String, Function, Collector)
@@ -7783,10 +7783,10 @@ public sealed interface Dataset permits RowDataset {
      * @param <R> the type of the row identifier in the resulting Sheet.
      * @param <C> the type of the column identifier in the resulting Sheet.
      * @param <T> the type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
-     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
-     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet.
+     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet.
+     * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnName}, {@code pivotColumnName}, or {@code collector} is {@code null}.
      * @see #groupBy(Collection)
@@ -7847,10 +7847,10 @@ public sealed interface Dataset permits RowDataset {
      * @param <R> the type of the row identifier in the resulting Sheet.
      * @param <C> the type of the column identifier in the resulting Sheet.
      * @param <T> the type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
-     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
+     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet.
+     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
      * @see #pivot(String, String, String, Collector)
@@ -7915,11 +7915,11 @@ public sealed interface Dataset permits RowDataset {
      * @param <C> the type of the column identifier in the resulting Sheet.
      * @param <U> the type of the row data after being transformed by the rowMapper.
      * @param <T> the type of the aggregation result in the resulting Sheet.
-     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet. Must not be {@code null}.
-     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet. Must not be {@code null}.
+     * @param keyColumnName the name of the column to be used as the row identifier in the resulting Sheet.
+     * @param pivotColumnName the name of the column to be used as the column identifier in the resulting Sheet.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed. Must not be {@code null} or empty.
-     * @param rowMapper the function to transform the row data before aggregation. Must not be {@code null}.
-     * @param collector the collector that defines the aggregate operation. Must not be {@code null}.
+     * @param rowMapper the function to transform the row data before aggregation.
+     * @param collector the collector that defines the aggregate operation.
      * @return a Sheet representing the result of the pivot operation.
      * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset or if {@code keyColumnName}, {@code aggregateOnColumnNames}, {@code pivotColumnName}, {@code rowMapper}, or {@code collector} is {@code null}, or if {@code aggregateOnColumnNames} is empty.
      * @see #pivot(String, String, String, Collector)
@@ -10407,7 +10407,7 @@ public sealed interface Dataset permits RowDataset {
      * //                  {2, "Bob", "A", 95}, {2, "Bob", "B", 90}
      * }</pre>
      *
-     * @param other the Dataset to perform the cartesian product with. Must not be {@code null}.
+     * @param other the Dataset to perform the cartesian product with.
      * @return a new Dataset that is the result of the cartesian product operation.
      * @throws IllegalArgumentException if {@code other} is {@code null}, or if the two Datasets share one or more column names.
      * @throws ArithmeticException if the number of resulting rows would overflow an {@code int}.
@@ -11132,8 +11132,7 @@ public sealed interface Dataset permits RowDataset {
      * @return a Stream of objects of type T, created by applying the rowMapper function to each row in the Dataset.
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
      */
-    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
-            throws IndexOutOfBoundsException, IllegalArgumentException;
+    <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) throws IndexOutOfBoundsException;
 
     /**
      * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the Dataset.
@@ -11594,8 +11593,9 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
-     * @param columnNames the collection of column names to be printed
+     * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset
      * @see #println()
      * @see #println(String)
      */
@@ -11633,9 +11633,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
-     * @param columnNames the collection of column names to be printed
+     * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
      * @param output the appendable where the Dataset will be printed
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code output} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #println()
      * @see #println(String)
@@ -11656,10 +11657,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
-     * @param columnNames the collection of column names to be printed
+     * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
      * @param prefix the prefix string to be printed before each line of the Dataset output
      * @param output the appendable where the Dataset will be printed
      * @throws IndexOutOfBoundsException if the fromRowIndex or toRowIndex is out of the Dataset's range
+     * @throws IllegalArgumentException if any of the specified column names does not exist in the Dataset, or if {@code output} is {@code null}
      * @throws UncheckedIOException if an I/O error occurs
      * @see #println()
      * @see #println(String)

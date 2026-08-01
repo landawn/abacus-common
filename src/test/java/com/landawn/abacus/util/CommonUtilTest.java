@@ -482,6 +482,7 @@ public class CommonUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> N.checkArgNotNull(null, "Custom error message"));
         try {
             N.checkArgNotNull(null, "arg");
+
             fail("Should throw exception");
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("cannot be null"));
@@ -2114,6 +2115,7 @@ public class CommonUtilTest extends TestBase {
         N.checkElementNotNull((String[]) null);
 
         N.checkElementNotNull(arr, "myArray");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkElementNotNull(nullArr, "myArray"));
     }
 
@@ -2129,6 +2131,7 @@ public class CommonUtilTest extends TestBase {
         N.checkElementNotNull((Collection<?>) null);
 
         N.checkElementNotNull(list, "myList");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkElementNotNull(nullList, "myList"));
     }
 
@@ -2156,6 +2159,7 @@ public class CommonUtilTest extends TestBase {
         N.checkKeyNotNull(map);
 
         N.checkKeyNotNull(new HashMap<>());
+
         assertNotNull(map);
     }
 
@@ -2246,6 +2250,7 @@ public class CommonUtilTest extends TestBase {
         N.checkKeyNotNull((Map<?, ?>) null);
 
         N.checkKeyNotNull(map, "myMap");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkKeyNotNull(nullKeyMap, "myMap"));
     }
 
@@ -2264,6 +2269,7 @@ public class CommonUtilTest extends TestBase {
         N.checkValueNotNull(map);
 
         N.checkValueNotNull(new HashMap<>());
+
         assertNotNull(map);
     }
 
@@ -2357,6 +2363,7 @@ public class CommonUtilTest extends TestBase {
         N.checkValueNotNull((Map<?, ?>) null);
 
         N.checkValueNotNull(map, "myMap");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkValueNotNull(nullValueMap, "myMap"));
     }
 
@@ -2982,6 +2989,7 @@ public class CommonUtilTest extends TestBase {
     public void testCheckArgument_MessageFormatting() {
         try {
             N.checkArgument(false, "Value {} should be less than {}", 10, 5);
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("10"));
@@ -2990,6 +2998,7 @@ public class CommonUtilTest extends TestBase {
 
         try {
             N.checkArgument(false, "Value %s should be less than %s", 10, 5);
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("10"));
@@ -2998,6 +3007,7 @@ public class CommonUtilTest extends TestBase {
 
         try {
             N.checkArgument(false, "No placeholders", 10, 5);
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("No placeholders"));
@@ -3006,6 +3016,7 @@ public class CommonUtilTest extends TestBase {
 
         try {
             N.checkArgument(false, "Only one {}", 10, 5);
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("10"));
@@ -3017,6 +3028,7 @@ public class CommonUtilTest extends TestBase {
     public void testCheckArgument_NullFormatting() {
         try {
             N.checkArgument(false, "Value is {}", (Object) null);
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("null"));
@@ -3024,6 +3036,7 @@ public class CommonUtilTest extends TestBase {
 
         try {
             N.checkArgument(false, null, "arg1", "arg2");
+
             Assertions.fail("Should throw IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             Assertions.assertTrue(e.getMessage().contains("null"));
@@ -3041,7 +3054,8 @@ public class CommonUtilTest extends TestBase {
     public void testCheckArgument_WithObjectMessage() {
         N.checkArgument(true, "message");
         N.checkArgument(true, 123);
-        N.checkArgument(true, null);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(true, null));
 
         Exception ex = Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "error message"));
         Assertions.assertEquals("error message", ex.getMessage());
@@ -3184,6 +3198,7 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testNullHandling() {
         N.checkArgument(true, "value is %s", (Object) null);
+
         Exception ex = Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "value %s", (Object) null));
         Assertions.assertTrue(ex.getMessage().contains("null"));
 
@@ -3213,12 +3228,15 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testCheckArgument() {
         N.checkArgument(true);
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false));
 
         N.checkArgument(true, "Error");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "Error"));
 
         N.checkArgument(true, "Error: %s", "test");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, "Error: %s", "test"));
 
         N.checkArgument(true, "Error: %s", 'c');
@@ -3237,6 +3255,7 @@ public class CommonUtilTest extends TestBase {
         N.checkArgument(true, "Error: %s %s %s %s", "a", "b", "c", "d");
 
         N.checkArgument(true, () -> "Error from supplier");
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> N.checkArgument(false, () -> "Error from supplier"));
     }
 
@@ -3924,6 +3943,7 @@ public class CommonUtilTest extends TestBase {
         final boolean[] supplierCalled = { false };
         N.checkState(true, () -> {
             supplierCalled[0] = true;
+
             return "Should not be called";
         });
         Assertions.assertFalse(supplierCalled[0]);
@@ -3931,6 +3951,7 @@ public class CommonUtilTest extends TestBase {
         try {
             N.checkState(false, () -> {
                 supplierCalled[0] = true;
+
                 return "Should be called";
             });
         } catch (IllegalStateException e) {
@@ -3997,12 +4018,15 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testCheckState() {
         N.checkState(true);
+
         Assertions.assertThrows(IllegalStateException.class, () -> N.checkState(false));
 
         N.checkState(true, "Error");
+
         Assertions.assertThrows(IllegalStateException.class, () -> N.checkState(false, "Error"));
 
         N.checkState(true, "Error: %s", "test");
+
         Assertions.assertThrows(IllegalStateException.class, () -> N.checkState(false, "Error: %s", "test"));
 
         N.checkState(true, "Error: %s", 'c');
@@ -4021,6 +4045,7 @@ public class CommonUtilTest extends TestBase {
         N.checkState(true, "Error: %s %s %s %s", "a", "b", "c", "d");
 
         N.checkState(true, () -> "Error from supplier");
+
         Assertions.assertThrows(IllegalStateException.class, () -> N.checkState(false, () -> "Error from supplier"));
     }
 
@@ -8400,6 +8425,7 @@ public class CommonUtilTest extends TestBase {
         assertEquals("test", N.defaultIfNull("test", Fn.s(() -> "default")));
 
         assertThrows(IllegalArgumentException.class, () -> N.defaultIfNull(nullStr, () -> null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.defaultIfNull("test", (Supplier<String>) null));
     }
 
     @Test
@@ -13953,7 +13979,7 @@ public class CommonUtilTest extends TestBase {
 
         Assertions.assertEquals(0, N.compare(new String[] {}, new String[] {}, reverseComparator));
 
-        Assertions.assertTrue(N.compare(arr1, arr2, (Comparator<String>) null) < 0);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.compare(arr1, arr2, (Comparator<String>) null));
     }
 
     @Test
@@ -13997,7 +14023,7 @@ public class CommonUtilTest extends TestBase {
         List<String> list1 = Arrays.asList("a", "b", "c");
         List<String> list2 = Arrays.asList("a", "b", "d");
 
-        Assertions.assertTrue(N.compare(list1, list2, (Comparator<String>) null) < 0);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.compare(list1, list2, (Comparator<String>) null));
 
         Assertions.assertTrue(N.compare(list1, list2, reverseComparator) > 0);
 
@@ -14010,7 +14036,7 @@ public class CommonUtilTest extends TestBase {
         List<String> list1 = Arrays.asList("a", "b", "c");
         List<String> list2 = Arrays.asList("a", "b", "d");
 
-        Assertions.assertTrue(N.compare(list1.iterator(), list2.iterator(), (Comparator<String>) null) < 0);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.compare(list1.iterator(), list2.iterator(), (Comparator<String>) null));
 
         Assertions.assertTrue(N.compare(list1.iterator(), list2.iterator(), reverseComparator) > 0);
     }
@@ -14032,7 +14058,7 @@ public class CommonUtilTest extends TestBase {
         assertTrue(N.compare("abc", "def", comp) < 0);
         assertTrue(N.compare("def", "abc", comp) > 0);
 
-        assertEquals(0, N.compare("abc", "abc", null));
+        assertThrows(IllegalArgumentException.class, () -> N.compare("abc", "abc", null));
     }
 
     @Test
@@ -14415,7 +14441,7 @@ public class CommonUtilTest extends TestBase {
     public void testLessThanWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.lessThan(1, 2, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lessThan(1, 2, null));
 
         Assertions.assertFalse(N.lessThan(1, 2, reverseComparator));
         Assertions.assertTrue(N.lessThan(2, 1, reverseComparator));
@@ -14432,8 +14458,8 @@ public class CommonUtilTest extends TestBase {
     public void testLessThanOrEqualWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.lessThanOrEqual(1, 2, null));
-        Assertions.assertTrue(N.lessThanOrEqual(1, 1, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lessThanOrEqual(1, 2, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.lessThanOrEqual(1, 1, null));
 
         Assertions.assertFalse(N.lessThanOrEqual(1, 2, reverseComparator));
         Assertions.assertTrue(N.lessThanOrEqual(2, 1, reverseComparator));
@@ -14450,8 +14476,8 @@ public class CommonUtilTest extends TestBase {
     public void testLeWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        assertTrue(N.le(1, 2, null));
-        assertTrue(N.le(1, 1, null));
+        assertThrows(IllegalArgumentException.class, () -> N.le(1, 2, null));
+        assertThrows(IllegalArgumentException.class, () -> N.le(1, 1, null));
         assertFalse(N.le(1, 2, reverseComparator));
         assertTrue(N.le(2, 1, reverseComparator));
     }
@@ -14467,7 +14493,7 @@ public class CommonUtilTest extends TestBase {
     public void testGreaterThanWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertFalse(N.greaterThan(1, 2, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.greaterThan(1, 2, null));
 
         Assertions.assertTrue(N.greaterThan(1, 2, reverseComparator));
         Assertions.assertFalse(N.greaterThan(2, 1, reverseComparator));
@@ -14484,8 +14510,8 @@ public class CommonUtilTest extends TestBase {
     public void testGreaterThanOrEqualWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertFalse(N.greaterThanOrEqual(1, 2, null));
-        Assertions.assertTrue(N.greaterThanOrEqual(1, 1, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.greaterThanOrEqual(1, 2, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.greaterThanOrEqual(1, 1, null));
 
         Assertions.assertTrue(N.greaterThanOrEqual(1, 2, reverseComparator));
         Assertions.assertFalse(N.greaterThanOrEqual(2, 1, reverseComparator));
@@ -14502,8 +14528,8 @@ public class CommonUtilTest extends TestBase {
     public void testGeWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        assertFalse(N.ge(1, 2, null));
-        assertTrue(N.ge(1, 1, null));
+        assertThrows(IllegalArgumentException.class, () -> N.ge(1, 2, null));
+        assertThrows(IllegalArgumentException.class, () -> N.ge(1, 1, null));
         assertTrue(N.ge(1, 2, reverseComparator));
         assertFalse(N.ge(2, 1, reverseComparator));
     }
@@ -14519,7 +14545,7 @@ public class CommonUtilTest extends TestBase {
     public void testGtAndLtWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.gtAndLt(5, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.gtAndLt(5, 1, 10, null));
 
         Assertions.assertTrue(N.gtAndLt(5, 10, 1, reverseComparator));
         Assertions.assertFalse(N.gtAndLt(5, 1, 10, reverseComparator));
@@ -14536,8 +14562,8 @@ public class CommonUtilTest extends TestBase {
     public void testGeAndLtWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.geAndLt(5, 1, 10, null));
-        Assertions.assertTrue(N.geAndLt(1, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.geAndLt(5, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.geAndLt(1, 1, 10, null));
 
         Assertions.assertTrue(N.geAndLt(5, 10, 1, reverseComparator));
         Assertions.assertTrue(N.geAndLt(10, 10, 1, reverseComparator));
@@ -14555,9 +14581,9 @@ public class CommonUtilTest extends TestBase {
     public void testGeAndLeWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.geAndLe(5, 1, 10, null));
-        Assertions.assertTrue(N.geAndLe(1, 1, 10, null));
-        Assertions.assertTrue(N.geAndLe(10, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.geAndLe(5, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.geAndLe(1, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.geAndLe(10, 1, 10, null));
 
         Assertions.assertTrue(N.geAndLe(5, 10, 1, reverseComparator));
         Assertions.assertTrue(N.geAndLe(10, 10, 1, reverseComparator));
@@ -14575,9 +14601,9 @@ public class CommonUtilTest extends TestBase {
     public void testGtAndLeWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.gtAndLe(5, 1, 10, null));
-        Assertions.assertFalse(N.gtAndLe(1, 1, 10, null));
-        Assertions.assertTrue(N.gtAndLe(10, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.gtAndLe(5, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.gtAndLe(1, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.gtAndLe(10, 1, 10, null));
 
         Assertions.assertTrue(N.gtAndLe(5, 10, 1, reverseComparator));
         Assertions.assertFalse(N.gtAndLe(10, 10, 1, reverseComparator));
@@ -14596,7 +14622,7 @@ public class CommonUtilTest extends TestBase {
     public void testIsBetweenWithComparator() {
         Comparator<Integer> reverseComparator = (a, b) -> b.compareTo(a);
 
-        Assertions.assertTrue(N.isBetween(5, 1, 10, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.isBetween(5, 1, 10, null));
         Assertions.assertTrue(N.isBetween(5, 10, 1, reverseComparator));
     }
 
@@ -20150,7 +20176,7 @@ public class CommonUtilTest extends TestBase {
 
         assertTrue(N.isSorted(array, Comparator.comparing(String::length).reversed()));
 
-        assertTrue(N.isSorted(array, null));
+        assertThrows(IllegalArgumentException.class, () -> N.isSorted(array, null));
     }
 
     @Test
@@ -20443,10 +20469,10 @@ public class CommonUtilTest extends TestBase {
     }
 
     @Test
-    public void testSort_List_WithRange_NullComparator() {
+    public void testSort_List_WithRange_RejectsNullComparator() {
         List<String> list = new ArrayList<>(Arrays.asList("d", "b", "a", "c", "e"));
-        N.sort(list, 1, 4, (Comparator<String>) null);
-        assertEquals(Arrays.asList("d", "a", "b", "c", "e"), list);
+        assertThrows(IllegalArgumentException.class, () -> N.sort(list, 1, 4, (Comparator<String>) null));
+        assertEquals(Arrays.asList("d", "b", "a", "c", "e"), list);
     }
 
     @Test
@@ -22327,8 +22353,7 @@ public class CommonUtilTest extends TestBase {
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         String[] arrWithNull = { null, "a", "b", null };
-        int[] nullIndices = N.indicesOfMin(arrWithNull, null);
-        Assertions.assertArrayEquals(new int[] { 1 }, nullIndices);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indicesOfMin(arrWithNull, null));
     }
 
     @Test
@@ -22373,8 +22398,7 @@ public class CommonUtilTest extends TestBase {
         Assertions.assertArrayEquals(new int[] { 1, 3, 5 }, indices);
 
         String[] arrWithNull = { "a", null, "b", null };
-        int[] nullIndices = N.indicesOfMax(arrWithNull, null);
-        Assertions.assertArrayEquals(new int[] { 2 }, nullIndices);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> N.indicesOfMax(arrWithNull, null));
     }
 
     @Test
@@ -23264,12 +23288,10 @@ public class CommonUtilTest extends TestBase {
 
     @Test
     public void testIndicesOfMinTreatsNullAsMaximum() {
-        // regression: the natural-ordering overloads used the nulls-first comparator (copied from the
-        // max family), reporting a null element as the minimum and contradicting both N.min and the
-        // comparator overload's documented nulls-as-maximum default
+        // Natural-ordering overloads treat null as the maximum; comparator overloads reject null.
         final Integer[] a = { 2, null, 1 };
         assertArrayEquals(new int[] { 2 }, N.indicesOfMin(a));
-        assertArrayEquals(new int[] { 2 }, N.indicesOfMin(a, null));
+        assertThrows(IllegalArgumentException.class, () -> N.indicesOfMin(a, null));
         assertArrayEquals(new int[] { 2 }, N.indicesOfMin(Arrays.asList(2, null, 1)));
 
         // max family unchanged: nulls smallest by default
@@ -23370,6 +23392,14 @@ public class CommonUtilTest extends TestBase {
         N.parallelSort(parallel, 1, 4, Comparator.naturalOrder());
         assertEquals(Arrays.asList(9, 1, 2, 3, 8), parallel);
         assertEquals(Arrays.asList(1, 2, 3), parallel.writtenIndices);
+    }
+
+    @Test
+    public void testNullFunctionalInterfaceArgumentsAreRejected() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(Runnable.class, null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(new Class<?>[] { Runnable.class }, null));
+        assertThrows(IllegalArgumentException.class,
+                () -> N.splitByChunkCount(1, 1, (com.landawn.abacus.util.function.IntBiFunction<Object>) null));
     }
 
 }

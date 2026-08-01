@@ -438,11 +438,9 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testMedianWithNullComparator() {
+    public void testMedianRejectsNullComparator() {
         Integer[] arr = { 3, 1, 2 };
-        Pair<Integer, Optional<Integer>> result = Median.of(arr, null);
-        assertEquals(2, result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(arr, null));
     }
 
     @Test
@@ -1724,11 +1722,9 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOfArrayWithComparator_NullComparator() {
+    public void testOfArrayWithComparator_RejectsNullComparator() {
         String[] words = { "apple", "banana", "cherry" };
-        Pair<String, Optional<String>> result = Median.of(words, null);
-        Assertions.assertEquals("banana", result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(words, null));
     }
 
     @Test
@@ -1740,11 +1736,9 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOfArrayRangeWithComparator_NullComparator() {
+    public void testOfArrayRangeWithComparator_RejectsNullComparator() {
         String[] words = { "elephant", "ant", "bee", "tiger" };
-        Pair<String, Optional<String>> result = Median.of(words, 1, 4, null);
-        Assertions.assertEquals("bee", result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(words, 1, 4, null));
     }
 
     @Test
@@ -1764,11 +1758,9 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOfCollectionWithComparator_NullComparator() {
+    public void testOfCollectionWithComparator_RejectsNullComparator() {
         List<String> words = Arrays.asList("apple", "banana", "cherry");
-        Pair<String, Optional<String>> result = Median.of(words, null);
-        Assertions.assertEquals("banana", result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(words, null));
     }
 
     @Test
@@ -1788,20 +1780,15 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOfCollectionRangeWithComparator_NullComparator() {
+    public void testOfCollectionRangeWithComparator_RejectsNullComparator() {
         List<String> words = Arrays.asList("elephant", "ant", "bee", "tiger", "cat");
-        Pair<String, Optional<String>> result = Median.of(words, 1, 4, null);
-        Assertions.assertEquals("bee", result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(words, 1, 4, null));
     }
 
     @Test
-    public void testOfArrayWithNullComparator() {
+    public void testOfArrayRejectsNullComparator() {
         Integer[] numbers = { 3, 1, 2 };
-
-        Pair<Integer, Optional<Integer>> result = Median.of(numbers, null);
-        Assertions.assertEquals(2, result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(numbers, null));
     }
 
     @Test
@@ -1864,16 +1851,12 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testNullComparator() {
+    public void testRejectsNullComparator() {
         Integer[] array = { 3, 1, 4, 1, 5 };
-        Pair<Integer, Optional<Integer>> result = Median.of(array, null);
-        Assertions.assertEquals(3, result.left());
-        Assertions.assertFalse(result.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(array, null));
 
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
-        Pair<Integer, Optional<Integer>> result2 = Median.of(list, null);
-        Assertions.assertEquals(3, result2.left());
-        Assertions.assertFalse(result2.right().isPresent());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Median.of(list, null));
     }
 
     @Test

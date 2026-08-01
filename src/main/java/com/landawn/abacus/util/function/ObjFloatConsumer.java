@@ -22,9 +22,9 @@ import com.landawn.abacus.util.cs;
  * and a float-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive float.
  *
- * <p>This interface is the float primitive specialization of {@link ObjDoubleConsumer}.
- * Unlike the JDK which only provides specializations for int, long, and double primitives,
- * this interface extends support to float primitives for better type safety and performance.
+ * <p>This is the {@code float} counterpart of {@link ObjDoubleConsumer} (and of the JDK's
+ * {@link java.util.function.ObjDoubleConsumer}). Unlike the JDK, which only provides specializations
+ * for {@code int}, {@code long}, and {@code double}, this package also supports {@code float}.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, float)}.
  *
@@ -71,13 +71,14 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * both.accept(stats, 1.5f);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ObjFloatConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ObjFloatConsumer<T> andThen(final ObjFloatConsumer<? super T> after) {
+    default ObjFloatConsumer<T> andThen(final ObjFloatConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);

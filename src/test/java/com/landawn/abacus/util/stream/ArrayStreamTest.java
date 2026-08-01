@@ -788,7 +788,7 @@ public class ArrayStreamTest extends TestBase {
 
     @Test
     public void testSplitWithNullCollectionSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(integerArray).split(2, (IntFunction<List<Integer>>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(integerArray).split(2, (IntFunction<List<Integer>>) null).first());
     }
 
     @Test
@@ -1569,6 +1569,15 @@ public class ArrayStreamTest extends TestBase {
         List<Integer> result = stream.maxAll(Integer::compareTo);
         assertEquals(2, result.size());
         assertEquals(Integer.valueOf(3), result.get(0));
+    }
+
+    @Test
+    public void testMaxAll_preservesEncounterOrderOnSortedFastPath() {
+        Comparator<String> byLength = Comparator.comparingInt(String::length);
+
+        List<String> result = Stream.of(new String[] { "x", "first", "other" }).sorted(byLength).maxAll(byLength);
+
+        assertEquals(Arrays.asList("first", "other"), result);
     }
 
     @Test

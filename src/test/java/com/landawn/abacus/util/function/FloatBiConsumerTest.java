@@ -108,7 +108,7 @@ public class FloatBiConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         FloatBiConsumer instance = (a, b) -> {
         };
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((FloatBiConsumer) null));

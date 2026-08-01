@@ -883,10 +883,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param sameRange a {@code non-null} predicate that determines if the next element belongs to the same range as the first element of the current range.
+     * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
-     * @param mapper a {@code non-null} function that maps a range (defined by its first and last element) to an output element
+     * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#rangeMap(BiPredicate, BiFunction)
@@ -922,10 +922,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <T> the element type of the new stream
-     * @param sameRange a {@code non-null} predicate that determines if the next element belongs to the same range as the first element of the current range.
+     * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
-     * @param mapper a {@code non-null} function that maps a range (defined by its first and last element) to an output object of type T
+     * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#rangeMap(BiPredicate, BiFunction)
@@ -1294,6 +1294,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a new FloatStream containing the top n elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
@@ -2277,10 +2278,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the other FloatStream to merge with
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a new FloatStream containing the merged elements
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -2306,7 +2306,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the FloatStream to be combined with the current FloatStream. Must be {@code non-null}. Will be closed along with this stream.
-     * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
+     * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(FloatStream, float, float, FloatBinaryOperator)
@@ -2334,7 +2334,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param b the second FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
      * @param c the third FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
-     * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
+     * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(FloatStream, FloatStream, float, float, float, FloatTernaryOperator)
@@ -2362,7 +2362,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param b the FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
      * @param valueForNoneA the default value to use for the current FloatStream when it runs out of elements
      * @param valueForNoneB the default value to use for the given FloatStream when it runs out of elements
-     * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
+     * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2393,7 +2393,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneA the default value to use for the current FloatStream when it runs out of elements
      * @param valueForNoneB the default value to use for the second FloatStream when it runs out of elements
      * @param valueForNoneC the default value to use for the third FloatStream when it runs out of elements
-     * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream. Must be {@code non-null}.
+     * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2486,8 +2486,9 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
     /**
      * Creates a new FloatStream that is supplied by the given supplier.
-     * The supplier is memoized and invoked at most once, when the returned stream is first traversed or closed.
-     * Closing the returned stream before traversal may still invoke the supplier so the supplied stream can be closed.
+     * The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
+     * the supplier so the supplied stream can be closed.
      *
      * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToFloat(it -> it.get())}.
      *
@@ -2503,20 +2504,23 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * FloatStream expensive = FloatStream.defer(() ->
      *     FloatStream.of(computeExpensiveFloatArray()));
      *
-     * // Supplier is memoized; the underlying stream is only created once
+     * // The first successfully supplied stream is memoized
      * double sum = deferred.sum();   // "Creating stream..." printed
      * }</pre>
      *
      * @param supplier the supplier that provides the FloatStream
      * @return a new FloatStream supplied by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see Stream#defer(Supplier)
      */
     public static FloatStream defer(final Supplier<FloatStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<FloatStream> s = Fn.memoize(supplier);
-        return Stream.just(s).flatMapToFloat(Supplier::get).onClose(newCloseHandler(s));
+        return FloatStream.of(FloatIterator.defer(() -> {
+            final FloatStream source = s.get();
+            return source == null ? FloatIterator.empty() : source.iteratorEx();
+        })).onClose(newCloseHandler(s));
     }
 
     /**
@@ -3087,12 +3091,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a FloatSupplier that provides the next float in the iteration
      * @return a FloatStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>next</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static FloatStream iterate(final BooleanSupplier hasNext, final FloatSupplier next) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(next);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(next, cs.next);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
             private boolean hasMore = true;
@@ -3144,12 +3148,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a FloatStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, BooleanSupplier, java.util.function.UnaryOperator)
      */
     public static FloatStream iterate(final float init, final BooleanSupplier hasNext, final FloatUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
             private float cur = 0;
@@ -3207,12 +3211,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param hasNext a predicate that determines if the returned stream has a next element; tested against {@code init} for the first element and {@code f.apply(previous)} for subsequent elements.
      * @param f a function to apply to the previous element to generate the next element
      * @return a FloatStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.Predicate, java.util.function.UnaryOperator)
      */
     public static FloatStream iterate(final float init, final FloatPredicate hasNext, final FloatUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
             private float cur = 0;
@@ -3278,11 +3282,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an infinite FloatStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>f</i> is null
+     * @throws IllegalArgumentException if {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.UnaryOperator)
      */
     public static FloatStream iterate(final float init, final FloatUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
             private float cur = 0;
@@ -3329,11 +3333,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param s the FloatSupplier that provides the elements of the stream
      * @return a FloatStream generated by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code s} is {@code null}
      * @see Stream#generate(Supplier)
      */
     public static FloatStream generate(final FloatSupplier s) throws IllegalArgumentException {
-        N.checkArgNotNull(s);
+        N.checkArgNotNull(s, cs.s);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
             @Override
@@ -3617,11 +3621,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first float array
      * @param b the second float array
-     * @param zipFunction the function to combine elements from both arrays. Must be non-null
+     * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], BiFunction)
      */
-    public static FloatStream zip(final float[] a, final float[] b, final FloatBinaryOperator zipFunction) {
+    public static FloatStream zip(final float[] a, final float[] b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b)) {
             return empty();
         }
@@ -3663,11 +3670,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first float array
      * @param b the second float array
      * @param c the third float array
-     * @param zipFunction the function to combine elements from all three arrays. Must be non-null
+     * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], TriFunction)
      */
-    public static FloatStream zip(final float[] a, final float[] b, final float[] c, final FloatTernaryOperator zipFunction) {
+    public static FloatStream zip(final float[] a, final float[] b, final float[] c, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b) || N.isEmpty(c)) {
             return empty();
         }
@@ -3707,11 +3717,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first float iterator
      * @param b the second float iterator
-     * @param zipFunction the function to combine elements from both iterators. Must be non-null
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, BiFunction)
      */
-    public static FloatStream zip(final FloatIterator a, final FloatIterator b, final FloatBinaryOperator zipFunction) {
+    public static FloatStream zip(final FloatIterator a, final FloatIterator b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorFloatStream(new FloatIteratorEx() {
             private final FloatIterator iterA = a == null ? FloatIterator.empty() : a;
             private final FloatIterator iterB = b == null ? FloatIterator.empty() : b;
@@ -3745,11 +3758,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first float iterator
      * @param b the second float iterator
      * @param c the third float iterator
-     * @param zipFunction the function to combine elements from all three iterators. Must be non-null
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, TriFunction)
      */
-    public static FloatStream zip(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatTernaryOperator zipFunction) {
+    public static FloatStream zip(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorFloatStream(new FloatIteratorEx() {
             private final FloatIterator iterA = a == null ? FloatIterator.empty() : a;
             private final FloatIterator iterB = b == null ? FloatIterator.empty() : b;
@@ -3782,11 +3799,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first float stream
      * @param b the second float stream
-     * @param zipFunction the function to combine elements from both streams. Must be non-null
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction) {
+    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -3807,11 +3827,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first float stream
      * @param b the second float stream
      * @param c the third float stream
-     * @param zipFunction the function to combine elements from all three streams. Must be non-null
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
-    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction) {
+    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
@@ -3830,11 +3854,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * }</pre>
      *
      * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all the streams. Must be non-null
+     * @param zipFunction the function to combine elements from all the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, Function)
      */
-    public static FloatStream zip(final Collection<? extends FloatStream> streams, final FloatNFunction<Float> zipFunction) {
+    public static FloatStream zip(final Collection<? extends FloatStream> streams, final FloatNFunction<Float> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, zipFunction).mapToFloat(ToFloatFunction.UNBOX);
     }
@@ -3857,12 +3884,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param b the second float array
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
-     * @param zipFunction the function to combine elements from both arrays. Must be non-null
+     * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      */
-    public static FloatStream zip(final float[] a, final float[] b, final float valueForNoneA, final float valueForNoneB,
-            final FloatBinaryOperator zipFunction) {
+    public static FloatStream zip(final float[] a, final float[] b, final float valueForNoneA, final float valueForNoneB, final FloatBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b)) {
             return empty();
         }
@@ -3911,12 +3941,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneA the default value to use if the first array is shorter
      * @param valueForNoneB the default value to use if the second array is shorter
      * @param valueForNoneC the default value to use if the third array is shorter
-     * @param zipFunction the function to combine elements from all three arrays. Must be non-null
+     * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      */
     public static FloatStream zip(final float[] a, final float[] b, final float[] c, final float valueForNoneA, final float valueForNoneB,
-            final float valueForNoneC, final FloatTernaryOperator zipFunction) {
+            final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b) && N.isEmpty(c)) {
             return empty();
         }
@@ -3963,12 +3996,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param b the second float iterator
      * @param valueForNoneA the default value to use if the first iterator is shorter
      * @param valueForNoneB the default value to use if the second iterator is shorter
-     * @param zipFunction the function to combine elements from both iterators. Must be non-null
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static FloatStream zip(final FloatIterator a, final FloatIterator b, final float valueForNoneA, final float valueForNoneB,
-            final FloatBinaryOperator zipFunction) {
+            final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorFloatStream(new FloatIteratorEx() {
             private final FloatIterator iterA = a == null ? FloatIterator.empty() : a;
             private final FloatIterator iterB = b == null ? FloatIterator.empty() : b;
@@ -4010,12 +4046,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneA the default value to use if the first iterator is shorter
      * @param valueForNoneB the default value to use if the second iterator is shorter
      * @param valueForNoneC the default value to use if the third iterator is shorter
-     * @param zipFunction the function to combine elements from all three iterators. Must be non-null
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static FloatStream zip(final FloatIterator a, final FloatIterator b, final FloatIterator c, final float valueForNoneA, final float valueForNoneB,
-            final float valueForNoneC, final FloatTernaryOperator zipFunction) {
+            final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorFloatStream(new FloatIteratorEx() {
             private final FloatIterator iterA = a == null ? FloatIterator.empty() : a;
             private final FloatIterator iterB = b == null ? FloatIterator.empty() : b;
@@ -4058,12 +4097,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param b the second float stream
      * @param valueForNoneA the default value to use if the first stream is shorter
      * @param valueForNoneB the default value to use if the second stream is shorter
-     * @param zipFunction the function to combine elements from both streams. Must be non-null
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final float valueForNoneA, final float valueForNoneB,
-            final FloatBinaryOperator zipFunction) {
+            final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -4088,12 +4130,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneA the default value to use if the first stream is shorter
      * @param valueForNoneB the default value to use if the second stream is shorter
      * @param valueForNoneC the default value to use if the third stream is shorter
-     * @param zipFunction the function to combine elements from all three streams. Must be non-null
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB,
-            final float valueForNoneC, final FloatTernaryOperator zipFunction) {
+            final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
@@ -4116,11 +4161,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the default values to use if the corresponding stream is shorter
-     * @param zipFunction the function to combine elements from all the streams. Must be non-null
+     * @param zipFunction the function to combine elements from all the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, List, Function)
      */
-    public static FloatStream zip(final Collection<? extends FloatStream> streams, final float[] valuesForNone, final FloatNFunction<Float> zipFunction) {
+    public static FloatStream zip(final Collection<? extends FloatStream> streams, final float[] valuesForNone, final FloatNFunction<Float> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, valuesForNone, zipFunction).mapToFloat(ToFloatFunction.UNBOX);
     }
@@ -4144,13 +4193,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first float array
      * @param b the second float array
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input arrays
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
-    public static FloatStream merge(final float[] a, final float[] b, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final float[] a, final float[] b, final FloatBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
@@ -4204,13 +4253,16 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first float array
      * @param b the second float array
      * @param c the third float array
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input arrays
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
-    public static FloatStream merge(final float[] a, final float[] b, final float[] c, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final float[] a, final float[] b, final float[] c, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), FloatStream.of(c).iteratorEx(), nextSelector);
     }
@@ -4236,13 +4288,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first FloatIterator
      * @param b the second FloatIterator
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input iterators
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
-    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new IteratorFloatStream(new FloatIteratorEx() {
@@ -4324,13 +4377,16 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first FloatIterator
      * @param b the second FloatIterator
      * @param c the third FloatIterator
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input iterators
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
-    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
@@ -4356,13 +4412,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param a the first FloatStream
      * @param b the second FloatStream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
@@ -4385,13 +4441,16 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param a the first FloatStream
      * @param b the second FloatStream
      * @param c the third FloatStream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
-    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -4416,13 +4475,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * }</pre>
      *
      * @param streams the collection of FloatStream instances to merge; a {@code null} collection and {@code null} elements are treated as empty
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the input FloatStreams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
-    public static FloatStream merge(final Collection<? extends FloatStream> streams, final FloatBiFunction<MergeResult> nextSelector) {
+    public static FloatStream merge(final Collection<? extends FloatStream> streams, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {

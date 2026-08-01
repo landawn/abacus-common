@@ -73,7 +73,7 @@ public class ImmutableIteratorTest extends TestBase {
     public void testToCollection_RejectsNullSupplierResultForEmptyIterator() {
         ImmutableIterator<String> iter = new TestImmutableIterator<>(Collections.emptyIterator());
 
-        Assertions.assertThrows(NullPointerException.class, () -> iter.toCollection(() -> null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.toCollection(() -> null));
     }
 
     @Test

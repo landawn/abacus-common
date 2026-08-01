@@ -14,6 +14,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.util.Fn.UnaryOperators;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -53,13 +54,14 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * Integer result2 = addTenThenDouble.apply(5);   // returns 30 ((5 + 10) * 2)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the before operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(java.util.function.UnaryOperator)
      */
-    default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) {
-        java.util.Objects.requireNonNull(before, cs.before);
+    default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) throws IllegalArgumentException {
+        N.checkArgNotNull(before, cs.before);
+
         return t -> apply(before.apply(t));
     }
 
@@ -83,13 +85,14 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      * Integer result2 = doubleThenAddTen.apply(5);   // returns 20 ((5 * 2) + 10)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the after operator
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(java.util.function.UnaryOperator)
      */
-    default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) {
-        java.util.Objects.requireNonNull(after, cs.after);
+    default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) throws IllegalArgumentException {
+        N.checkArgNotNull(after, cs.after);
+
         return t -> after.apply(apply(t));
     }
 

@@ -1397,9 +1397,10 @@ public class CharStreamTest extends TestBase {
         assertNotNull(stream);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, stream.toArray());
     }
+  
 
     @Test
-    public void testDefer_NullSupplier() {
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.defer(null));
     }
 
@@ -4143,7 +4144,7 @@ public class CharStreamTest extends TestBase {
 
     @Test
     public void testIterateBooleanSupplierCharSupplierNull() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a'));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a').count());
     }
 
     @Test
@@ -4190,7 +4191,7 @@ public class CharStreamTest extends TestBase {
 
     @Test
     public void testGenerate_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null).limit(1).count());
     }
 
     @Test

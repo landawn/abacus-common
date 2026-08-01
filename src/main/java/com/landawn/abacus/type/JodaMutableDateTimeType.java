@@ -106,9 +106,9 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *   <li>All other values: parsed as a timestamp via the default timestamp parser</li>
      * </ul>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed Joda {@link MutableDateTime}, or {@code null} if {@code str} is {@code null} or a null-datetime string

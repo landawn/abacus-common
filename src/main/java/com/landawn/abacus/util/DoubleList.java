@@ -391,7 +391,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.set(0, 9.0);   // data[0] is now 9.0 too (backing array is shared)
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @throws NullPointerException if the specified array is {@code null}
      */
     public DoubleList(final double[] a) {
@@ -414,7 +414,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * new DoubleList(data, 6);   // throws IndexOutOfBoundsException (6 > data.length)
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @param size the number of elements in the list. Must be between 0 and {@code a.length} (inclusive).
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than {@code a.length}
      * @throws NullPointerException if {@code a} is {@code null}
@@ -512,7 +512,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * DoubleList.copyOf(data, 0, 6);                      // throws IndexOutOfBoundsException (6 > data.length)
      * }</pre>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied.
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new DoubleList containing a copy of the elements in the specified range
@@ -953,12 +953,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * boolean none = list2.removeIf(d -> d > 100);   // returns false, list unchanged
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final DoublePredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final DoublePredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final DoubleList tmp = new DoubleList(size());
 
@@ -1213,6 +1213,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1358,11 +1359,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.replaceAll(d -> d + 1);   // list is now [3.0, 5.0, 7.0]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified operator is {@code null}
+     * @param operator the operator to apply to each element.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final DoubleUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final DoubleUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsDouble(elementData[i]);
@@ -1383,13 +1384,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * boolean none = list2.replaceIf(d -> d > 100, 0.0);   // returns false, list unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test elements. Must not be {@code null}.
+     * @param predicate the predicate to test elements.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final DoublePredicate predicate, final double newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final DoublePredicate predicate, final double newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2152,8 +2153,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * new DoubleList().forEach(d -> sum[0] += d);   // no-op on empty list, sum[0] still 6.0
      * }</pre>
      *
-     * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final DoubleConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2186,12 +2187,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the index of the first element (inclusive) to be processed
      * @param toIndex the index of the last element (exclusive) to be processed,
      *                or -1 for reverse iteration to the beginning
-     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @param action the action to be performed for each element.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      *         ({@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0 || max(fromIndex, toIndex) > size()})
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2532,7 +2533,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
-     * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
+     * @param rnd the source of randomness to use to shuffle the list.
      * @throws IllegalArgumentException if {@code rnd} is {@code null}
      */
     @Override
@@ -2786,14 +2787,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a collection containing the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Double>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2814,13 +2816,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a {@code Multiset} containing the specified range of elements with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier) throws IndexOutOfBoundsException {
+    public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Double> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Double> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

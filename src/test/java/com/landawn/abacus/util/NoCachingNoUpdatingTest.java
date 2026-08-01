@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -5194,7 +5195,7 @@ public class NoCachingNoUpdatingTest extends TestBase {
     }
 
     @Test
-    public void testToCollectionRejectsNullSupplierAndNullResultForEveryView() {
+    public void testToCollectionNullSupplierAndNullResultForEveryView() {
         DisposableArray<Object> objects = DisposableArray.wrap(new Object[0]);
         DisposableBooleanArray booleans = DisposableBooleanArray.wrap(new boolean[0]);
         DisposableCharArray chars = DisposableCharArray.wrap(new char[0]);
@@ -5206,27 +5207,27 @@ public class NoCachingNoUpdatingTest extends TestBase {
         DisposableDoubleArray doubles = DisposableDoubleArray.wrap(new double[0]);
         DisposableDeque<Object> deque = DisposableDeque.wrap(new ArrayDeque<>());
 
-        assertThrows(NullPointerException.class, () -> objects.<List<Object>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> booleans.<List<Boolean>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> chars.<List<Character>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> bytes.<List<Byte>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> shorts.<List<Short>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> ints.<List<Integer>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> longs.<List<Long>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> floats.<List<Float>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> doubles.<List<Double>> toCollection(null));
-        assertThrows(NullPointerException.class, () -> deque.<List<Object>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> objects.<List<Object>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> booleans.<List<Boolean>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> chars.<List<Character>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> bytes.<List<Byte>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> shorts.<List<Short>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> ints.<List<Integer>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> longs.<List<Long>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> floats.<List<Float>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> doubles.<List<Double>> toCollection(null));
+        assertThrows(IllegalArgumentException.class, () -> deque.<List<Object>> toCollection(null));
 
-        assertThrows(NullPointerException.class, () -> objects.<List<Object>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> booleans.<List<Boolean>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> chars.<List<Character>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> bytes.<List<Byte>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> shorts.<List<Short>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> ints.<List<Integer>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> longs.<List<Long>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> floats.<List<Float>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> doubles.<List<Double>> toCollection(size -> null));
-        assertThrows(NullPointerException.class, () -> deque.<List<Object>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> objects.<List<Object>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> booleans.<List<Boolean>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> chars.<List<Character>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> bytes.<List<Byte>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> shorts.<List<Short>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> ints.<List<Integer>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> longs.<List<Long>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> floats.<List<Float>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> doubles.<List<Double>> toCollection(size -> null));
+        assertThrows(IllegalArgumentException.class, () -> deque.<List<Object>> toCollection(size -> null));
     }
 
     @Test
@@ -5235,21 +5236,21 @@ public class NoCachingNoUpdatingTest extends TestBase {
     }
 
     @Test
-    public void testEmptyForeachRejectsNullCallbackForEveryView() {
-        assertThrows(NullPointerException.class, () -> DisposableArray.wrap(new Object[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableBooleanArray.wrap(new boolean[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableCharArray.wrap(new char[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableByteArray.wrap(new byte[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableShortArray.wrap(new short[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableIntArray.wrap(new int[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableLongArray.wrap(new long[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableFloatArray.wrap(new float[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableDoubleArray.wrap(new double[0]).foreach(null));
-        assertThrows(NullPointerException.class, () -> DisposableDeque.wrap(new ArrayDeque<>()).foreach(null));
+    public void testEmptyForeachDoesNotEvaluateNullCallbackForEveryView() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableArray.wrap(new Object[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableBooleanArray.wrap(new boolean[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableCharArray.wrap(new char[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableByteArray.wrap(new byte[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableShortArray.wrap(new short[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableIntArray.wrap(new int[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableLongArray.wrap(new long[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableFloatArray.wrap(new float[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableDoubleArray.wrap(new double[0]).foreach(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> DisposableDeque.wrap(new ArrayDeque<>()).foreach(null));
     }
 
     @Test
-    public void testApplyAndAcceptRejectNullCallbacksAndAllowNullFunctionResults() throws Exception {
+    public void testApplyAndAcceptNullCallbacksAndNullFunctionResults() throws Exception {
         DisposableArray<Object> objects = DisposableArray.wrap(new Object[0]);
         DisposableBooleanArray booleans = DisposableBooleanArray.wrap(new boolean[0]);
         DisposableCharArray chars = DisposableCharArray.wrap(new char[0]);
@@ -5261,47 +5262,47 @@ public class NoCachingNoUpdatingTest extends TestBase {
         DisposableDoubleArray doubles = DisposableDoubleArray.wrap(new double[0]);
         DisposableDeque<Object> deque = DisposableDeque.wrap(new ArrayDeque<>());
 
-        assertThrows(NullPointerException.class, () -> objects.apply(null));
-        assertThrows(NullPointerException.class, () -> booleans.apply(null));
-        assertThrows(NullPointerException.class, () -> chars.apply(null));
-        assertThrows(NullPointerException.class, () -> bytes.apply(null));
-        assertThrows(NullPointerException.class, () -> shorts.apply(null));
-        assertThrows(NullPointerException.class, () -> ints.apply(null));
-        assertThrows(NullPointerException.class, () -> longs.apply(null));
-        assertThrows(NullPointerException.class, () -> floats.apply(null));
-        assertThrows(NullPointerException.class, () -> doubles.apply(null));
-        assertThrows(NullPointerException.class, () -> deque.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> objects.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> booleans.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> chars.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> bytes.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> shorts.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> ints.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> longs.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> floats.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> doubles.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> deque.apply(null));
 
-        assertThrows(NullPointerException.class, () -> objects.accept(null));
-        assertThrows(NullPointerException.class, () -> booleans.accept(null));
-        assertThrows(NullPointerException.class, () -> chars.accept(null));
-        assertThrows(NullPointerException.class, () -> bytes.accept(null));
-        assertThrows(NullPointerException.class, () -> shorts.accept(null));
-        assertThrows(NullPointerException.class, () -> ints.accept(null));
-        assertThrows(NullPointerException.class, () -> longs.accept(null));
-        assertThrows(NullPointerException.class, () -> floats.accept(null));
-        assertThrows(NullPointerException.class, () -> doubles.accept(null));
-        assertThrows(NullPointerException.class, () -> deque.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> objects.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> booleans.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> chars.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> bytes.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> shorts.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> ints.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> longs.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> floats.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> doubles.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> deque.accept(null));
 
         assertNull(objects.apply(array -> null));
         assertNull(booleans.apply(array -> null));
         assertNull(deque.apply(value -> null));
 
         DisposableEntry<String, Integer> entry = DisposableEntry.wrap(new AbstractMap.SimpleEntry<>("key", 1));
-        assertThrows(NullPointerException.class, () -> entry.apply((Throwables.Function<DisposableEntry<String, Integer>, Object, RuntimeException>) null));
-        assertThrows(NullPointerException.class, () -> entry.apply((Throwables.BiFunction<String, Integer, Object, RuntimeException>) null));
-        assertThrows(NullPointerException.class, () -> entry.accept((Throwables.Consumer<DisposableEntry<String, Integer>, RuntimeException>) null));
-        assertThrows(NullPointerException.class, () -> entry.accept((Throwables.BiConsumer<String, Integer, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class, () -> entry.apply((Throwables.Function<DisposableEntry<String, Integer>, Object, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class, () -> entry.apply((Throwables.BiFunction<String, Integer, Object, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class, () -> entry.accept((Throwables.Consumer<DisposableEntry<String, Integer>, RuntimeException>) null));
+        assertThrows(IllegalArgumentException.class, () -> entry.accept((Throwables.BiConsumer<String, Integer, RuntimeException>) null));
         assertNull(entry.apply((key, value) -> null));
 
         DisposablePair<String, Integer> pair = DisposablePair.wrap(Pair.of("left", 1));
-        assertThrows(NullPointerException.class, () -> pair.apply(null));
-        assertThrows(NullPointerException.class, () -> pair.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> pair.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> pair.accept(null));
         assertNull(pair.apply((left, right) -> null));
 
         DisposableTriple<String, Integer, Boolean> triple = DisposableTriple.wrap(Triple.of("left", 1, true));
-        assertThrows(NullPointerException.class, () -> triple.apply(null));
-        assertThrows(NullPointerException.class, () -> triple.accept(null));
+        assertThrows(IllegalArgumentException.class, () -> triple.apply(null));
+        assertThrows(IllegalArgumentException.class, () -> triple.accept(null));
         assertNull(triple.apply((left, middle, right) -> null));
     }
 

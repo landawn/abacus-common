@@ -98,7 +98,7 @@ public class DoubleTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         DoubleTriPredicate instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((DoubleTriPredicate) null));
     }

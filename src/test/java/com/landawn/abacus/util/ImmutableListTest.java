@@ -461,7 +461,7 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.clear());
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.set(0, "c"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.replaceAll(UnaryOperator.identity()));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.sort(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> list.sort(null));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> list.removeIf(s -> true));
     }
 
@@ -804,9 +804,9 @@ public class ImmutableListTest extends TestBase {
     }
 
     @Test
-    public void testSort_WithNull_ThrowsException() {
+    public void testSort_WithNull_ThrowsIllegalArgumentException() {
         ImmutableList<String> list = ImmutableList.of("a", "b");
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> list.sort(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> list.sort(null));
     }
 
     @Test

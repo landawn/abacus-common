@@ -127,7 +127,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * }</pre>
      *
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
-     * @param config the serialization configuration to use (must contain schema if obj is not SpecificRecord)
+     * @param config the serialization configuration to use (must contain a schema unless {@code obj} is a
+     *        {@code SpecificRecord} or a collection of {@code SpecificRecord}s)
      * @return the Base64 encoded string representation of the serialized object
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
      *         or a {@code SpecificRecord} collection contains nulls or more than one record class

@@ -977,11 +977,14 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         N.checkArgNotNegative(id, "id");
 
         synchronized (kryoPool) {
-            clearKryoRegistration(type);
-            kryoClassIdMap.put(type, id);
+            synchronized (ParserFactory._kryoRegistrationLock) {
+                checkKryoRegistrationIdAvailable(type, id);
+                clearKryoRegistration(type);
+                kryoClassIdMap.put(type, id);
 
-            xPool.clear();
-            kryoPool.clear();
+                xPool.clear();
+                kryoPool.clear();
+            }
         }
     }
 
@@ -1035,11 +1038,54 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         N.checkArgNotNegative(id, "id");
 
         synchronized (kryoPool) {
-            clearKryoRegistration(type);
-            kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
+            synchronized (ParserFactory._kryoRegistrationLock) {
+                checkKryoRegistrationIdAvailable(type, id);
+                clearKryoRegistration(type);
+                kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
 
-            xPool.clear();
-            kryoPool.clear();
+                xPool.clear();
+                kryoPool.clear();
+            }
+        }
+    }
+
+    private void checkKryoRegistrationIdAvailable(final Class<?> type, final int id) {
+        for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) {
+            if (entry.getValue().intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
+        }
+
+        for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
+            if (entry.getValue()._2.intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
+        }
+
+        for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
+            if (entry.getValue().intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
+        }
+
+        for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
+            if (entry.getValue()._2.intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
+        }
+    }
+
+    private void checkMergedKryoRegistrationIds() {
+        // Global registrations can be added after this parser's instance registrations. At this
+        // boundary both scopes are visible under a consistent lock snapshot, so reject a merged
+        // conflict before a pooled or newly constructed Kryo can escape. The same class is allowed
+        // in both scopes because the instance registration intentionally overrides the global one.
+        for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) {
+            checkKryoRegistrationIdAvailable(entry.getKey(), entry.getValue());
+        }
+
+        for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
+            checkKryoRegistrationIdAvailable(entry.getKey(), entry.getValue()._2);
         }
     }
 
@@ -1235,6 +1281,29 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         }
     }
 
+    private static final Map<Integer, Class<?>> builtInRegistrationIdMap = createBuiltInRegistrationIdMap();
+
+    private static Map<Integer, Class<?>> createBuiltInRegistrationIdMap() {
+        final Kryo kryo = new Kryo();
+        kryo.setRegistrationRequired(false);
+
+        for (final Class<?> cls : builtInClassesToRegister) {
+            kryo.register(cls);
+        }
+
+        final Map<Integer, Class<?>> result = new HashMap<>();
+
+        for (int id = 0, max = kryo.getNextRegistrationId(); id < max; id++) {
+            final Registration registration = kryo.getRegistration(id);
+
+            if (registration != null) {
+                result.put(id, registration.getType());
+            }
+        }
+
+        return java.util.Collections.unmodifiableMap(result);
+    }
+
     /**
      * Creates and configures a new Kryo instance with all registered types.
      * This method retrieves a Kryo instance from the pool if available, or creates a new one
@@ -1272,6 +1341,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                     globalKryoRegistrationVersion = currentGlobalRegistrationVersion;
                 }
 
+                checkMergedKryoRegistrationIds();
+
                 // Keep the global lock through the pooled-instance decision. Otherwise a global
                 // registration could complete after the version check but before this removal,
                 // allowing one stale pooled Kryo to escape after the new registration is visible.
@@ -1299,7 +1370,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
                     for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
-                        kryo.register(entry.getKey(), entry.getValue());
+                        registerKryo(kryo, entry.getKey(), entry.getValue());
                     }
                 }
 
@@ -1311,7 +1382,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(ParserFactory._kryoClassSerializerIdMap)) {
                     for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
-                        kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                        registerKryo(kryo, entry.getKey(), entry.getValue()._1, entry.getValue()._2);
                     }
                 }
 
@@ -1323,7 +1394,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(kryoClassIdMap)) {
                     for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
-                        kryo.register(entry.getKey(), entry.getValue());
+                        registerKryo(kryo, entry.getKey(), entry.getValue());
                     }
                 }
 
@@ -1335,7 +1406,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(kryoClassSerializerIdMap)) {
                     for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
-                        kryo.register(entry.getKey(), entry.getValue()._1, entry.getValue()._2);
+                        registerKryo(kryo, entry.getKey(), entry.getValue()._1, entry.getValue()._2);
                     }
                 }
 
@@ -1343,6 +1414,44 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 return kryo;
             }
+        }
+    }
+
+    private static void registerKryo(final Kryo kryo, final Class<?> type, final int id) {
+        checkKryoRegistrationIdAvailable(kryo, type, id);
+        final Registration registration = kryo.getClassResolver().getRegistration(type);
+        final Serializer<?> serializer = registration != null && registration.getType().isPrimitive()
+                && ClassUtil.wrap(registration.getType()) == ClassUtil.wrap(type) ? registration.getSerializer() : kryo.getDefaultSerializer(type);
+        unregisterKryoRegistrationAtDifferentId(kryo, type, id);
+        // Kryo.register(Class, int) returns an existing name-based registration unchanged.
+        // Use the serializer overload so an explicit ID can replace an earlier implicit
+        // registration for the same class. Primitive and wrapper classes share Kryo's
+        // primitive registration, whose specialized serializer must survive relocation.
+        kryo.register(type, serializer, id);
+    }
+
+    private static void registerKryo(final Kryo kryo, final Class<?> type, final Serializer<?> serializer, final int id) {
+        checkKryoRegistrationIdAvailable(kryo, type, id);
+        unregisterKryoRegistrationAtDifferentId(kryo, type, id);
+        kryo.register(type, serializer, id);
+    }
+
+    private static void checkKryoRegistrationIdAvailable(final Kryo kryo, final Class<?> type, final int id) {
+        final Registration registration = kryo.getRegistration(id);
+
+        if (registration != null && registration.getType() != type && builtInRegistrationIdMap.get(id) != registration.getType()) {
+            throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + registration.getType().getName());
+        }
+    }
+
+    private static void unregisterKryoRegistrationAtDifferentId(final Kryo kryo, final Class<?> type, final int id) {
+        // Kryo.getRegistration(Class) creates an implicit registration when registration is
+        // optional. Query the resolver directly so merely preparing an explicit registration
+        // does not create a name-based (-1) entry that Kryo.register(Class, int) would retain.
+        final Registration registration = kryo.getClassResolver().getRegistration(type);
+
+        if (registration != null && registration.getId() >= 0 && registration.getId() != id) {
+            kryo.getClassResolver().unregister(registration.getId());
         }
     }
 

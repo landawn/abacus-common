@@ -70,10 +70,11 @@ import com.google.common.hash.HashCode;
  *     int age;
  * }
  *
- * Funnel<Person> personFunnel = (person, hasher) -> {
- *     hasher.putString(person.firstName, StandardCharsets.UTF_8)
- *           .putString(person.lastName, StandardCharsets.UTF_8)
- *           .putInt(person.age);
+ * // Funnel receives Guava PrimitiveSink (putString/putInt), not abacus Hasher
+ * Funnel<Person> personFunnel = (person, into) -> {
+ *     into.putString(person.firstName, StandardCharsets.UTF_8)
+ *         .putString(person.lastName, StandardCharsets.UTF_8)
+ *         .putInt(person.age);
  * };
  * Person person = new Person();
  * HashCode hash = hf.hash(person, personFunnel);
@@ -261,12 +262,13 @@ public interface HashFunction {
     HashCode hash(CharSequence input, Charset charset);
 
     /**
-     * Computes the hash code for an arbitrary object using a {@link Funnel} to decompose
+     * Computes the hash code for an arbitrary object using a Guava {@link Funnel} to decompose
      * the object into primitive values. This is a convenience method equivalent to
      * {@code newHasher().put(instance, funnel).hash()}.
      *
-     * <p>The funnel defines how to extract data from the object and feed it to the hasher.
-     * This approach ensures consistent hashing of complex objects.
+     * <p>The funnel receives a Guava {@code PrimitiveSink} and should call Guava sink methods
+     * such as {@code putString}, {@code putInt}, and {@code putLong} (not the abacus
+     * {@link Hasher#put} overloads). This ensures consistent hashing of complex objects.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

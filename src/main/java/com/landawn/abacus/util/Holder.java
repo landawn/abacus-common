@@ -280,13 +280,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
-     * @param updateFunction the function that takes the current value and returns a new value;
-     *                       must not be {@code null}.
+     * @param updateFunction the function that takes the current value and returns a new value
      * @return the previous value held by this Holder before the update, may be {@code null}.
-     * @throws NullPointerException if {@code updateFunction} is {@code null}.
      * @throws E if the update function throws an exception.
+     * @throws IllegalArgumentException if {@code updateFunction} is {@code null}.
      */
-    public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
+    public <E extends Exception> T getAndUpdate(final Throwables.UnaryOperator<T, E> updateFunction) throws E, IllegalArgumentException {
+        N.checkArgNotNull(updateFunction, cs.updateFunction);
+
+        // NOSONAR
         final T oldValue = value;
         value = updateFunction.apply(oldValue);
         return oldValue;
@@ -309,13 +311,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the update function may throw.
-     * @param updateFunction the function that takes the current value and returns a new value;
-     *                       must not be {@code null}.
+     * @param updateFunction the function that takes the current value and returns a new value
      * @return the new value held by this Holder after the update, may be {@code null}.
-     * @throws NullPointerException if {@code updateFunction} is {@code null}.
      * @throws E if the update function throws an exception.
+     * @throws IllegalArgumentException if {@code updateFunction} is {@code null}.
      */
-    public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E { // NOSONAR
+    public <E extends Exception> T updateAndGet(final Throwables.UnaryOperator<T, E> updateFunction) throws E, IllegalArgumentException {
+        N.checkArgNotNull(updateFunction, cs.updateFunction);
+
+        // NOSONAR
         final T newValue = updateFunction.apply(value);
         value = newValue;
         return newValue;
@@ -342,13 +346,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate that tests the current value, must not be {@code null}.
+     * @param predicate the predicate that tests the current value
      * @param newValue the new value to set if the predicate returns {@code true}, may be {@code null}.
      * @return {@code true} if the value was updated, {@code false} otherwise.
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setIf(final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.Predicate<? super T, E> predicate, final T newValue) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(value)) {
             value = newValue;
             return true;
@@ -411,12 +417,14 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}.
-     * @throws IllegalArgumentException if the action is {@code null}.
+     * @param action the action to be performed with the {@code non-null} value
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action, "action"); //NOSONAR
+    public <E extends Exception> void ifNotNull(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
+        //NOSONAR
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -443,16 +451,17 @@ public final class Holder<T> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param <E2> the type of exception that the empty action may throw.
-     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}.
-     * @param emptyAction the action to be performed when the value is {@code null}, must not be {@code null}.
-     * @throws IllegalArgumentException if either action or emptyAction is {@code null}.
+     * @param action the action to be performed with the {@code non-null} value
+     * @param emptyAction the action to be performed when the value is {@code null}
      * @throws E if the action throws an exception.
      * @throws E2 if the emptyAction throws an exception.
+     * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
      */
     public <E extends Exception, E2 extends Exception> void ifNotNullOrElse(final Throwables.Consumer<? super T, E> action,
-            final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
-        N.checkArgNotNull(action, "action");
-        N.checkArgNotNull(emptyAction, "emptyAction");
+            final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(emptyAction, cs.emptyAction);
+
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -473,14 +482,16 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with the value; must not be {@code null}.
-     * @throws NullPointerException if {@code action} is {@code null}.
+     * @param action the action to be performed with the value
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated Use {@link #ifNotNull(Throwables.Consumer)} for null-conditional execution,
      *             or access the value directly via {@link #value()} for unconditional use.
      */
     @Deprecated
-    public <E extends Exception> void accept(final Throwables.Consumer<? super T, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(value);
     }
 
@@ -495,14 +506,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw.
-     * @param action the action to be performed with the {@code non-null} value, must not be {@code null}.
-     * @throws IllegalArgumentException if the action is {@code null}.
+     * @param action the action to be performed with the {@code non-null} value
      * @throws E if the action throws an exception.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated replaced by {@link #ifNotNull(Throwables.Consumer)}.
      */
     @Deprecated
-    public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action, "action");
+    public <E extends Exception> void acceptIfNotNull(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -525,12 +537,14 @@ public final class Holder<T> implements Mutable {
      *
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
-     * @param mapper the mapping function to apply to the value; must not be {@code null}.
+     * @param mapper the mapping function to apply to the value
      * @return the result of applying the mapping function to the value, may be {@code null}.
-     * @throws NullPointerException if {@code mapper} is {@code null}.
      * @throws E if the mapping function throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E {
+    public <U, E extends Exception> U map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return mapper.apply(value);
     }
 
@@ -555,14 +569,15 @@ public final class Holder<T> implements Mutable {
      *
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
-     * @param mapper the mapping function to apply to the non-{@code null} value; must not be {@code null}.
+     * @param mapper the mapping function to apply to the non-{@code null} value
      * @return a {@code Nullable} containing the mapped value if the held value was not {@code null},
      *         otherwise an empty {@code Nullable}.
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @throws E if the mapping function throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mapper, "mapper");
+    public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper) throws E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -594,16 +609,17 @@ public final class Holder<T> implements Mutable {
      * @param <U> the type of the result of the mapping function.
      * @param <E> the type of exception that the mapping function may throw.
      * @param mapper the mapping function to apply to the non-{@code null} value;
-     *               must not be {@code null} and must not return {@code null}.
+     *               must not return {@code null}.
      * @return an {@code Optional} containing the mapped value if the held value was not {@code null},
      *         otherwise an empty {@code Optional}.
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @throws NullPointerException if the mapping function returns {@code null}.
      * @throws E if the mapping function throws an exception.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
-            throws IllegalArgumentException, NullPointerException, E {
-        N.checkArgNotNull(mapper, "mapper");
+            throws NullPointerException, E, IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -628,13 +644,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate to test the value; must not be {@code null}.
+     * @param predicate the predicate to test the value
      * @return a {@code Nullable} containing the value if the predicate returns {@code true},
      *         otherwise an empty {@code Nullable}.
-     * @throws NullPointerException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E {
+    public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final T currentValue = value;
 
         if (predicate.test(currentValue)) {
@@ -663,14 +681,15 @@ public final class Holder<T> implements Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the predicate to test the non-{@code null} value; must not be {@code null}.
+     * @param predicate the predicate to test the non-{@code null} value
      * @return an {@code Optional} containing the value if it is not {@code null} and the predicate
      *         returns {@code true}, otherwise an empty {@code Optional}.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-        N.checkArgNotNull(predicate, "predicate");
+    public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final T currentValue = value;
 
         if (currentValue != null && predicate.test(currentValue)) {
@@ -717,14 +736,14 @@ public final class Holder<T> implements Mutable {
      * String value = holder.orElseGetIfNull(() -> computeExpensiveDefault());
      * }</pre>
      *
-     * @param other the supplier whose result is returned if the held value is {@code null};
-     *              must not be {@code null}.
+     * @param other the supplier whose result is returned if the held value is {@code null}
      * @return the held value if not {@code null}, otherwise the result of {@code other.get()},
      *         which may itself be {@code null}.
      * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     public T orElseGetIfNull(final Supplier<? extends T> other) throws IllegalArgumentException {
-        N.checkArgNotNull(other, "other");
+        N.checkArgNotNull(other, cs.other);
+
         final T currentValue = value;
 
         if (currentValue != null) {
@@ -921,14 +940,15 @@ public final class Holder<T> implements Mutable {
      *
      * @param <E> the type of exception to be thrown.
      * @param exceptionSupplier the supplier that provides the exception to throw if the value is
-     *                          {@code null}; must not be {@code null}.
+     *                          {@code null}
      * @return the non-{@code null} value held by this Holder.
-     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      * @throws NullPointerException if the supplier returns {@code null} while the held value is {@code null}.
      * @throws E if the value is {@code null}.
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
-    public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+    public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
+
         final T currentValue = value;
 
         if (currentValue != null) {

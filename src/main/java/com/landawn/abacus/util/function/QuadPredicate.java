@@ -123,13 +123,14 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *     hasBalance.and(hasStock);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
+    default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c, d) -> test(a, b, c, d) && other.test(a, b, c, d);
     }
 
@@ -156,13 +157,14 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *     isPremiumUser.or(hasLoyaltyPoints);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) {
+    default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c, d) -> test(a, b, c, d) || other.test(a, b, c, d);
     }
 

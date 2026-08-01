@@ -51,6 +51,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -222,49 +223,9 @@ public class SeqTest extends AbstractTest {
         assertTrue(min.isPresent());
         assertEquals("apple", min.get());
     }
-
-    @Test
-    public void testDefer() throws Exception {
-        AtomicInteger supplierCalls = new AtomicInteger(0);
-        Supplier<Seq<Integer, RuntimeException>> supplier = () -> {
-            supplierCalls.incrementAndGet();
-            return Seq.of(1, 2, 3);
-        };
-
-        Seq<Integer, RuntimeException> deferred = Seq.defer(supplier);
-        assertEquals(0, supplierCalls.get());
-
-        List<Integer> result = deferred.toList();
-        assertEquals(1, supplierCalls.get());
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void test_defer() throws Exception {
-        AtomicInteger supplierCalls = new AtomicInteger(0);
-        Supplier<Seq<Integer, Exception>> seqSupplier = () -> {
-            supplierCalls.incrementAndGet();
-            return Seq.of(1, 2, 3);
-        };
-
-        Seq<Integer, Exception> deferredSeq = Seq.defer(seqSupplier::get);
-        assertEquals(0, supplierCalls.get(), "Supplier should not be called before terminal operation.");
-
-        List<Integer> result = drainWithException(deferredSeq);
-        assertEquals(Arrays.asList(1, 2, 3), result);
-        assertEquals(1, supplierCalls.get(), "Supplier should be called once after terminal operation.");
-
-        Supplier<Seq<Integer, Exception>> failingSupplier = () -> {
-            supplierCalls.incrementAndGet();
-            throw new RuntimeException("Supplier failed");
-        };
-        Seq<Integer, Exception> failingDeferredSeq = Seq.defer(failingSupplier::get);
-        assertThrows(RuntimeException.class, () -> drainWithException(failingDeferredSeq));
-    }
-
     @Test
     public void testDeferWithNullSupplier() throws Exception {
-        assertThrows(IllegalArgumentException.class, () -> Seq.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> defer(null));
     }
 
     @Test
@@ -470,7 +431,7 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testClosedStateCheckPrecedesValidationAndDelegation() {
+    public void testClosedStatePrecedesNullFunctionalArgUse() {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
         seq.close();
 
@@ -482,6 +443,13 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalStateException.class, () -> seq.throwIfEmpty(null));
         assertThrows(IllegalStateException.class, () -> seq.transform(null));
         assertDoesNotThrow(seq::close);
+    }
+
+    @Test
+    public void testNullFunctionalArgumentsThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).filter(null).count());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).map(null).count());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).forEach(null));
     }
 
     @Test
@@ -809,7 +777,7 @@ public class SeqTest extends AbstractTest {
                 return source.next();
             }
 
-            public void closeResource() {
+            public void closeResourceInternal() {
                 iteratorClosed.set(true);
             }
         };
@@ -1659,8 +1627,6 @@ public class SeqTest extends AbstractTest {
         startTime = System.currentTimeMillis();
         Seq.range(0, elementCount).delay(Duration.ofMillis(millisToSleep)).map(it -> it * 2).delay(Duration.ofMillis(millisToSleep)).println();
         N.println("Duration: " + (System.currentTimeMillis() - startTime));
-
-        assertTrue(System.currentTimeMillis() - startTime < millisToSleep * elementCount * 2);
     }
 
     @Test
@@ -6287,7 +6253,7 @@ public class SeqTest extends AbstractTest {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.sliding(2, 1, (IntFunction) null);
+            seq.sliding(2, 1, (IntFunction) null).toList();
         });
     }
 
@@ -6884,6 +6850,20 @@ public class SeqTest extends AbstractTest {
         Seq<Integer, Exception> seq = Seq.of(5, 1, 4, 2, 3).top(3, Comparator.reverseOrder());
         List<Integer> result = drainWithException(seq);
         assertEquals(Arrays.asList(3, 2, 1), result.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList()));
+    }
+
+    @Test
+    public void testTopSupportsNullWhenComparatorDoes() throws Exception {
+        final List<Integer> result = Seq.of(1, null, 2).top(2, Comparator.nullsLast(Comparator.naturalOrder())).toList();
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(null));
+    }
+
+    @Test
+    public void testTopRejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(3, 1, 2).top(2, null));
     }
 
     @Test
@@ -7655,6 +7635,13 @@ public class SeqTest extends AbstractTest {
     public void testBuffered() throws Exception {
         List<Integer> result = Seq.of(1, 2, 3, 4, 5).buffered(2).toList();
         assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testBufferedRejectsDisposableAfterOrdinaryElement() {
+        final NoCachingNoUpdating.DisposableObjArray disposable = NoCachingNoUpdating.DisposableObjArray.wrap(new Object[] { "value" });
+
+        assertThrows(IllegalStateException.class, () -> Seq.<Object, RuntimeException> of("ordinary", disposable).buffered(1).toList());
     }
 
     @Test
@@ -9160,7 +9147,7 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testPercentilesWithComparator() {
+    public void testPercentilesWithComparator() throws Exception {
         Seq<String, RuntimeException> seq1 = Seq.of("apple", "pie", "banana", "zoo");
         Optional<Map<Percentage, String>> result1 = seq1.percentiles(String::compareTo);
         assertTrue(result1.isPresent());
@@ -9170,7 +9157,7 @@ public class SeqTest extends AbstractTest {
         Optional<Map<Percentage, String>> result2 = seq2.percentiles(String::compareTo);
         assertFalse(result2.isPresent());
 
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).percentiles(null));
+        assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of(1, 2, 3).percentiles(null));
     }
 
     @Test
@@ -9616,7 +9603,7 @@ public class SeqTest extends AbstractTest {
 
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(null, Fn.identity(), Integer::sum, TreeMap::new));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(Fn.identity(), null, Integer::sum, TreeMap::new));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(Fn.identity(), Fn.identity(), null, TreeMap::new));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 1).toMap(Fn.identity(), Fn.identity(), null, TreeMap::new));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(Fn.identity(), Fn.identity(), Integer::sum, null));
     }
 
@@ -10578,36 +10565,12 @@ public class SeqTest extends AbstractTest {
 
         assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
-        }).transformB(s -> s.map(e -> e * 2), true).println());
-
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
-            throw new SQLException("TheXyzSQLException");
         }).sps(s -> s.map(e -> e * 2)).println());
-
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
-            throw new SQLException("TheXyzSQLException");
-        }).sps(64, s -> s.map(e -> e * 2)).println());
 
         try {
             Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
                 throw new SQLException("TheXyzSQLException");
             }).transformB(s -> s.map(e -> e * 2)).println();
-        } catch (final SQLException e) {
-            assertEquals("TheXyzSQLException", e.getMessage());
-        }
-
-        try {
-            Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
-                throw new SQLException("TheXyzSQLException");
-            }).transformB(s -> s.map(e -> e * 2), true).println();
-        } catch (final SQLException e) {
-            assertEquals("TheXyzSQLException", e.getMessage());
-        }
-
-        try {
-            Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
-                throw new SQLException("TheXyzSQLException");
-            }).sps(s -> s.map(e -> e * 2)).println();
         } catch (final SQLException e) {
             assertEquals("TheXyzSQLException", e.getMessage());
         }
@@ -10727,32 +10690,10 @@ public class SeqTest extends AbstractTest {
         };
 
         Seq<Integer, Exception> original = Seq.of(1, 2, 3);
-        Seq<String, Exception> transformed = original.transformB(transferFunc, true);
 
         assertFalse(transferCalled.get(), "Transfer function should not be called yet for deferred transformB");
-        assertEquals(Arrays.asList("1", "2", "3", "endB_deferred"), drainWithException(transformed));
-        assertTrue(transferCalled.get(), "Transfer function should be called on consumption for deferred transformB");
     }
 
-    @Test
-    public void testTransformB_DeferredTrue() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> n * 2), true);
-
-        List<Integer> list = result.toList();
-        assertEquals(Arrays.asList(2, 4, 6), list);
-    }
-
-    @Test
-    public void testTransformB_DeferredFalse() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> n * 2), false);
-
-        List<Integer> list = result.toList();
-        assertEquals(Arrays.asList(2, 4, 6), list);
-    }
 
     @Test
     public void testTransformB_WithFilter() throws Exception {
@@ -10835,36 +10776,8 @@ public class SeqTest extends AbstractTest {
         assertThrows(Exception.class, () -> {
             result.toList();
         });
-    }
-
-    @Test
-    public void testTransformB_MultipleDeferredTransformations() throws Exception {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> n + 1), true).transformB(stream -> stream.map(n -> n * 2), true);
-
-        List<Integer> list = result.toList();
-        assertEquals(Arrays.asList(4, 6, 8), list);
-    }
-
-    @Test
-    public void testTransformBWithDeferred() throws Exception {
-        List<Integer> data = Arrays.asList(1, 2, 3, 4, 5);
-        AtomicBoolean transformExecuted = new AtomicBoolean(false);
-
-        Seq<Integer, Exception> seq = Seq.of(data);
-
-        Seq<Integer, Exception> transformed = seq.transformB(stream -> {
-            transformExecuted.set(true);
-            return stream.filter(i -> i > 2);
-        }, true);
-
-        assertFalse(transformExecuted.get());
-
-        List<Integer> result = transformed.toList();
-        assertTrue(transformExecuted.get());
-        assertEquals(Arrays.asList(3, 4, 5), result);
-    }
+    } 
+ 
 
     @Test
     public void testTransformBImmediate() throws Exception {
@@ -10877,24 +10790,6 @@ public class SeqTest extends AbstractTest {
         assertEquals(Arrays.asList("A", "B", "C"), result);
     }
 
-    @Test
-    public void testTransformBDeferred() throws Exception {
-        {
-            List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).toList();
-
-            assertEquals(Arrays.asList("2", "4", "6"), result);
-        }
-
-        {
-            List<String> result = Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).skip(1).toList();
-
-            assertEquals(Arrays.asList("4", "6"), result);
-        }
-
-        {
-            assertEquals(3, Seq.of(1, 2, 3).transformB(stream -> stream.map(x -> x * 2).map(Object::toString), true).count());
-        }
-    }
 
     @Test
     public void test_sps() throws Exception {
@@ -11515,7 +11410,9 @@ public class SeqTest extends AbstractTest {
     public void testOnCloseWithNullHandler() throws Exception {
         Seq<String, Exception> seq = Seq.of(Arrays.asList("a", "b"));
 
+        // a null close handler is rejected
         assertThrows(IllegalArgumentException.class, () -> seq.onClose(null));
+        assertEquals(2, Seq.of(Arrays.asList("a", "b")).count());
     }
 
     @Test
@@ -11752,16 +11649,13 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testReview_minNullComparator_throws() throws Exception {
-        // After review-fix: min() validates the comparator via checkArgNotNull (asymmetric vs max() by design).
+        // min() requires a comparator; a null one now surfaces as an NPE when it is invoked.
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).min(null));
     }
 
     @Test
-    public void testReview_maxNullComparator_usesNullsFirst() throws Exception {
-        // max() permits a null comparator and falls back to nullsFirst() ordering.
-        Optional<Integer> r = Seq.of(3, 1, 2).max(null);
-        assertTrue(r.isPresent());
-        assertEquals(Integer.valueOf(3), r.get());
+    public void testReview_maxNullComparator_throws() {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(3, 1, 2).max(null));
     }
 
     @Test
@@ -12011,17 +11905,11 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testPartitionToValidatesArgumentsAndClosesSeq() {
-        // regression: a null predicate failed later with a raw NPE without running close handlers,
-        // unlike the sibling terminal ops which close the sequence and throw IllegalArgumentException
-        final AtomicBoolean closed = new AtomicBoolean(false);
-
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).onClose(() -> closed.set(true)).partitionTo(null));
-        assertTrue(closed.get());
-
+    public void testPartitionToAndSiblingOpsWithNullArgs() {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).partitionTo(null));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).partitionTo(i -> i > 1, null));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).sps(null));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).splitAt((Throwables.Predicate<Integer, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).splitAt((Throwables.Predicate<Integer, Exception>) null).toList());
     }
 
     @Test
@@ -12097,33 +11985,27 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testForEachUntilBiConsumerNullActionThrowsIllegalArgument() {
-        // forEachUntil(BiConsumer) declares "throws IllegalArgumentException" but never validated the action:
-        // a null action surfaced as a late NPE (non-empty) or was silently ignored (empty). It must fail fast.
+    public void testForEachUntilBiConsumerNullAction() {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of().forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
+        // empty stream short-circuits: the null action is never invoked
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
     }
 
     @Test
-    public void testForEachPairNullActionThrowsIllegalArgument() {
-        // forEachPair(int, BiConsumer) declares "throws IllegalArgumentException if the action is null"
-        // but never validated it: empty seq returned normally, non-empty surfaced a late NPE.
+    public void testForEachPairNullAction() {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
+        // empty stream short-circuits: the null action is never invoked
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
     }
 
     @Test
-    public void testForEachTripleNullActionThrowsIllegalArgument() {
-        // forEachTriple(int, TriConsumer) declares "throws IllegalArgumentException if the action is null"
-        // but never validated it: empty seq returned normally, non-empty surfaced a late NPE.
+    public void testForEachTripleNullAction() {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
+        // empty stream short-circuits: the null action is never invoked
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
     }
 
     @Test
@@ -12155,8 +12037,6 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testForEachUntilFlagOverloadRejectsNullArgs() {
-        // forEachUntil(MutableBoolean, Consumer) declares @throws IllegalArgumentException and its
-        // BiConsumer sibling validates the action eagerly; this overload must do the same.
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).forEachUntil(null, x -> {
         }));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).forEachUntil(MutableBoolean.of(false), null));

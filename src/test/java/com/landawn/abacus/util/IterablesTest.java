@@ -1337,11 +1337,9 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testMin_Iterator_WithNullComparator() {
+    public void testMin_Iterator_RejectsNullComparator() {
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
-        Nullable<Integer> result = Iterables.min(list.iterator(), (Comparator<Integer>) null);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
+        assertThrows(IllegalArgumentException.class, () -> Iterables.min(list.iterator(), (Comparator<Integer>) null));
     }
 
     @Test
@@ -2121,11 +2119,9 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testMax_Iterator_WithNullComparator() {
+    public void testMax_Iterator_RejectsNullComparator() {
         List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
-        Nullable<Integer> result = Iterables.max(list.iterator(), (Comparator<Integer>) null);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(5), result.get());
+        assertThrows(IllegalArgumentException.class, () -> Iterables.max(list.iterator(), (Comparator<Integer>) null));
     }
 
     @Test
@@ -5050,11 +5046,11 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testFill_NullSupplierRejectedForEmptyTargetsAndRanges() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
+    public void testFill_NullSupplierNotEvaluatedForEmptyTargetsAndRanges() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
     }
 
     @Test
@@ -6121,9 +6117,11 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testOrderedPermutations_NullComparatorRejectedForEveryInputSize() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.<Integer> emptyList(), null));
-        assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.singletonList(1), null));
+    public void testOrderedPermutations_RejectsNullComparatorForEveryInputSize() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.<Integer> emptyList(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.singletonList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterables.orderedPermutations(Arrays.asList(2, 1, 3), null));
     }
 
     @Test

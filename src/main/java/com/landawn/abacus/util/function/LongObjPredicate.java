@@ -99,13 +99,14 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * // both.test(3L, "hello") returns true (3 > 0 AND "hello".length() > 3)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default LongObjPredicate<T> and(final LongObjPredicate<? super T> other) {
+    default LongObjPredicate<T> and(final LongObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -129,13 +130,14 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * // either.test(5L, "") returns true (string is empty)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default LongObjPredicate<T> or(final LongObjPredicate<? super T> other) {
+    default LongObjPredicate<T> or(final LongObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 

@@ -685,11 +685,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param operator ignored.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
-    public void replaceAll(final UnaryOperator<E> operator) throws UnsupportedOperationException {
+    public void replaceAll(final UnaryOperator<E> operator) throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
+
         throw new UnsupportedOperationException();
     }
 
@@ -699,11 +702,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param c ignored.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code c} is {@code null}.
      * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
-    public void sort(final Comparator<? super E> c) throws UnsupportedOperationException {
+    public void sort(final Comparator<? super E> c) throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(c, cs.c);
+
         throw new UnsupportedOperationException();
     }
 

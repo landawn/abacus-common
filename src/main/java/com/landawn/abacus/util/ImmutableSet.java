@@ -43,13 +43,13 @@ import com.landawn.abacus.annotation.Beta;
  * </ul>
  *
  * <p>The implementation maintains the iteration order when created from a List, LinkedHashSet,
- * or SortedSet, otherwise no specific iteration order is guaranteed.
+ * or SortedSet, otherwise no specific iteration order is guaranteed.</p>
  *
  * <p><b>Note:</b> the {@code of(...)} factory methods and the no-arg {@link #builder()} both preserve
  * the order in which the elements are supplied (they are backed by a {@code LinkedHashSet}). To use a
  * different backing set type, pass it explicitly to {@link #builder(Set)}.</p>
  *
- * <p>Null elements are supported if the underlying set implementation supports them.
+ * <p>Null elements are supported if the underlying set implementation supports them.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -663,7 +663,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * <p>The returned set is immutable and will throw UnsupportedOperationException
          * for any modification attempts. The iteration order depends on the type of set
-         * used internally by the builder.
+         * used internally by the builder.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

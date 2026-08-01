@@ -173,7 +173,7 @@ public abstract class Observer<T> {
      * @throws IllegalArgumentException if {@code dispatcher} is {@code null}
      */
     protected Observer(final Dispatcher<Object> dispatcher) {
-        this.dispatcher = N.checkArgNotNull(dispatcher, "dispatcher");
+        this.dispatcher = N.checkArgNotNull(dispatcher, cs.dispatcher);
     }
 
     /**
@@ -185,12 +185,11 @@ public abstract class Observer<T> {
      * @throws IllegalArgumentException if any callback is {@code null}
      * @throws IllegalStateException if this observer has already been subscribed
      */
+    @SuppressWarnings("unused")
     protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError,
             final Runnable onComplete) {
-        N.checkArgNotNull(action, cs.action);
-        N.checkArgNotNull(onError, cs.onError);
-        N.checkArgNotNull(onComplete, cs.onComplete);
         N.checkState(!subscribed, "This Observer has already been subscribed");
+
         subscribed = true;
     }
 
@@ -1164,9 +1163,9 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param keyExtractor function to extract the key used to determine uniqueness; key
-     *        equality is based on {@code hashCode()} and {@code equals()}; must not be {@code null}
+     *        equality is based on {@code hashCode()} and {@code equals()};
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #distinct()
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
@@ -1197,9 +1196,9 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param filter the predicate used to test each item; items for which the predicate returns
-     *               {@code true} are forwarded downstream; must not be {@code null}
+     *               {@code true} are forwarded downstream;
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public Observer<T> filter(final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
@@ -1227,10 +1226,10 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param <R> the type of items emitted after transformation
-     * @param mapper the function to transform each item; must not be {@code null}
+     * @param mapper the function to transform each item;
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         transformed items
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #flatMap(Function)
      */
     public <R> Observer<R> map(final Function<? super T, R> mapper) throws IllegalArgumentException {
@@ -1262,10 +1261,10 @@ public abstract class Observer<T> {
      * @param <R> the type of items in the flattened sequence
      * @param mapper function that transforms each item into a collection; if it returns
      *        {@code null} or an empty collection, no items are emitted for that input;
-     *        must not be {@code null}
+     *
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         flattened items
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #map(Function)
      */
     public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
@@ -1702,12 +1701,14 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param action the action to perform on each item
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws IllegalStateException if this Observer has already been subscribed
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #observe(Consumer, Consumer)
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action) {
+    public void observe(final Consumer<? super T> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         observe(action, ON_ERROR_MISSING);
     }
 
@@ -1726,11 +1727,14 @@ public abstract class Observer<T> {
      *
      * @param action the action to perform on each item
      * @param onError the action to perform on error
-     * @throws IllegalArgumentException if {@code action} or {@code onError} is {@code null}
      * @throws IllegalStateException if this Observer has already been subscribed
+     * @throws IllegalArgumentException if any of {@code action}, {@code onError} is {@code null}.
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) {
+    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(onError, cs.onError);
+
         observe(action, onError, EMPTY_ACTION);
     }
 
@@ -1826,7 +1830,7 @@ public abstract class Observer<T> {
          * @throws IllegalArgumentException if {@code downDispatcher} is {@code null}
          */
         public void append(final Dispatcher<T> downDispatcher) {
-            N.checkArgNotNull(downDispatcher, "downDispatcher");
+            N.checkArgNotNull(downDispatcher, cs.downDispatcher);
 
             Dispatcher<T> tmp = this;
 
@@ -1855,12 +1859,10 @@ public abstract class Observer<T> {
         /**
          * Constructs a terminal dispatcher with the given error and completion handlers.
          *
-         * @param onError the consumer to invoke when an error is signalled; must not be {@code null}
-         * @param onComplete the runnable to invoke when the stream completes; must not be {@code null}
+         * @param onError the consumer to invoke when an error is signalled;
+         * @param onComplete the runnable to invoke when the stream completes;
          */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
-            N.checkArgNotNull(onError, cs.onError);
-            N.checkArgNotNull(onComplete, cs.onComplete);
 
             this.onError = onError;
             this.onComplete = onComplete;
@@ -1913,14 +1915,18 @@ public abstract class Observer<T> {
          * Items are polled from the queue on a background thread until {@link Observer#complete(BlockingQueue)}
          * has been called or {@link #hasMore} is set to {@code false}.
          *
-         * @param action the action to perform on each item; must not be {@code null}
+         * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the queue signals completion
-         * @throws IllegalArgumentException if any callback is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
@@ -1979,14 +1985,18 @@ public abstract class Observer<T> {
          * Items are pulled from the iterator on a background thread until
          * {@code iter.hasNext()} returns {@code false} or {@link #hasMore} is set to {@code false}.
          *
-         * @param action the action to perform on each item; must not be {@code null}
+         * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the iterator is exhausted
-         * @throws IllegalArgumentException if any callback is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
@@ -2051,14 +2061,18 @@ public abstract class Observer<T> {
          * stop condition (for example {@code limit(0)}) is already in effect, no value is
          * emitted and completion is signalled asynchronously without waiting for the timer.
          *
-         * @param action the action to perform when the timer fires; must not be {@code null}
+         * @param action the action to perform when the timer fires
          * @param onError the consumer invoked if an exception occurs during the scheduled emission
          * @param onComplete the runnable invoked immediately after the single emission
-         * @throws IllegalArgumentException if any callback is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {
@@ -2128,14 +2142,18 @@ public abstract class Observer<T> {
          * If production was stopped before subscription (for example by {@code limit(0)}),
          * completion is signalled asynchronously without waiting for {@code initialDelay}.
          *
-         * @param action the action to perform on each emission; must not be {@code null}
+         * @param action the action to perform on each emission
          * @param onError the consumer invoked if an exception occurs during an emission
          * @param onComplete the runnable invoked when the interval is cancelled
-         * @throws IllegalArgumentException if any callback is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
                 throws IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(onError, onComplete) {

@@ -212,7 +212,8 @@ public final class Try<T extends AutoCloseable> {
      * @param targetResource the resource to be managed by the Try instance.
      * @param finalAction the action to be executed after the resource is closed.
      * @return a new Try instance managing the specified target resource and final action.
-     * @throws IllegalArgumentException if the targetResource or finalAction is {@code null}.
+     * @throws IllegalArgumentException if the targetResource is {@code null}.
+     * @throws IllegalArgumentException if {@code finalAction} is {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);
@@ -239,11 +240,9 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance;
-     *                               neither the supplier nor the resource it returns may be {@code null}
+     * @param targetResourceSupplier the supplier that provides the closeable resource; must not be {@code null}
      * @return a new Try instance managing the specified target resource supplier.
-     * @throws IllegalArgumentException if the targetResourceSupplier is {@code null}; a {@code null}
-     *         supplied resource is rejected when an operation attempts to acquire it
+     * @throws IllegalArgumentException if {@code targetResourceSupplier} is {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier)
             throws IllegalArgumentException {
@@ -271,12 +270,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <T> the type of the resource that extends AutoCloseable.
-     * @param targetResourceSupplier the supplier to provide the resource to be managed by the Try instance;
-     *                               neither the supplier nor the resource it returns may be {@code null}
-     * @param finalAction the action to be executed after the resource is closed, must not be {@code null}.
+     * @param targetResourceSupplier the supplier that provides the closeable resource; must not be {@code null}
+     * @param finalAction the action to be executed after the resource is closed.
      * @return a new Try instance managing the specified target resource supplier and final action.
-     * @throws IllegalArgumentException if the targetResourceSupplier or finalAction is {@code null}; a
-     *         {@code null} supplied resource is rejected when an operation attempts to acquire it
+     * @throws IllegalArgumentException if any of {@code targetResourceSupplier}, {@code finalAction} is {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final Throwables.Supplier<T, ? extends Exception> targetResourceSupplier, final Runnable finalAction)
             throws IllegalArgumentException {
@@ -303,9 +300,9 @@ public final class Try<T extends AutoCloseable> {
      * Try.run(() -> Files.write(path, data));
      * }</pre>
      *
-     * @param cmd the runnable task that might throw an exception. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @param cmd the runnable task that might throw an exception.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see Throwables#run(Throwables.Runnable)
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd) throws IllegalArgumentException {
@@ -340,9 +337,9 @@ public final class Try<T extends AutoCloseable> {
      * );
      * }</pre>
      *
-     * @param cmd the runnable task that might throw an exception, must not be {@code null}.
-     * @param actionOnError the consumer to handle any exceptions thrown by the {@code cmd}, must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}.
+     * @param cmd the runnable task that might throw an exception.
+     * @param actionOnError the consumer to handle any exceptions thrown by the {@code cmd}.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      * @see Throwables#run(Throwables.Runnable, Consumer)
      */
     public static void run(final Throwables.Runnable<? extends Exception> cmd, final Consumer<? super Exception> actionOnError)
@@ -374,10 +371,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result.
      * @return the result of the {@code cmd}.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @throws RuntimeException if an exception occurs during the execution of the {@code cmd}.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see Throwables#call(Throwables.Callable)
      */
     public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd) throws IllegalArgumentException {
@@ -413,10 +410,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param actionOnError the function to apply to the exception if one is thrown by the {@code cmd}. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result.
+     * @param actionOnError the function to apply to the exception if one is thrown by the {@code cmd}.
      * @return the result of the {@code cmd} or the result of applying the {@code actionOnError} function to the exception if one is thrown.
-     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Function)
      */
     public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Function<? super Exception, ? extends R> actionOnError)
@@ -454,10 +451,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param supplier the supplier to provide a return value when an exception occurs. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result.
+     * @param supplier the supplier to provide a return value when an exception occurs.
      * @return the result of the {@code cmd} or the result of the {@code supplier} if an exception occurs.
-     * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code supplier} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Supplier)
      */
     public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Supplier<R> supplier) throws IllegalArgumentException {
@@ -493,7 +490,7 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result.
      * @param defaultValue the default value to return if an exception occurs during the execution of the {@code cmd}, may be {@code null}.
      * @return the result of the {@code cmd} or the default value if an exception occurs.
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
@@ -501,8 +498,9 @@ public final class Try<T extends AutoCloseable> {
      */
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final R defaultValue)
             throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
+
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
 
         try {
             return cmd.call();
@@ -536,12 +534,12 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception, must not be {@code null}.
-     * @param predicate the predicate to test the exception, must not be {@code null}.
-     * @param supplier the supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}, must not be {@code null}.
+     * @param cmd the callable task that might throw an exception.
+     * @param predicate the predicate to test the exception.
+     * @param supplier the supplier to provide a return value when an exception occurs and the {@code predicate} returns {@code true}.
      * @return the result of the {@code cmd} or the result of the {@code supplier} if an exception occurs and the {@code predicate} returns {@code true}.
-     * @throws IllegalArgumentException if {@code cmd}, {@code predicate}, or {@code supplier} is {@code null}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate}, {@code supplier} is {@code null}.
      * @see Throwables#call(Throwables.Callable, Predicate, Supplier)
      */
     public static <R> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate, final Supplier<R> supplier)
@@ -588,19 +586,20 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the callable task that might throw an exception and returns a result. Must not be {@code null}.
-     * @param predicate the predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown. Must not be {@code null}.
+     * @param cmd the callable task that might throw an exception and returns a result.
+     * @param predicate the predicate to test the exception. If it returns {@code true}, the default value is returned. If it returns {@code false}, the exception is rethrown.
      * @param defaultValue the default value to return if an exception occurs during the execution of the {@code cmd} and the {@code predicate} returns {@code true}.
      * @return the result of the {@code cmd} or the default value if an exception occurs and the {@code predicate} returns {@code true}.
-     * @throws IllegalArgumentException if {@code cmd} or {@code predicate} is {@code null}.
      * @throws RuntimeException if an exception occurs and the {@code predicate} returns {@code false}.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate} is {@code null}.
      * @see #call(java.util.concurrent.Callable, Predicate, Supplier)
      */
     public static <R extends Comparable<? super R>> R call(final java.util.concurrent.Callable<? extends R> cmd, final Predicate<? super Exception> predicate,
             final R defaultValue) throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
+
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
 
         try {
             return cmd.call();
@@ -632,14 +631,13 @@ public final class Try<T extends AutoCloseable> {
      *    });
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource; must not be {@code null}
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
-     *         the resource is acquired or closed
+     * @param cmd the consumer that operates on the managed resource;
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
      *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}. If the final action
      *         also fails while another failure is being propagated, its failure is suppressed on
      *         the primary failure.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -671,11 +669,10 @@ public final class Try<T extends AutoCloseable> {
      *    );
      * }</pre>
      *
-     * @param cmd the consumer that operates on the managed resource; must not be {@code null}
+     * @param cmd the consumer that operates on the managed resource;
      * @param actionOnError the error handler invoked with any exception thrown while creating the
-     *                      resource, executing the {@code cmd}, or closing the resource; must not be {@code null}
-     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null};
-     *         validation occurs before the resource is acquired or closed
+     *                      resource, executing the {@code cmd}, or closing the resource;
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      */
     public void run(final Throwables.Consumer<? super T, ? extends Exception> cmd, final Consumer<? super Exception> actionOnError)
             throws IllegalArgumentException {
@@ -710,13 +707,12 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
      * @return the result produced by the function.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
-     *         the resource is acquired or closed
      * @throws RuntimeException if an exception occurs while creating the resource, executing the
      *         {@code cmd}, or closing the resource. Checked exceptions are converted via
      *         {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -749,11 +745,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
-     * @param actionOnError the function to transform exceptions into return values; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
+     * @param actionOnError the function to transform exceptions into return values;
      * @return the result from the command or from the error handler if an exception occurs.
-     * @throws IllegalArgumentException if {@code cmd} or {@code actionOnError} is {@code null};
-     *         validation occurs before the resource is acquired or closed
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Function<? super Exception, ? extends R> actionOnError)
             throws IllegalArgumentException {
@@ -788,11 +783,10 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
-     * @param supplier the supplier to provide a fallback value if an exception occurs; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
+     * @param supplier the supplier to provide a fallback value if an exception occurs;
      * @return the result from the command or from the supplier if an exception occurs.
-     * @throws IllegalArgumentException if {@code cmd} or {@code supplier} is {@code null};
-     *         validation occurs before the resource is acquired or closed
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code supplier} is {@code null}.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Supplier<R> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(cmd, cs.cmd);
@@ -823,17 +817,17 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
      * @param defaultValue the value to return if an exception occurs; may be {@code null}
      * @return the result from the command or the default value if an exception occurs.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}; validation occurs before
-     *         the resource is acquired or closed
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #call(Throwables.Function, Supplier)
      */
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final R defaultValue)
             throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
+
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
 
         return executeWithFinalAction(() -> {
             try (final T closeable = acquireResource()) {
@@ -865,13 +859,12 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
-     * @param predicate the predicate to test exceptions; must not be {@code null}
-     * @param supplier the supplier to provide a fallback value for matching exceptions; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
+     * @param predicate the predicate to test exceptions;
+     * @param supplier the supplier to provide a fallback value for matching exceptions;
      * @return the result from the command or from the supplier if a matching exception occurs.
-     * @throws IllegalArgumentException if {@code cmd}, {@code predicate}, or {@code supplier} is
-     *         {@code null}; validation occurs before the resource is acquired or closed
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate}, {@code supplier} is {@code null}.
      */
     public <R> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd, final Predicate<? super Exception> predicate,
             final Supplier<R> supplier) throws IllegalArgumentException {
@@ -914,20 +907,20 @@ public final class Try<T extends AutoCloseable> {
      * }</pre>
      *
      * @param <R> the type of the result.
-     * @param cmd the function that operates on the managed resource and returns a result; must not be {@code null}
-     * @param predicate the predicate to test exceptions; must not be {@code null}
+     * @param cmd the function that operates on the managed resource and returns a result;
+     * @param predicate the predicate to test exceptions;
      * @param defaultValue the value to return for matching exceptions; may be {@code null}
      * @return the result from the command or the default value if a matching exception occurs.
-     * @throws IllegalArgumentException if {@code cmd} or {@code predicate} is {@code null};
-     *         validation occurs before the resource is acquired or closed
      * @throws RuntimeException if an exception occurs that doesn't match the predicate.
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate} is {@code null}.
      * @see #call(Throwables.Function, Predicate, Supplier)
      */
     public <R extends Comparable<? super R>> R call(final Throwables.Function<? super T, ? extends R, ? extends Exception> cmd,
             final Predicate<? super Exception> predicate, final R defaultValue) throws IllegalArgumentException {
-        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
+
+        // <R extends Comparable<? super R>> avoids ambiguous overloads involving Comparable<R>.
 
         return executeWithFinalAction(() -> {
             try (final T closeable = acquireResource()) {

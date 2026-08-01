@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -7,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Collection;
 import java.util.List;
@@ -909,6 +909,163 @@ public class TypeFactoryTest extends TestBase {
 
             TypeFactory.registerType("CustomType5", CustomClass5.class, toStringFunc, fromStringFunc);
         });
+    }
+
+    @Test
+    public void testRegisterTypeRejectsNullConversionFunctionsBeforePublishing() {
+        class ClassBiFunctionTarget {
+            final String value;
+
+            ClassBiFunctionTarget(final String value) {
+                this.value = value;
+            }
+        }
+
+        assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType(ClassBiFunctionTarget.class, (BiFunction<ClassBiFunctionTarget, JsonParser, String>) null,
+                        (str, parser) -> new ClassBiFunctionTarget(str)));
+        TypeFactory.registerType(ClassBiFunctionTarget.class, (value, parser) -> value.value, (str, parser) -> new ClassBiFunctionTarget(str));
+
+        class ClassFunctionTarget {
+            final String value;
+
+            ClassFunctionTarget(final String value) {
+                this.value = value;
+            }
+        }
+
+        assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType(ClassFunctionTarget.class, (Function<ClassFunctionTarget, String>) value -> value.value,
+                        (Function<String, ClassFunctionTarget>) null));
+        TypeFactory.registerType(ClassFunctionTarget.class, value -> value.value, ClassFunctionTarget::new);
+
+        class NamedBiFunctionTarget {
+            final String value;
+
+            NamedBiFunctionTarget(final String value) {
+                this.value = value;
+            }
+        }
+
+        final String namedBiFunctionType = "TypeFactoryNullNamedBiFunction_" + System.nanoTime();
+        assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType(namedBiFunctionType, NamedBiFunctionTarget.class,
+                        (BiFunction<NamedBiFunctionTarget, JsonParser, String>) (value, parser) -> value.value,
+                        (BiFunction<String, JsonParser, NamedBiFunctionTarget>) null));
+        TypeFactory.registerType(namedBiFunctionType, NamedBiFunctionTarget.class, (value, parser) -> value.value,
+                (str, parser) -> new NamedBiFunctionTarget(str));
+
+        class NamedFunctionTarget {
+            final String value;
+
+            NamedFunctionTarget(final String value) {
+                this.value = value;
+            }
+        }
+
+        final String namedFunctionType = "TypeFactoryNullNamedFunction_" + System.nanoTime();
+        assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType(namedFunctionType, NamedFunctionTarget.class, (Function<NamedFunctionTarget, String>) null,
+                        NamedFunctionTarget::new));
+        TypeFactory.registerType(namedFunctionType, NamedFunctionTarget.class, value -> value.value, NamedFunctionTarget::new);
+    }
+
+    @Test
+    public void testRegisterTypeRejectsEmptyNamesBeforePublishing() {
+        final String intrinsicName = "TypeFactoryEmptyAliasIntrinsic_" + System.nanoTime();
+        final Type<Object> validlyNamedType = new AbstractType<Object>(intrinsicName) {
+            @Override
+            public Class<Object> javaType() {
+                return Object.class;
+            }
+
+            @Override
+            public String stringOf(final Object value) {
+                return N.stringOf(value);
+            }
+
+            @Override
+            public Object valueOf(final String str) {
+                return str;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType("", validlyNamedType));
+        assertNull(TypeFactory.getTypeIfPresent(intrinsicName));
+
+        final Type<Object> unnamedType = new AbstractType<Object>("") {
+            @Override
+            public Class<Object> javaType() {
+                return Object.class;
+            }
+
+            @Override
+            public String stringOf(final Object value) {
+                return N.stringOf(value);
+            }
+
+            @Override
+            public Object valueOf(final String str) {
+                return str;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(unnamedType));
+    }
+
+    @Test
+    public void testRegisterTypeRejectsNullIntrinsicNamesWithIllegalArgumentException() {
+        final Type<Object> directlyRegisteredType = new AbstractType<Object>("TypeFactoryNullIntrinsicDirect") {
+            @Override
+            public String name() {
+                return null;
+            }
+
+            @Override
+            public Class<Object> javaType() {
+                return Object.class;
+            }
+
+            @Override
+            public String stringOf(final Object value) {
+                return N.stringOf(value);
+            }
+
+            @Override
+            public Object valueOf(final String str) {
+                return str;
+            }
+        };
+
+        final RuntimeException directError = assertThrows(RuntimeException.class, () -> TypeFactory.registerType(directlyRegisteredType));
+        assertTrue(directError instanceof IllegalArgumentException);
+
+        final String alias = "TypeFactoryNullIntrinsicAlias_" + System.nanoTime();
+        final Type<Object> aliasedType = new AbstractType<Object>("TypeFactoryNullIntrinsicAliased") {
+            @Override
+            public String name() {
+                return null;
+            }
+
+            @Override
+            public Class<Object> javaType() {
+                return Object.class;
+            }
+
+            @Override
+            public String stringOf(final Object value) {
+                return N.stringOf(value);
+            }
+
+            @Override
+            public Object valueOf(final String str) {
+                return str;
+            }
+        };
+
+        final RuntimeException aliasError = assertThrows(RuntimeException.class, () -> TypeFactory.registerType(alias, aliasedType));
+        assertNull(TypeFactory.getTypeIfPresent(alias));
+        assertTrue(aliasError instanceof IllegalArgumentException);
     }
 
     // Covers L1383/L1388: registerType(Class, BiFunction, BiFunction) lambda body execution

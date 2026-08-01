@@ -180,7 +180,7 @@ public class DoubleBiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         DoubleBiPredicate instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((DoubleBiPredicate) null));
     }

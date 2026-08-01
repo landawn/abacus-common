@@ -113,7 +113,7 @@ public class ObjByteConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         ObjByteConsumer<String> instance = (a, b) -> {
         };
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ObjByteConsumer) null));

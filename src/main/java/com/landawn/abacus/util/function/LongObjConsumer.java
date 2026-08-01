@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts a {@code long}-valued and an object-valued
+ * Represents an operation that accepts a {@code long}-valued argument and an object-valued
  * argument, and returns no result. This is the {@code (long, Object)} specialization
  * of {@link java.util.function.BiConsumer}. Unlike most other functional interfaces,
  * {@code LongObjConsumer} is expected to operate via side-effects.
@@ -99,13 +99,14 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * // First updates the user's timestamp, then logs the update
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code LongObjConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) {
+    default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

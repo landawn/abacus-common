@@ -214,10 +214,12 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
-     * @throws NullPointerException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public <E extends Exception> boolean setIf(final Throwables.ShortPredicate<E> predicate, final short newValue) throws E {
+    public <E extends Exception> boolean setIf(final Throwables.ShortPredicate<E> predicate, final short newValue) throws E, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(value)) {
             value = newValue;
             return true;

@@ -118,7 +118,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <p><b>Memory Efficiency:</b>
  * <ul>
  *   <li><b>Storage:</b> 1 byte per element (8 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Byte&gt;:</b> ~16x less memory usage (no Byte wrapper objects)</li>
+ *   <li><b>vs List&lt;Byte&gt;:</b> Avoids per-element references and boxing; actual memory savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -198,7 +198,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Byte&gt;:</b> 16x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Byte&gt;:</b> Lower memory use and no boxing in primitive operations</li>
  *   <li><b>vs byte[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
  *   <li><b>vs ByteBuffer:</b> Simpler API, better for list operations, no position tracking</li>
  *   <li><b>vs ByteArrayOutputStream:</b> Random access, better for non-sequential operations</li>
@@ -1072,12 +1072,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed; must not be {@code null}
+     * @param p the predicate which returns {@code true} for elements to be removed;
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
-     * @throws NullPointerException if {@code p} is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final BytePredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final BytePredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final ByteList tmp = new ByteList(size());
 
@@ -1348,6 +1348,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1500,11 +1501,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [2, 4, 6]
      * }</pre>
      *
-     * @param operator the operator to apply to each element; must not be {@code null}
-     * @throws NullPointerException if {@code operator} is {@code null}
+     * @param operator the operator to apply to each element;
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final ByteUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final ByteUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsByte(elementData[i]);
@@ -1526,13 +1527,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 0, 3, 0, 5]
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element;
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
-     * @throws NullPointerException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final BytePredicate predicate, final byte newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final BytePredicate predicate, final byte newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2263,8 +2264,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element;
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ByteConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2294,11 +2295,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element; must not be {@code null}
+     * @param action the action to be performed for each element;
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final ByteConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final ByteConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2997,18 +2998,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param <C> the type of Collection to create
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Collection instance given the required size; must not be {@code null}
+     * @param supplier a function that creates a new Collection instance given the required size;
      * @return a new Collection containing boxed elements from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws NullPointerException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -3024,17 +3025,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Multiset instance given the required size; must not be {@code null}
+     * @param supplier a function that creates a new Multiset instance given the required size;
      * @return a new Multiset containing elements from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws NullPointerException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier) throws IndexOutOfBoundsException {
+    public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Byte> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Byte> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

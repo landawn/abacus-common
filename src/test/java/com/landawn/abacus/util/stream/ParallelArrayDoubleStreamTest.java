@@ -1387,9 +1387,9 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
     @Test
     public void testOnCloseEmptyHandler() {
         DoubleStream stream = createDoubleStream(TEST_ARRAY);
-        DoubleStream newStream = stream.onClose(null);
-        assertSame(stream, newStream);
-        newStream.close();
+
+        assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
+        stream.close();
     }
 
     @Test

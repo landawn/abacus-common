@@ -1127,7 +1127,7 @@ public abstract class DoubleStream
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -1168,7 +1168,7 @@ public abstract class DoubleStream
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -1558,10 +1558,11 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers up to {@code n} elements.
      *
      * @param n the number of elements to select
-     * @param comparator a non-interfering, stateless comparator to compare elements of this stream; if {@code null}, natural ordering is used (the {@code n} greatest elements are returned)
+     * @param comparator a non-interfering, stateless comparator to compare elements of this stream; must not be {@code null}
      * @return a new stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
@@ -2057,12 +2058,15 @@ public abstract class DoubleStream
      *
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @see #forEach(Throwables.DoubleConsumer)
      */
     @ParallelSupported
     @TerminalOp
-    public void foreach(final DoubleConsumer action) { // NOSONAR
+    public void foreach(final DoubleConsumer action) throws IllegalArgumentException { // NOSONAR
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         forEach(action::accept);
     }
@@ -2675,10 +2679,9 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the other stream to merge with this stream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the new merged stream
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -2704,7 +2707,7 @@ public abstract class DoubleStream
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the DoubleStream to be combined with the current DoubleStream. Must be {@code non-null}.
-     * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
+     * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(DoubleStream, double, double, DoubleBinaryOperator)
@@ -2732,7 +2735,7 @@ public abstract class DoubleStream
      *
      * @param b the second DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
      * @param c the third DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
-     * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
+     * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(DoubleStream, DoubleStream, double, double, double, DoubleTernaryOperator)
@@ -2761,7 +2764,7 @@ public abstract class DoubleStream
      * @param b the DoubleStream to be combined with the current DoubleStream. Will be closed along with this DoubleStream.
      * @param valueForNoneA the default value to use for the current DoubleStream when it runs out of elements
      * @param valueForNoneB the default value to use for the given DoubleStream when it runs out of elements
-     * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
+     * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2792,7 +2795,7 @@ public abstract class DoubleStream
      * @param valueForNoneA the default value to use for the current DoubleStream when it runs out of elements
      * @param valueForNoneB the default value to use for the second DoubleStream when it runs out of elements
      * @param valueForNoneC the default value to use for the third DoubleStream when it runs out of elements
-     * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream. Must be {@code non-null}.
+     * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2888,17 +2891,21 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param transfer the function to transform the JDK stream. Must not be {@code null}.
+     * @param transfer the function to transform the JDK stream.
      * @return the transformed stream as a DoubleStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}
      * @see #transformB(Function, boolean)
      * @see #toJdkStream()
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public DoubleStream transformB(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer) {
+    public DoubleStream transformB(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer)
+            throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(transfer, cs.transfer);
 
         return transformB(transfer, false);
     }
@@ -2944,12 +2951,12 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param transfer the function to transform the JDK stream. Must not be {@code null}.
+     * @param transfer the function to transform the JDK stream.
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed;
      *                 if {@code false}, the transformation is applied immediately
      * @return the transformed stream as a DoubleStream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if transfer is null
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}
      * @see #transformB(Function)
      * @see #toJdkStream()
      * @see DoubleStream#defer(Supplier)
@@ -2958,8 +2965,9 @@ public abstract class DoubleStream
     @SequentialOnly
     @IntermediateOp
     public DoubleStream transformB(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer,
-            final boolean deferred) throws IllegalStateException, IllegalArgumentException {
+            final boolean deferred) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
@@ -2996,8 +3004,9 @@ public abstract class DoubleStream
      * Returns a DoubleStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier is memoized and invoked at most once. Closing the returned stream before traversal may still
-     * invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
+     * the supplier so the supplied stream can be closed.
      *
      * <p>It is equivalent to {@code Stream.just(supplier).flatMapToDouble(it -> it.get())}.
      *
@@ -3018,14 +3027,17 @@ public abstract class DoubleStream
      *
      * @param supplier the supplier that provides the DoubleStream
      * @return a new DoubleStream supplied by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see Stream#defer(Supplier)
      */
     public static DoubleStream defer(final Supplier<DoubleStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<DoubleStream> s = Fn.memoize(supplier);
-        return Stream.just(s).flatMapToDouble(Supplier::get).onClose(newCloseHandler(s));
+        return DoubleStream.of(DoubleIterator.defer(() -> {
+            final DoubleStream source = s.get();
+            return source == null ? DoubleIterator.empty() : source.iteratorEx();
+        })).onClose(newCloseHandler(s));
     }
 
     /**
@@ -3862,12 +3874,12 @@ public abstract class DoubleStream
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a DoubleSupplier that provides the next double in the iteration
      * @return a DoubleStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or next is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static DoubleStream iterate(final BooleanSupplier hasNext, final DoubleSupplier next) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(next);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(next, cs.next);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private boolean hasMore = true;
@@ -3929,12 +3941,12 @@ public abstract class DoubleStream
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a DoubleStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or f is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, BooleanSupplier, java.util.function.UnaryOperator)
      */
     public static DoubleStream iterate(final double init, final BooleanSupplier hasNext, final DoubleUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private double cur = 0;
@@ -4002,12 +4014,12 @@ public abstract class DoubleStream
      * @param hasNext predicate to test the current value; stream continues while this returns true
      * @param f a function to apply to the previous element to generate the next element
      * @return a DoubleStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or f is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.Predicate, java.util.function.UnaryOperator)
      */
     public static DoubleStream iterate(final double init, final DoublePredicate hasNext, final DoubleUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private double cur = 0;
@@ -4074,11 +4086,11 @@ public abstract class DoubleStream
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an infinite DoubleStream of elements generated by the iteration
-     * @throws IllegalArgumentException if f is null
+     * @throws IllegalArgumentException if {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.UnaryOperator)
      */
     public static DoubleStream iterate(final double init, final DoubleUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private double cur = 0;
@@ -4138,11 +4150,11 @@ public abstract class DoubleStream
      *
      * @param s the DoubleSupplier that provides the elements of the stream
      * @return an infinite DoubleStream generated by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code s} is {@code null}
      * @see Stream#generate(Supplier)
      */
     public static DoubleStream generate(final DoubleSupplier s) throws IllegalArgumentException {
-        N.checkArgNotNull(s);
+        N.checkArgNotNull(s, cs.s);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             @Override
@@ -4464,11 +4476,14 @@ public abstract class DoubleStream
      *
      * @param a the first double array
      * @param b the second double array
-     * @param zipFunction the function to combine pairs of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], BiFunction)
      */
-    public static DoubleStream zip(final double[] a, final double[] b, final DoubleBinaryOperator zipFunction) {
+    public static DoubleStream zip(final double[] a, final double[] b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b)) {
             return empty();
         }
@@ -4512,11 +4527,15 @@ public abstract class DoubleStream
      * @param a the first double array
      * @param b the second double array
      * @param c the third double array
-     * @param zipFunction the function to combine triples of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], TriFunction)
      */
-    public static DoubleStream zip(final double[] a, final double[] b, final double[] c, final DoubleTernaryOperator zipFunction) {
+    public static DoubleStream zip(final double[] a, final double[] b, final double[] c, final DoubleTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b) || N.isEmpty(c)) {
             return empty();
         }
@@ -4558,11 +4577,14 @@ public abstract class DoubleStream
      *
      * @param a the first double iterator
      * @param b the second double iterator
-     * @param zipFunction the function to combine pairs of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, BiFunction)
      */
-    public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final DoubleBinaryOperator zipFunction) {
+    public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private final DoubleIterator iterA = a == null ? DoubleIterator.empty() : a;
             private final DoubleIterator iterB = b == null ? DoubleIterator.empty() : b;
@@ -4598,11 +4620,15 @@ public abstract class DoubleStream
      * @param a the first double iterator
      * @param b the second double iterator
      * @param c the third double iterator
-     * @param zipFunction the function to combine triples of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, TriFunction)
      */
-    public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleTernaryOperator zipFunction) {
+    public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private final DoubleIterator iterA = a == null ? DoubleIterator.empty() : a;
             private final DoubleIterator iterB = b == null ? DoubleIterator.empty() : b;
@@ -4637,11 +4663,14 @@ public abstract class DoubleStream
      *
      * @param a the first double stream
      * @param b the second double stream
-     * @param zipFunction the function to combine pairs of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleBinaryOperator zipFunction) {
+    public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -4664,11 +4693,15 @@ public abstract class DoubleStream
      * @param a the first double stream
      * @param b the second double stream
      * @param c the third double stream
-     * @param zipFunction the function to combine triples of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
-    public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction) {
+    public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
@@ -4695,11 +4728,15 @@ public abstract class DoubleStream
      * {@link DoubleTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine values from all the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine values from all the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, Function)
      */
-    public static DoubleStream zip(final Collection<? extends DoubleStream> streams, final DoubleNFunction<Double> zipFunction) {
+    public static DoubleStream zip(final Collection<? extends DoubleStream> streams, final DoubleNFunction<Double> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, zipFunction).mapToDouble(ToDoubleFunction.UNBOX);
     }
@@ -4724,12 +4761,15 @@ public abstract class DoubleStream
      * @param b the second double array
      * @param valueForNoneA the default value to use when array a runs out of values
      * @param valueForNoneB the default value to use when array b runs out of values
-     * @param zipFunction the function to combine pairs of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      */
     public static DoubleStream zip(final double[] a, final double[] b, final double valueForNoneA, final double valueForNoneB,
-            final DoubleBinaryOperator zipFunction) {
+            final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b)) {
             return empty();
         }
@@ -4780,12 +4820,15 @@ public abstract class DoubleStream
      * @param valueForNoneA the default value to use when array a runs out of values
      * @param valueForNoneB the default value to use when array b runs out of values
      * @param valueForNoneC the default value to use when array c runs out of values
-     * @param zipFunction the function to combine triples of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      */
     public static DoubleStream zip(final double[] a, final double[] b, final double[] c, final double valueForNoneA, final double valueForNoneB,
-            final double valueForNoneC, final DoubleTernaryOperator zipFunction) {
+            final double valueForNoneC, final DoubleTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b) && N.isEmpty(c)) {
             return empty();
         }
@@ -4834,12 +4877,15 @@ public abstract class DoubleStream
      * @param b the second double iterator
      * @param valueForNoneA the default value to use when iterator a runs out of values
      * @param valueForNoneB the default value to use when iterator b runs out of values
-     * @param zipFunction the function to combine pairs of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final double valueForNoneA, final double valueForNoneB,
-            final DoubleBinaryOperator zipFunction) {
+            final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private final DoubleIterator iterA = a == null ? DoubleIterator.empty() : a;
             private final DoubleIterator iterB = b == null ? DoubleIterator.empty() : b;
@@ -4883,12 +4929,15 @@ public abstract class DoubleStream
      * @param valueForNoneA the default value to use when iterator a runs out of values
      * @param valueForNoneB the default value to use when iterator b runs out of values
      * @param valueForNoneC the default value to use when iterator c runs out of values
-     * @param zipFunction the function to combine triples of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static DoubleStream zip(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final double valueForNoneA,
-            final double valueForNoneB, final double valueForNoneC, final DoubleTernaryOperator zipFunction) {
+            final double valueForNoneB, final double valueForNoneC, final DoubleTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorDoubleStream(new DoubleIteratorEx() {
             private final DoubleIterator iterA = a == null ? DoubleIterator.empty() : a;
             private final DoubleIterator iterB = b == null ? DoubleIterator.empty() : b;
@@ -4934,12 +4983,15 @@ public abstract class DoubleStream
      * @param b the second double stream
      * @param valueForNoneA the default value to use when stream a runs out of values
      * @param valueForNoneB the default value to use when stream b runs out of values
-     * @param zipFunction the function to combine pairs of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final double valueForNoneA, final double valueForNoneB,
-            final DoubleBinaryOperator zipFunction) {
+            final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -4967,12 +5019,15 @@ public abstract class DoubleStream
      * @param valueForNoneA the default value to use when stream a runs out of values
      * @param valueForNoneB the default value to use when stream b runs out of values
      * @param valueForNoneC the default value to use when stream c runs out of values
-     * @param zipFunction the function to combine triples of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final double valueForNoneA, final double valueForNoneB,
-            final double valueForNoneC, final DoubleTernaryOperator zipFunction) {
+            final double valueForNoneC, final DoubleTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
@@ -5004,11 +5059,15 @@ public abstract class DoubleStream
      *
      * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the array of default values to use when streams run out of values
-     * @param zipFunction the function to combine values from all the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine values from all the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, List, Function)
      */
-    public static DoubleStream zip(final Collection<? extends DoubleStream> streams, final double[] valuesForNone, final DoubleNFunction<Double> zipFunction) {
+    public static DoubleStream zip(final Collection<? extends DoubleStream> streams, final double[] valuesForNone, final DoubleNFunction<Double> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, valuesForNone, zipFunction).mapToDouble(ToDoubleFunction.UNBOX);
     }
@@ -5044,13 +5103,13 @@ public abstract class DoubleStream
      *
      * @param a the first double array
      * @param b the second double array
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from array a, otherwise selects from array b
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
-    public static DoubleStream merge(final double[] a, final double[] b, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final double[] a, final double[] b, final DoubleBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
@@ -5112,13 +5171,16 @@ public abstract class DoubleStream
      * @param a the first double array
      * @param b the second double array
      * @param c the third double array
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
-    public static DoubleStream merge(final double[] a, final double[] b, final double[] c, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final double[] a, final double[] b, final double[] c, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), DoubleStream.of(c).iteratorEx(), nextSelector);
     }
@@ -5147,13 +5209,14 @@ public abstract class DoubleStream
      *
      * @param a the first DoubleIterator
      * @param b the second DoubleIterator
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from iterator a, otherwise selects from iterator b
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
-    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() {
@@ -5235,13 +5298,16 @@ public abstract class DoubleStream
      * @param a the first DoubleIterator
      * @param b the second DoubleIterator
      * @param c the third DoubleIterator
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
-    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
@@ -5268,13 +5334,14 @@ public abstract class DoubleStream
      *
      * @param a the first DoubleStream
      * @param b the second DoubleStream
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from stream a, otherwise selects from stream b
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
@@ -5298,13 +5365,16 @@ public abstract class DoubleStream
      * @param a the first DoubleStream
      * @param b the second DoubleStream
      * @param c the third DoubleStream
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
-    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -5335,13 +5405,14 @@ public abstract class DoubleStream
      * }</pre>
      *
      * @param streams the collection of DoubleStreams to merge; a {@code null} collection and {@code null} elements are treated as empty
-     * @param nextSelector a function that determines which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function that determines which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select the first parameter, otherwise selects the second
      * @return a DoubleStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
-    public static DoubleStream merge(final Collection<? extends DoubleStream> streams, final DoubleBiFunction<MergeResult> nextSelector) {
+    public static DoubleStream merge(final Collection<? extends DoubleStream> streams, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {

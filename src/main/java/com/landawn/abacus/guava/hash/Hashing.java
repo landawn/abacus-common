@@ -272,8 +272,8 @@ public final class Hashing {
      * HashCode hash = sipHash.hash("keyed data".getBytes());
      * }</pre>
      *
-     * @param k0 the first 64 bits of the 128-bit key (low order bits)
-     * @param k1 the second 64 bits of the 128-bit key (high order bits)
+     * @param k0 the first half of the 128-bit key
+     * @param k1 the second half of the 128-bit key
      * @return a SipHash-2-4 hash function initialized with the given key
      */
     public static HashFunction sipHash24(final long k0, final long k1) {

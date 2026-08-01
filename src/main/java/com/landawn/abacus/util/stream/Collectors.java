@@ -982,10 +982,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param combiner the combiner function that merges two result containers
      * @param characteristics optional characteristics of the collector
      * @return a new {@code Collector} with the specified supplier, accumulator, and combiner
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Characteristics...)
      */
     public static <T, R> Collector<T, R, R> create(final Supplier<? extends R> supplier, final BiConsumer<? super R, ? super T> accumulator,
-            final BinaryOperator<R> combiner, final Characteristics... characteristics) {
+            final BinaryOperator<R> combiner, final Characteristics... characteristics) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+        N.checkArgNotNull(combiner, cs.combiner);
+
         return Collector.of((Supplier<R>) supplier, (BiConsumer<R, T>) accumulator, combiner, characteristics);
     }
 
@@ -1015,10 +1020,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param combiner the combiner function that merges two result containers
      * @param characteristics optional characteristics of the collector
      * @return a new {@code Collector} with the specified supplier, accumulator, and combiner
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Characteristics...)
      */
     public static <T, R> Collector<T, R, R> create(final Supplier<? extends R> supplier, final BiConsumer<? super R, ? super T> accumulator,
-            final BinaryOperator<R> combiner, final Collection<Characteristics> characteristics) {
+            final BinaryOperator<R> combiner, final Collection<Characteristics> characteristics) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+        N.checkArgNotNull(combiner, cs.combiner);
+
         return Collector.of((Supplier<R>) supplier, (BiConsumer<R, T>) accumulator, combiner,
                 N.isEmpty(characteristics) ? CH_NOID : characteristics.toArray(Characteristics[]::new));
     }
@@ -1050,10 +1060,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param finisher the function that transforms the intermediate result to the final result
      * @param characteristics optional characteristics of the collector
      * @return a new {@code Collector} with the specified components
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner}, or {@code finisher} is {@code null}
      * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Function, Characteristics...)
      */
     public static <T, A, R> Collector<T, A, R> create(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator,
-            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Characteristics... characteristics) {
+            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Characteristics... characteristics)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+        N.checkArgNotNull(combiner, cs.combiner);
+        N.checkArgNotNull(finisher, cs.finisher);
+
         return Collector.of((Supplier<A>) supplier, (BiConsumer<A, T>) accumulator, combiner, (Function<A, R>) finisher, characteristics);
     }
 
@@ -1087,10 +1104,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param finisher the function that transforms the intermediate result to the final result
      * @param characteristics optional characteristics of the collector
      * @return a new {@code Collector} with the specified components
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner}, or {@code finisher} is {@code null}
      * @see Collector#of(Supplier, BiConsumer, BinaryOperator, Function, Characteristics...)
      */
     public static <T, A, R> Collector<T, A, R> create(final Supplier<? extends A> supplier, final BiConsumer<? super A, ? super T> accumulator,
-            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Collection<Characteristics> characteristics) {
+            final BinaryOperator<A> combiner, final Function<? super A, ? extends R> finisher, final Collection<Characteristics> characteristics)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+        N.checkArgNotNull(combiner, cs.combiner);
+        N.checkArgNotNull(finisher, cs.finisher);
+
         return Collector.of((Supplier<A>) supplier, (BiConsumer<A, T>) accumulator, combiner, (Function<A, R>) finisher,
                 N.isEmpty(characteristics) ? CH_NOID : characteristics.toArray(Characteristics[]::new));
     }
@@ -1125,12 +1149,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                         the results will be inserted
      * @return a {@code Collector} which collects all input elements into a collection,
      *         in encounter order
+     * @throws IllegalArgumentException if {@code collectionFactory} is {@code null}
      * @see #toCollection(int, Supplier)
      * @see #toCollection(Supplier, BiConsumer)
      * @see #toList()
      * @see #toSet()
      */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> collectionFactory) {
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> collectionFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(collectionFactory, cs.collectionFactory);
+
         final BiConsumer<C, T> accumulator = BiConsumers.ofAdd();
         // Left-preserving: a bigger-wins combiner reorders segments under JDK parallel streams,
         // breaking the documented encounter order.
@@ -1177,6 +1204,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects at most the specified number of input
      *         elements into a collection, in encounter order
      * @throws IllegalArgumentException if {@code atMostSize} is negative
+     * @throws IllegalArgumentException if {@code collectionFactory} is {@code null}
      * @see #toCollection(Supplier)
      * @see #first(int)
      * @see #toList(int)
@@ -1184,6 +1212,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final int atMostSize, final Supplier<? extends C> collectionFactory)
             throws IllegalArgumentException {
         N.checkArgNotNegative(atMostSize, "atMostSize");
+        N.checkArgNotNull(collectionFactory, cs.collectionFactory);
 
         final BiConsumer<C, T> accumulator = (c, t) -> {
             if (c.size() < atMostSize) {
@@ -1249,10 +1278,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param accumulator a function for incorporating a new element into a collection
      * @return a {@code Collector} which collects input elements into a collection
      *         using the specified accumulator
+     * @throws IllegalArgumentException if {@code supplier} or {@code accumulator} is {@code null}
      * @see #toCollection(Supplier, BiConsumer, BinaryOperator)
      * @see #toCollection(Supplier)
      */
-    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator) {
+    public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+
         // Left-preserving: a bigger-wins combiner reorders segments under JDK parallel streams,
         // breaking the documented encounter order.
         final BinaryOperator<C> combiner = BinaryOperators.ofAddAllToFirst();
@@ -1299,12 +1333,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param combiner a function for combining two collections into one
      * @return a {@code Collector} which collects input elements into a collection
      *         using the specified accumulator and combiner
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      * @see #toCollection(Supplier, BiConsumer)
      * @see #toCollection(Supplier)
      * @see #create(Supplier, BiConsumer, BinaryOperator, Characteristics...)
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> toCollection(final Supplier<? extends C> supplier, final BiConsumer<C, T> accumulator,
-            final BinaryOperator<C> combiner) {
+            final BinaryOperator<C> combiner) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(accumulator, cs.accumulator);
+        N.checkArgNotNull(combiner, cs.combiner);
+
         return toCollection(supplier, accumulator, combiner, CH_ID);
     }
 
@@ -1892,9 +1931,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param supplier a supplier providing a new empty {@code Multiset} into which
      *                 the results will be inserted
      * @return a {@code Collector} which collects all input elements into a {@code Multiset}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Multiset<T>> toMultiset(final Supplier<Multiset<T>> supplier) {
+    public static <T> Collector<T, ?, Multiset<T>> toMultiset(final Supplier<Multiset<T>> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final BiConsumer<Multiset<T>, T> accumulator = (BiConsumer) Multiset_Accumulator;
         final BinaryOperator<Multiset<T>> combiner = (BinaryOperator) Multiset_Combiner;
 
@@ -1958,11 +2000,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <A> the component type of the array
      * @param arraySupplier a supplier providing an array of the desired type
      * @return a {@code Collector} which collects all input elements into an array
-     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}
      * @throws ArrayStoreException if an element is not assignable to the supplied array's component type
+     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}
      */
-    public static <T, A> Collector<T, ?, A[]> toArray(final Supplier<A[]> arraySupplier) {
-        N.checkArgNotNull(arraySupplier, "arraySupplier");
+    public static <T, A> Collector<T, ?, A[]> toArray(final Supplier<A[]> arraySupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(arraySupplier, cs.arraySupplier);
 
         final Supplier<List<A>> supplier = Suppliers.ofList();
         @SuppressWarnings("rawtypes")
@@ -2012,11 +2054,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param arraySupplier a function which produces a new array of the desired
      *                      type and the provided length
      * @return a {@code Collector} which collects all input elements into an array
-     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}
      * @throws ArrayStoreException if an element is not assignable to the returned array's component type
+     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}
      */
-    public static <T, A> Collector<T, ?, A[]> toArray(final IntFunction<A[]> arraySupplier) {
-        N.checkArgNotNull(arraySupplier, "arraySupplier");
+    public static <T, A> Collector<T, ?, A[]> toArray(final IntFunction<A[]> arraySupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(arraySupplier, cs.arraySupplier);
 
         final Supplier<List<A>> supplier = Suppliers.ofList();
         @SuppressWarnings("rawtypes")
@@ -2631,8 +2673,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param predicate a predicate to apply to elements
      * @return a {@code Collector} which collects the single matching element into an {@code Optional}
      * @throws TooManyElementsException if more than one element matches the predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    public static <T> Collector<T, ?, Optional<T>> onlyOne(final Predicate<? super T> predicate) {
+    public static <T> Collector<T, ?, Optional<T>> onlyOne(final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final Collector<T, ?, Optional<T>> downstream = onlyOne();
 
         return filtering(predicate, downstream);
@@ -2929,9 +2974,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
     public static Collector<Object, ?, String> joining(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
-        N.checkArgNotNull(delimiter, "delimiter");
-        N.checkArgNotNull(prefix, "prefix");
-        N.checkArgNotNull(suffix, "suffix");
+        N.checkArgNotNull(delimiter, cs.delimiter);
+        N.checkArgNotNull(prefix, cs.prefix);
+        N.checkArgNotNull(suffix, cs.suffix);
 
         // Snapshot mutable CharSequence arguments once. Every parallel accumulation container
         // must use the same formatting configuration even if a caller later mutates an argument.
@@ -2975,11 +3020,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector which will accept filtered values
      * @return a collector which applies the predicate to the input elements and provides
      *         the elements for which predicate returned {@code true} to the downstream collector
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #filteringToList(Predicate)
      */
-    public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream) {
-        N.checkArgNotNull(predicate, "predicate");
-        N.checkArgNotNull(downstream, "downstream");
+    public static <T, A, R> Collector<T, ?, R> filtering(final Predicate<? super T> predicate, final Collector<? super T, A, R> downstream)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
 
@@ -3015,10 +3062,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param predicate a filter function to be applied to the input elements
      * @return a collector which applies the predicate to the input elements and collects
      *         the elements for which predicate returned {@code true} to the {@code List}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see #filtering(Predicate, Collector)
      */
     @Beta
-    public static <T> Collector<T, ?, List<T>> filteringToList(final Predicate<? super T> predicate) {
+    public static <T> Collector<T, ?, List<T>> filteringToList(final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final Collector<? super T, ?, List<T>> downstream = Collectors.toList();
 
         return filtering(predicate, downstream);
@@ -3051,11 +3101,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector which will accept mapped values
      * @return a collector which applies the mapping function to the input elements and
      *         provides the mapped results to the downstream collector
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mappingToList(Function)
      */
-    public static <T, U, A, R> Collector<T, ?, R> mapping(final Function<? super T, ? extends U> mapper, final Collector<? super U, A, R> downstream) {
+    public static <T, U, A, R> Collector<T, ?, R> mapping(final Function<? super T, ? extends U> mapper, final Collector<? super U, A, R> downstream)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -3088,10 +3140,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function to be applied to the input elements
      * @return a collector which applies the mapping function to the input elements and
      *         collects the mapped results to a {@code List}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mapping(Function, Collector)
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> mappingToList(final Function<? super T, ? extends U> mapper) {
+    public static <T, U> Collector<T, ?, List<U>> mappingToList(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return Collectors.mapping(mapper, Collectors.<U> toList());
     }
 
@@ -3124,12 +3179,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector which will accept elements of the streams returned by mapper
      * @return a collector which applies the flat mapping function to the input elements and
      *         provides the elements of the resulting streams to the downstream collector
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMappingToList(Function)
      */
     public static <T, U, A, R> Collector<T, ?, R> flatMapping(final Function<? super T, ? extends Stream<? extends U>> mapper,
-            final Collector<? super U, A, R> downstream) {
+            final Collector<? super U, A, R> downstream) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -3170,10 +3226,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *               of results
      * @return a collector which applies the flat mapping function to the input elements and
      *         collects all resulting elements to a {@code List}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapping(Function, Collector)
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends U>> mapper) {
+    public static <T, U> Collector<T, ?, List<U>> flatMappingToList(final Function<? super T, ? extends Stream<? extends U>> mapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return flatMapping(mapper, Collectors.<U> toList());
     }
 
@@ -3209,12 +3269,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                   by mapper
      * @return a collector which applies the flat mapping function to the input elements and
      *         provides the elements of the resulting collections to the downstream collector
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatmappingToList(Function)
      */
     public static <T, U, A, R> Collector<T, ?, R> flatmapping(final Function<? super T, ? extends Collection<? extends U>> mapper, // NOSONAR
-            final Collector<? super U, A, R> downstream) {
+            final Collector<? super U, A, R> downstream) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
@@ -3254,10 +3315,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *               collection of results
      * @return a collector which applies the flat mapping function to the input elements and
      *         collects all resulting elements to a {@code List}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatmapping(Function, Collector)
      */
     @Beta
-    public static <T, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends U>> mapper) { // NOSONAR
+    public static <T, U> Collector<T, ?, List<U>> flatmappingToList(final Function<? super T, ? extends Collection<? extends U>> mapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
+        // NOSONAR
         return flatmapping(mapper, Collectors.<U> toList());
     }
 
@@ -3293,12 +3359,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param finisher a function to be applied to the final result of the downstream collector
      * @return a collector which performs the action of the downstream collector, followed by
      *         an additional finishing step
-     * @throws IllegalArgumentException if downstream or finisher is null
+     * @throws IllegalArgumentException if {@code finisher} is {@code null}
      */
     public static <T, A, R, RR> Collector<T, A, RR> collectingAndThen(final Collector<T, A, R> downstream, final Function<? super R, RR> finisher)
             throws IllegalArgumentException {
         N.checkArgNotNull(downstream);
-        N.checkArgNotNull(finisher);
+        N.checkArgNotNull(finisher, cs.finisher);
 
         final Function<A, R> downstreamFinisher = downstream.finisher();
 
@@ -3465,13 +3531,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param defaultForEmpty a supplier for the default value if no elements are collected
      * @return a collector which returns the collected result, or the supplied default value
      *         if no elements were collected
-     * @throws IllegalArgumentException if {@code collector} or {@code defaultForEmpty} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultForEmpty} is {@code null}
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseGetIfEmpty(final Collector<T, A, R> collector, final Supplier<? extends R> defaultForEmpty)
             throws IllegalArgumentException {
         N.checkArgNotNull(collector);
-        N.checkArgNotNull(defaultForEmpty, "defaultForEmpty");
+        N.checkArgNotNull(defaultForEmpty, cs.defaultForEmpty);
 
         final Supplier<A> downstreamSupplier = collector.supplier();
         final BiConsumer<A, T> downstreamAccumulator = collector.accumulator();
@@ -3577,13 +3643,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier supplier for the exception to throw if no elements are collected
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
-     * @throws IllegalArgumentException if {@code collector} or {@code exceptionSupplier} is {@code null}
      * @throws RuntimeException the exception supplied by {@code exceptionSupplier} if no elements are collected
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
-            final Supplier<? extends RuntimeException> exceptionSupplier) {
-        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+            final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         return collectingOrElseGetIfEmpty(collector, () -> {
             throw exceptionSupplier.get();
@@ -3614,8 +3680,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of the input elements
      * @param keyMapper a function which classifies input elements
      * @return a collector which collects distinct elements to the {@code List}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyMapper) {
+    public static <T> Collector<T, ?, List<T>> distinctByToList(final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return distinctByToCollection(keyMapper, Suppliers.ofList());
     }
 
@@ -3647,10 +3716,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param supplier a supplier providing a new empty collection into which the
      *                 distinct elements will be inserted
      * @return a collector which collects distinct elements to the specified collection type
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code supplier} is {@code null}
      */
     public static <T, C extends Collection<T>> Collector<T, ?, C> distinctByToCollection(final Function<? super T, ?> keyMapper,
-            final Supplier<? extends C> supplier) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
+            final Supplier<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<Map<Object, T>> mappSupplier = Suppliers.ofLinkedHashMap();
@@ -3708,9 +3778,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a function which classifies input elements
      * @return a collector which counts the number of distinct values the mapper
      *         function returns for the stream elements
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyMapper) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
+    public static <T> Collector<T, ?, Integer> distinctByToCounting(final Function<? super T, ?> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Supplier<Set<Object>> supplier = Suppliers.ofSet();
 
@@ -3833,11 +3904,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @return a {@code Collector} that produces the minimal element according to the
      *         comparator, wrapped in an {@code Optional}
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #minBy(java.util.function.Function)
      */
     public static <T> Collector<T, ?, Optional<T>> min(final Comparator<? super T> comparator) throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
 
@@ -3892,8 +3963,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param defaultForEmpty the default value to return if the stream is empty
      * @return a {@code Collector} that produces the minimal element according to the
      *         comparator, or the default value if no elements are present
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, T> minOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) {
+    public static <T> Collector<T, ?, T> minOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minOrElseGet(comparator, () -> defaultForEmpty);
     }
 
@@ -3924,8 +3998,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the minimum element or returns the default value
+     * @throws IllegalArgumentException if {@code supplierForEmpty} is {@code null}
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseGet(final Supplier<? extends T> supplierForEmpty) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> minOrElseGet(final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
+
         return minOrElseGet(Comparators.nullsLast(), supplierForEmpty);
     }
 
@@ -3951,11 +4029,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the minimum element or returns the default value
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} or {@code supplierForEmpty} is {@code null}
      */
     public static <T> Collector<T, ?, T> minOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty)
             throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
 
@@ -4011,8 +4090,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param comparator a {@code Comparator} for comparing elements
      * @return a {@code Collector} which finds the minimum element or throws if empty
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minOrElseThrow(comparator, noSuchElementExceptionSupplier);
     }
 
@@ -4036,11 +4118,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @param exceptionSupplier a supplier providing the exception to throw if no elements are present
      * @return a {@code Collector} which finds the minimum element or throws a custom exception
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} or {@code exceptionSupplier} is {@code null}
      */
     public static <T> Collector<T, ?, T> minOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) <= 0 ? a : b;
 
@@ -4074,10 +4157,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the minimum key
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      * @see #min(java.util.Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) {
+    public static <T> Collector<T, ?, Optional<T>> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return min(Comparators.nullsLastBy(keyMapper));
     }
 
@@ -4102,10 +4188,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the element with the minimum key or returns default
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code supplierForEmpty} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
-            final Supplier<? extends T> supplierForEmpty) {
+    public static <T> Collector<T, ?, T> minByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
+
         return minOrElseGet(Comparators.nullsLastBy(keyMapper), supplierForEmpty);
     }
 
@@ -4127,9 +4217,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the minimum key or throws
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+    public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return minOrElseThrow(Comparators.nullsLastBy(keyMapper));
     }
 
@@ -4154,10 +4247,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @param exceptionSupplier a supplier providing the exception to throw if no elements are present
      * @return a {@code Collector} which finds the element with the minimum key or throws
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code exceptionSupplier} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> minByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
-            final Supplier<? extends RuntimeException> exceptionSupplier) {
+            final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
+
         return minOrElseThrow(Comparators.nullsLastBy(keyMapper), exceptionSupplier);
     }
 
@@ -4209,11 +4306,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param comparator a {@code Comparator} for comparing elements
      * @return a {@code Collector} which finds the maximum element
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #maxBy(java.util.function.Function)
      */
     public static <T> Collector<T, ?, Optional<T>> max(final Comparator<? super T> comparator) throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
 
@@ -4269,8 +4366,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @param defaultForEmpty the default value to return if no elements are present
      * @return a {@code Collector} which finds the maximum element or returns the default
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, T> maxOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) {
+    public static <T> Collector<T, ?, T> maxOrElse(final Comparator<? super T> comparator, final T defaultForEmpty) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxOrElseGet(comparator, () -> defaultForEmpty);
     }
 
@@ -4296,8 +4396,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the maximum element or returns the default
+     * @throws IllegalArgumentException if {@code supplierForEmpty} is {@code null}
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseGet(final Supplier<? extends T> supplierForEmpty) {
+    public static <T extends Comparable<? super T>> Collector<T, ?, T> maxOrElseGet(final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
+
         return maxOrElseGet(Comparators.nullsFirst(), supplierForEmpty);
     }
 
@@ -4322,11 +4426,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the maximum element or returns the default
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} or {@code supplierForEmpty} is {@code null}
      */
     public static <T> Collector<T, ?, T> maxOrElseGet(final Comparator<? super T> comparator, final Supplier<? extends T> supplierForEmpty)
             throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
 
@@ -4382,8 +4487,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param comparator a {@code Comparator} for comparing elements
      * @return a {@code Collector} which finds the maximum element or throws if empty
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxOrElseThrow(comparator, noSuchElementExceptionSupplier);
     }
 
@@ -4407,11 +4515,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} for comparing elements
      * @param exceptionSupplier a supplier providing the exception to throw if no elements are present
      * @return a {@code Collector} which finds the maximum element or throws a custom exception
-     * @throws IllegalArgumentException if the comparator is null
+     * @throws IllegalArgumentException if {@code comparator} or {@code exceptionSupplier} is {@code null}
      */
     public static <T> Collector<T, ?, T> maxOrElseThrow(final Comparator<? super T> comparator, final Supplier<? extends RuntimeException> exceptionSupplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(comparator);
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         final BinaryOperator<T> op = (a, b) -> comparator.compare(a, b) >= 0 ? a : b;
 
@@ -4443,10 +4552,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the maximum key
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      * @see #max(java.util.Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+    public static <T> Collector<T, ?, Optional<T>> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return max(Comparators.nullsFirstBy(keyMapper));
     }
 
@@ -4471,10 +4583,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @param supplierForEmpty a supplier providing the default value if no elements are present
      * @return a {@code Collector} which finds the element with the maximum key or returns default
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code supplierForEmpty} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper,
-            final Supplier<? extends T> supplierForEmpty) {
+    public static <T> Collector<T, ?, T> maxByOrElseGet(final Function<? super T, ? extends Comparable> keyMapper, final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
+
         return maxOrElseGet(Comparators.nullsFirstBy(keyMapper), supplierForEmpty);
     }
 
@@ -4496,9 +4612,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @return a {@code Collector} which finds the element with the maximum key or throws
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) {
+    public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper));
     }
 
@@ -4523,10 +4642,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a function extracting a {@code Comparable} key from each element
      * @param exceptionSupplier a supplier providing the exception to throw if no elements are present
      * @return a {@code Collector} which finds the element with the maximum key or throws
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code exceptionSupplier} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collector<T, ?, T> maxByOrElseThrow(final Function<? super T, ? extends Comparable> keyMapper,
-            final Supplier<? extends RuntimeException> exceptionSupplier) {
+            final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
+
         return maxOrElseThrow(Comparators.nullsFirstBy(keyMapper), exceptionSupplier);
     }
 
@@ -4586,10 +4709,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @return a {@code Collector} which finds all the minimal elements and
      *         collects them to the {@code List}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #minAll(Comparator, Collector)
      * @see #minAll()
      */
-    public static <T> Collector<T, ?, List<T>> minAll(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, List<T>> minAll(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minAll(comparator, Integer.MAX_VALUE);
     }
 
@@ -4616,9 +4742,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @param atMostSize the maximum number of minimal elements to collect
      * @return a {@code Collector} which finds at most the specified number of minimal elements
-     * @throws IllegalArgumentException if {@code comparator} is {@code null} or {@code atMostSize} is negative
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, List<T>> minAll(final Comparator<? super T> comparator, final int atMostSize) {
+    public static <T> Collector<T, ?, List<T>> minAll(final Comparator<? super T> comparator, final int atMostSize) throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
 
         return maxAll(Comparators.reverseOrder(comparator), atMostSize);
@@ -4697,11 +4823,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
      * @return a {@code Collector} which finds all the minimal elements.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #minAll(Comparator)
      * @see #minAll(Collector)
      * @see #minAll()
      */
-    public static <T, R> Collector<T, ?, R> minAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+    public static <T, R> Collector<T, ?, R> minAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
 
         return maxAll(Comparators.reverseOrder(comparator), downstream);
@@ -4759,9 +4887,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the minimum element and applies downstream
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Beta
-    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minAllWith(comparator, downstream, Fn.identity());
     }
 
@@ -4797,11 +4929,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @param finisher a function to apply to the final result
      * @return a {@code Collector} which finds the minimum and transforms the result
+     * @throws IllegalArgumentException if {@code comparator} or {@code finisher} is {@code null}
      */
     @Beta
     public static <T, R, RR> Collector<T, ?, RR> minAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
-            final Function<Optional<Pair<T, R>>, RR> finisher) {
+            final Function<Optional<Pair<T, R>>, RR> finisher) throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(finisher, cs.finisher);
 
         return maxAllWith(Comparators.reverseOrder(comparator), downstream, finisher);
     }
@@ -4862,10 +4996,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @return a {@code Collector} which finds all the maximal elements and
      *         collects them to the {@code List}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #maxAll(Comparator, Collector)
      * @see #maxAll()
      */
-    public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxAll(comparator, Integer.MAX_VALUE);
     }
 
@@ -4892,7 +5029,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @param atMostSize the maximum number of maximal elements to collect
      * @return a {@code Collector} which finds at most the specified number of maximal elements
-     * @throws IllegalArgumentException if {@code comparator} is {@code null} or {@code atMostSize} is negative
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     public static <T> Collector<T, ?, List<T>> maxAll(final Comparator<? super T> comparator, final int atMostSize) throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
@@ -5029,13 +5166,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream
      *        reduction
      * @return a {@code Collector} which finds all the maximal elements.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #maxAll(Comparator)
      * @see #maxAll(Collector)
      * @see #maxAll()
      */
-    public static <T, R> Collector<T, ?, R> maxAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+    public static <T, R> Collector<T, ?, R> maxAll(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream)
+            throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
-        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
         final BiConsumer<Object, ? super T> downstreamAccumulator = (BiConsumer<Object, ? super T>) downstream.accumulator();
@@ -5143,9 +5282,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param comparator a {@code Comparator} to compare the elements
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Collector} which finds the maximum element and applies downstream
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Beta
-    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream) {
+    public static <T, R> Collector<T, ?, Optional<Pair<T, R>>> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return maxAllWith(comparator, downstream, Fn.identity());
     }
 
@@ -5184,12 +5327,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @param finisher a function to apply to the final result
      * @return a {@code Collector} which finds the maximum and transforms the result
+     * @throws IllegalArgumentException if {@code comparator} or {@code finisher} is {@code null}
      */
     @Beta
     public static <T, R, RR> Collector<T, ?, RR> maxAllWith(final Comparator<? super T> comparator, final Collector<? super T, ?, R> downstream,
-            final Function<Optional<Pair<T, R>>, RR> finisher) {
+            final Function<Optional<Pair<T, R>>, RR> finisher) throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
-        N.checkArgNotNull(downstream, "downstream");
+        N.checkArgNotNull(downstream, cs.downstream);
         N.checkArgNotNull(finisher, cs.finisher);
 
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
@@ -5304,7 +5448,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws IllegalArgumentException if {@code comparator} is {@code null}
      * @see #minMax(Comparator, BiFunction)
      */
-    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMax(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMax(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minMax(comparator, Fn.pair());
     }
 
@@ -5343,7 +5489,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws IllegalArgumentException if {@code comparator} or {@code finisher} is {@code null}
      */
     public static <T, R> Collector<T, ?, Optional<R>> minMax(final Comparator<? super T> comparator,
-            final BiFunction<? super T, ? super T, ? extends R> finisher) {
+            final BiFunction<? super T, ? super T, ? extends R> finisher) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
         N.checkArgNotNull(finisher, cs.finisher);
 
         return minMax(comparator, a -> a.present ? Optional.ofNullable((R) finisher.apply(a.min, a.max)) : Optional.empty());
@@ -5368,9 +5515,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper function to extract a {@code Comparable} key from elements
      * @return a {@code Collector} which finds the elements with minimum and maximum keys,
      *         wrapped in an {@code Optional<Pair>}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper) {
+    public static <T> Collector<T, ?, Optional<Pair<T, T>>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return minMax(Comparators.comparingBy(keyMapper));
     }
 
@@ -5398,10 +5549,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                 and produces the final result
      * @return a {@code Collector} which finds elements with minimum and maximum keys
      *         and applies the finisher function
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code finisher} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, Optional<R>> minMaxBy(final Function<? super T, ? extends Comparable> keyMapper,
-            final BiFunction<? super T, ? super T, ? extends R> finisher) {
+            final BiFunction<? super T, ? super T, ? extends R> finisher) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(finisher, cs.finisher);
+
         return minMax(Comparators.comparingBy(keyMapper), finisher);
     }
 
@@ -5428,9 +5583,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         or returns the supplied default if stream is empty
      * @throws IllegalArgumentException if {@code supplierForEmpty} is {@code null}
      */
-    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(
-            final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
-        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+    public static <T extends Comparable<? super T>> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         return naturalMinMax(a -> a.present ? Pair.of(a.min, a.max) : (Pair<T, T>) supplierForEmpty.get());
     }
@@ -5462,8 +5617,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws IllegalArgumentException if {@code comparator} or {@code supplierForEmpty} is {@code null}
      */
     public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseGet(final Comparator<? super T> comparator,
-            final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) {
-        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+            final Supplier<Pair<? extends T, ? extends T>> supplierForEmpty) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         return minMax(comparator, a -> a.present ? Pair.of(a.min, a.max) : (Pair<T, T>) supplierForEmpty.get());
     }
@@ -5523,7 +5679,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws NoSuchElementException if the stream is empty
      * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
-    public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow(final Comparator<? super T> comparator) {
+    public static <T> Collector<T, ?, Pair<T, T>> minMaxOrElseThrow(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return minMax(comparator, a -> {
             if (a.present) {
                 return Pair.of(a.min, a.max);
@@ -5534,8 +5692,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     private static <T, R> Collector<T, ?, R> minMax(final Comparator<? super T> comparator, final Function<MinMaxHolder<T>, R> finisher) {
-        N.checkArgNotNull(comparator, cs.comparator);
-        N.checkArgNotNull(finisher, cs.finisher);
 
         final Supplier<MinMaxHolder<T>> supplier = () -> new MinMaxHolder<>(comparator);
 
@@ -5616,8 +5772,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract an integer value from an element
      * @return a {@code Collector} that produces the sum of the extracted values
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Integer> summingInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<int[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
@@ -5644,8 +5801,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract an integer value from an element
      * @return a {@code Collector} that produces the sum as a {@code Long}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, Long> summingIntToLong(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Long> summingIntToLong(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsInt(t);
@@ -5671,8 +5829,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a long value from an element
      * @return a {@code Collector} that produces the sum of the extracted values
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Long> summingLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> a[0] += mapper.applyAsLong(t);
@@ -5702,8 +5861,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a double value from an element
      * @return a {@code Collector} that produces the sum of the extracted values
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> summingDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -5730,8 +5890,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigInteger} value from an element
      * @return a {@code Collector} that produces the sum of the extracted values
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, BigInteger> summingBigInteger(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, BigInteger> summingBigInteger(final Function<? super T, BigInteger> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<BigInteger[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
@@ -5757,8 +5918,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper function to extract a {@code BigDecimal} value from an element
      * @return a {@code Collector} that produces the sum of the extracted values
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
-    public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> summingBigDecimal(final Function<? super T, BigDecimal> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> a[0] = a[0].add(mapper.apply(t));
@@ -5804,11 +5966,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting an integer value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted integer values as a {@code Double}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingIntOrEmpty(ToIntFunction)
      * @see #averagingIntOrElseThrow(ToIntFunction)
      * @see java.util.stream.Collectors#averagingInt(ToIntFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingInt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return java.util.stream.Collectors.averagingInt(mapper);
@@ -5853,10 +6016,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting an integer value from each input element
      * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
      *         or an empty {@code OptionalDouble} if no elements were present
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingInt(ToIntFunction)
      * @see #averagingIntOrElseThrow(ToIntFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingIntOrEmpty(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingIntOrEmpty(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -5911,10 +6075,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting an integer value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted integer values as a {@code Double}
      * @throws NoSuchElementException if no elements are present in the stream
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingInt(ToIntFunction)
      * @see #averagingIntOrEmpty(ToIntFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingIntOrElseThrow(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingIntOrElseThrow(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -5966,11 +6131,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a long value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted long values as a {@code Double}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingLongOrEmpty(ToLongFunction)
      * @see #averagingLongOrElseThrow(ToLongFunction)
      * @see java.util.stream.Collectors#averagingLong(ToLongFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingLong(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return java.util.stream.Collectors.averagingLong(mapper);
@@ -6020,10 +6186,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a long value from each input element
      * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
      *         or an empty {@code OptionalDouble} if no elements were present
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingLong(ToLongFunction)
      * @see #averagingLongOrElseThrow(ToLongFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingLongOrEmpty(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingLongOrEmpty(final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -6078,10 +6245,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a long value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted long values as a {@code Double}
      * @throws NoSuchElementException if no elements are present in the stream
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingLong(ToLongFunction)
      * @see #averagingLongOrEmpty(ToLongFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingLongOrElseThrow(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingLongOrElseThrow(final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<long[], T> accumulator = (a, t) -> {
@@ -6131,11 +6299,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a double value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted double values as a {@code Double}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      * @see java.util.stream.Collectors#averagingDouble(ToDoubleFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return java.util.stream.Collectors.averagingDouble(mapper);
@@ -6185,10 +6354,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a double value from each input element
      * @return a {@code Collector} that produces an {@code OptionalDouble} containing the arithmetic mean,
      *         or an empty {@code OptionalDouble} if no elements were present
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingDouble(ToDoubleFunction)
      * @see #averagingDoubleOrElseThrow(ToDoubleFunction)
      */
-    public static <T> Collector<T, ?, OptionalDouble> averagingDoubleOrEmpty(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, OptionalDouble> averagingDoubleOrEmpty(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -6244,10 +6414,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a double value from each input element
      * @return a {@code Collector} that produces the arithmetic mean of the extracted double values as a {@code Double}
      * @throws NoSuchElementException if no elements are present in the stream
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingDouble(ToDoubleFunction)
      * @see #averagingDoubleOrEmpty(ToDoubleFunction)
      */
-    public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, Double> averagingDoubleOrElseThrow(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
@@ -6294,10 +6465,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a {@code BigInteger} value from each input element
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigIntegerOrEmpty(Function)
      * @see #averagingBigIntegerOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigInteger(final Function<? super T, BigInteger> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -6349,10 +6521,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a {@code BigInteger} value from each input element
      * @return a {@code Collector} that produces an {@code Optional<BigDecimal>} containing the arithmetic mean,
      *         or an empty {@code Optional} if no elements were present
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigInteger(Function)
      * @see #averagingBigIntegerOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigIntegerOrEmpty(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigIntegerOrEmpty(final Function<? super T, BigInteger> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -6405,10 +6579,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a {@code BigInteger} value from each input element
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @throws NoSuchElementException if no elements are present in the stream
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigInteger(Function)
      * @see #averagingBigIntegerOrEmpty(Function)
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrElseThrow(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigIntegerOrElseThrow(final Function<? super T, BigInteger> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigInteger, long[]>, T> accumulator = (a, t) -> {
@@ -6467,10 +6642,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a {@code BigDecimal} value from each input element
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigDecimalOrEmpty(Function)
      * @see #averagingBigDecimalOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimal(final Function<? super T, BigDecimal> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -6525,10 +6701,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a {@code BigDecimal} value from each input element
      * @return a {@code Collector} that produces an {@code Optional<BigDecimal>} containing the arithmetic mean,
      *         or an empty {@code Optional} if no elements were present
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigDecimal(Function)
      * @see #averagingBigDecimalOrElseThrow(Function)
      */
-    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimalOrEmpty(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, Optional<BigDecimal>> averagingBigDecimalOrEmpty(final Function<? super T, BigDecimal> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -6581,10 +6759,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function extracting a {@code BigDecimal} value from each input element
      * @return a {@code Collector} that produces the arithmetic mean as a {@code BigDecimal}
      * @throws NoSuchElementException if no elements are present in the stream
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #averagingBigDecimal(Function)
      * @see #averagingBigDecimalOrEmpty(Function)
      */
-    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrElseThrow(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, BigDecimal> averagingBigDecimalOrElseThrow(final Function<? super T, BigDecimal> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final BiConsumer<Pair<BigDecimal, long[]>, T> accumulator = (a, t) -> {
@@ -6628,10 +6807,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a char value from each input element
      * @return a {@code Collector} that produces {@code CharSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) { // NOSONAR
+    public static <T> Collector<T, ?, CharSummaryStatistics> summarizingChar(final ToCharFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
+
+        // NOSONAR
 
         final Supplier<CharSummaryStatistics> supplier = SummarizingChar_Supplier;
 
@@ -6676,10 +6858,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a byte value from each input element
      * @return a {@code Collector} that produces {@code ByteSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) { // NOSONAR
+    public static <T> Collector<T, ?, ByteSummaryStatistics> summarizingByte(final ToByteFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
+
+        // NOSONAR
 
         final Supplier<ByteSummaryStatistics> supplier = SummarizingByte_Supplier;
 
@@ -6723,10 +6908,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a short value from each input element
      * @return a {@code Collector} that produces {@code ShortSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) { // NOSONAR
+    public static <T> Collector<T, ?, ShortSummaryStatistics> summarizingShort(final ToShortFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
+
+        // NOSONAR
 
         final Supplier<ShortSummaryStatistics> supplier = SummarizingShort_Supplier;
 
@@ -6770,9 +6958,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting an integer value from each input element
      * @return a {@code Collector} that produces {@code IntSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, IntSummaryStatistics> summarizingInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final Supplier<IntSummaryStatistics> supplier = SummarizingInt_Supplier;
@@ -6820,9 +7009,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a long value from each input element
      * @return a {@code Collector} that produces {@code LongSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, LongSummaryStatistics> summarizingLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final Supplier<LongSummaryStatistics> supplier = SummarizingLong_Supplier;
@@ -6873,10 +7063,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a float value from each input element
      * @return a {@code Collector} that produces {@code FloatSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) { // NOSONAR
+    public static <T> Collector<T, ?, FloatSummaryStatistics> summarizingFloat(final ToFloatFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
+
+        // NOSONAR
 
         final Supplier<FloatSummaryStatistics> supplier = SummarizingFloat_Supplier;
 
@@ -6926,9 +7119,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a double value from each input element
      * @return a {@code Collector} that produces {@code DoubleSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) {
+    public static <T> Collector<T, ?, DoubleSummaryStatistics> summarizingDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final Supplier<DoubleSummaryStatistics> supplier = SummarizingDouble_Supplier;
@@ -6979,9 +7173,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a {@code BigInteger} value from each input element
      * @return a {@code Collector} that produces {@code BigIntegerSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, BigIntegerSummaryStatistics> summarizingBigInteger(final Function<? super T, BigInteger> mapper) {
+    public static <T> Collector<T, ?, BigIntegerSummaryStatistics> summarizingBigInteger(final Function<? super T, BigInteger> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final Supplier<BigIntegerSummaryStatistics> supplier = SummarizingBigInteger_Supplier;
@@ -7031,9 +7227,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param mapper a function extracting a {@code BigDecimal} value from each input element
      * @return a {@code Collector} that produces {@code BigDecimalSummaryStatistics} containing comprehensive statistics
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressWarnings("UnnecessaryLocalVariable")
-    public static <T> Collector<T, ?, BigDecimalSummaryStatistics> summarizingBigDecimal(final Function<? super T, BigDecimal> mapper) {
+    public static <T> Collector<T, ?, BigDecimalSummaryStatistics> summarizingBigDecimal(final Function<? super T, BigDecimal> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final Supplier<BigDecimalSummaryStatistics> supplier = SummarizingBigDecimal_Supplier;
@@ -7093,12 +7291,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param identity the identity value for the reduction operation (also returned when no elements are present)
      * @param op an associative, stateless binary operator for combining two values
      * @return a {@code Collector} that reduces the input elements using the binary operator
+     * @throws IllegalArgumentException if {@code op} is {@code null}
      * @see #reducing(BinaryOperator)
      * @see #reducing(Object, Function, BinaryOperator)
      * @see java.util.stream.Collectors#reducing(Object, BinaryOperator)
      */
-    public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) {
-        N.checkArgNotNull(op, "op");
+    public static <T> Collector<T, ?, T> reducing(final T identity, final BinaryOperator<T> op) throws IllegalArgumentException {
+        N.checkArgNotNull(op, cs.op);
 
         final BiConsumer<Holder<T>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), t));
 
@@ -7157,14 +7356,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param op an associative, stateless binary operator for combining two values
      * @return a {@code Collector} that reduces the input elements into an {@code Optional} containing the reduced value,
      *         or an empty {@code Optional} if no elements were present
+     * @throws IllegalArgumentException if {@code op} is {@code null}
      * @see #reducing(Object, BinaryOperator)
      * @see #reducingOrElseGet(BinaryOperator, Supplier)
      * @see #reducingOrElseThrow(BinaryOperator)
      * @see java.util.stream.Collectors#reducing(BinaryOperator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, Optional<T>> reducing(final BinaryOperator<T> op) {
-        N.checkArgNotNull(op, "op");
+    public static <T> Collector<T, ?, Optional<T>> reducing(final BinaryOperator<T> op) throws IllegalArgumentException {
+        N.checkArgNotNull(op, cs.op);
 
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
@@ -7201,14 +7401,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param op binary operator used to reduce elements
      * @param supplierForEmpty supplier that provides a default value when stream is empty
      * @return a {@code Collector} that reduces elements or returns the supplied default
+     * @throws IllegalArgumentException if {@code op} or {@code supplierForEmpty} is {@code null}
      * @see #reducing(BinaryOperator)
      * @see #reducingOrElseThrow(BinaryOperator)
      * @see #reducingOrElseGet(Function, BinaryOperator, Supplier)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> reducingOrElseGet(final BinaryOperator<T> op, final Supplier<? extends T> supplierForEmpty) {
-        N.checkArgNotNull(op, "op");
-        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+    public static <T> Collector<T, ?, T> reducingOrElseGet(final BinaryOperator<T> op, final Supplier<? extends T> supplierForEmpty)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(op, cs.op);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
@@ -7243,11 +7445,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param op binary operator used to reduce elements
      * @return a {@code Collector} that reduces elements or throws if empty
      * @throws NoSuchElementException if the stream is empty
+     * @throws IllegalArgumentException if {@code op} is {@code null}
      * @see #reducing(BinaryOperator)
      * @see #reducingOrElseGet(BinaryOperator, Supplier)
      * @see #reducingOrElseThrow(BinaryOperator, Supplier)
      */
-    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op) {
+    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op) throws IllegalArgumentException {
+        N.checkArgNotNull(op, cs.op);
+
         return reducingOrElseThrow(op, noSuchElementExceptionSupplier);
     }
 
@@ -7279,14 +7484,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier a supplier that provides the exception to throw when no elements are present
      * @return a {@code Collector} which reduces the input elements using the binary operator
      * @throws RuntimeException the exception provided by the supplier if no elements are present
+     * @throws IllegalArgumentException if {@code op} or {@code exceptionSupplier} is {@code null}
      * @see #reducing(BinaryOperator)
      * @see #reducingOrElseThrow(BinaryOperator)
      * @see #reducingOrElseGet(BinaryOperator, Supplier)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier) {
-        N.checkArgNotNull(op, "op");
-        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+    public static <T> Collector<T, ?, T> reducingOrElseThrow(final BinaryOperator<T> op, final Supplier<? extends RuntimeException> exceptionSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(op, cs.op);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         final Supplier<OptHolder<T>> supplier = () -> new OptHolder<>(op);
 
@@ -7331,13 +7538,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function to map input elements to the type used for reduction
      * @param op a binary operator used to reduce the mapped values
      * @return a {@code Collector} which reduces the input elements
+     * @throws IllegalArgumentException if {@code mapper} or {@code op} is {@code null}
      * @see #reducing(Object, BinaryOperator)
      * @see #reducing(Function, BinaryOperator)
      * @see java.util.stream.Collectors#reducing(Object, Function, BinaryOperator)
      */
-    public static <T, R> Collector<T, ?, R> reducing(final R identity, final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+    public static <T, R> Collector<T, ?, R> reducing(final R identity, final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(op, cs.op);
 
         final BiConsumer<Holder<R>, T> accumulator = (a, t) -> a.setValue(op.apply(a.value(), mapper.apply(t)));
 
@@ -7381,14 +7590,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapper a function to map input elements to the type used for reduction
      * @param op a binary operator used to reduce the mapped values
      * @return a {@code Collector} which reduces the input elements into an {@code Optional}
+     * @throws IllegalArgumentException if {@code mapper} or {@code op} is {@code null}
      * @see #reducing(Object, Function, BinaryOperator)
      * @see #reducingOrElseGet(Function, BinaryOperator, Supplier)
      * @see #reducingOrElseThrow(Function, BinaryOperator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T, R> Collector<T, ?, Optional<R>> reducing(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+    public static <T, R> Collector<T, ?, Optional<R>> reducing(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(op, "op");
+        N.checkArgNotNull(op, cs.op);
 
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
@@ -7530,16 +7741,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param op a binary operator used to reduce the mapped values
      * @param supplierForEmpty a supplier that provides the value to return when no elements are present
      * @return a {@code Collector} which reduces the input elements
+     * @throws IllegalArgumentException if any of {@code mapper}, {@code op}, or {@code supplierForEmpty} is {@code null}
      * @see #reducing(Function, BinaryOperator)
      * @see #reducingOrElseThrow(Function, BinaryOperator)
      * @see #reducingOrElseGet(BinaryOperator, Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> reducingOrElseGet(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
-            final Supplier<? extends R> supplierForEmpty) {
+            final Supplier<? extends R> supplierForEmpty) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(op, "op");
-        N.checkArgNotNull(supplierForEmpty, "supplierForEmpty");
+        N.checkArgNotNull(op, cs.op);
+        N.checkArgNotNull(supplierForEmpty, cs.supplierForEmpty);
 
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
@@ -7581,16 +7793,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier a supplier that provides the exception to throw when no elements are present
      * @return a {@code Collector} which reduces the input elements
      * @throws RuntimeException the exception provided by the supplier if no elements are present
+     * @throws IllegalArgumentException if any of {@code mapper}, {@code op}, or {@code exceptionSupplier} is {@code null}
      * @see #reducing(Function, BinaryOperator)
      * @see #reducingOrElseThrow(Function, BinaryOperator)
      * @see #reducingOrElseThrow(BinaryOperator, Supplier)
      */
     @SuppressWarnings("rawtypes")
     public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op,
-            final Supplier<? extends RuntimeException> exceptionSupplier) {
+            final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
-        N.checkArgNotNull(op, "op");
-        N.checkArgNotNull(exceptionSupplier, "exceptionSupplier");
+        N.checkArgNotNull(op, cs.op);
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         final Supplier<MappingOptHolder<T, R>> supplier = () -> new MappingOptHolder<>(mapper, op);
 
@@ -7636,11 +7849,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param op a binary operator used to reduce the mapped values
      * @return a {@code Collector} which reduces the input elements
      * @throws NoSuchElementException if no elements are present
+     * @throws IllegalArgumentException if {@code mapper} or {@code op} is {@code null}
      * @see #reducing(Function, BinaryOperator)
      * @see #reducingOrElseGet(Function, BinaryOperator, Supplier)
      * @see #reducingOrElseThrow(Function, BinaryOperator, Supplier)
      */
-    public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op) {
+    public static <T, R> Collector<T, ?, R> reducingOrElseThrow(final Function<? super T, ? extends R> mapper, final BinaryOperator<R> op)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+        N.checkArgNotNull(op, cs.op);
+
         return reducingOrElseThrow(mapper, op, noSuchElementExceptionSupplier);
     }
 
@@ -7783,8 +8001,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K> the type of keys
      * @param keyMapper a classifier function mapping input elements to keys
      * @return a {@code Collector} implementing the group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, Map<K, List<T>>> groupingBy(final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         final Collector<? super T, ?, List<T>> downstream = toList();
 
         return groupingBy(keyMapper, downstream);
@@ -7819,9 +8040,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} implementing the group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     public static <T, K, M extends Map<K, List<T>>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Collector<? super T, ?, List<T>> downstream = toList();
 
         return groupingBy(keyMapper, downstream, mapFactory);
@@ -7858,9 +8083,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param downstream a collector implementing the downstream reduction
      * @return a {@code Collector} implementing the cascaded group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
     public static <T, K, A, D> Collector<T, ?, Map<K, D>> groupingBy(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream) {
+            final Collector<? super T, A, D> downstream) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         final Supplier<Map<K, D>> mapFactory = Suppliers.ofMap();
 
         return groupingBy(keyMapper, downstream, mapFactory);
@@ -7898,10 +8126,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} implementing the cascaded group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      * @see java.util.stream.Collectors#groupingBy(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends Map<K, D>> Collector<T, ?, M> groupingBy(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Supplier<M> mapSupplier = (Supplier<M>) mapFactory;
 
         return java.util.stream.Collectors.groupingBy(keyMapper, mapSupplier, downstream);
@@ -7930,8 +8162,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K> the type of keys
      * @param keyMapper a classifier function mapping input elements to keys
      * @return a concurrent {@code Collector} implementing the group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, ConcurrentMap<K, List<T>>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         final Collector<? super T, ?, List<T>> downstream = toList();
 
         return groupingByConcurrent(keyMapper, downstream);
@@ -7965,9 +8201,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param mapFactory a supplier providing a new empty concurrent map into which the results will be inserted
      * @return a concurrent {@code Collector} implementing the group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     public static <T, K, M extends ConcurrentMap<K, List<T>>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Collector<? super T, ?, List<T>> downstream = toList();
 
         return groupingByConcurrent(keyMapper, downstream, mapFactory);
@@ -8003,9 +8243,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param downstream a collector implementing the downstream reduction
      * @return a concurrent {@code Collector} implementing the cascaded group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
     public static <T, K, A, D> Collector<T, ?, ConcurrentMap<K, D>> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream) {
+            final Collector<? super T, A, D> downstream) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         final Supplier<ConcurrentMap<K, D>> mapFactory = Suppliers.ofConcurrentMap();
 
         return groupingByConcurrent(keyMapper, downstream, mapFactory);
@@ -8043,10 +8286,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param downstream a collector implementing the downstream reduction
      * @param mapFactory a supplier providing a new empty concurrent map into which the results will be inserted
      * @return a concurrent {@code Collector} implementing the cascaded group-by operation
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      * @see java.util.stream.Collectors#groupingByConcurrent(Function, Supplier, Collector)
      */
     public static <T, K, A, D, M extends ConcurrentMap<K, D>> Collector<T, ?, M> groupingByConcurrent(final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) {
+            final Collector<? super T, A, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Supplier<M> mapSupplier = (Supplier<M>) mapFactory;
 
         return java.util.stream.Collectors.groupingByConcurrent(keyMapper, mapSupplier, downstream);
@@ -8076,8 +8323,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <T> the type of input elements
      * @param predicate a predicate used for classifying input elements
      * @return a {@code Collector} implementing the partitioning operation
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    public static <T> Collector<T, ?, Map<Boolean, List<T>>> partitioningBy(final Predicate<? super T> predicate) {
+    public static <T> Collector<T, ?, Map<Boolean, List<T>>> partitioningBy(final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final Collector<? super T, ?, List<T>> downstream = toList();
 
         return partitioningBy(predicate, downstream);
@@ -8114,10 +8364,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param predicate a predicate used for classifying input elements
      * @param downstream a collector implementing the downstream reduction
      * @return a {@code Collector} implementing the cascaded partitioning operation
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    public static <T, A, D> Collector<T, ?, Map<Boolean, D>> partitioningBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream) {
-        N.checkArgNotNull(predicate, "predicate");
-        N.checkArgNotNull(downstream, "downstream");
+    public static <T, A, D> Collector<T, ?, Map<Boolean, D>> partitioningBy(final Predicate<? super T> predicate, final Collector<? super T, A, D> downstream)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+        N.checkArgNotNull(downstream, cs.downstream);
 
         final Supplier<A> downstreamSupplier = downstream.supplier();
         final BiConsumer<A, ? super T> downstreamAccumulator = downstream.accumulator();
@@ -8177,8 +8429,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K> the type of keys
      * @param keyMapper a classifier function mapping input elements to keys
      * @return a {@code Collector} implementing the counting operation
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, Map<K, Long>> countingBy(final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return countingBy(keyMapper, Suppliers.ofMap());
     }
 
@@ -8212,9 +8467,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} implementing the counting operation
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     public static <T, K, M extends Map<K, Long>> Collector<T, ?, M> countingBy(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Collector<? super T, ?, Long> downstream = counting();
 
         return groupingBy(keyMapper, downstream, mapFactory);
@@ -8243,8 +8502,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K> the type of keys
      * @param keyMapper a classifier function mapping input elements to keys
      * @return a {@code Collector} implementing the counting operation with integer results
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, Map<K, Integer>> countingToIntBy(final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         return countingToIntBy(keyMapper, Suppliers.ofMap());
     }
 
@@ -8277,9 +8539,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a classifier function mapping input elements to keys
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} implementing the counting operation with integer results
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     public static <T, K, M extends Map<K, Integer>> Collector<T, ?, M> countingToIntBy(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Collector<? super T, ?, Integer> downstream = countingToInt();
 
         return groupingBy(keyMapper, downstream, mapFactory);
@@ -8345,11 +8611,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <V> the type of values
      * @param mergeFunction a merge function used to resolve collisions between values associated with the same key
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Map}
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}
      * @see #toMap()
      * @see #toMap(BinaryOperator, Supplier)
      * @see #toMap(Function, Function, BinaryOperator)
      */
-    public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) {
+    public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> toMap(final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.key();
         final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.value();
 
@@ -8379,11 +8648,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Map}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}
      * @see #toMap()
      * @see #toMap(BinaryOperator, Supplier)
      * @see #toMap(Function, Function, Supplier)
      */
-    public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final Supplier<? extends M> mapFactory) {
+    public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.key();
         final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.value();
 
@@ -8414,12 +8686,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function used to resolve collisions between values associated with the same key
      * @param mapFactory a supplier providing a new empty map into which the results will be inserted
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Map}
+     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapFactory} is {@code null}
      * @see #toMap(BinaryOperator)
      * @see #toMap(Supplier)
      * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <K, V, M extends Map<K, V>> Collector<Map.Entry<K, V>, ?, M> toMap(final BinaryOperator<V> mergeFunction,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Function<Map.Entry<K, V>, ? extends K> keyMapper = Fn.key();
         final Function<Map.Entry<K, V>, ? extends V> valueMapper = Fn.value();
 
@@ -8454,12 +8730,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code Map}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      * @see #toMap(Function, Function, BinaryOperator)
      * @see #toMap(Function, Function, Supplier)
      * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toMap(keyMapper, valueMapper, mergeFunction);
@@ -8503,12 +8783,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code Map}
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      * @see #toMap(Function, Function)
      * @see #toMap(Function, Function, Supplier)
      * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Supplier<Map<K, V>> mapFactory = Suppliers.ofMap();
 
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -8552,11 +8837,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      * @see #toMap(Function, Function)
      * @see #toMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -8606,6 +8896,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code Map}
      *         whose keys and values are the result of applying mapping functions to
      *         the input elements
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      * @see #toMap(Function, Function)
      * @see #toMap(Function, Function, BinaryOperator)
      * @see #toMap(Function, Function, Supplier)
@@ -8613,11 +8904,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @see #toConcurrentMap(Function, Function, BinaryOperator, Supplier)
      */
     public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mergeFunction, "mergeFunction");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         // Use the null-safe merge() helper rather than Map.merge(...). Map.merge throws NPE on
         // a null value, but the Javadoc on this collector explicitly says null values are
@@ -8686,11 +8978,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function, used to resolve collisions between
      *                      values associated with the same key
      * @return a {@code Collector} which collects {@code Map.Entry} elements into an {@code ImmutableMap}
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}
      * @see #toImmutableMap()
      * @see #toImmutableMap(Function, Function, BinaryOperator)
      * @see #toMap(BinaryOperator)
      */
-    public static <K, V> Collector<Map.Entry<K, V>, ?, ImmutableMap<K, V>> toImmutableMap(final BinaryOperator<V> mergeFunction) {
+    public static <K, V> Collector<Map.Entry<K, V>, ?, ImmutableMap<K, V>> toImmutableMap(final BinaryOperator<V> mergeFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Collector<Map.Entry<K, V>, ?, Map<K, V>> downstream = toMap(mergeFunction);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
@@ -8722,12 +9018,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into an {@code ImmutableMap}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      * @see #toImmutableMap(Function, Function, BinaryOperator)
      * @see #toImmutableMap()
      * @see #toMap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
@@ -8762,12 +9062,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function, used to resolve collisions between
      *                      values associated with the same key
      * @return a {@code Collector} which collects elements into an {@code ImmutableMap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      * @see #toImmutableMap(Function, Function)
      * @see #toImmutableMap(BinaryOperator)
      * @see #toMap(Function, Function, BinaryOperator)
      */
     public static <T, K, V> Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Collector<T, ?, Map<K, V>> downstream = toMap(keyMapper, valueMapper, mergeFunction);
         @SuppressWarnings("rawtypes")
         final Function<Map<K, V>, ImmutableMap<K, V>> finisher = (Function) ImmutableMap_Finisher;
@@ -8799,10 +9104,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into an unmodifiable {@code Map}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper);
     }
 
@@ -8833,10 +9142,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function, used to resolve collisions between
      *                      values associated with the same key
      * @return a {@code Collector} which collects elements into an unmodifiable {@code Map}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      * @see java.util.stream.Collectors#toUnmodifiableMap(Function, Function, BinaryOperator)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toUnmodifiableMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         return java.util.stream.Collectors.toUnmodifiableMap(keyMapper, valueMapper, mergeFunction);
     }
 
@@ -8867,10 +9181,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code LinkedHashMap}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      * @see #toMap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toLinkedHashMap(keyMapper, valueMapper, mergeFunction);
@@ -8903,13 +9221,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function, used to resolve collisions between
      *                      values associated with the same key
      * @return a {@code Collector} which collects elements into a {@code LinkedHashMap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      * @see #toMap(Function, Function, BinaryOperator)
      */
     public static <T, K, V> Collector<T, ?, Map<K, V>> toLinkedHashMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mergeFunction, "mergeFunction");
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         // Build the collector inline so the LinkedHashMap supplier stays explicit while keeping
         // the ordered CH_ID characteristics used by toMap(...).
@@ -8945,9 +9264,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toConcurrentMap(keyMapper, valueMapper, mergeFunction);
@@ -8981,9 +9304,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
      * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
+            final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -9016,9 +9344,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mergeFunction a merge function, used to resolve collisions between
      *                      values associated with the same key
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, ConcurrentMap<K, V>> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Supplier<ConcurrentMap<K, V>> mapFactory = Suppliers.ofConcurrentMap();
 
         return toConcurrentMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -9067,13 +9400,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code ConcurrentMap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code ConcurrentMap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      */
     public static <T, K, V, M extends ConcurrentMap<K, V>> Collector<T, ?, M> toConcurrentMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mergeFunction, "mergeFunction");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> map.merge(keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
@@ -9108,9 +9443,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code BiMap}
      * @throws IllegalStateException if duplicate keys are encountered
      * @throws IllegalArgumentException if a duplicate value is encountered
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toBiMap(keyMapper, valueMapper, mergeFunction);
@@ -9146,9 +9485,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} which collects elements into a {@code BiMap}
      * @throws IllegalStateException if duplicate keys are encountered
      * @throws IllegalArgumentException if a duplicate value is encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) {
+            final Function<? super T, ? extends V> valueMapper, final Supplier<BiMap<K, V>> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final BinaryOperator<V> mergeFunction = Fn.throwingMerger();
 
         return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -9183,9 +9527,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                      values associated with the same key
      * @return a {@code Collector} which collects elements into a {@code BiMap}
      * @throws IllegalArgumentException if a value produced for a new key is already bound to a different key
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) {
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Supplier<BiMap<K, V>> mapFactory = Suppliers.ofBiMap();
 
         return toBiMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -9220,13 +9569,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code BiMap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code BiMap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, BiMap<K, V>> toBiMap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mergeFunction, "mergeFunction");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Function<? super T, ? extends V> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<BiMap<K, V>> mapFactory)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<BiMap<K, V>, T> accumulator = (map, element) -> merge(map, keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
@@ -9250,7 +9601,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param remappingFunction applied to the existing and the new value when the key is already present
      */
     static <K, V> void merge(final BiMap<K, V> biMap, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        N.checkArgNotNull(remappingFunction);
 
         final V oldValue = biMap.get(key);
 
@@ -9272,7 +9622,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a combiner that merges the second {@code BiMap} into the first
      */
     static <K, V> BinaryOperator<BiMap<K, V>> biMapMerger(final BinaryOperator<V> mergeFunction) {
-        N.checkArgNotNull(mergeFunction);
 
         return (m1, m2) -> {
             for (final Map.Entry<K, V> e : m2.entrySet()) {
@@ -9339,10 +9688,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code Multimap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects {@code Map.Entry} elements into a {@code Multimap}
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<Map.Entry<K, V>, ?, M> toMultimap(
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Function<Map.Entry<? extends K, ? extends V>, ? extends K> keyMapper = (Function) Fn.key();
         final Function<Map.Entry<? extends K, ? extends V>, ? extends V> valueMapper = (Function) Fn.value();
 
@@ -9368,8 +9720,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <K> the output type of the key mapping function
      * @param keyMapper a mapping function to produce keys
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
      */
-    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyMapper) {
+    public static <T, K> Collector<T, ?, ListMultimap<K, T>> toMultimap(final Function<? super T, ? extends K> keyMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+
         final Function<? super T, ? extends T> valueMapper = Fn.identity();
 
         return toMultimap(keyMapper, valueMapper);
@@ -9401,9 +9756,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code Multimap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code Multimap}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     public static <T, K, C extends Collection<T>, M extends Multimap<K, T, C>> Collector<T, ?, M> toMultimap(final Function<? super T, ? extends K> keyMapper,
-            final Supplier<? extends M> mapFactory) {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
+
         final Function<? super T, ? extends T> valueMapper = Fn.identity();
 
         return toMultimap(keyMapper, valueMapper, mapFactory);
@@ -9433,9 +9792,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param valueMapper a mapping function to produce values
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> toMultimap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         final Supplier<ListMultimap<K, V>> mapFactory = Suppliers.ofListMultimap();
 
         return toMultimap(keyMapper, valueMapper, mapFactory);
@@ -9470,12 +9833,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code Multimap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code Multimap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> toMultimap(
-            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends V> valueMapper, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> map.put(keyMapper.apply(element), valueMapper.apply(element));
 
@@ -9511,10 +9876,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param flatValueExtractor a function that returns a stream of values for each element
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code flatValueExtractor} is {@code null}
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingValueToMultimap(final Function<? super T, ? extends K> keyMapper,
-            final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor) {
+            final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(flatValueExtractor, cs.flatValueExtractor);
+
         return flatMappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.ofListMultimap());
     }
 
@@ -9548,14 +9917,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code Multimap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code Multimap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code flatValueExtractor}, or {@code mapFactory} is {@code null}
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingValueToMultimap(
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends Stream<? extends V>> flatValueExtractor,
-            final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(flatValueExtractor, "flatValueExtractor");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(flatValueExtractor, cs.flatValueExtractor);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final K key = keyMapper.apply(element);
@@ -9602,10 +9972,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param keyMapper a mapping function to produce keys
      * @param flatValueExtractor a function that returns a collection of values for each element
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code flatValueExtractor} is {@code null}
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingValueToMultimap(final Function<? super T, ? extends K> keyMapper, // NOSONAR
-            final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor) {
+            final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(flatValueExtractor, cs.flatValueExtractor);
+
         return flatmappingValueToMultimap(keyMapper, flatValueExtractor, Suppliers.ofListMultimap());
     }
 
@@ -9638,14 +10012,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param mapFactory a supplier providing a new empty {@code Multimap}
      *                   into which the results will be inserted
      * @return a {@code Collector} which collects elements into a {@code Multimap}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code flatValueExtractor}, or {@code mapFactory} is {@code null}
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingValueToMultimap( // NOSONAR
             final Function<? super T, ? extends K> keyMapper, final Function<? super T, ? extends Collection<? extends V>> flatValueExtractor,
-            final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(keyMapper, "keyMapper");
-        N.checkArgNotNull(flatValueExtractor, "flatValueExtractor");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapper, cs.keyMapper);
+        N.checkArgNotNull(flatValueExtractor, cs.flatValueExtractor);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final K key = keyMapper.apply(element);
@@ -9694,10 +10069,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a function to produce values for the multimap
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
      *         using flat key extraction
+     * @throws IllegalArgumentException if {@code flatKeyExtractor} or {@code valueMapper} is {@code null}
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatMappingKeyToMultimap(final Function<? super T, Stream<? extends K>> flatKeyExtractor,
-            final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         return flatMappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.ofListMultimap());
     }
 
@@ -9737,14 +10116,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                   will be inserted
      * @return a {@code Collector} which collects elements into a multimap using flat
      *         key extraction
+     * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatMappingKeyToMultimap(
             final Function<? super T, Stream<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(flatKeyExtractor, "flatKeyExtractor");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final V value = valueMapper.apply(element);
@@ -9796,10 +10176,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param valueMapper a function to produce values for the multimap
      * @return a {@code Collector} which collects elements into a {@code ListMultimap}
      *         using collection-based key extraction
+     * @throws IllegalArgumentException if {@code flatKeyExtractor} or {@code valueMapper} is {@code null}
      * @see Collectors#toMultimap(Function, Function)
      */
     public static <T, K, V> Collector<T, ?, ListMultimap<K, V>> flatmappingKeyToMultimap( // NOSONAR
-            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper) {
+            final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+
         return flatmappingKeyToMultimap(flatKeyExtractor, valueMapper, Suppliers.ofListMultimap());
     }
 
@@ -9840,14 +10225,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *                   will be inserted
      * @return a {@code Collector} which collects elements into a multimap using
      *         collection-based key extraction
+     * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      * @see Collectors#toMultimap(Function, Function, Supplier)
      */
     public static <T, K, V, C extends Collection<V>, M extends Multimap<K, V, C>> Collector<T, ?, M> flatmappingKeyToMultimap( // NOSONAR
             final Function<? super T, ? extends Collection<? extends K>> flatKeyExtractor, final Function<? super T, ? extends V> valueMapper,
-            final Supplier<? extends M> mapFactory) {
-        N.checkArgNotNull(flatKeyExtractor, "flatKeyExtractor");
-        N.checkArgNotNull(valueMapper, "valueMapper");
-        N.checkArgNotNull(mapFactory, "mapFactory");
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+        N.checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
+        N.checkArgNotNull(valueMapper, cs.valueMapper);
+        N.checkArgNotNull(mapFactory, cs.mapFactory);
 
         final BiConsumer<M, T> accumulator = (map, element) -> {
             final V value = valueMapper.apply(element);
@@ -9878,7 +10264,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @throws ConcurrentModificationException if the map is structurally modified while this method runs
      */
     static <K, V> void replaceAll(final Map<K, V> map, final BiFunction<? super K, ? super V, ? extends V> function) {
-        N.checkArgNotNull(function);
 
         try {
             for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -9890,7 +10275,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     private static <K, V, M extends Map<K, V>> BinaryOperator<M> mapMerger(final BinaryOperator<V> mergeFunction) {
-        N.checkArgNotNull(mergeFunction);
 
         return (m1, m2) -> {
             for (final Map.Entry<K, V> e : m2.entrySet()) {
@@ -9907,7 +10291,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     private static <K, V, M extends ConcurrentMap<K, V>> BinaryOperator<M> concurrentMapMerger(final BinaryOperator<V> mergeFunction) {
-        N.checkArgNotNull(mergeFunction);
 
         return (m1, m2) -> {
             for (final Map.Entry<K, V> e : m2.entrySet()) {
@@ -9955,7 +10338,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param remappingFunction applied to the existing and the new value when the key is already present
      */
     static <K, V> void merge(final Map<K, V> map, final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        N.checkArgNotNull(remappingFunction);
 
         final V oldValue = map.get(key);
 
@@ -10000,9 +10382,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param merger a function to merge the results of the two downstream collectors
      * @return a {@code Collector} which performs the reduction of its input elements
      *         under the two downstream collectors and merges the results
+     * @throws IllegalArgumentException if {@code merger} is {@code null}
      */
     public static <T, R1, R2, R> Collector<T, ?, R> teeing(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
-            final BiFunction<? super R1, ? super R2, R> merger) {
+            final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
+        N.checkArgNotNull(merger, cs.merger);
+
         return java.util.stream.Collectors.teeing(downstream1, downstream2, merger);
     }
 
@@ -10079,10 +10464,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first integer property to sum
          * @param secondMapper a function extracting the second integer property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper) {
+                final ToIntFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
@@ -10121,10 +10509,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second integer property to sum
          * @param thirdMapper a function extracting the third integer property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Integer, Integer, Integer>> summingInt(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<int[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
@@ -10161,10 +10553,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first integer property to sum
          * @param secondMapper a function extracting the second integer property to sum
          * @return a {@code Collector} that produces a tuple of the two sums as longs
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper) {
+                final ToIntFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
@@ -10202,10 +10597,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second integer property to sum
          * @param thirdMapper a function extracting the third integer property to sum
          * @return a {@code Collector} that produces a tuple of the three sums as longs
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingIntToLong(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsInt(t);
@@ -10243,10 +10642,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first long property to sum
          * @param secondMapper a function extracting the second long property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
-                final ToLongFunction<? super T> secondMapper) {
+                final ToLongFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsLong(t);
@@ -10285,10 +10687,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second long property to sum
          * @param thirdMapper a function extracting the third long property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Long, Long, Long>> summingLong(final ToLongFunction<? super T> firstMapper,
-                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
+                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<long[], T> accumulator = (a, t) -> {
                 a[0] += firstMapper.applyAsLong(t);
@@ -10327,10 +10733,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first double property to sum
          * @param secondMapper a function extracting the second double property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
-                final ToDoubleFunction<? super T> secondMapper) {
+                final ToDoubleFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
@@ -10370,10 +10779,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second double property to sum
          * @param thirdMapper a function extracting the third double property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> summingDouble(final ToDoubleFunction<? super T> firstMapper,
-                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
+                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
@@ -10410,10 +10823,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first BigInteger property to sum
          * @param secondMapper a function extracting the second BigInteger property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
-                final Function<? super T, BigInteger> secondMapper) {
+                final Function<? super T, BigInteger> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
@@ -10451,10 +10867,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second BigInteger property to sum
          * @param thirdMapper a function extracting the third BigInteger property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<BigInteger, BigInteger, BigInteger>> summingBigInteger(final Function<? super T, BigInteger> firstMapper,
-                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
+                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<BigInteger[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
@@ -10491,10 +10911,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first BigDecimal property to sum
          * @param secondMapper a function extracting the second BigDecimal property to sum
          * @return a {@code Collector} that produces a tuple of the two sums
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
-                final Function<? super T, BigDecimal> secondMapper) {
+                final Function<? super T, BigDecimal> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
@@ -10533,10 +10956,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second BigDecimal property to sum
          * @param thirdMapper a function extracting the third BigDecimal property to sum
          * @return a {@code Collector} that produces a tuple of the three sums
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> summingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
-                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
+                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<BigDecimal[], T> accumulator = (a, t) -> {
                 a[0] = a[0].add(firstMapper.apply(t));
@@ -10574,10 +11001,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first integer property to average
          * @param secondMapper a function extracting the second integer property to average
          * @return a {@code Collector} that produces a tuple of the two averages
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper) {
+                final ToIntFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsInt(t);
@@ -10618,10 +11048,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second integer property to average
          * @param thirdMapper a function extracting the third integer property to average
          * @return a {@code Collector} that produces a tuple of the three averages
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingInt(final ToIntFunction<? super T> firstMapper,
-                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) {
+                final ToIntFunction<? super T> secondMapper, final ToIntFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsInt(t);
@@ -10663,10 +11097,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first long property to average
          * @param secondMapper a function extracting the second long property to average
          * @return a {@code Collector} that produces a tuple of the two averages
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
-                final ToLongFunction<? super T> secondMapper) {
+                final ToLongFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsLong(t);
@@ -10708,10 +11145,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second long property to average
          * @param thirdMapper a function extracting the third long property to average
          * @return a {@code Collector} that produces a tuple of the three averages
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingLong(final ToLongFunction<? super T> firstMapper,
-                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) {
+                final ToLongFunction<? super T> secondMapper, final ToLongFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<Pair<long[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] += firstMapper.applyAsLong(t);
@@ -10753,10 +11194,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param firstMapper a function extracting the first double property to average
          * @param secondMapper a function extracting the second double property to average
          * @return a {@code Collector} that produces a tuple of the two averages
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
-                final ToDoubleFunction<? super T> secondMapper) {
+                final ToDoubleFunction<? super T> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
@@ -10796,10 +11240,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second double property to average
          * @param thirdMapper a function extracting the third double property to average
          * @return a {@code Collector} that produces a tuple of the three averages
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<Double, Double, Double>> averagingDouble(final ToDoubleFunction<? super T> firstMapper,
-                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) {
+                final ToDoubleFunction<? super T> secondMapper, final ToDoubleFunction<? super T> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<KahanSummation[], T> accumulator = (a, t) -> {
                 a[0].add(firstMapper.applyAsDouble(t));
@@ -10842,10 +11290,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second {@code BigInteger} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple2<BigDecimal, BigDecimal>}
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
-                final Function<? super T, BigInteger> secondMapper) {
+                final Function<? super T, BigInteger> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
@@ -10891,10 +11342,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param thirdMapper a function extracting the third {@code BigInteger} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple3<BigDecimal, BigDecimal, BigDecimal>}
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigInteger(final Function<? super T, BigInteger> firstMapper,
-                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) {
+                final Function<? super T, BigInteger> secondMapper, final Function<? super T, BigInteger> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<Pair<BigInteger[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
@@ -10940,10 +11395,13 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param secondMapper a function extracting the second {@code BigDecimal} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple2<BigDecimal, BigDecimal>}
+         * @throws IllegalArgumentException if {@code firstMapper} or {@code secondMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple2<BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
-                final Function<? super T, BigDecimal> secondMapper) {
+                final Function<? super T, BigDecimal> secondMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
 
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
@@ -10989,10 +11447,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param thirdMapper a function extracting the third {@code BigDecimal} value from an element
          * @return a {@code Collector} which calculates the averages of the extracted values
          *         as a {@code Tuple3<BigDecimal, BigDecimal, BigDecimal>}
+         * @throws IllegalArgumentException if any of {@code firstMapper}, {@code secondMapper}, or {@code thirdMapper} is {@code null}
          */
         public static <T> Collector<T, ?, Tuple3<BigDecimal, BigDecimal, BigDecimal>> averagingBigDecimal(final Function<? super T, BigDecimal> firstMapper,
-                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) {
+                final Function<? super T, BigDecimal> secondMapper, final Function<? super T, BigDecimal> thirdMapper) throws IllegalArgumentException {
             checkMappers(firstMapper, secondMapper, thirdMapper);
+            N.checkArgNotNull(firstMapper, cs.firstMapper);
+            N.checkArgNotNull(secondMapper, cs.secondMapper);
+            N.checkArgNotNull(thirdMapper, cs.thirdMapper);
 
             final BiConsumer<Pair<BigDecimal[], long[]>, T> accumulator = (a, t) -> {
                 a.left()[0] = a.left()[0].add(firstMapper.apply(t));
@@ -11177,11 +11639,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         public static <T, R1, R2, R3, R4, R5> Collector<T, ?, Tuple5<R1, R2, R3, R4, R5>> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
                 final Collector<? super T, ?, R5> downstream5) throws IllegalArgumentException {
-            N.checkArgNotNull(downstream1, "downstream1"); //NOSONAR
-            N.checkArgNotNull(downstream2, "downstream2"); //NOSONAR
-            N.checkArgNotNull(downstream3, "downstream3"); //NOSONAR
-            N.checkArgNotNull(downstream4, "downstream4"); //NOSONAR
-            N.checkArgNotNull(downstream5, "downstream5"); //NOSONAR
+            N.checkArgNotNull(downstream1, cs.downstream1); //NOSONAR
+            N.checkArgNotNull(downstream2, cs.downstream2); //NOSONAR
+            N.checkArgNotNull(downstream3, cs.downstream3); //NOSONAR
+            N.checkArgNotNull(downstream4, cs.downstream4); //NOSONAR
+            N.checkArgNotNull(downstream5, cs.downstream5); //NOSONAR
 
             final List<Collector<? super T, ?, ?>> downstreams = Array.asList(downstream1, downstream2, downstream3, downstream4, downstream5);
 
@@ -11364,14 +11826,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results of the two component collectors
          * @return a {@code Collector} which combines the results of two component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any component collector or merger is null
+         * @throws IllegalArgumentException if {@code merger} is {@code null}
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1, final Collector<? super T, ?, R2> downstream2,
                 final BiFunction<? super R1, ? super R2, R> merger) throws IllegalArgumentException {
             N.checkArgNotNull(downstream1, cs.downstream1);
             N.checkArgNotNull(downstream2, cs.downstream2);
-            N.checkArgNotNull(merger, "merger"); //NOSONAR
+            N.checkArgNotNull(merger, cs.merger);
+
+            //NOSONAR
 
             final Supplier<Object> c1supplier = (Supplier) downstream1.supplier();
             final Supplier<Object> c2Supplier = (Supplier) downstream2.supplier();
@@ -11437,7 +11901,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results of the three component collectors
          * @return a {@code Collector} which combines the results of three component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any component collector or merger is null
+         * @throws IllegalArgumentException if {@code merger} is {@code null}
          */
         @SuppressWarnings("rawtypes")
         public static <T, R1, R2, R3, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
@@ -11525,7 +11989,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results of the four component collectors
          * @return a {@code Collector} which combines the results of four component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if any component collector or merger is null
+         * @throws IllegalArgumentException if {@code merger} is {@code null}
          */
         public static <T, R1, R2, R3, R4, R> Collector<T, ?, R> combine(final Collector<? super T, ?, R1> downstream1,
                 final Collector<? super T, ?, R2> downstream2, final Collector<? super T, ?, R3> downstream3, final Collector<? super T, ?, R4> downstream4,
@@ -11588,18 +12052,20 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * @param merger a function to merge the results array from all component collectors
          * @return a {@code Collector} which combines the results of multiple component collectors
          *         using the merger function
-         * @throws IllegalArgumentException if {@code downstreams} is {@code null}, empty, or contains
-         *         a null collector, or if {@code merger} is null
+         * @throws IllegalArgumentException if {@code merger} is {@code null}
          */
-        public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams,
-                final Function<Object[], R> merger) { //NOSONAR
-            N.checkArgument(N.notEmpty(downstreams), "The specified 'downstreams' cannot be null or empty");
+        public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams, final Function<Object[], R> merger)
+                throws IllegalArgumentException {
             N.checkArgNotNull(merger, cs.merger);
+
+            //NOSONAR
+            N.checkArgument(N.notEmpty(downstreams), "The specified 'downstreams' cannot be null or empty");
 
             final List<Collector<? super T, ?, ?>> downstreamList = new ArrayList<>(downstreams.size());
             int downstreamIndex = 0;
             for (final Collector<? super T, ?, ?> downstream : downstreams) {
                 N.checkArgNotNull(downstream, "downstreams[" + downstreamIndex++ + "]");
+
                 downstreamList.add(downstream);
             }
 

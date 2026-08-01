@@ -991,7 +991,7 @@ public class IteratorCharStreamTest extends TestBase {
 
     @Test
     public void testGenerateNull() {
-        assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.generate(null).limit(1).count());
     }
 
     @Test

@@ -205,21 +205,11 @@ public abstract class TestBase {
     }
 
     public static <T> Iterable<T> createIterable(final T... a) {
-        return new Iterable<>() {
-            @Override
-            public java.util.Iterator<T> iterator() {
-                return N.toList(a).iterator();
-            }
-        };
+        return () -> N.toList(a).iterator();
     }
 
     public static <T> Iterable<T> createIterable(final Collection<? extends T> c) {
-        return new Iterable<>() {
-            @Override
-            public java.util.Iterator<T> iterator() {
-                return (Iterator<T>) c.iterator();
-            }
-        };
+        return () -> (Iterator<T>) c.iterator();
     }
 
     public static <A, B> BiIterator<A, B> createBiIterator(final Iterable<Pair<A, B>> iterable) {

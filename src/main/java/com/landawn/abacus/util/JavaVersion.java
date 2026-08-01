@@ -651,10 +651,9 @@ public enum JavaVersion {
      * <p>Version strings resolving to a number above Java 39 return {@link #JAVA_RECENT}.</p>
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1"); must not be {@code null} or empty
-     * @return the corresponding JavaVersion enum constant, never {@code null}
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, cannot be parsed,
-     *         or does not match any known Java version
-     * @see #get(String)
+     * @return the corresponding JavaVersion enum constant, never {@code null}; versions above 39 yield {@link #JAVA_RECENT}
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or cannot be parsed as a
+     *         known Java version or a numeric version greater than 39
      */
     public static JavaVersion of(final String versionStr) {
         if (Strings.isEmpty(versionStr)) {

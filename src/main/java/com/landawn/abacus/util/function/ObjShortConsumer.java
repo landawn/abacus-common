@@ -22,9 +22,9 @@ import com.landawn.abacus.util.cs;
  * and a short-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive short.
  *
- * <p>This interface is the short primitive specialization of {@link ObjIntConsumer}.
- * Unlike the JDK which only provides specializations for int, long, and double primitives,
- * this interface extends support to short primitives for better type safety and performance.
+ * <p>This is the {@code short} counterpart of {@link ObjIntConsumer} (and of the JDK's
+ * {@link java.util.function.ObjIntConsumer}). Unlike the JDK, which only provides specializations
+ * for {@code int}, {@code long}, and {@code double}, this package also supports {@code short}.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, short)}.
  *
@@ -78,13 +78,14 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * combined.accept(new ArrayList<>(), (short) 7);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code ObjShortConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default ObjShortConsumer<T> andThen(final ObjShortConsumer<? super T> after) {
+    default ObjShortConsumer<T> andThen(final ObjShortConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, value) -> {
             accept(t, value);
             after.accept(t, value);

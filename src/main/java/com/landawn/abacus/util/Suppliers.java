@@ -283,9 +283,8 @@ public final class Suppliers {
 
     private static <T> java.util.function.Supplier<T> nonNullResultSupplier(final java.util.function.Supplier<? extends T> supplier,
             final String argumentName) {
-        N.checkArgNotNull(supplier, argumentName);
 
-        return () -> N.requireNonNull(supplier.get(), "'" + argumentName + "' returned null");
+        return () -> N.checkArgNotNull(supplier.get(), "'" + argumentName + "' returned null");
     }
 
     /**
@@ -306,7 +305,7 @@ public final class Suppliers {
     }
 
     private static <T> Supplier<T> registeredSupplier(final Class<T> targetClass, final java.util.function.Supplier<? extends T> supplier) {
-        return () -> targetClass.cast(N.requireNonNull(supplier.get(), "The registered supplier returned null"));
+        return () -> targetClass.cast(N.checkArgNotNull(supplier.get(), "The registered supplier returned null"));
     }
 
     /**
@@ -327,7 +326,7 @@ public final class Suppliers {
      * @param <T> the type of results supplied by the supplier
      * @param supplier the supplier to return
      * @return the supplier unchanged
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #of(Object, Function)
      * @see Fn#s(Supplier)
      * @see Fn#s(Object, Function)
@@ -336,8 +335,10 @@ public final class Suppliers {
      * @see IntFunctions#of(IntFunction)
      */
     @Beta
-    public static <T> Supplier<T> of(final Supplier<T> supplier) {
-        return N.checkArgNotNull(supplier, cs.supplier);
+    public static <T> Supplier<T> of(final Supplier<T> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        return supplier;
     }
 
     /**
@@ -362,7 +363,7 @@ public final class Suppliers {
      * @param a the value to be processed by the function
      * @param func the function to apply to the value
      * @return a supplier that will return the result of applying the function to the value
-     * @throws IllegalArgumentException if {@code func} is {@code null}
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #of(Supplier)
      * @see Fn#s(Supplier)
      * @see Fn#s(Object, Function)
@@ -371,7 +372,7 @@ public final class Suppliers {
      * @see IntFunctions#of(IntFunction)
      */
     @Beta
-    public static <A, T> Supplier<T> of(final A a, final Function<? super A, ? extends T> func) {
+    public static <A, T> Supplier<T> of(final A a, final Function<? super A, ? extends T> func) throws IllegalArgumentException {
         N.checkArgNotNull(func, cs.func);
 
         return () -> func.apply(a);
@@ -1318,7 +1319,9 @@ public final class Suppliers {
      * @return a supplier that creates new Multiset instances backed by maps from the given supplier
      * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
      */
-    public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) {
+    public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         final java.util.function.Supplier<Map<T, ?>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
 
         return () -> N.newMultiset(checkedMapSupplier);
@@ -1398,7 +1401,7 @@ public final class Suppliers {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
-        N.checkArgNotNull(valueType, "valueType");
+        N.checkArgNotNull(valueType, cs.valueType);
         N.checkArgument(List.class.isAssignableFrom(valueType), "'valueType': {} is not a List class", valueType);
 
         final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier = (java.util.function.Supplier) ofMap(mapType);
@@ -1432,9 +1435,13 @@ public final class Suppliers {
      * @param valueSupplier supplier that creates the List instances for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances using the provided suppliers
      * @throws IllegalArgumentException if either supplier is {@code null}
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
-            final java.util.function.Supplier<? extends List<E>> valueSupplier) {
+            final java.util.function.Supplier<? extends List<E>> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         final java.util.function.Supplier<Map<K, List<E>>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
         final java.util.function.Supplier<List<E>> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
 
@@ -1515,7 +1522,7 @@ public final class Suppliers {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
-        N.checkArgNotNull(valueType, "valueType");
+        N.checkArgNotNull(valueType, cs.valueType);
         N.checkArgument(Set.class.isAssignableFrom(valueType), "'valueType': {} is not a Set class", valueType);
 
         final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier = (java.util.function.Supplier) ofMap(mapType);
@@ -1549,9 +1556,13 @@ public final class Suppliers {
      * @param valueSupplier supplier that creates the Set instances for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances using the provided suppliers
      * @throws IllegalArgumentException if either supplier is {@code null}
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
-            final java.util.function.Supplier<? extends Set<E>> valueSupplier) {
+            final java.util.function.Supplier<? extends Set<E>> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         final java.util.function.Supplier<Map<K, Set<E>>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
         final java.util.function.Supplier<Set<E>> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
 
@@ -1584,9 +1595,13 @@ public final class Suppliers {
      * @param valueSupplier supplier that creates the Collection instances for values, must not be {@code null}
      * @return a Supplier that creates new Multimap instances using the provided suppliers
      * @throws IllegalArgumentException if either supplier is {@code null}
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
     public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
-            final java.util.function.Supplier<? extends V> valueSupplier) {
+            final java.util.function.Supplier<? extends V> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         final java.util.function.Supplier<Map<K, V>> checkedMapSupplier = nonNullResultSupplier(mapSupplier, "mapSupplier");
         final java.util.function.Supplier<V> checkedValueSupplier = nonNullResultSupplier(valueSupplier, cs.valueSupplier);
 
@@ -1858,14 +1873,15 @@ public final class Suppliers {
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
      * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Collection class,
      *         or {@code targetClass} is a built-in class
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #ofCollection(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgNotNull(supplier, cs.Supplier);
         N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -1902,14 +1918,15 @@ public final class Suppliers {
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
      * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Map class,
      *         or {@code targetClass} is a built-in class
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #ofMap(Class)
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.Supplier<T> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgNotNull(supplier, cs.Supplier);
         N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));

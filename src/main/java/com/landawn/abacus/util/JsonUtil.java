@@ -479,7 +479,7 @@ public final class JsonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
-        N.checkArgNotNull(jsonObject, "jsonObject");
+        N.checkArgNotNull(jsonObject, cs.jsonObject);
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (!targetType.javaType().equals(Object.class) && targetType.javaType().isAssignableFrom(JSONObject.class)) {
@@ -656,7 +656,7 @@ public final class JsonUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
-        N.checkArgNotNull(jsonArray, "jsonArray");
+        N.checkArgNotNull(jsonArray, cs.jsonArray);
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (!targetType.javaType().equals(Object.class) && targetType.javaType().isAssignableFrom(JSONArray.class)) {
@@ -766,7 +766,7 @@ public final class JsonUtil {
      * @throws IllegalArgumentException if either argument is {@code null}
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
-        N.checkArgNotNull(elementClass, "elementClass");
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
         return toList(jsonArray, Type.of(elementClass));
     }
@@ -794,8 +794,8 @@ public final class JsonUtil {
      * @throws IllegalArgumentException if either argument is {@code null}
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
-        N.checkArgNotNull(jsonArray, "jsonArray");
-        N.checkArgNotNull(elementType, "elementType");
+        N.checkArgNotNull(jsonArray, cs.jsonArray);
+        N.checkArgNotNull(elementType, cs.elementType);
 
         final int len = jsonArray.length();
         final List<Object> coll = new ArrayList<>(len);

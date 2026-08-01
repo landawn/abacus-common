@@ -735,7 +735,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -782,7 +782,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -908,7 +908,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
-     * @see Stream#collapse(BiPredicate, BinaryOperator)
+     * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
@@ -2133,11 +2133,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the other stream to merge with
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     Takes elements from both streams and returns {@code MergeResult.TAKE_FIRST} to select
      *                     the element from this stream, or {@code MergeResult.TAKE_SECOND} to select from stream b
      * @return a new stream containing elements merged from both streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -2164,7 +2163,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the CharStream to be combined with the current CharStream. Must be {@code non-null}.
-     * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream. Must be {@code non-null}.
+     * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStream
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(CharStream, char, char, CharBinaryOperator)
@@ -2193,7 +2192,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param b the second CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param c the third CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
-     * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream. Must be {@code non-null}.
+     * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStreams
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(CharStream, CharStream, char, char, char, CharTernaryOperator)
@@ -2222,7 +2221,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param b the CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param valueForNoneA the default value to use for the current CharStream when it runs out of elements
      * @param valueForNoneB the default value to use for the given CharStream when it runs out of elements
-     * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream. Must be {@code non-null}.
+     * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStream
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2254,7 +2253,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneA the default value to use for the current CharStream when it runs out of elements
      * @param valueForNoneB the default value to use for the second CharStream when it runs out of elements
      * @param valueForNoneC the default value to use for the third CharStream when it runs out of elements
-     * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream. Must be {@code non-null}.
+     * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStreams
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2344,8 +2343,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * Returns a CharStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier is memoized and invoked at most once. Closing the returned stream before traversal may still
-     * invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
+     * the supplier so the supplied stream can be closed.
      *
      * <p>Note: it's equivalent to {@code Stream.just(supplier).flatMapToChar(it -> it.get())}.
      *
@@ -2369,14 +2369,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param supplier the supplier that provides the CharStream
      * @return a new CharStream supplied by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see Stream#defer(Supplier)
      */
     public static CharStream defer(final Supplier<CharStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<CharStream> s = Fn.memoize(supplier);
-        return Stream.just(s).flatMapToChar(Supplier::get).onClose(newCloseHandler(s));
+        return CharStream.of(CharIterator.defer(() -> {
+            final CharStream source = s.get();
+            return source == null ? CharIterator.empty() : source.iteratorEx();
+        })).onClose(newCloseHandler(s));
     }
 
     /**
@@ -4167,12 +4170,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a CharSupplier that provides the next char in the iteration
      * @return a CharStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or next is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static CharStream iterate(final BooleanSupplier hasNext, final CharSupplier next) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(next);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(next, cs.next);
 
         return new IteratorCharStream(new CharIteratorEx() {
             private boolean hasMore = true;
@@ -4226,12 +4229,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a CharStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or f is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, BooleanSupplier, UnaryOperator)
      */
     public static CharStream iterate(final char init, final BooleanSupplier hasNext, final CharUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorCharStream(new CharIteratorEx() {
             private char cur = 0;
@@ -4296,12 +4299,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *                then with the result of applying f to the previous element for subsequent elements.
      * @param f a function to apply to the previous element to generate the next element
      * @return a CharStream of elements generated by the iteration
-     * @throws IllegalArgumentException if hasNext or f is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, Predicate, UnaryOperator)
      */
     public static CharStream iterate(final char init, final CharPredicate hasNext, final CharUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorCharStream(new CharIteratorEx() {
             private char cur = 0;
@@ -4364,11 +4367,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an infinite CharStream of elements generated by iterative application of f
-     * @throws IllegalArgumentException if f is null
+     * @throws IllegalArgumentException if {@code f} is {@code null}
      * @see Stream#iterate(Object, UnaryOperator)
      */
     public static CharStream iterate(final char init, final CharUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorCharStream(new CharIteratorEx() {
             private char cur = 0;
@@ -4417,11 +4420,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param s the CharSupplier that provides the elements of the stream
      * @return an infinite CharStream generated by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code s} is {@code null}
      * @see Stream#generate(Supplier)
      */
     public static CharStream generate(final CharSupplier s) throws IllegalArgumentException {
-        N.checkArgNotNull(s);
+        N.checkArgNotNull(s, cs.s);
 
         return new IteratorCharStream(new CharIteratorEx() {
             @Override
@@ -4702,11 +4705,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first char array
      * @param b the second char array
-     * @param zipFunction the function to combine elements from both arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values, or an empty stream if either input array is {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], BiFunction)
      */
-    public static CharStream zip(final char[] a, final char[] b, final CharBinaryOperator zipFunction) {
+    public static CharStream zip(final char[] a, final char[] b, final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b)) {
             return empty();
         }
@@ -4749,10 +4755,13 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first char array
      * @param b the second char array
      * @param c the third char array
-     * @param zipFunction the function to combine elements from all three arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values, or an empty stream if any input array is {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
-    public static CharStream zip(final char[] a, final char[] b, final char[] c, final CharTernaryOperator zipFunction) {
+    public static CharStream zip(final char[] a, final char[] b, final char[] c, final CharTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b) || N.isEmpty(c)) {
             return empty();
         }
@@ -4793,11 +4802,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first char iterator. Can be {@code null} (treated as empty)
      * @param b the second char iterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine elements from both iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, BiFunction)
      */
-    public static CharStream zip(final CharIterator a, final CharIterator b, final CharBinaryOperator zipFunction) {
+    public static CharStream zip(final CharIterator a, final CharIterator b, final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorCharStream(new CharIteratorEx() {
             private final CharIterator iterA = a == null ? CharIterator.empty() : a;
             private final CharIterator iterB = b == null ? CharIterator.empty() : b;
@@ -4831,10 +4843,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first char iterator. Can be {@code null} (treated as empty)
      * @param b the second char iterator. Can be {@code null} (treated as empty)
      * @param c the third char iterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine elements from all three iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
-    public static CharStream zip(final CharIterator a, final CharIterator b, final CharIterator c, final CharTernaryOperator zipFunction) {
+    public static CharStream zip(final CharIterator a, final CharIterator b, final CharIterator c, final CharTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorCharStream(new CharIteratorEx() {
             private final CharIterator iterA = a == null ? CharIterator.empty() : a;
             private final CharIterator iterB = b == null ? CharIterator.empty() : b;
@@ -4867,11 +4883,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first char stream
      * @param b the second char stream
-     * @param zipFunction the function to combine elements from both streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static CharStream zip(final CharStream a, final CharStream b, final CharBinaryOperator zipFunction) {
+    public static CharStream zip(final CharStream a, final CharStream b, final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -4892,10 +4911,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first char stream
      * @param b the second char stream
      * @param c the third char stream
-     * @param zipFunction the function to combine elements from all three streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
-    public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final CharTernaryOperator zipFunction) {
+    public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final CharTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
@@ -4913,11 +4936,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }</pre>
      *
      * @param streams the collection of character streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all streams.
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, Function)
      */
-    public static CharStream zip(final Collection<? extends CharStream> streams, final CharNFunction<Character> zipFunction) {
+    public static CharStream zip(final Collection<? extends CharStream> streams, final CharNFunction<Character> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, zipFunction).mapToChar(ToCharFunction.UNBOX);
     }
@@ -4940,11 +4966,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param b the second char array
      * @param valueForNoneA the default value to use when the first array runs out of values
      * @param valueForNoneB the default value to use when the second array runs out of values
-     * @param zipFunction the function to combine elements from both arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      */
-    public static CharStream zip(final char[] a, final char[] b, final char valueForNoneA, final char valueForNoneB, final CharBinaryOperator zipFunction) {
+    public static CharStream zip(final char[] a, final char[] b, final char valueForNoneA, final char valueForNoneB, final CharBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b)) {
             return empty();
         }
@@ -4993,11 +5023,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneA the default value to use when the first array runs out of values
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param valueForNoneC the default value to use when the third array runs out of values
-     * @param zipFunction the function to combine elements from all three arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     public static CharStream zip(final char[] a, final char[] b, final char[] c, final char valueForNoneA, final char valueForNoneB, final char valueForNoneC,
-            final CharTernaryOperator zipFunction) {
+            final CharTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b) && N.isEmpty(c)) {
             return empty();
         }
@@ -5044,12 +5077,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param b the second char iterator, may be {@code null} (treated as empty)
      * @param valueForNoneA the default value to use when the first iterator runs out of values
      * @param valueForNoneB the default value to use when the second iterator runs out of values
-     * @param zipFunction the function to combine elements from both iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static CharStream zip(final CharIterator a, final CharIterator b, final char valueForNoneA, final char valueForNoneB,
-            final CharBinaryOperator zipFunction) {
+            final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorCharStream(new CharIteratorEx() {
             private final CharIterator iterA = a == null ? CharIterator.empty() : a;
             private final CharIterator iterB = b == null ? CharIterator.empty() : b;
@@ -5091,11 +5127,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneA the default value to use when the first iterator runs out of values
      * @param valueForNoneB the default value to use when the second iterator runs out of values
      * @param valueForNoneC the default value to use when the third iterator runs out of values
-     * @param zipFunction the function to combine elements from all three iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     public static CharStream zip(final CharIterator a, final CharIterator b, final CharIterator c, final char valueForNoneA, final char valueForNoneB,
-            final char valueForNoneC, final CharTernaryOperator zipFunction) {
+            final char valueForNoneC, final CharTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorCharStream(new CharIteratorEx() {
             private final CharIterator iterA = a == null ? CharIterator.empty() : a;
             private final CharIterator iterB = b == null ? CharIterator.empty() : b;
@@ -5138,12 +5177,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param b the second char stream
      * @param valueForNoneA the default value to use when the first stream runs out of values
      * @param valueForNoneB the default value to use when the second stream runs out of values
-     * @param zipFunction the function to combine elements from both streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static CharStream zip(final CharStream a, final CharStream b, final char valueForNoneA, final char valueForNoneB,
-            final CharBinaryOperator zipFunction) {
+            final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -5168,11 +5210,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneA the default value to use when the first stream runs out of values
      * @param valueForNoneB the default value to use when the second stream runs out of values
      * @param valueForNoneC the default value to use when the third stream runs out of values
-     * @param zipFunction the function to combine elements from all three streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB,
-            final char valueForNoneC, final CharTernaryOperator zipFunction) {
+            final char valueForNoneC, final CharTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
@@ -5194,12 +5239,16 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param streams the collection of character streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values to use when the corresponding stream runs out of values, must have the same size as the streams collection
-     * @param zipFunction the function to combine elements from all streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine elements from all streams.
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams collection
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see Stream#zip(Collection, char[], CharNFunction)
      */
-    public static CharStream zip(final Collection<? extends CharStream> streams, final char[] valuesForNone, final CharNFunction<Character> zipFunction) {
+    public static CharStream zip(final Collection<? extends CharStream> streams, final char[] valuesForNone, final CharNFunction<Character> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, valuesForNone, zipFunction).mapToChar(ToCharFunction.UNBOX);
     }
@@ -5223,14 +5272,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first char array
      * @param b the second char array
-     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from the first array,
      *                     or MergeResult.TAKE_SECOND to select from the second array.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
-    public static CharStream merge(final char[] a, final char[] b, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final char[] a, final char[] b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
@@ -5284,12 +5333,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first char array
      * @param b the second char array
      * @param c the third char array
-     * @param nextSelector a function to determine which element should be selected next; must not be {@code null}
+     * @param nextSelector a function to determine which element should be selected next
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
-    public static CharStream merge(final char[] a, final char[] b, final char[] c, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final char[] a, final char[] b, final char[] c, final CharBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), CharStream.of(c).iteratorEx(), nextSelector);
     }
@@ -5309,14 +5361,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first CharIterator
      * @param b the second CharIterator
-     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from the first iterator,
      *                     or MergeResult.TAKE_SECOND to select from the second iterator.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
-    public static CharStream merge(final CharIterator a, final CharIterator b, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final CharIterator a, final CharIterator b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new IteratorCharStream(new CharIteratorEx() {
@@ -5398,12 +5450,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first CharIterator
      * @param b the second CharIterator
      * @param c the third CharIterator
-     * @param nextSelector a function to determine which element should be selected next; must not be {@code null}
+     * @param nextSelector a function to determine which element should be selected next
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
-    public static CharStream merge(final CharIterator a, final CharIterator b, final CharIterator c, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final CharIterator a, final CharIterator b, final CharIterator c, final CharBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
@@ -5430,14 +5485,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param a the first CharStream
      * @param b the second CharStream
-     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from the first stream,
      *                     or MergeResult.TAKE_SECOND to select from the second stream.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
@@ -5461,12 +5516,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param a the first CharStream
      * @param b the second CharStream
      * @param c the third CharStream
-     * @param nextSelector a function to determine which element should be selected next; must not be {@code null}
+     * @param nextSelector a function to determine which element should be selected next
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
-    public static CharStream merge(final CharStream a, final CharStream b, final CharStream c, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final CharStream a, final CharStream b, final CharStream c, final CharBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -5496,14 +5554,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }</pre>
      *
      * @param streams the collection of CharStreams to merge; a {@code null} collection and {@code null} elements are treated as empty
-     * @param nextSelector a function to determine which element should be selected next. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected next.
      *                     Takes two elements from different streams and returns MergeResult.TAKE_FIRST
      *                     to select the first element, or MergeResult.TAKE_SECOND to select the second.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see Stream#merge(Collection, BiFunction)
      */
-    public static CharStream merge(final Collection<? extends CharStream> streams, final CharBiFunction<MergeResult> nextSelector) {
+    public static CharStream merge(final Collection<? extends CharStream> streams, final CharBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {

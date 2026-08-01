@@ -14,6 +14,7 @@
 package com.landawn.abacus.util.function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -81,13 +82,14 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * BiPredicate<String, String> valid = notNull.and(notEmpty);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default BiPredicate<T, U> and(final java.util.function.BiPredicate<? super T, ? super U> other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return (t, u) -> test(t, u) && other.test(t, u);
     }
 
@@ -106,13 +108,14 @@ public interface BiPredicate<T, U> extends Throwables.BiPredicate<T, U, RuntimeE
      * BiPredicate<String, Integer> combined = isLong.or(hasMinLength);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed {@code BiPredicate} that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default BiPredicate<T, U> or(final java.util.function.BiPredicate<? super T, ? super U> other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return (t, u) -> test(t, u) || other.test(t, u);
     }
 

@@ -162,7 +162,7 @@ public class LongTriPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         LongTriPredicate instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((LongTriPredicate) null));
     }

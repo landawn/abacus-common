@@ -306,6 +306,13 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testNullFunctionalArgumentsRejectedEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter((Predicate<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter(value -> true, (Consumer<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.defer(null));
+    }
+
+    @Test
     public void testStreamCreatedAfterFilter() {
         assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).count());
         assertEquals(2, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).count());
@@ -6656,7 +6663,7 @@ public class StreamTest extends AbstractTest {
         List<Integer> result = deferred.toList();
         assertEquals(1, callCount.get());
         assertEquals(Arrays.asList(1, 2, 3), result);
-    }
+    } 
 
     @Test
     public void testDefer2() {
@@ -6672,7 +6679,7 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testDeferWithNullSupplier() {
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> Stream.defer(null));
     }
 
@@ -8695,7 +8702,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testGenerate_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.generate(null).count());
     }
 
     @Test
@@ -9597,6 +9604,22 @@ public class StreamTest extends AbstractTest {
         List<Integer> result = Stream.parallelConcatIterators(Arrays.asList(it1, it2), 2).toList();
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4)));
+    }
+
+    @Test
+    public void testParallelConcatRejectsDisposableAfterRegularElement() {
+        NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
+        Stream<Object> source = Stream.of((Object) "safe", disposable);
+
+        assertThrows(IllegalStateException.class, () -> Stream.parallelConcat(Arrays.asList(source), 1, 8).count());
+    }
+
+    @Test
+    public void testParallelConcatIteratorsRejectsDisposableAfterRegularElement() {
+        NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
+        Iterator<Object> source = Arrays.<Object> asList("safe", disposable).iterator();
+
+        assertThrows(IllegalStateException.class, () -> Stream.parallelConcatIterators(Arrays.asList(source), 1, 8).count());
     }
 
     @Test
@@ -11774,8 +11797,8 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testIterate_BooleanSupplierSupplier_NullArgs_uncovered() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.iterate((BooleanSupplier) null, () -> 1));
-        assertThrows(IllegalArgumentException.class, () -> Stream.iterate(() -> true, (Supplier<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.iterate((BooleanSupplier) null, () -> 1).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.iterate(() -> true, (Supplier<Integer>) null).count());
     }
 
     // generate(Supplier) limited (line 18539).
@@ -11788,7 +11811,7 @@ public class StreamTest extends AbstractTest {
 
     @Test
     public void testGenerate_NullSupplier_uncovered() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.generate((Supplier<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.generate((Supplier<Integer>) null).count());
     }
 
     // splitByChunkCount sizeSmallerFirst=true advance() + count() (lines 17905-17941).
@@ -12111,20 +12134,35 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), merged.toList());
     }
 
+    @Test
+    public void testParallelMergeNullSelectorThrowsOnConsumption() {
+        final List<Stream<Integer>> sources = Arrays.asList(Stream.of(1), Stream.of(2), Stream.of(3), Stream.of(4));
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelMerge(sources, null, 2).toList());
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.merge(Stream.of(1), Stream.of(2), (BiFunction<Integer, Integer, MergeResult>) null).toList());
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.merge(N.asList(1).iterator(), N.asList(2).iterator(), (BiFunction<Integer, Integer, MergeResult>) null).toList());
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.parallelMergeIterators(N.asList(N.asList(1).iterator(), N.asList(2).iterator()), null, 2).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelMergeIterables(N.asList(N.asList(1), N.asList(2)), null, 2).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.mergeIterables(N.asList(N.asList(1), N.asList(2)), null).toList());
+    }
 
     @Test
-    public void testPrimitiveMergeRejectsNullSelectorEagerly() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(new byte[0], new byte[0], null));
-        assertThrows(IllegalArgumentException.class, () -> CharStream.merge(new char[0], new char[0], null));
-        assertThrows(IllegalArgumentException.class, () -> ShortStream.merge(new short[0], new short[0], null));
-        assertThrows(IllegalArgumentException.class, () -> IntStream.merge(new int[0], new int[0], null));
-        assertThrows(IllegalArgumentException.class, () -> LongStream.merge(new long[0], new long[0], null));
-        assertThrows(IllegalArgumentException.class, () -> FloatStream.merge(new float[0], new float[0], null));
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.merge(new double[0], new double[0], null));
+    public void testPrimitiveMergeNullSelectorThrowsOnConsumption() {
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(new byte[] { 1 }, new byte[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> CharStream.merge(new char[] { 'a' }, new char[] { 'b' }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> ShortStream.merge(new short[] { 1 }, new short[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> IntStream.merge(new int[] { 1 }, new int[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> LongStream.merge(new long[] { 1 }, new long[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> FloatStream.merge(new float[] { 1 }, new float[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.merge(new double[] { 1 }, new double[] { 2 }, null).count());
 
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.empty(), ByteIterator.empty(), null));
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.empty(), ByteStream.empty(), null));
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(Collections.<ByteStream> emptyList(), null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.of((byte) 1), ByteIterator.of((byte) 2), null).count());
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.of((byte) 1), ByteStream.of((byte) 2), null).count());
+        assertThrows(IllegalArgumentException.class,
+                () -> ByteStream.merge(N.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), null).count());
     }
 
     @Test
@@ -12270,9 +12308,9 @@ public class StreamTest extends AbstractTest {
 
 
     @Test
-    public void testReferenceArrayMergeRejectsNullSelectorEagerly() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[0], new Integer[0], null));
-        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[0], new Integer[0], new Integer[0], null));
+    public void testReferenceArrayMergeNullSelectorThrowsOnConsumption() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, new Integer[] { 3 }, null).count());
     }
 
     @Test

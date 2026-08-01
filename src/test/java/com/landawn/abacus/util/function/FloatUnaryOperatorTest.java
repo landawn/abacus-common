@@ -93,7 +93,7 @@ public class FloatUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testComposeNullThrowsImmediately() {
+    public void testComposeRejectsNullImmediately() {
         FloatUnaryOperator instance = a -> 0f;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((FloatUnaryOperator) null));
     }

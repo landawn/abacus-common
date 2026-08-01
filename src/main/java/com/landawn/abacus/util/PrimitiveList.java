@@ -1572,11 +1572,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance with the given initial capacity.
      *                 The supplier receives the number of elements that will be added.
      * @return a Collection containing all elements from this list as boxed objects
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      * @see #toCollection(int, int, IntFunction)
      */
-    public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier) {
+    public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(0, size(), supplier);
     }
 
@@ -1598,7 +1600,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
      * @return a Collection containing elements from the specified range in the same order
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws NullPointerException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
@@ -1665,10 +1668,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
-    public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) {
+    public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toMultiset(0, size(), supplier);
     }
 
@@ -1692,7 +1697,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing elements from the specified range with their occurrence counts
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws NullPointerException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);

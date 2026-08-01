@@ -113,16 +113,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * Constructs a ParallelArrayStream with the specified configuration for parallel processing.
      * This constructor initializes all parameters for controlling parallel execution behavior.
      *
-     * @param values the array to stream
+     * @param values the array to stream; it is used directly, not copied, so callers must not mutate it afterwards
      * @param fromIndex the start index (inclusive) of the range to process
      * @param toIndex the end index (exclusive) of the range to process
      * @param sorted whether the array elements in the range are in sorted order
      * @param comparator the comparator used to order elements, or {@code null} if using natural ordering
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitStrategy the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
+     *         or {@code fromIndex > toIndex}
      */
     ParallelArrayStream(final T[] values, final int fromIndex, final int toIndex, final boolean sorted, final Comparator<? super T> comparator,
             final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
@@ -143,10 +145,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to apply to each element to determine inclusion
      * @return a new parallel stream of matching elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.filter(predicate);
@@ -253,10 +258,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code false} for any element, the stream terminates
      * @return a new parallel stream of matching elements selected by the parallel operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.takeWhile(predicate);
@@ -322,10 +330,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return a new parallel stream of elements selected by the parallel drop operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.dropWhile(predicate);
@@ -408,10 +419,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel stream of mapped values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalStateException {
+    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.map(mapper);
@@ -498,22 +512,26 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @return a new parallel stream of results from the sliding pair mapping
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
     public <R> Stream<R> slidingMap(final int increment, final boolean ignoreNotPaired, final BiFunction<? super T, ? super T, ? extends R> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(mapper, cs.mapper);
+
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
             return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum,
-                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
         }
 
         final int windowSize = 2;
         checkArgPositive(increment, "increment"); //NOSONAR
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+
         final List<Iterator<R>> iters = new ArrayList<>(threadNum);
         final MutableInt curIndex = MutableInt.of(fromIndex);
 
@@ -566,16 +584,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @return a new parallel stream of results from the sliding triple mapping
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
     public <R> Stream<R> slidingMap(final int increment, final boolean ignoreNotPaired, final TriFunction<? super T, ? super T, ? super T, ? extends R> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(mapper, cs.mapper);
+
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
             return new ParallelIteratorStream<>(sequential().slidingMap(increment, ignoreNotPaired, mapper).iteratorEx(), false, null, maxThreadNum,
-                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                    splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
         }
 
         final int windowSize = 3;
@@ -630,11 +651,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapperForElse a non-interfering, stateless function to apply to all other elements
      * @return a new parallel stream with differentiated first-element mapping
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapperForFirst} or {@code mapperForElse} is {@code null}
      */
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForFirst, cs.mapperForFirst);
+        checkArgNotNull(mapperForElse, cs.mapperForElse);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapFirstOrElse(mapperForFirst, mapperForElse);
@@ -663,16 +688,20 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapperForElse a non-interfering, stateless function to apply to all preceding elements
      * @return a new parallel stream with differentiated last-element mapping
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapperForLast} or {@code mapperForElse} is {@code null}
      */
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForLast, cs.mapperForLast);
+        checkArgNotNull(mapperForElse, cs.mapperForElse);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
             return new ParallelIteratorStream<>(sequential().mapLastOrElse(mapperForLast, mapperForElse).iteratorEx(), false, null, maxThreadNum, splitStrategy,
-                    asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                    asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
         }
 
         if (fromIndex == toIndex) {
@@ -696,10 +725,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code char}
      * @return a new parallel {@code CharStream} of mapped char values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalStateException {
+    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToChar(mapper);
@@ -769,7 +801,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorCharStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -780,10 +812,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code byte}
      * @return a new parallel {@code ByteStream} of mapped byte values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalStateException {
+    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToByte(mapper);
@@ -853,7 +888,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorByteStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -864,10 +899,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code short}
      * @return a new parallel {@code ShortStream} of mapped short values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalStateException {
+    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToShort(mapper);
@@ -937,7 +975,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorShortStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -948,10 +986,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce an {@code int}
      * @return a new parallel {@code IntStream} of mapped int values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalStateException {
+    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToInt(mapper);
@@ -1021,7 +1062,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorIntStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1032,10 +1073,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code long}
      * @return a new parallel {@code LongStream} of mapped long values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalStateException {
+    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToLong(mapper);
@@ -1105,7 +1149,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorLongStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1116,10 +1160,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code float}
      * @return a new parallel {@code FloatStream} of mapped float values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalStateException {
+    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToFloat(mapper);
@@ -1189,7 +1236,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorFloatStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1200,10 +1247,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapper a non-interfering, stateless function to apply to each element to produce a {@code double}
      * @return a new parallel {@code DoubleStream} of mapped double values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalStateException {
+    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToDouble(mapper);
@@ -1273,7 +1323,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         return new ParallelIteratorDoubleStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1284,14 +1334,16 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * is not guaranteed to match the input order.
      *
      * @param <R> the element type of the new stream
-     * @param mapper a non-interfering, stateless function that maps each element to a stream of results;
-     *        the returned sub-stream may be {@code null}, in which case it is treated as empty
+     * @param mapper a non-interfering, stateless function that maps each element to a stream of results
      * @return a new parallel stream formed by concatenating all mapped sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -1437,10 +1489,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} or empty collections are treated as empty
      * @return a new parallel stream formed by concatenating all mapped collections
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -1536,11 +1591,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} arrays are treated as empty
      * @return a new parallel stream formed by concatenating all mapped arrays
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatmap(t -> Array.asList(mapper.apply(t)));
     }
@@ -1556,11 +1614,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code CharStream} formed by concatenating all mapped char sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalStateException {
+    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -1708,11 +1769,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code ByteStream} formed by concatenating all mapped byte sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalStateException {
+    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -1860,11 +1924,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code ShortStream} formed by concatenating all mapped short sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalStateException {
+    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -2012,11 +2079,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code IntStream} formed by concatenating all mapped int sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -2164,11 +2234,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code LongStream} formed by concatenating all mapped long sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -2316,11 +2389,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code FloatStream} formed by concatenating all mapped float sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -2468,11 +2544,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@code null} sub-streams are treated as empty
      * @return a new parallel {@code DoubleStream} formed by concatenating all mapped double sub-streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @SuppressFBWarnings
     @Override
-    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -2617,10 +2696,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param action a non-interfering action to perform on each element as it is consumed
      * @return a new parallel stream that invokes the action on each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalStateException {
+    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.onEach(action);
@@ -2709,11 +2791,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
      * @throws E2 if the completion callback throws an exception
+     * @throws IllegalArgumentException if {@code action} or {@code onComplete} is {@code null}
      */
     @Override
     public <E extends Exception, E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E> action, final Throwables.Runnable<E2> onComplete)
-            throws E, E2 {
+            throws IllegalArgumentException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
+        checkArgNotNull(onComplete, cs.onComplete);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEach(action, onComplete);
@@ -2819,11 +2905,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code action} throws an exception
+     * @throws IllegalArgumentException if {@code flatMapper} or {@code action} is {@code null}
      */
     @Override
     public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalStateException, E, E2 {
+            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEach(flatMapper, action);
@@ -2922,13 +3012,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code flatMapper2} throws an exception
      * @throws E3 if {@code action} throws an exception
+     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code flatMapper2}, or {@code action} is {@code null}
      */
     @Override
     public <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
-            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(flatMapper2, cs.flatMapper2);
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEach(flatMapper, flatMapper2, action);
@@ -3033,11 +3128,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
     public <E extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E> action)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEachPair(increment, action);
@@ -3096,11 +3194,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code increment} is not positive
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
     public <E extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEachTriple(increment, action);
@@ -3165,12 +3266,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -3281,12 +3388,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalArgumentException if the key mapper returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.groupTo(keyMapper, valueMapper, downstream, mapFactory);
@@ -3440,13 +3552,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalArgumentException if a returned key is {@code null}
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.flatGroupTo(flatKeyExtractor, valueMapper, downstream, mapFactory);
@@ -3608,12 +3725,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E extends Exception, E2 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.toMultimap(keyMapper, valueMapper, mapFactory);
@@ -3705,10 +3827,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @return an {@link Optional} describing the result of the reduction, or an empty Optional if the
      *         stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.reduce(accumulator);
@@ -3812,11 +3937,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        reduction results
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} or {@code combiner} is {@code null}
      */
     @Override
     public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.reduce(identity, accumulator, combiner);
@@ -3903,11 +4032,16 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        container's contents are merged into the first
      * @return the result of the mutable reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.collect(supplier, accumulator, combiner);
@@ -4086,15 +4220,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * parallel. If the stream is already sorted with the same comparator, the first element is returned
      * directly without parallel scanning.
      *
-     * @param comparator a non-interfering, stateless comparator to compare elements; if {@code null},
-     *        a natural-ordering comparator treating {@code null} values as larger is used
+     * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(comparator, cs.comparator);
 
         boolean isDone = true;
 
@@ -4112,8 +4248,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        comparator = comparator == null ? NULL_MAX_COMPARATOR : comparator;
-
         return collect(Collectors.min(comparator));
     }
 
@@ -4122,15 +4256,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * parallel. If the stream is already sorted with the same comparator, the last element is returned
      * directly without parallel scanning.
      *
-     * @param comparator a non-interfering, stateless comparator to compare elements; if {@code null},
-     *        a natural-ordering comparator treating {@code null} values as smaller is used
+     * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(comparator, cs.comparator);
 
         boolean isDone = true;
 
@@ -4148,8 +4284,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        comparator = comparator == null ? NULL_MIN_COMPARATOR : comparator;
-
         return collect(Collectors.max(comparator));
     }
 
@@ -4163,10 +4297,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.anyMatch(predicate);
@@ -4245,10 +4383,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.allMatch(predicate);
@@ -4327,10 +4469,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.noneMatch(predicate);
@@ -4413,14 +4559,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if
      *         {@code atLeast > atMost}
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E> predicate)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNegative(atLeast, cs.atLeast);
-        checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
+        checkArgNotNegative(atMost, cs.atMost);
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.hasMatchCountBetween(atLeast, atMost, predicate);
@@ -4498,10 +4647,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *         Optional if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findFirst(predicate);
@@ -4597,10 +4750,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *         matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findAny(predicate);
@@ -4693,10 +4850,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *         Optional if no element matches
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findLast(predicate);
@@ -4792,15 +4953,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param c the collection of keys; duplicates are treated as separate candidates
      * @return a new parallel stream of elements whose keys are in {@code c}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <U> Stream<T> intersection(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
+    public <U> Stream<T> intersection(final Function<? super T, ? extends U> mapper, final Collection<U> c)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
             return new ParallelIteratorStream<>(sequential().intersection(mapper, c).iteratorEx(), isSorted(), comparator(), maxThreadNum, splitStrategy,
-                    asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                    asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
         }
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4833,15 +4998,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param c the collection of keys to exclude; duplicates are treated as separate exclusions
      * @return a new parallel stream of elements whose keys are not in {@code c}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <U> Stream<T> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c) throws IllegalStateException {
+    public <U> Stream<T> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
             return new ParallelIteratorStream<>(sequential().difference(mapper, c).iteratorEx(), isSorted(), comparator(), maxThreadNum, splitStrategy,
-                    asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                    asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
         }
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -4906,13 +5075,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @Override
-    public Stream<T> mergeWith(final Collection<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
+    public Stream<T> mergeWith(final Collection<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
+        checkArgNotNull(nextSelector, cs.nextSelector);
+
         return new ParallelIteratorStream<>(Stream.merge(iteratorEx(), N.iterate(b), nextSelector), false, null, maxThreadNum, splitStrategy, asyncExecutor,
-                cancelUncompletedThreads, closeHandlers());
+                cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -4927,10 +5100,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @Override
-    public Stream<T> mergeWith(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalStateException {
+    public Stream<T> mergeWith(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new ParallelIteratorStream<>(Stream.merge(this, b, nextSelector), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, null);
@@ -4947,13 +5124,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public <T2, R> Stream<R> zipWith(final Collection<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
+    public <T2, R> Stream<R> zipWith(final Collection<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
+        checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy,
-                asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -4970,14 +5151,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
-            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
+            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
+        checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -4993,14 +5177,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c,
-            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException {
+            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
+        checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), zipFunction, maxThreadNum), false, null, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -5020,15 +5207,18 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
-            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException {
+            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ParallelIteratorStream<>(
                 Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -5042,10 +5232,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
+    public <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, null);
@@ -5065,11 +5259,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final T valueForNoneA, final T2 valueForNoneB,
-            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException {
+            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false, null, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
@@ -5088,11 +5285,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
                 cancelUncompletedThreads, null);
@@ -5116,11 +5316,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any required argument is invalid
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
             final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false, null,
                 maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
@@ -5154,7 +5357,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             synchronized (this) {
                 tmp = sequential;
                 if (tmp == null) {
-                    tmp = new ArrayStream<>(elements, fromIndex, toIndex, isSorted(), comparator(), closeHandlers());
+                    tmp = new ArrayStream<>(elements, fromIndex, toIndex, isSorted(), comparator(), closeHandlersForNewStream());
                     sequential = tmp;
                 }
             }

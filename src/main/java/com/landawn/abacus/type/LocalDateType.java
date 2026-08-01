@@ -78,7 +78,8 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -145,7 +146,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * LocalDate date3 = type.valueOf("1609459200000");
      * }</pre>
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
      * {@code stringOf} back into a value of this type. Because {@code stringOf} delegates to
      * {@link LocalDate#toString()}, the value returned by {@code toString()} round-trips as well.</p>
      *

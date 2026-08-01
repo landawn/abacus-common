@@ -155,7 +155,7 @@ public final class JsonMappers {
     }
 
     private static void checkByteRange(final byte[] json, final int offset, final int len) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkFromIndexSize(offset, len, json.length);
     }
 
@@ -264,8 +264,8 @@ public final class JsonMappers {
      * @see #toJson(Object, SerializationConfig)
      */
     public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features) {
-        N.checkArgNotNull(first, "first");
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(first, cs.first);
+        N.checkArgNotNull(features, cs.features);
 
         return toJson(obj, defaultSerializationConfig.with(first, features));
     }
@@ -731,8 +731,8 @@ public final class JsonMappers {
      */
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationFeature first,
             final DeserializationFeature... features) {
-        N.checkArgNotNull(first, "first");
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(first, cs.first);
+        N.checkArgNotNull(features, cs.features);
 
         return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
     }
@@ -1320,8 +1320,8 @@ public final class JsonMappers {
      */
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationFeature first,
             final DeserializationFeature... features) {
-        N.checkArgNotNull(first, "first");
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(first, cs.first);
+        N.checkArgNotNull(features, cs.features);
 
         return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
     }

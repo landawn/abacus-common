@@ -1,12 +1,12 @@
 package com.landawn.abacus.eventbus;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -222,9 +222,8 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testCreateWithIdentifierAndExecutor() {
-        EventBus bus = EventBus.create("testBus", null);
-        Assertions.assertEquals("testBus", bus.identifier());
+    public void testCreateWithNullExecutor() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> EventBus.create("testBus", null));
     }
 
     @Test

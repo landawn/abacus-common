@@ -546,7 +546,7 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void testFindClassesInPackage_rejectsNullPredicateBeforeScanning() {
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true, null));
     }
 
     @Test

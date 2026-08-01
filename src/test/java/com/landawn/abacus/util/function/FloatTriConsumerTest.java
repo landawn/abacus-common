@@ -47,7 +47,7 @@ public class FloatTriConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         FloatTriConsumer instance = (a, b, c) -> {
         };
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((FloatTriConsumer) null));

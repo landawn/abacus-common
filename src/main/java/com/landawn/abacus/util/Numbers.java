@@ -6756,8 +6756,8 @@ public final class Numbers {
      * @see BigInteger#gcd(BigInteger)
      */
     public static BigInteger gcd(final BigInteger a, final BigInteger b) throws IllegalArgumentException {
-        N.checkArgNotNull(a, "a");
-        N.checkArgNotNull(b, "b");
+        N.checkArgNotNull(a, cs.a);
+        N.checkArgNotNull(b, cs.b);
 
         return a.gcd(b);
     }
@@ -6788,8 +6788,8 @@ public final class Numbers {
      * @see #gcd(BigInteger, BigInteger)
      */
     public static BigInteger lcm(final BigInteger a, final BigInteger b) throws IllegalArgumentException {
-        N.checkArgNotNull(a, "a");
-        N.checkArgNotNull(b, "b");
+        N.checkArgNotNull(a, cs.a);
+        N.checkArgNotNull(b, cs.b);
 
         if (a.signum() == 0 || b.signum() == 0) {
             return BigInteger.ZERO;

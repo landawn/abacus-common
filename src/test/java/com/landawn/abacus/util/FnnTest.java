@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +60,7 @@ public class FnnTest extends TestBase {
 
     @Test
     public void testMemoizeFunctionRejectsNullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> Fnn.memoize((Throwables.Function<Object, Object, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.memoize((Throwables.Function<Object, Object, Exception>) null));
     }
 
     @Test
@@ -101,6 +104,25 @@ public class FnnTest extends TestBase {
         assertEquals(2, callCount[0]);
         assertNotNull(first);
         assertNotNull(second);
+    }
+
+    @Test
+    public void testMemoizeWithExpiration_recursiveComputationFailsFastAndRetries() {
+        final int[] attempts = { 0 };
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+
+        holder[0] = Fnn.memoizeWithExpiration(() -> {
+            attempts[0]++;
+            return holder[0].get();
+        }, 1, java.util.concurrent.TimeUnit.HOURS);
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, holder[0]::get);
+        final IllegalStateException second = assertThrows(IllegalStateException.class, holder[0]::get);
+
+        assertEquals("Recursive computation of memoized value", first.getMessage());
+        assertEquals("Recursive computation of memoized value", second.getMessage());
+        assertEquals(2, attempts[0], "Failed refreshes must remain retryable");
     }
 
     // Additional tests for uncovered branches
@@ -423,7 +445,7 @@ public class FnnTest extends TestBase {
 
     @Test
     public void testThrowException_withNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Fnn.throwException((java.util.function.Supplier<Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.throwException((java.util.function.Supplier<Exception>) null));
     }
 
     @Test
@@ -864,7 +886,7 @@ public class FnnTest extends TestBase {
 
     @Test
     public void testC_Callable_Null() {
-        assertThrows(IllegalArgumentException.class, () -> Fnn.c((Throwables.Callable<String, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Fnn.c((Throwables.Callable<String, Exception>) null));
     }
 
     @Test
@@ -1004,6 +1026,162 @@ public class FnnTest extends TestBase {
         assertEquals("k!", f.apply("k"));
         assertEquals("k!", f.apply("k"));
         assertEquals(2, calls.get(), "exception path must not cache, success path caches");
+    }
+
+    @Test
+    public void testMemoizeFunction_recursiveNullKeyFailsFastAndRetries() {
+        final int[] attempts = { 0 };
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            attempts[0]++;
+            return holder[0].apply(key);
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertEquals(2, attempts[0], "Failed null-key computations must remain retryable");
+    }
+
+    @Test
+    public void testMemoizeFunction_recursiveNonNullKeyFailsFastAndRetries() {
+        final int[] attempts = { 0 };
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            attempts[0]++;
+            return holder[0].apply(key);
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertEquals(2, attempts[0], "Failed keyed computations must remain retryable");
+    }
+
+    @Test
+    public void testMemoizeFunction_swallowedRecursiveNullKeyStillFailsAndRetries() {
+        final int[] attempts = { 0 };
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            attempts[0]++;
+
+            try {
+                holder[0].apply(key);
+            } catch (final IllegalStateException ignored) {
+                // A recursive failure must invalidate the outer computation even if caught here.
+            }
+
+            return "must-not-be-cached";
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply(null));
+        assertEquals(2, attempts[0]);
+    }
+
+    @Test
+    public void testMemoizeFunction_swallowedRecursiveNonNullKeyStillFailsAndRetries() {
+        final int[] attempts = { 0 };
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            attempts[0]++;
+
+            try {
+                holder[0].apply(key);
+            } catch (final IllegalStateException ignored) {
+                // A recursive failure must invalidate the outer computation even if caught here.
+            }
+
+            return "must-not-be-cached";
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("key"));
+        assertEquals(2, attempts[0]);
+    }
+
+    @Test
+    public void testMemoizeFunction_distinctKeyRecursionRemainsSupported() throws Exception {
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<Integer, Integer, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> key == 0 ? 0 : holder[0].apply(key - 1) + 1);
+
+        assertEquals(4, holder[0].apply(4));
+        assertEquals(4, holder[0].apply(4));
+    }
+
+    @Test
+    public void testMemoizeFunction_nullAndNonNullCrossCallsDoNotDeadlock() throws Exception {
+        final CountDownLatch nullCallbackEntered = new CountDownLatch(1);
+        final CountDownLatch nonNullWorkerStarted = new CountDownLatch(1);
+        final CountDownLatch nonNullCallbackEntered = new CountDownLatch(1);
+        final AtomicReference<Thread> dedicatedNonNullWorker = new AtomicReference<>();
+        final AtomicReference<String> nullResult = new AtomicReference<>();
+        final AtomicReference<String> nonNullResult = new AtomicReference<>();
+        final AtomicReference<Throwable> nullFailure = new AtomicReference<>();
+        final AtomicReference<Throwable> nonNullFailure = new AtomicReference<>();
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            if (key == null) {
+                nullCallbackEntered.countDown();
+                assertTrue(nonNullWorkerStarted.await(5, TimeUnit.SECONDS));
+                nonNullCallbackEntered.await(1, TimeUnit.SECONDS);
+                return "null->" + holder[0].apply("key");
+            }
+
+            nonNullCallbackEntered.countDown();
+
+            if (Thread.currentThread() == dedicatedNonNullWorker.get()) {
+                return "key->" + holder[0].apply(null);
+            }
+
+            return "key";
+        });
+
+        final Thread nullWorker = new Thread(() -> {
+            try {
+                nullResult.set(holder[0].apply(null));
+            } catch (final Throwable e) {
+                nullFailure.set(e);
+            }
+        }, "FnnTest-memoize-null-worker");
+        nullWorker.setDaemon(true);
+        nullWorker.start();
+        assertTrue(nullCallbackEntered.await(5, TimeUnit.SECONDS));
+
+        final Thread nonNullWorker = new Thread(() -> {
+            nonNullWorkerStarted.countDown();
+
+            try {
+                nonNullResult.set(holder[0].apply("key"));
+            } catch (final Throwable e) {
+                nonNullFailure.set(e);
+            }
+        }, "FnnTest-memoize-non-null-worker");
+        dedicatedNonNullWorker.set(nonNullWorker);
+        nonNullWorker.setDaemon(true);
+        nonNullWorker.start();
+
+        nullWorker.join(TimeUnit.SECONDS.toMillis(3));
+        nonNullWorker.join(TimeUnit.SECONDS.toMillis(3));
+
+        assertFalse(nullWorker.isAlive(), "Null/non-null memoization lock inversion deadlocked the null worker");
+        assertFalse(nonNullWorker.isAlive(), "Null/non-null memoization lock inversion deadlocked the non-null worker");
+        assertNull(nullFailure.get());
+        assertNull(nonNullFailure.get());
+        assertEquals("null->key", nullResult.get());
+        assertEquals("key", nonNullResult.get());
+        assertEquals("null->key", holder[0].apply(null));
+        assertEquals("key", holder[0].apply("key"));
     }
 
     // --- alwaysTrue / alwaysFalse / identity ---

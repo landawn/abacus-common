@@ -27,7 +27,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <A> the type of the first argument to the function
@@ -87,12 +86,13 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * }</pre>
      *
      * @param <V> the type of output of the after function, and of the composed function
-     * @param after the function to apply after this function is applied. Must not be {@code null}.
+     * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the after function
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+    default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c) -> after.apply(apply(a, b, c));
     }
 

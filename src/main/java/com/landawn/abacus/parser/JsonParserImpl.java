@@ -5242,7 +5242,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         Bean/Map/MapEntity/Collection/object-array/Dataset/Sheet/EntityId type
      */
     private void checkStreamSupportedType(final Type<?> elementType) {
-        N.checkArgNotNull(elementType, "elementType");
+        N.checkArgNotNull(elementType, cs.elementType);
 
         switch (elementType.serializationType()) { // NOSONAR
             case ENTITY, MAP, ARRAY, COLLECTION, MAP_ENTITY, DATASET, SHEET, ENTITY_ID:

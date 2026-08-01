@@ -214,8 +214,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream skipUntil(final CharPredicate predicate) throws IllegalStateException {
+    public CharStream skipUntil(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return dropWhile(t -> !predicate.test(t));
     }
@@ -231,29 +233,37 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalStateException {
+    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMap(t -> CharStream.of(mapper.apply(t)));
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMapToObj(t -> Stream.of(mapper.apply(t)));
     }
 
     @Override
-    public <T> Stream<T> flatMapArrayToObj(final CharFunction<T[]> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapArrayToObj(final CharFunction<T[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMapToObj(t -> Stream.of(mapper.apply(t)));
     }
 
     @Override
-    public CharStream mapPartial(final CharFunction<OptionalChar> mapper) {
+    public CharStream mapPartial(final CharFunction<OptionalChar> mapper) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             //noinspection resource
@@ -265,8 +275,11 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream rangeMap(final CharBiPredicate sameRange, final CharBinaryOperator mapper) throws IllegalStateException {
+    public CharStream rangeMap(final CharBiPredicate sameRange, final CharBinaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(sameRange, cs.sameRange);
+        checkArgNotNull(mapper, cs.mapper);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -300,8 +313,12 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<? extends T> mapper)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(sameRange, cs.sameRange);
+        checkArgNotNull(mapper, cs.mapper);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -335,8 +352,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public Stream<CharList> collapse(final CharBiPredicate collapsible) throws IllegalStateException {
+    public Stream<CharList> collapse(final CharBiPredicate collapsible) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -368,8 +387,12 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream collapse(final CharBiPredicate collapsible, final CharBinaryOperator mergeFunction) throws IllegalStateException {
+    public CharStream collapse(final CharBiPredicate collapsible, final CharBinaryOperator mergeFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -400,8 +423,12 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream collapse(final CharTriPredicate collapsible, final CharBinaryOperator mergeFunction) throws IllegalStateException {
+    public CharStream collapse(final CharTriPredicate collapsible, final CharBinaryOperator mergeFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -435,6 +462,7 @@ abstract class AbstractCharStream extends CharStream {
     @Override
     public CharStream skip(final long n, final CharConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
         checkArgNotNull(action, cs.action);
 
@@ -462,8 +490,11 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream filter(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalStateException {
+    public CharStream filter(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(onDrop, cs.onDrop);
 
         return filter(value -> {
             if (!predicate.test(value)) {
@@ -476,8 +507,11 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalStateException {
+    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(onDrop, cs.onDrop);
 
         return dropWhile(value -> {
             if (predicate.test(value)) {
@@ -519,8 +553,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream scan(final CharBinaryOperator accumulator) throws IllegalStateException {
+    public CharStream scan(final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -546,8 +582,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream scan(final char init, final CharBinaryOperator accumulator) throws IllegalStateException {
+    public CharStream scan(final char init, final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         final CharIteratorEx iter = iteratorEx();
 
@@ -567,8 +605,11 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream scan(final char init, final boolean initIncluded, final CharBinaryOperator accumulator) throws IllegalStateException {
+    public CharStream scan(final char init, final boolean initIncluded, final CharBinaryOperator accumulator)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (!initIncluded) {
             return scan(init, accumulator);
@@ -1175,8 +1216,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream mergeWith(final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalStateException {
+    public CharStream mergeWith(final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (isParallel()) {
             return CharStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
@@ -1186,70 +1229,96 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream zipWith(final CharStream b, final CharBinaryOperator zipFunction) throws IllegalStateException {
+    public CharStream zipWith(final CharStream b, final CharBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, zipFunction);
     }
 
     @Override
-    public CharStream zipWith(final CharStream b, final CharStream c, final CharTernaryOperator zipFunction) throws IllegalStateException {
+    public CharStream zipWith(final CharStream b, final CharStream c, final CharTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public CharStream zipWith(final CharStream b, final char valueForNoneA, final char valueForNoneB, final CharBinaryOperator zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public CharStream zipWith(final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB, final char valueForNoneC,
-            final CharTernaryOperator zipFunction) throws IllegalStateException {
+            final CharTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Throwables.CharFunction<? extends V, E2> valueMapper) throws IllegalStateException, E, E2 {
+            final Throwables.CharFunction<? extends V, E2> valueMapper) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
 
         return toMap(keyMapper, valueMapper, Suppliers.ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Throwables.CharFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2 {
+            final Throwables.CharFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         return toMap(keyMapper, valueMapper, Fn.throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalStateException, E, E2 {
+            final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction)
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.ofMap());
     }
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Collector<? super Character, ?, D> downstream) throws IllegalStateException, E {
+            final Collector<? super Character, ?, D> downstream) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
 
     @Override
-    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
@@ -1322,8 +1391,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return findFirst(predicate);
     }
@@ -1393,11 +1464,6 @@ abstract class AbstractCharStream extends CharStream {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws IllegalArgumentException if {@code joiner} is {@code null}
-     */
     @Override
     public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
@@ -1418,8 +1484,11 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator) throws IllegalStateException {
+    public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
 
         @SuppressWarnings("UnnecessaryLocalVariable")
         final BiConsumer<R, R> combiner = collectingCombiner;

@@ -689,6 +689,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p>This library uses specific naming for different {@code flatMap} variants:</p>
      * <ul>
      *   <li>{@link #flatMap(IntFunction) flatMap} (this method) - transforms elements into {@link com.landawn.abacus.util.stream.IntStream IntStream} (this library's stream).</li>
+     *   <li>{@link #flatmap(IntFunction) flatmap} (lowercase 'm') - transforms elements into a {@link java.util.Collection Collection} of {@link Integer}.</li>
      *   <li>{@link #flatMapArray(IntFunction) flatMapArray} - transforms elements into an {@code int[]} array.</li>
      *   <li>{@link #flattMap(IntFunction) flattMap} (double 't', uppercase 'M') - transforms elements into a standard {@link java.util.stream.IntStream java.util.stream.IntStream} (JDK).</li>
      * </ul>
@@ -909,12 +910,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped JDK streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public IntStream flatMapJdkStream(IntFunction<? extends java.util.stream.IntStream> mapper) {
+    public IntStream flatMapJdkStream(IntFunction<? extends java.util.stream.IntStream> mapper) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flattMap(mapper);
     }
@@ -1293,7 +1297,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -1327,7 +1331,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
-     *              If {@code true} is returned, the next element belongs to the same range as the first element. Must be {@code non-null}.
+     *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
@@ -1448,7 +1452,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
-     * @see Stream#collapse(BiPredicate, BinaryOperator)
+     * @see Stream#collapse(TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
@@ -1688,6 +1692,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a new {@link IntStream} consisting of the top {@code n} elements as determined by the comparator; the order of the returned elements is not guaranteed
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
@@ -2148,12 +2153,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @see #forEach(Throwables.IntConsumer)
      */
     @ParallelSupported
     @TerminalOp
-    public void foreach(final IntConsumer action) { // NOSONAR
+    public void foreach(final IntConsumer action) throws IllegalArgumentException { // NOSONAR
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         forEach(action::accept);
     }
@@ -2719,11 +2727,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param b the stream to merge with this stream
-     * @param nextSelector a function to determine which element should be selected as the next element. Must not be {@code null}.
+     * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned,
      *                     otherwise the second parameter is selected.
      * @return the merged stream
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -2749,7 +2756,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param b the IntStream to be combined with the current IntStream. Must be {@code non-null}. Will be closed along with this stream.
-     * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
+     * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(IntStream, int, int, IntBinaryOperator)
@@ -2777,7 +2784,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param b the second IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
      * @param c the third IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
-     * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
+     * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
      * @throws IllegalStateException if the stream is already closed
      * @see #zipWith(IntStream, IntStream, int, int, int, IntTernaryOperator)
@@ -2805,7 +2812,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
      * @param valueForNoneA the default value to use for the current IntStream when it runs out of elements
      * @param valueForNoneB the default value to use for the given IntStream when it runs out of elements
-     * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
+     * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
      * @throws IllegalStateException if the stream is already closed
      */
@@ -2836,7 +2843,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneA the default value to use for the current IntStream when it runs out of elements
      * @param valueForNoneB the default value to use for the second IntStream when it runs out of elements
      * @param valueForNoneC the default value to use for the third IntStream when it runs out of elements
-     * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream. Must be {@code non-null}.
+     * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
      * @throws IllegalStateException if the stream is already closed
      */
@@ -3061,13 +3068,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param transfer the function to transform the java.util.stream.IntStream
      * @return a new IntStream resulting from the transformation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if transfer is null
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public IntStream transformB(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer) {
+    public IntStream transformB(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer)
+            throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(transfer, cs.transfer);
 
         return transformB(transfer, false);
     }
@@ -3098,7 +3108,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                 if {@code false}, the transformation is applied immediately
      * @return a new IntStream resulting from the transformation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if transfer is null
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -3106,6 +3116,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public IntStream transformB(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer, final boolean deferred)
             throws IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
@@ -3152,8 +3163,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Returns an IntStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier is memoized and invoked at most once. Closing the returned stream before traversal may still
-     * invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
+     * the supplier so the supplied stream can be closed.
      *
      * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToInt(it -> it.get())}.
      *
@@ -3178,14 +3190,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param supplier the supplier that provides the IntStream
      * @return a new IntStream supplied by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
      * @see Stream#defer(Supplier)
      */
     public static IntStream defer(final Supplier<IntStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<IntStream> s = Fn.memoize(supplier);
-        return Stream.just(s).flatMapToInt(Supplier::get).onClose(newCloseHandler(s));
+        return IntStream.of(IntIterator.defer(() -> {
+            final IntStream source = s.get();
+            return source == null ? IntIterator.empty() : source.iteratorEx();
+        })).onClose(newCloseHandler(s));
     }
 
     /**
@@ -3595,9 +3610,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a function that maps a chunk defined by its from index (inclusive) and to index (exclusive) to an int value in the resulting stream
      * @return an IntStream of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
-    public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBinaryOperator mapper) {
+    public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBinaryOperator mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         return splitByChunkCount(totalSize, maxChunkCount, false, mapper);
     }
 
@@ -3625,12 +3643,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a function that maps a chunk defined by its from index (inclusive) and to index (exclusive) to an int value in the resulting stream
      * @return an IntStream of the mapped chunk values
      * @throws IllegalArgumentException if {@code totalSize} is negative or {@code maxChunkCount} is not positive.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#splitByChunkCount(int, int, boolean, IntBiFunction)
      */
     public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst, final IntBinaryOperator mapper)
             throws IllegalArgumentException {
         N.checkArgNotNegative(totalSize, cs.totalSize);
         N.checkArgPositive(maxChunkCount, cs.maxChunkCount);
+        N.checkArgNotNull(mapper, cs.mapper);
 
         if (totalSize == 0) {
             return IntStream.empty();
@@ -4561,10 +4581,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param source the source from which indices are generated
      * @param indexFunc the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if indexFunc is null
+     * @throws IllegalArgumentException if {@code indexFunc} is {@code null}
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final ObjIntFunction<? super AC, Integer> indexFunc) {
+    public static <AC> IntStream ofIndices(final AC source, final ObjIntFunction<? super AC, Integer> indexFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(indexFunc, cs.indexFunc);
+
         return ofIndices(source, 0, indexFunc);
     }
 
@@ -4591,10 +4613,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param fromIndex the starting index from which to generate indices
      * @param indexFunc the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if fromIndex is negative or if indexFunc is null
+     * @throws IllegalArgumentException if fromIndex is negative
+     * @throws IllegalArgumentException if {@code indexFunc} is {@code null}
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final ObjIntFunction<? super AC, Integer> indexFunc) {
+    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final ObjIntFunction<? super AC, Integer> indexFunc)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(indexFunc, cs.indexFunc);
+
         return ofIndices(source, fromIndex, 1, indexFunc);
     }
 
@@ -4622,14 +4648,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param increment the increment value for generating indices (can be positive or negative but not zero)
      * @param indexFunc the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if fromIndex is negative, if increment is zero, or if indexFunc is null
+     * @throws IllegalArgumentException if fromIndex is negative or if increment is zero
+     * @throws IllegalArgumentException if {@code indexFunc} is {@code null}
      */
     @Beta
     public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunc)
             throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
-        N.checkArgument(increment != 0, "'increment' cannot be zero");
         N.checkArgNotNull(indexFunc, cs.indexFunc);
+
+        N.checkArgument(increment != 0, "'increment' cannot be zero");
 
         if (source == null) {
             return IntStream.empty();
@@ -4653,14 +4681,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param sourceLen the length of the source
      * @param indexFunc the function to generate indices from the source
      * @return an IntStream of indices, or empty stream if source is null
-     * @throws IllegalArgumentException if fromIndex is negative, if increment is zero, or if indexFunc is null
+     * @throws IllegalArgumentException if fromIndex is negative or if increment is zero
      */
     @Beta
     private static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final int sourceLen,
             final ObjIntFunction<? super AC, Integer> indexFunc) throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
         N.checkArgument(increment != 0, "'increment' cannot be zero");
-        N.checkArgNotNull(indexFunc, cs.indexFunc);
 
         if (source == null) {
             return IntStream.empty();
@@ -4693,12 +4720,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next an IntSupplier that provides the next int in the iteration
      * @return an IntStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>next</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static IntStream iterate(final BooleanSupplier hasNext, final IntSupplier next) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(next);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(next, cs.next);
 
         return new IteratorIntStream(new IntIteratorEx() {
             private boolean hasMore = true;
@@ -4753,12 +4780,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return an IntStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, BooleanSupplier, java.util.function.UnaryOperator)
      */
     public static IntStream iterate(final int init, final BooleanSupplier hasNext, final IntUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorIntStream(new IntIteratorEx() {
             private int cur = 0;
@@ -4822,12 +4849,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param hasNext a predicate that determines if the returned stream has next by testing hasNext.test(init) for first time and hasNext.test(f.apply(previous)) for remaining elements
      * @param f a function to apply to the previous element to generate the next element
      * @return an IntStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>hasNext</i> or <i>f</i> is null
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.Predicate, java.util.function.UnaryOperator)
      */
     public static IntStream iterate(final int init, final IntPredicate hasNext, final IntUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorIntStream(new IntIteratorEx() {
             private int cur = 0;
@@ -4889,11 +4916,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an IntStream of elements generated by the iteration
-     * @throws IllegalArgumentException if <i>f</i> is null
+     * @throws IllegalArgumentException if {@code f} is {@code null}
      * @see Stream#iterate(Object, java.util.function.UnaryOperator)
      */
     public static IntStream iterate(final int init, final IntUnaryOperator f) throws IllegalArgumentException {
-        N.checkArgNotNull(f);
+        N.checkArgNotNull(f, cs.f);
 
         return new IteratorIntStream(new IntIteratorEx() {
             private int cur = 0;
@@ -4944,11 +4971,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param s the IntSupplier that provides the elements of the stream
      * @return an IntStream generated by the given supplier
-     * @throws IllegalArgumentException if the supplier is null
+     * @throws IllegalArgumentException if {@code s} is {@code null}
      * @see Stream#generate(Supplier)
      */
     public static IntStream generate(final IntSupplier s) throws IllegalArgumentException {
-        N.checkArgNotNull(s);
+        N.checkArgNotNull(s, cs.s);
 
         return new IteratorIntStream(new IntIteratorEx() {
             @Override
@@ -5235,11 +5262,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first int array
      * @param b the second int array
-     * @param zipFunction the function to combine pairs of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(int[], int[], int, int, IntBinaryOperator)
      */
-    public static IntStream zip(final int[] a, final int[] b, final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final int[] a, final int[] b, final IntBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b)) {
             return empty();
         }
@@ -5283,11 +5313,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first int array
      * @param b the second int array
      * @param c the third int array
-     * @param zipFunction the function to combine triples of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(int[], int[], int[], int, int, int, IntTernaryOperator)
      */
-    public static IntStream zip(final int[] a, final int[] b, final int[] c, final IntTernaryOperator zipFunction) {
+    public static IntStream zip(final int[] a, final int[] b, final int[] c, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) || N.isEmpty(b) || N.isEmpty(c)) {
             return empty();
         }
@@ -5329,11 +5362,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first int iterator. Can be {@code null} (treated as empty)
      * @param b the second int iterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine pairs of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntIterator, IntIterator, int, int, IntBinaryOperator)
      */
-    public static IntStream zip(final IntIterator a, final IntIterator b, final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final IntIterator a, final IntIterator b, final IntBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorIntStream(new IntIteratorEx() {
             private final IntIterator iterA = a == null ? IntIterator.empty() : a;
             private final IntIterator iterB = b == null ? IntIterator.empty() : b;
@@ -5369,11 +5405,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first int iterator. Can be {@code null} (treated as empty)
      * @param b the second int iterator. Can be {@code null} (treated as empty)
      * @param c the third int iterator. Can be {@code null} (treated as empty)
-     * @param zipFunction the function to combine triples of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntIterator, IntIterator, IntIterator, int, int, int, IntTernaryOperator)
      */
-    public static IntStream zip(final IntIterator a, final IntIterator b, final IntIterator c, final IntTernaryOperator zipFunction) {
+    public static IntStream zip(final IntIterator a, final IntIterator b, final IntIterator c, final IntTernaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorIntStream(new IntIteratorEx() {
             private final IntIterator iterA = a == null ? IntIterator.empty() : a;
             private final IntIterator iterB = b == null ? IntIterator.empty() : b;
@@ -5408,11 +5448,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param a the first IntStream
      * @param b the second IntStream
-     * @param zipFunction the function to combine pairs of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntStream, IntStream, int, int, IntBinaryOperator)
      */
-    public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -5435,11 +5478,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first IntStream
      * @param b the second IntStream
      * @param c the third IntStream
-     * @param zipFunction the function to combine triples of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntStream, IntStream, IntStream, int, int, int, IntTernaryOperator)
      */
-    public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) {
+    public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
     }
 
@@ -5468,11 +5514,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@link IntTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values. Empty if the collection is empty
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(Collection, int[], IntNFunction)
      */
-    public static IntStream zip(final Collection<? extends IntStream> streams, final IntNFunction<Integer> zipFunction) {
+    public static IntStream zip(final Collection<? extends IntStream> streams, final IntNFunction<Integer> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, zipFunction).mapToInt(ToIntFunction.UNBOX);
     }
@@ -5496,11 +5545,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second int array
      * @param valueForNoneA the default value to use when the first array runs out of values
      * @param valueForNoneB the default value to use when the second array runs out of values
-     * @param zipFunction the function to combine pairs of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(int[], int[], IntBinaryOperator)
      */
-    public static IntStream zip(final int[] a, final int[] b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final int[] a, final int[] b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b)) {
             return empty();
         }
@@ -5550,12 +5603,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneA the default value to use when the first array runs out of values
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param valueForNoneC the default value to use when the third array runs out of values
-     * @param zipFunction the function to combine triples of values from the arrays. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(int[], int[], int[], IntTernaryOperator)
      */
     public static IntStream zip(final int[] a, final int[] b, final int[] c, final int valueForNoneA, final int valueForNoneB, final int valueForNoneC,
-            final IntTernaryOperator zipFunction) {
+            final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         if (N.isEmpty(a) && N.isEmpty(b) && N.isEmpty(c)) {
             return empty();
         }
@@ -5604,12 +5660,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second int iterator, may be {@code null} (treated as empty)
      * @param valueForNoneA the default value to use when the first iterator runs out of values
      * @param valueForNoneB the default value to use when the second iterator runs out of values
-     * @param zipFunction the function to combine pairs of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntIterator, IntIterator, IntBinaryOperator)
      */
-    public static IntStream zip(final IntIterator a, final IntIterator b, final int valueForNoneA, final int valueForNoneB,
-            final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final IntIterator a, final IntIterator b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorIntStream(new IntIteratorEx() {
             private final IntIterator iterA = a == null ? IntIterator.empty() : a;
             private final IntIterator iterB = b == null ? IntIterator.empty() : b;
@@ -5653,12 +5712,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneA the default value to use when the first iterator runs out of values
      * @param valueForNoneB the default value to use when the second iterator runs out of values
      * @param valueForNoneC the default value to use when the third iterator runs out of values
-     * @param zipFunction the function to combine triples of values from the iterators. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntIterator, IntIterator, IntIterator, IntTernaryOperator)
      */
     public static IntStream zip(final IntIterator a, final IntIterator b, final IntIterator c, final int valueForNoneA, final int valueForNoneB,
-            final int valueForNoneC, final IntTernaryOperator zipFunction) {
+            final int valueForNoneC, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return new IteratorIntStream(new IntIteratorEx() {
             private final IntIterator iterA = a == null ? IntIterator.empty() : a;
             private final IntIterator iterB = b == null ? IntIterator.empty() : b;
@@ -5703,11 +5765,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second int stream
      * @param valueForNoneA the default value to use when the first stream runs out of values
      * @param valueForNoneB the default value to use when the second stream runs out of values
-     * @param zipFunction the function to combine pairs of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntStream, IntStream, IntBinaryOperator)
      */
-    public static IntStream zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction) {
+    public static IntStream zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
     }
 
@@ -5734,12 +5800,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneA the default value to use when the first stream runs out of values
      * @param valueForNoneB the default value to use when the second stream runs out of values
      * @param valueForNoneC the default value to use when the third stream runs out of values
-     * @param zipFunction the function to combine triples of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(IntStream, IntStream, IntStream, IntTernaryOperator)
      */
     public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB,
-            final int valueForNoneC, final IntTernaryOperator zipFunction) {
+            final int valueForNoneC, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
                 .onClose(newCloseHandler(Array.asList(a, b, c)));
     }
@@ -5772,12 +5841,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
-     * @param zipFunction the function to combine arrays of values from the streams. Must be {@code non-null}.
+     * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
      * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      * @see #zip(Collection, IntNFunction)
      */
-    public static IntStream zip(final Collection<? extends IntStream> streams, final int[] valuesForNone, final IntNFunction<Integer> zipFunction) {
+    public static IntStream zip(final Collection<? extends IntStream> streams, final int[] valuesForNone, final IntNFunction<Integer> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         //noinspection resource
         return Stream.zip(streams, valuesForNone, zipFunction).mapToInt(ToIntFunction.UNBOX);
     }
@@ -5808,13 +5881,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second int array
      * @param nextSelector a function that determines which element to select next. It receives the next elements from both sources
      *                     and returns {@code MergeResult.TAKE_FIRST} to select the first or {@code MergeResult.TAKE_SECOND} to select
-     *                     the second; must not be {@code null}
+     *                     the second
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(int[], int[], int[], IntBiFunction)
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
-    public static IntStream merge(final int[] a, final int[] b, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final int[] a, final int[] b, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(a)) {
@@ -5877,13 +5950,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first int array
      * @param b the second int array
      * @param c the third int array
-     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
+     * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(int[], int[], IntBiFunction)
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
-    public static IntStream merge(final int[] a, final int[] b, final int[] c, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final int[] a, final int[] b, final int[] c, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), IntStream.of(c).iteratorEx(), nextSelector);
     }
@@ -5914,13 +5989,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second IntIterator (null is treated as an empty iterator)
      * @param nextSelector a function that determines which element to select next. It receives the next elements from both sources
      *                     and returns {@code MergeResult.TAKE_FIRST} to select the first or {@code MergeResult.TAKE_SECOND} to select
-     *                     the second; must not be {@code null}
+     *                     the second
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntIterator, IntIterator, IntIterator, IntBiFunction)
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
-    public static IntStream merge(final IntIterator a, final IntIterator b, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final IntIterator a, final IntIterator b, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return new IteratorIntStream(new IntIteratorEx() {
@@ -6011,13 +6086,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first IntIterator (null is treated as an empty iterator)
      * @param b the second IntIterator (null is treated as an empty iterator)
      * @param c the third IntIterator (null is treated as an empty iterator)
-     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
+     * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntIterator, IntIterator, IntBiFunction)
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
-    public static IntStream merge(final IntIterator a, final IntIterator b, final IntIterator c, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final IntIterator a, final IntIterator b, final IntIterator c, final IntBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         //noinspection resource
         return merge(merge(a, b, nextSelector).iteratorEx(), c, nextSelector);
     }
@@ -6048,13 +6126,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the second IntStream
      * @param nextSelector a function that determines which element to select next. It receives the next elements from both sources
      *                     and returns {@code MergeResult.TAKE_FIRST} to select the first or {@code MergeResult.TAKE_SECOND} to select
-     *                     the second; must not be {@code null}
+     *                     the second
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
@@ -6089,13 +6167,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param a the first IntStream
      * @param b the second IntStream
      * @param c the third IntStream
-     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
+     * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
-    public static IntStream merge(final IntStream a, final IntStream b, final IntStream c, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final IntStream a, final IntStream b, final IntStream c, final IntBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         return merge(merge(a, b, nextSelector), c, nextSelector);
     }
 
@@ -6129,13 +6210,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * }</pre>
      *
      * @param streams the collection of IntStreams to merge; a {@code null} collection and {@code null} elements are treated as empty
-     * @param nextSelector a function that determines which element to select next from pairs of elements; must not be {@code null}
+     * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements, or an empty stream if the collection is empty
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Collection, BiFunction)
      */
-    public static IntStream merge(final Collection<? extends IntStream> streams, final IntBiFunction<MergeResult> nextSelector) {
+    public static IntStream merge(final Collection<? extends IntStream> streams, final IntBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {

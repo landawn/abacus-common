@@ -1374,7 +1374,7 @@ public final class TypeFactory {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Type<T> getType(final java.lang.reflect.Type javaType) throws IllegalArgumentException {
-        N.checkArgNotNull(javaType, "javaType");
+        N.checkArgNotNull(javaType, cs.javaType);
 
         Type result = javaType2TypeCache.get(javaType);
 
@@ -1501,7 +1501,7 @@ public final class TypeFactory {
      * @param targetClass the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, if a type is already registered for {@code targetClass}, or if a type with the same name (the canonical class name of {@code targetClass}) already exists
+     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
@@ -1549,7 +1549,7 @@ public final class TypeFactory {
      * @param cls the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}, if a type is already registered for {@code cls}, or if a type with the same name (the canonical class name of {@code cls}) already exists
+     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
      */
@@ -1614,8 +1614,8 @@ public final class TypeFactory {
             throw new IllegalArgumentException("A type has already registered with class: " + cls);
         }
 
-        final String registeredTypeName = type.name();
-        registerType(type);
+        final String registeredTypeName = N.checkArgNotEmpty(type.name(), "type.name()");
+        registerTypeByIntrinsicName(registeredTypeName, type);
 
         // Atomic check-then-put closes the check-then-act race: a concurrent registration for the
         // same class cannot silently overwrite an existing mapping.
@@ -1651,14 +1651,14 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is {@code null},
-     *                                  or if a type with the given name already exists
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass}, {@code toStringFunc}, or
+     *                                  {@code fromStringFunc} is {@code null}
      * @see #registerType(String, Class, Function, Function)
      * @see #registerType(String, Type)
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final BiFunction<? super T, JsonParser, String> toStringFunc,
             final BiFunction<? super String, JsonParser, T> fromStringFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotEmpty(typeName, cs.typeName);
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
         N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
@@ -1708,14 +1708,14 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if typeName, targetClass, toStringFunc, or fromStringFunc is {@code null},
-     *                                  or if a type with the given name already exists
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass}, {@code toStringFunc}, or
+     *                                  {@code fromStringFunc} is {@code null}
      * @see #registerType(String, Class, BiFunction, BiFunction)
      * @see #registerType(String, Type)
      */
     public static <T> void registerType(final String typeName, final Class<T> targetClass, final Function<? super T, String> toStringFunc,
             final Function<? super String, T> fromStringFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotEmpty(typeName, cs.typeName);
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
         N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
@@ -1767,14 +1767,16 @@ public final class TypeFactory {
      * @see #getType(String)
      */
     public static void registerType(final String typeName, final Type<?> type) throws IllegalArgumentException {
-        N.checkArgNotNull(typeName, cs.typeName);
+        N.checkArgNotEmpty(typeName, cs.typeName);
         N.checkArgNotNull(type, cs.type);
 
-        if (typeName.equals(type.name())) {
+        final String intrinsicTypeName = N.checkArgNotEmpty(type.name(), "type.name()");
+
+        if (typeName.equals(intrinsicTypeName)) {
             // typeName IS the type's own name: a single atomic registration (no separate alias slot).
             // Delegating avoids a self-conflict where the alias put would collide with the name just
             // inserted by registerType(type).
-            registerType(type);
+            registerTypeByIntrinsicName(intrinsicTypeName, type);
             return;
         }
 
@@ -1783,7 +1785,7 @@ public final class TypeFactory {
         }
 
         try {
-            registerType(type);
+            registerTypeByIntrinsicName(intrinsicTypeName, type);
         } catch (final RuntimeException e) {
             typePool.remove(typeName, type);
             throw e;
@@ -1817,10 +1819,16 @@ public final class TypeFactory {
     public static void registerType(final Type<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
 
+        final String intrinsicTypeName = N.checkArgNotEmpty(type.name(), "type.name()");
+
+        registerTypeByIntrinsicName(intrinsicTypeName, type);
+    }
+
+    private static void registerTypeByIntrinsicName(final String intrinsicTypeName, final Type<?> type) {
         // Atomic check-then-put closes the check-then-act race: a concurrent registration for the
         // same name cannot silently overwrite an existing mapping (a startup-time op in practice).
-        if (typePool.putIfAbsent(type.name(), type) != null) {
-            throw new IllegalArgumentException("A type has already registered with name: " + type.name());
+        if (typePool.putIfAbsent(intrinsicTypeName, type) != null) {
+            throw new IllegalArgumentException("A type has already registered with name: " + intrinsicTypeName);
         }
 
         //    if (!typePool.containsKey(getClassName(type.javaType()))) {
@@ -1832,6 +1840,9 @@ public final class TypeFactory {
         //    }
     }
 
+    /**
+     * Suppresses default constructor; {@code TypeFactory} is a static utility and is not instantiable.
+     */
     private TypeFactory() {
         // no instance.
     }

@@ -192,11 +192,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // The supplier is not invoked until iter.hasNext() or iter.nextLong() is called
      * }</pre>
      *
-     * @param iteratorSupplier a {@link Supplier} that provides the {@code LongIterator} when needed;
-     *        must not be {@code null}
+     * @param iteratorSupplier a {@link Supplier} that provides the {@code LongIterator} when needed
      * @return a lazily initialized {@code LongIterator} that delegates to the iterator provided by the supplier
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -258,12 +257,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Generates random long values infinitely
      * }</pre>
      *
-     * @param supplier the {@link LongSupplier} used to generate values; must not be {@code null}
+     * @param supplier the {@link LongSupplier} used to generate values
      * @return an infinite {@code LongIterator} that generates values using the supplier
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static LongIterator generate(final LongSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new LongIterator() {
             @Override
@@ -296,15 +295,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Will generate: 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param hasNext a {@link BooleanSupplier} that determines if more elements are available;
-     *        must not be {@code null}
-     * @param supplier the {@link LongSupplier} used to generate values; must not be {@code null}
+     * @param hasNext a {@link BooleanSupplier} that determines if more elements are available
+     * @param supplier the {@link LongSupplier} used to generate values
      * @return a {@code LongIterator} that generates values while {@code hasNext} returns {@code true}
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static LongIterator generate(final BooleanSupplier hasNext, final LongSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new LongIterator() {
             private boolean hasNextCached = false;
@@ -481,12 +479,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Will iterate over: 2, 4
      * }</pre>
      *
-     * @param predicate the predicate used to test each element; must not be {@code null}
+     * @param predicate the predicate used to test each element
      * @return a new {@code LongIterator} containing only elements that satisfy the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public LongIterator filter(final LongPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final LongIterator iter = this;
 
@@ -672,12 +670,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param action the action to be performed for each element
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.LongConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Long> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Long> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -692,12 +692,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.LongConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.LongConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextLong());
@@ -722,14 +722,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element, accepting index and value; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element, accepting index and value
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

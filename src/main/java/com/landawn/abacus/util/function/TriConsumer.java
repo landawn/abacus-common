@@ -28,7 +28,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <A> the type of the first argument to the operation
@@ -82,12 +81,13 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      * // Notify: Error occurred
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code TriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) {
+    default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

@@ -119,7 +119,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
          *
          * @param e the element argument (not used because this operation is unsupported)
          * @throws UnsupportedOperationException always
-         * @deprecated - UnsupportedOperationException
+         * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
          */
         @Deprecated
         @Override
@@ -132,7 +132,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
          *
          * @param e the element argument (not used because this operation is unsupported)
          * @throws UnsupportedOperationException always
-         * @deprecated - UnsupportedOperationException
+         * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
          */
         @Deprecated
         @Override
@@ -338,7 +338,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -351,7 +351,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -454,7 +454,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -467,7 +467,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -570,7 +570,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -583,7 +583,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
              *
              * @param e the element argument (not used because this operation is unsupported)
              * @throws UnsupportedOperationException always
-             * @deprecated - UnsupportedOperationException
+             * @deprecated Unsupported operation; always throws {@link UnsupportedOperationException}.
              */
             @Deprecated
             @Override
@@ -729,12 +729,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining element
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachIndexed(Throwables.IntObjConsumer)
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {
             action.accept(next());
@@ -761,14 +761,14 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
-     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws IllegalStateException if {@link #nextIndex()} returns a negative value because its
      *         index has overflowed
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachRemaining(Throwables.Consumer)
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {
             final int idx = nextIndex();

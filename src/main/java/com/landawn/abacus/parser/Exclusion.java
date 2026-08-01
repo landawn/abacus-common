@@ -41,9 +41,10 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(null);   // property is excluded
+     * person.setNickname(null);   // reference-type property is excluded
      *
      * // With Exclusion.NULL, output: {"name": "John"}
+     * // (non-null fields remain; null reference fields are omitted)
      * }</pre>
      *
      */
@@ -57,8 +58,9 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(0);          // value is excluded (default int)
-     * person.setActive(false);   // value is excluded (default boolean)
+     * person.setAge(0);          // int property at default 0 is excluded
+     * person.setActive(false);   // boolean property at default false is excluded
+     * person.setNickname(null);  // null reference is also excluded
      *
      * // With Exclusion.DEFAULT, output: {"name": "John"}
      * }</pre>
@@ -74,9 +76,9 @@ public enum Exclusion {
      * <pre>{@code
      * Person person = new Person();
      * person.setName("John");
-     * person.setAge(null);
+     * person.setNickname(null);
      *
-     * // With Exclusion.NONE, output: {"name": "John", "age": null}
+     * // With Exclusion.NONE, output includes nulls, e.g.: {"name": "John", "nickname": null, ...}
      * }</pre>
      *
      */

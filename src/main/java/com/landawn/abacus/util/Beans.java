@@ -923,7 +923,7 @@ public final class Beans {
      */
     @SuppressWarnings("deprecation")
     public static void registerNonPropertyAccessor(final Class<?> cls, final String propName) {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
         N.checkArgNotEmpty(propName, "propName");
 
         final Set<Class<?>> classesToRefresh = N.newLinkedHashSet();
@@ -987,7 +987,7 @@ public final class Beans {
     @SuppressWarnings("deprecation")
     public static void registerPropertyAccessor(final String propName, final Method method) {
         N.checkArgNotEmpty(propName, "propName");
-        N.checkArgNotNull(method, "method");
+        N.checkArgNotNull(method, cs.method);
 
         final Class<?> cls = method.getDeclaringClass();
         final Set<Class<?>> classesToRefresh = N.newLinkedHashSet();
@@ -1419,8 +1419,11 @@ public final class Beans {
      *        (a {@code NullPointerException} is thrown otherwise).
      * @param propNameFilter the predicate to filter property names.
      * @return a list of property names for the specified bean, filtered by the given predicate.
+     * @throws IllegalArgumentException if {@code propNameFilter} is {@code null}.
      */
-    public static List<String> getPropNames(final Object bean, final Predicate<? super String> propNameFilter) {
+    public static List<String> getPropNames(final Object bean, final Predicate<? super String> propNameFilter) throws IllegalArgumentException {
+        N.checkArgNotNull(propNameFilter, cs.propNameFilter);
+
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
@@ -1457,8 +1460,11 @@ public final class Beans {
      *        (a {@code NullPointerException} is thrown otherwise).
      * @param propNameValueFilter the bi-predicate to filter property names and values, where the first parameter is the property name and the second parameter is the property value.
      * @return a list of property names for the specified bean, filtered by the given bi-predicate.
+     * @throws IllegalArgumentException if {@code propNameValueFilter} is {@code null}.
      */
-    public static List<String> getPropNames(final Object bean, final BiPredicate<? super String, Object> propNameValueFilter) {
+    public static List<String> getPropNames(final Object bean, final BiPredicate<? super String, Object> propNameValueFilter) throws IllegalArgumentException {
+        N.checkArgNotNull(propNameValueFilter, cs.propNameValueFilter);
+
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
         final int size = beanInfo.propInfoList.size();
         final List<String> result = new ArrayList<>(size < 10 ? size : size / 2);
@@ -3384,8 +3390,11 @@ public final class Beans {
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type containing the non-{@code null} property name-value pairs of the bean;
      *         never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
-    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M beanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToMap(bean, null, mapSupplier);
     }
 
@@ -3447,9 +3456,12 @@ public final class Beans {
      * @return a map of the specified type with the selected (or all non-{@code null}) property name-value pairs;
      *         never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist in the bean class.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -3491,9 +3503,12 @@ public final class Beans {
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type with property name-value pairs; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist in the bean class.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -3711,9 +3726,12 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to exclude from the map; ignored if {@code null}.
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type with the bean's property name-value pairs; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -3781,9 +3799,12 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type with the bean's property name-value pairs; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -3978,9 +3999,13 @@ public final class Beans {
      * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return deepBeanToMap(bean, null, mapSupplier);
     }
 
@@ -4057,10 +4082,13 @@ public final class Beans {
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return deepBeanToMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -4100,9 +4128,12 @@ public final class Beans {
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -4344,10 +4375,13 @@ public final class Beans {
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a Map of the specified type containing the bean properties; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return deepBeanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -4410,10 +4444,13 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a Map of the specified type with full customization applied; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -4623,9 +4660,13 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map; if {@code null}, an empty map is returned.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with nested properties flattened; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
-    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final IntFunction<? extends M> mapSupplier) {
+    public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final IntFunction<? extends M> mapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToFlatMap(bean, null, mapSupplier);
     }
 
@@ -4687,10 +4728,13 @@ public final class Beans {
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with selected properties flattened; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToFlatMap(bean, selectPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -4725,9 +4769,12 @@ public final class Beans {
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map of the specified type with the bean's (selected) properties flattened using dot notation for nested beans; never {@code null}.
      * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -4945,10 +4992,13 @@ public final class Beans {
      *        matched (dotted names such as {@code "address.city"} are not supported).
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with filtering applied; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, mapSupplier);
     }
 
@@ -5015,10 +5065,13 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a fully customized flat map representation of the bean; never {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
-            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) {
+            final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (bean == null) {
             return mapSupplier.apply(0);
         }
@@ -5299,8 +5352,11 @@ public final class Beans {
          *
          * @param propFilter the predicate receiving the property name and value.
          * @return this builder.
+         * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
          */
-        public BeanMapBuilder filter(final BiPredicate<? super String, Object> propFilter) {
+        public BeanMapBuilder filter(final BiPredicate<? super String, Object> propFilter) throws IllegalArgumentException {
+            N.checkArgNotNull(propFilter, cs.propFilter);
+
             this.propFilter = propFilter;
             return this;
         }
@@ -5377,8 +5433,11 @@ public final class Beans {
          * @param mapSupplier a function that creates a new map given an initial capacity.
          * @return the created map with the converted properties; never {@code null}.
          * @throws IllegalArgumentException if a {@code select}ed property is not found in the bean class.
+         * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
          */
-        public <M extends Map<String, Object>> M toMap(final IntFunction<? extends M> mapSupplier) {
+        public <M extends Map<String, Object>> M toMap(final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+            N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
             final Collection<String> effective = effectivePropNames();
             final M output = mapSupplier.apply(effective == null ? 0 : effective.size());
             fill(effective, output);
@@ -5690,11 +5749,14 @@ public final class Beans {
      *        the property in the copy.
      * @return a new instance of the same class as {@code sourceBean} with the properties that pass
      *         {@code propFilter} copied, or {@code null} if {@code sourceBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     @MayReturnNull
-    public static <T> T copy(final T sourceBean, final BiPredicate<? super String, Object> propFilter) {
+    public static <T> T copy(final T sourceBean, final BiPredicate<? super String, Object> propFilter) throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+
         if (sourceBean == null) {
             return null; // NOSONAR
         }
@@ -5795,12 +5857,14 @@ public final class Beans {
      * @return a new instance of the target type with properties copied and names converted; never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a selected property
      *         is not found in the source bean or its (converted) name is not found in the target bean.
+     * @throws IllegalArgumentException if {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, final Function<String, String> propNameConverter,
             @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
@@ -5860,11 +5924,14 @@ public final class Beans {
      * @return a new instance of the target type with filtered properties copied; never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that
      *         passes the filter has no matching property in the target bean.
+     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T copyAs(final Object sourceBean, final BiPredicate<? super String, Object> propFilter, final Class<? extends T> targetType)
             throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+
         return copyAs(sourceBean, propFilter, Fn.identity(), targetType);
     }
 
@@ -5903,11 +5970,14 @@ public final class Beans {
      *         never {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that
      *         passes the filter has no matching (converted) property name in the target bean.
+     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T copyAs(final Object sourceBean, final BiPredicate<? super String, Object> propFilter, final Function<String, String> propNameConverter,
             final Class<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (sourceBean != null) {
@@ -6096,13 +6166,16 @@ public final class Beans {
      * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
      * @param targetBean the target bean into which properties are merged; must not be {@code null}.
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
-     *        the value to set on the target; must not be {@code null}.
+     *        the value to set on the target.
      * @return {@code targetBean} with merged properties applied.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, final T targetBean, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
+
         return mergeInto(sourceBean, targetBean, true, null, mergeFunc);
     }
 
@@ -6179,10 +6252,12 @@ public final class Beans {
      * @return {@code targetBean} with properties merged using custom logic.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if
      *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
+     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
             final Set<String> ignoredPropNames, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
 
         if (sourceBean == null) {
             return targetBean;
@@ -6243,12 +6318,15 @@ public final class Beans {
      *        the value to set on the target.
      * @return {@code targetBean} with merged properties applied.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code propNameConverter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, final T targetBean, final Function<String, String> propNameConverter,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
 
         if (sourceBean == null) {
             return targetBean;
@@ -6331,11 +6409,14 @@ public final class Beans {
      * @return {@code targetBean} with the selected properties merged.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
      *         is not found in the source bean or in the target bean.
+     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
+
         return mergeInto(sourceBean, targetBean, selectPropNames, Fn.identity(), mergeFunc);
     }
 
@@ -6372,12 +6453,14 @@ public final class Beans {
      * @return {@code targetBean} with the selected (and name-converted) properties merged.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
      *         is not found in the source bean or in the target bean.
+     * @throws IllegalArgumentException if {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
 
         return mergeInto(sourceBean, targetBean, selectPropNames, propNameConverter, DEFAULT_MERGE_FUNC);
     }
@@ -6424,12 +6507,15 @@ public final class Beans {
      * @return {@code targetBean} with the selected, name-converted, and merged properties applied.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
      *         is not found in the source bean or in the target bean.
+     * @throws IllegalArgumentException if any of {@code propNameConverter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
@@ -6540,11 +6626,14 @@ public final class Beans {
      * @return {@code targetBean} with matching properties merged.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
      *         the filter has no matching property in the target bean.
+     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, final T targetBean, final BiPredicate<? super String, Object> propFilter)
             throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+
         return mergeInto(sourceBean, targetBean, propFilter, DEFAULT_MERGE_FUNC);
     }
 
@@ -6582,11 +6671,15 @@ public final class Beans {
      * @return {@code targetBean} with filtered and merged properties applied.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
      *         the filter has no matching property in the target bean.
+     * @throws IllegalArgumentException if any of {@code propFilter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, Object> propFilter,
             final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
+
         return mergeInto(sourceBean, targetBean, propFilter, Fn.identity(), mergeFunc);
     }
 
@@ -6624,11 +6717,15 @@ public final class Beans {
      * @return {@code targetBean} with filtered and name-converted properties merged.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
      *         the filter has no matching property in the target bean.
+     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, Object> propFilter,
             final Function<String, String> propNameConverter) throws IllegalArgumentException {
+        N.checkArgNotNull(propFilter, cs.propFilter);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
+
         return mergeInto(sourceBean, targetBean, propFilter, propNameConverter, DEFAULT_MERGE_FUNC);
     }
 
@@ -6671,20 +6768,24 @@ public final class Beans {
      * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
      * @param targetBean the target bean into which properties are merged; must not be {@code null}.
      * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
-     *        merge the property into the target; must not be {@code null}.
+     *        merge the property into the target.
      * @param propNameConverter a function that converts each source property name to the corresponding
-     *        target property name; use {@link Fn#identity()} to keep names unchanged; must not be {@code null}.
+     *        target property name; use {@link Fn#identity()} to keep names unchanged.
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
-     *        the value to set on the target; must not be {@code null}.
+     *        the value to set on the target.
      * @return {@code targetBean} with filtered, name-converted, and merged properties applied.
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
      *         the filter has no matching property in the target bean.
+     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final BiPredicate<? super String, Object> propFilter,
             final Function<String, String> propNameConverter, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
         N.checkArgNotNull(targetBean, cs.targetBean);
+        N.checkArgNotNull(propFilter, cs.propFilter);
+        N.checkArgNotNull(propNameConverter, cs.propNameConverter);
+        N.checkArgNotNull(mergeFunc, cs.mergeFunc);
 
         final BeanInfo targetBeanInfo = ParserUtil.getBeanInfo(targetBean.getClass());
 
@@ -7186,10 +7287,12 @@ public final class Beans {
      *         and each value is the corresponding property value (which may be {@code null}),
      *         containing only those properties for which {@code propFilter} returned {@code true}.
      * @throws IllegalArgumentException if {@code bean} is {@code null}.
+     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
      */
     public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<? super String, Object> propFilter)
             throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
+        N.checkArgNotNull(propFilter, cs.propFilter);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(bean.getClass());
 

@@ -110,7 +110,7 @@ public class UnaryOperatorTest extends TestBase {
     public void testSpecializedCompositionRejectsNullImmediately() {
         UnaryOperator<String> operator = s -> s;
 
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> operator.compose((java.util.function.UnaryOperator<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> operator.andThen((java.util.function.UnaryOperator<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> operator.compose((java.util.function.UnaryOperator<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> operator.andThen((java.util.function.UnaryOperator<String>) null));
     }
 }

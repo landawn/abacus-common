@@ -62,12 +62,13 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      * combined.accept(true, true, false);   // Logs then calculates AND
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code BooleanTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default BooleanTriConsumer andThen(final BooleanTriConsumer after) {
+    default BooleanTriConsumer andThen(final BooleanTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

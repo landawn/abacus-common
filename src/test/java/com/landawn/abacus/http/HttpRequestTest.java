@@ -493,10 +493,14 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testBodyIsRejectedForDelete() {
+    public void testBodyIsSentForDelete() throws Exception {
+        server.enqueue(new MockResponse().setBody("deleted"));
         HttpRequest request = HttpRequest.url(baseUrl).body("a=b");
 
-        assertThrows(IllegalStateException.class, () -> request.delete(String.class));
+        assertEquals("deleted", request.delete(String.class));
+
+        final RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("DELETE", recordedRequest.getMethod());
     }
 
     @Test
@@ -614,28 +618,6 @@ public class HttpRequestTest extends TestBase {
         assertNotNull(future.get());
     }
 
-    // M9: patch()/asyncPatch() convenience methods. PATCH is rejected by HttpURLConnection at the JDK
-    // level, so these tests assert the body-validation routing rather than a real round-trip.
-
-    @Test
-    public void testPatchRoutesAsPatch() {
-        // patch() permits a body (like POST/PUT), unlike GET/DELETE — verify it routes to PATCH by
-        // confirming a query(...) misuse is rejected the same way execute(HttpMethod.PATCH) would be.
-        HttpRequest request = HttpRequest.url(baseUrl).query("a=b");
-        assertThrows(IllegalStateException.class, request::patch);
-        assertThrows(IllegalStateException.class, () -> request.patch(String.class));
-    }
-
-    @Test
-    public void testAsyncPatchMethodsExist() {
-        // Smoke-test that all four asyncPatch overloads are public and return a future.
-        HttpRequest request = HttpRequest.url(baseUrl);
-        assertNotNull(request.asyncPatch());
-        assertNotNull(request.asyncPatch(executor));
-        assertNotNull(request.asyncPatch(String.class));
-        assertNotNull(request.asyncPatch(String.class, executor));
-    }
-
     @Test
     public void testExecute() throws IOException {
         server.enqueue(new MockResponse().setBody("Execute response"));
@@ -657,6 +639,15 @@ public class HttpRequestTest extends TestBase {
     public void testExecuteWithNullHttpMethod() {
         HttpRequest request = HttpRequest.url(baseUrl);
         assertThrows(IllegalArgumentException.class, () -> request.execute(null, String.class));
+    }
+
+    @Test
+    public void testExecuteWithPatchMethodRejected() {
+        // PATCH is not supported by the underlying HttpURLConnection, so execute(...) rejects it up front.
+        HttpRequest request = HttpRequest.url(baseUrl);
+        assertThrows(UnsupportedOperationException.class, () -> request.execute(HttpMethod.PATCH));
+        assertThrows(UnsupportedOperationException.class, () -> request.execute(HttpMethod.PATCH, String.class));
+        assertThrows(UnsupportedOperationException.class, () -> request.execute(HttpMethod.PATCH, new File("test.txt")));
     }
 
     @Test

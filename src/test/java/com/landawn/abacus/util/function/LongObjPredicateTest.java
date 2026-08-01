@@ -171,7 +171,7 @@ public class LongObjPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         LongObjPredicate<String> instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((LongObjPredicate) null));
     }

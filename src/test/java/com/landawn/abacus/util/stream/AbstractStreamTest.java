@@ -1118,6 +1118,32 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testSplitAtKeepsIteratorSourceOpenForEscapedSecondStream() {
+        assertSplitAtKeepsIteratorSourceOpen(source -> source.splitAt(2));
+        assertSplitAtKeepsIteratorSourceOpen(source -> source.splitAt(value -> value == 3));
+    }
+
+    private static void assertSplitAtKeepsIteratorSourceOpen(
+            final java.util.function.Function<Stream<Integer>, Stream<Stream<Integer>>> splitter) {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(Arrays.asList(1, 2, 3, 4).iterator()).onClose(closeCount::incrementAndGet);
+        final List<Stream<Integer>> parts = splitter.apply(source).toList();
+
+        assertEquals(0, closeCount.get());
+        assertEquals(Arrays.asList(1, 2), parts.get(0).toList());
+        assertEquals(0, closeCount.get());
+        assertEquals(Arrays.asList(3, 4), parts.get(1).toList());
+        assertEquals(1, closeCount.get());
+
+        final AtomicInteger abandonedCloseCount = new AtomicInteger();
+        final Stream<Integer> abandonedSource = Stream.of(Arrays.asList(1, 2, 3, 4).iterator()).onClose(abandonedCloseCount::incrementAndGet);
+        final List<Stream<Integer>> firstPartOnly = splitter.apply(abandonedSource).limit(1).toList();
+
+        assertEquals(1, abandonedCloseCount.get());
+        assertEquals(Arrays.asList(1, 2), firstPartOnly.get(0).toList());
+    }
+
+    @Test
     public void testSplitAt_advice() {
         List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
@@ -2483,11 +2509,8 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testSorted_WithNullComparator() {
-        // sorted(null) should use natural order
-        Stream<Integer> s = Stream.of(3, 1, 2);
-        java.util.List<Integer> result = s.sorted((java.util.Comparator<Integer>) null).toList();
-        assertEquals(java.util.Arrays.asList(1, 2, 3), result);
+    public void testSorted_RejectsNullComparator() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(3, 1, 2).sorted((java.util.Comparator<Integer>) null));
     }
 
     @Test

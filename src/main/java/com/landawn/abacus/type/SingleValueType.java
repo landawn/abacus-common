@@ -748,8 +748,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         if (getMethod == null) {
             try {
+                // Object contract methods are not value accessors.
                 getMethod = N.findFirst(methods, it -> Modifier.isPublic(it.getModifiers()) //
                         && !Modifier.isStatic(it.getModifiers()) //
+                        && !"hashCode".equals(it.getName()) //
+                        && !"toString".equals(it.getName()) //
                         && valueType.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 0).orElseNull();
             } catch (final Exception e) {

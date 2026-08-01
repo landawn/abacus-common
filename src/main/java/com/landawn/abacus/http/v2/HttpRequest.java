@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import javax.net.ssl.SSLSession;
 
@@ -49,6 +50,7 @@ import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.URLEncodedUtil;
+import com.landawn.abacus.util.cs;
 
 /**
  * A fluent HTTP request builder and executor based on Java 11+ HttpClient.
@@ -921,9 +923,12 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
      * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> get(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> get(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return execute(HttpMethod.GET, responseBodyHandler);
     }
 
@@ -984,9 +989,12 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
      * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> post(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> post(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return execute(HttpMethod.POST, responseBodyHandler);
     }
 
@@ -1051,9 +1059,12 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
      * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> put(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> put(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return execute(HttpMethod.PUT, responseBodyHandler);
     }
 
@@ -1121,9 +1132,12 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
      * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> patch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> patch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return execute(HttpMethod.PATCH, responseBodyHandler);
     }
 
@@ -1185,9 +1199,12 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
      * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> delete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    public <T> HttpResponse<T> delete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return execute(HttpMethod.DELETE, responseBodyHandler);
     }
 
@@ -1257,7 +1274,7 @@ public final class HttpRequest {
      *
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return the HTTP response with String body
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
@@ -1280,7 +1297,7 @@ public final class HttpRequest {
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}
      * @throws UncheckedIOException if the request could not be executed
      * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
@@ -1289,25 +1306,39 @@ public final class HttpRequest {
     public <T> HttpResponse<T> execute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
             throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
-        boolean cleanupHandled = false;
+        final HttpResponse<T> response;
 
         try {
-            final HttpResponse<T> response = httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
-            final HttpResponse<T> result = prepareResponseForClientCleanup(response, httpClientToUse);
-            cleanupHandled = true;
-            return result;
+            response = httpClientToUse.send(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw ExceptionUtil.toRuntimeException(e, true);
+            final RuntimeException primary = ExceptionUtil.toRuntimeException(e, true);
+            doAfterExecutionPreservingPrimary(httpClientToUse, primary);
+            throw primary;
         } catch (final IOException e) {
-            throw ExceptionUtil.toRuntimeException(e, true);
-        } finally {
-            if (!cleanupHandled) {
-                doAfterExecution(httpClientToUse);
-            }
+            final RuntimeException primary = ExceptionUtil.toRuntimeException(e, true);
+            doAfterExecutionPreservingPrimary(httpClientToUse, primary);
+            throw primary;
+        } catch (final RuntimeException | Error e) {
+            doAfterExecutionPreservingPrimary(httpClientToUse, e);
+            throw e;
         }
+
+        // Successful send transfers cleanup to response preparation (immediately for
+        // ordinary bodies, or to CleanupInputStream for streaming bodies).
+        final T responseBody;
+
+        try {
+            responseBody = response.body();
+        } catch (final RuntimeException | Error e) {
+            doAfterExecutionPreservingPrimary(httpClientToUse, e);
+            throw e;
+        }
+
+        return prepareResponseForClientCleanup(response, responseBody, httpClientToUse);
     }
 
     /**
@@ -1374,15 +1405,39 @@ public final class HttpRequest {
      * @param httpClientUsed the client that executed the request
      */
     void doAfterExecution(final HttpClient httpClientUsed) {
-        if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT) {
-            // Java 21+ HttpClient implements AutoCloseable; shut it down to release internal executor threads.
-            if (httpClientUsed instanceof AutoCloseable ac) {
-                try {
-                    ac.close();
-                } catch (final Exception e) {
-                    // ignore — best effort cleanup
-                }
+        try {
+            closeOwnedHttpClient(httpClientUsed);
+        } catch (final Exception e) {
+            // ignore — best effort cleanup
+        }
+    }
+
+    private void doAfterExecutionPreservingPrimary(final HttpClient httpClientUsed, final Throwable primary) {
+        try {
+            closeOwnedHttpClient(httpClientUsed);
+        } catch (final RuntimeException | Error cleanupFailure) {
+            if (cleanupFailure != primary) {
+                primary.addSuppressed(cleanupFailure);
             }
+        } catch (final Exception e) {
+            // Preserve the established best-effort treatment of checked close failures.
+        }
+    }
+
+    private void doAfterExecutionPropagatingUnchecked(final HttpClient httpClientUsed) {
+        try {
+            closeOwnedHttpClient(httpClientUsed);
+        } catch (final RuntimeException | Error e) {
+            throw e;
+        } catch (final Exception e) {
+            // Preserve the established best-effort treatment of checked close failures.
+        }
+    }
+
+    private void closeOwnedHttpClient(final HttpClient httpClientUsed) throws Exception {
+        if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT && httpClientUsed instanceof AutoCloseable ac) {
+            // Java 21+ HttpClient implements AutoCloseable; shut it down to release internal executor threads.
+            ac.close();
         }
     }
 
@@ -1425,9 +1480,12 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return asyncExecute(HttpMethod.GET, responseBodyHandler);
     }
 
@@ -1472,10 +1530,15 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
+
         return asyncExecute(HttpMethod.GET, responseBodyHandler, pushPromiseHandler);
     }
 
@@ -1519,9 +1582,12 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return asyncExecute(HttpMethod.POST, responseBodyHandler);
     }
 
@@ -1573,10 +1639,15 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
+
         return asyncExecute(HttpMethod.POST, responseBodyHandler, pushPromiseHandler);
     }
 
@@ -1620,9 +1691,12 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return asyncExecute(HttpMethod.PUT, responseBodyHandler);
     }
 
@@ -1674,10 +1748,15 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
+
         return asyncExecute(HttpMethod.PUT, responseBodyHandler, pushPromiseHandler);
     }
 
@@ -1729,9 +1808,12 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return asyncExecute(HttpMethod.PATCH, responseBodyHandler);
     }
 
@@ -1785,10 +1867,15 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
+
         return asyncExecute(HttpMethod.PATCH, responseBodyHandler, pushPromiseHandler);
     }
 
@@ -1832,9 +1919,12 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
         return asyncExecute(HttpMethod.DELETE, responseBodyHandler);
     }
 
@@ -1882,10 +1972,15 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler,
-            final PushPromiseHandler<T> pushPromiseHandler) {
+            final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
+
         return asyncExecute(HttpMethod.DELETE, responseBodyHandler, pushPromiseHandler);
     }
 
@@ -1969,23 +2064,25 @@ public final class HttpRequest {
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler)
             throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
+        final ClientCleanup clientCleanup = new ClientCleanup(httpClientToUse);
 
-        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
-                .whenComplete((r, t) -> {
-                    if (t != null) {
-                        doAfterExecution(httpClientToUse);
-                    }
-                });
+        try {
+            return observeAsyncExecution(httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler),
+                    response -> prepareResponseForClientCleanup(response, clientCleanup), clientCleanup);
+        } catch (final RuntimeException | Error e) {
+            clientCleanup.preservePrimary(e);
+            throw e;
+        }
     }
 
     /**
@@ -2014,17 +2111,17 @@ public final class HttpRequest {
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
 
-        final HttpClient httpClientToUse = checkUrlAndHttpClient();
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
+        final HttpClient httpClientToUse = checkUrlAndHttpClient();
+        final ClientCleanup clientCleanup = new ClientCleanup(httpClientToUse);
 
-        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler)
-                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
-                .thenApply(it -> getBody(it, resultClass))
-                .whenComplete((r, t) -> {
-                    if (t != null) {
-                        doAfterExecution(httpClientToUse);
-                    }
-                });
+        try {
+            return observeAsyncExecution(httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler),
+                    response -> getBody(prepareResponseForClientCleanup(response, clientCleanup), resultClass), clientCleanup);
+        } catch (final RuntimeException | Error e) {
+            clientCleanup.preservePrimary(e);
+            throw e;
+        }
     }
 
     /**
@@ -2050,34 +2147,123 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if httpMethod is null
+     * @throws IllegalArgumentException if {@code httpMethod}, {@code responseBodyHandler}, or {@code pushPromiseHandler} is {@code null}
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     @Beta
     public <T> CompletableFuture<HttpResponse<T>> asyncExecute(final HttpMethod httpMethod, final HttpResponse.BodyHandler<T> responseBodyHandler,
             final PushPromiseHandler<T> pushPromiseHandler) throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
+        N.checkArgNotNull(pushPromiseHandler, cs.pushPromiseHandler);
 
         final HttpClient httpClientToUse = checkUrlAndHttpClient();
+        final ClientCleanup clientCleanup = new ClientCleanup(httpClientToUse);
 
-        return httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler)
-                .thenApply(response -> prepareResponseForClientCleanup(response, httpClientToUse))
-                .whenComplete((r, t) -> {
-                    if (t != null) {
-                        doAfterExecution(httpClientToUse);
-                    }
-                });
+        try {
+            return observeAsyncExecution(
+                    httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler, pushPromiseHandler),
+                    response -> prepareResponseForClientCleanup(response, clientCleanup), clientCleanup);
+        } catch (final RuntimeException | Error e) {
+            clientCleanup.preservePrimary(e);
+            throw e;
+        }
     }
 
-    private <T> HttpResponse<T> prepareResponseForClientCleanup(final HttpResponse<T> response, final HttpClient httpClientUsed) {
-        if (response.body() instanceof InputStream inputStream) {
+    private <S, T> CompletableFuture<T> observeAsyncExecution(final CompletableFuture<S> upstream, final Function<? super S, ? extends T> resultMapper,
+            final ClientCleanup clientCleanup) {
+        final CompletableFuture<T> result = new CompletableFuture<>();
+
+        // This observer is deliberately not exposed to callers. Cancelling the public result
+        // therefore cannot detach cleanup from the request that is still running upstream.
+        upstream.whenComplete((upstreamResult, upstreamFailure) -> {
+            if (upstreamFailure != null) {
+                clientCleanup.preservePrimary(upstreamFailure);
+                result.completeExceptionally(upstreamFailure);
+                return;
+            }
+
+            final T mappedResult;
+
+            try {
+                mappedResult = resultMapper.apply(upstreamResult);
+            } catch (final Throwable e) {
+                clientCleanup.preservePrimary(e);
+                result.completeExceptionally(e);
+                return;
+            }
+
+            if (!result.complete(mappedResult)) {
+                closeOrphanedAsyncResult(mappedResult);
+            }
+        });
+
+        return result;
+    }
+
+    private static void closeOrphanedAsyncResult(final Object result) {
+        try {
+            final Object body = result instanceof HttpResponse<?> response ? response.body() : result;
+
+            if (body instanceof InputStream inputStream) {
+                inputStream.close();
+            }
+        } catch (final Exception | Error e) {
+            // The public result has already been completed or cancelled, so cleanup cannot
+            // replace its outcome. CleanupInputStream still releases its client in this path.
+        }
+    }
+
+    private final class ClientCleanup {
+        private final HttpClient httpClientUsed;
+        private final AtomicBoolean claimed = new AtomicBoolean();
+
+        private ClientCleanup(final HttpClient httpClientUsed) {
+            this.httpClientUsed = httpClientUsed;
+        }
+
+        private void bestEffort() {
+            if (claimed.compareAndSet(false, true)) {
+                doAfterExecution(httpClientUsed);
+            }
+        }
+
+        private void preservePrimary(final Throwable primary) {
+            if (claimed.compareAndSet(false, true)) {
+                doAfterExecutionPreservingPrimary(httpClientUsed, primary);
+            }
+        }
+
+        private void propagateUnchecked() {
+            if (claimed.compareAndSet(false, true)) {
+                doAfterExecutionPropagatingUnchecked(httpClientUsed);
+            }
+        }
+    }
+
+    private <T> HttpResponse<T> prepareResponseForClientCleanup(final HttpResponse<T> response, final T responseBody, final HttpClient httpClientUsed) {
+        if (responseBody instanceof InputStream inputStream) {
             @SuppressWarnings("unchecked")
-            final T body = (T) new CleanupInputStream(inputStream, () -> doAfterExecution(httpClientUsed));
+            final T body = (T) new CleanupInputStream(inputStream, () -> doAfterExecutionPropagatingUnchecked(httpClientUsed));
 
             return new DelegatingHttpResponse<>(response, body);
         }
 
         doAfterExecution(httpClientUsed);
+        return response;
+    }
+
+    private <T> HttpResponse<T> prepareResponseForClientCleanup(final HttpResponse<T> response, final ClientCleanup clientCleanup) {
+        final T responseBody = response.body();
+
+        if (responseBody instanceof InputStream inputStream) {
+            @SuppressWarnings("unchecked")
+            final T body = (T) new CleanupInputStream(inputStream, clientCleanup::propagateUnchecked);
+
+            return new DelegatingHttpResponse<>(response, body);
+        }
+
+        clientCleanup.bestEffort();
         return response;
     }
 
@@ -2168,11 +2354,25 @@ public final class HttpRequest {
 
         @Override
         public void close() throws IOException {
+            if (!closed.compareAndSet(false, true)) {
+                return;
+            }
+
             try {
                 inputStream.close();
-            } finally {
-                closeOnce();
+            } catch (final IOException | RuntimeException | Error e) {
+                try {
+                    cleanup.run();
+                } catch (final RuntimeException | Error cleanupFailure) {
+                    if (cleanupFailure != e) {
+                        e.addSuppressed(cleanupFailure);
+                    }
+                }
+
+                throw e;
             }
+
+            cleanup.run();
         }
 
         @Override
@@ -2188,17 +2388,6 @@ public final class HttpRequest {
         @Override
         public boolean markSupported() {
             return inputStream.markSupported();
-        }
-
-        private void closeOnce() {
-            // InputStream.close() is allowed to be called repeatedly and real response streams are
-            // sometimes closed concurrently by cancellation/error-handling paths. A volatile
-            // check-then-set is not atomic and can consequently release the per-request client more
-            // than once. Claim cleanup before invoking caller code so even a failing cleanup is not
-            // retried by a second close.
-            if (closed.compareAndSet(false, true)) {
-                cleanup.run();
-            }
         }
     }
 

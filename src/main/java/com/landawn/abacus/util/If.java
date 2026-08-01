@@ -1021,13 +1021,13 @@ public final class If {
      * }</pre>
      *
      * @param <E> the type of exception that the runnable may throw
-     * @param cmd the runnable to execute if the condition is {@code true} (must not be {@code null})
+     * @param cmd the runnable to execute if the condition is {@code true}
      * @return an OrElse instance for optional chaining of an else clause
-     * @throws IllegalArgumentException if cmd is null
      * @throws E if the runnable throws an exception during execution
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
-    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
-        N.checkArgNotNull(cmd);
+    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws E, IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
 
         if (b) {
             cmd.run();
@@ -1066,14 +1066,14 @@ public final class If {
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that the consumer may throw
      * @param init the input value to pass to the consumer (can be {@code null})
-     * @param action the consumer to execute if the condition is {@code true} (must not be {@code null})
+     * @param action the consumer to execute if the condition is {@code true}
      * @return an OrElse instance for optional chaining of an else clause
-     * @throws IllegalArgumentException if action is null
      * @throws E if the consumer throws an exception during execution
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Beta
-    public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         if (b) {
             action.accept(init);
@@ -1118,13 +1118,13 @@ public final class If {
      * }</pre>
      *
      * @param <E> the type of exception to throw
-     * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null})
+     * @param exceptionSupplier the supplier that provides the exception to throw
      * @return an OrElse instance for optional chaining of an else clause (unreachable if the condition is true)
-     * @throws IllegalArgumentException if exceptionSupplier is null
      * @throws E if the condition is true
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
-    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-        N.checkArgNotNull(exceptionSupplier);
+    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
+        N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         if (b) {
             throw exceptionSupplier.get();
@@ -1244,12 +1244,12 @@ public final class If {
          * }</pre>
          *
          * @param <E> the type of exception that the runnable may throw
-         * @param cmd the runnable to execute if the initial condition was {@code false} (must not be {@code null})
-         * @throws IllegalArgumentException if cmd is null
+         * @param cmd the runnable to execute if the initial condition was {@code false}
          * @throws E if the runnable throws an exception during execution
+         * @throws IllegalArgumentException if {@code cmd} is {@code null}.
          */
-        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
-            N.checkArgNotNull(cmd);
+        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws E, IllegalArgumentException {
+            N.checkArgNotNull(cmd, cs.cmd);
 
             if (!isIfTrue) {
                 cmd.run();
@@ -1285,13 +1285,13 @@ public final class If {
          * @param <T> the type of the input to the consumer
          * @param <E> the type of exception that the consumer may throw
          * @param init the input value to pass to the consumer (can be {@code null})
-         * @param action the consumer to execute if the initial condition was {@code false} (must not be {@code null})
-         * @throws IllegalArgumentException if action is null
+         * @param action the consumer to execute if the initial condition was {@code false}
          * @throws E if the consumer throws an exception during execution
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
         @Beta
-        public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
-            N.checkArgNotNull(action);
+        public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             if (!isIfTrue) {
                 action.accept(init);
@@ -1333,12 +1333,12 @@ public final class If {
          * }</pre>
          *
          * @param <E> the type of exception to throw
-         * @param exceptionSupplier the supplier that provides the exception to throw (must not be {@code null})
-         * @throws IllegalArgumentException if exceptionSupplier is null
+         * @param exceptionSupplier the supplier that provides the exception to throw
          * @throws E if the initial condition was false
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
-            N.checkArgNotNull(exceptionSupplier);
+        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
+            N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (!isIfTrue) {
                 throw exceptionSupplier.get();

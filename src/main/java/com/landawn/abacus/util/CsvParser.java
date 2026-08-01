@@ -495,7 +495,7 @@ public class CsvParser {
      * @throws ArrayIndexOutOfBoundsException if {@code output} is too small to hold all parsed fields
      */
     public void parseLineToArray(final String nextLine, final String[] output) throws IllegalArgumentException, ParsingException {
-        N.checkArgNotNull(output, "output");
+        N.checkArgNotNull(output, cs.output);
 
         parseLine(nextLine, output);
     }

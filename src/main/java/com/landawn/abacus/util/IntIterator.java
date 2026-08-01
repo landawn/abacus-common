@@ -197,8 +197,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @param iteratorSupplier a {@code Supplier} that provides the {@code IntIterator} when needed
      * @return a lazily initialized {@code IntIterator}
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -265,10 +265,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @param supplier the {@code IntSupplier} used to generate each value
      * @return an infinite {@code IntIterator} whose {@code hasNext()} always returns {@code true}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static IntIterator generate(final IntSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new IntIterator() {
             @Override
@@ -301,11 +301,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param hasNext the {@code BooleanSupplier} that determines whether more elements exist
      * @param supplier the {@code IntSupplier} used to generate each value
      * @return an {@code IntIterator} that generates values while {@code hasNext} returns {@code true}
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static IntIterator generate(final BooleanSupplier hasNext, final IntSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new IntIterator() {
             private boolean hasNextCached = false;
@@ -497,12 +497,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * evens.toArray();   // returns [2, 4]
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return a new {@code IntIterator} containing only elements that match the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public IntIterator filter(final IntPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final IntIterator iter = this;
 
@@ -694,11 +694,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }</pre>
      *
      * @param action the action to perform on each remaining element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -718,12 +721,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.IntConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.IntConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextInt());
@@ -749,14 +752,14 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each index-value pair, must not be null
-     * @throws IllegalArgumentException if action is null
+     * @param action the action to perform on each index-value pair
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

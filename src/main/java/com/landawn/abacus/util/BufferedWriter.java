@@ -418,7 +418,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param len the number of characters to write; bounds are checked against the same effective source string
      * @throws IOException if an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
-     *         the requested range exceeds the effective source string
+     *         or the requested range exceeds the effective source string
      */
     @Override
     public void write(final String str, final int off, final int len) throws IOException {

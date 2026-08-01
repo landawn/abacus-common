@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,6 +24,7 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 public class ShortIteratorTest extends TestBase {
+ 
 
     // ===================== Additional tests for untested ShortIterator methods =====================
 
@@ -425,7 +427,7 @@ public class ShortIteratorTest extends TestBase {
     @Test
     @DisplayName("Test defer() with null supplier throws exception")
     public void testDeferNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.defer(null));
     }
 
     @Test
@@ -550,7 +552,7 @@ public class ShortIteratorTest extends TestBase {
     @Test
     @DisplayName("Test generate() with null supplier throws exception")
     public void testGenerateNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null));
     }
 
     @Test
@@ -564,13 +566,13 @@ public class ShortIteratorTest extends TestBase {
     @Test
     @DisplayName("Test generate() with null hasNext throws exception")
     public void testGenerateNullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null, () -> (short) 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null, () -> (short) 1));
     }
 
     @Test
     @DisplayName("Test generate() with null supplier throws exception")
     public void testGenerateConditionalNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(() -> true, null));
     }
 
     @Test
@@ -601,8 +603,8 @@ public class ShortIteratorTest extends TestBase {
     @Test
     @DisplayName("Test generate(BooleanSupplier, ShortSupplier) with null supplier throws")
     public void testGenerateConditional_NullArgs() {
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null, () -> (short) 1));
-        assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(null, () -> (short) 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ShortIterator.generate(() -> true, null));
     }
 
     @Test
@@ -943,7 +945,7 @@ public class ShortIteratorTest extends TestBase {
     @DisplayName("Test filter() with null predicate throws exception")
     public void testFilterNullPredicate() {
         ShortIterator iter = ShortIterator.of((short) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test

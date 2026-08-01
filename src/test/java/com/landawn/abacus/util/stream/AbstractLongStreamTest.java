@@ -211,7 +211,7 @@ public class AbstractLongStreamTest extends TestBase {
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            createLongStream(new long[] { 1 }).skip(1, null);
+            createLongStream(new long[] { 1 }).skip(1, null).count();
         });
     }
 

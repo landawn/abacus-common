@@ -291,7 +291,7 @@ public final class CodeGenerationUtil {
      */
     @Beta
     public static String generatePropNameTableClass(final Class<?> entityClass, final String propNameTableClassName, final String srcDir) {
-        N.checkArgNotNull(entityClass, "entityClass");
+        N.checkArgNotNull(entityClass, cs.entityClass);
         checkJavaIdentifier(propNameTableClassName, "propNameTableClassName");
 
         final StringBuilder sb = new StringBuilder();

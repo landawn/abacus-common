@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -234,7 +235,7 @@ public class FuturesTest extends TestBase {
         List<Future<Integer>> cfs = Arrays.asList(CompletableFuture.completedFuture(1));
         Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> 0;
 
-        assertThrows(IllegalArgumentException.class, () -> Futures.compose(cfs, null, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Futures.compose(cfs, null, null));
     }
 
     @Test

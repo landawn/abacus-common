@@ -229,11 +229,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * @param mappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) throws UnsupportedOperationException {
+    public final V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(mappingFunction, cs.mappingFunction);
+
         throw new UnsupportedOperationException();
     }
 
@@ -245,11 +249,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
+    public final V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
+
         throw new UnsupportedOperationException();
     }
 
@@ -261,11 +269,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
+    public final V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
+
         throw new UnsupportedOperationException();
     }
 
@@ -278,12 +290,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * @param remappingFunction ignored.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
     public final V merge(final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
-            throws UnsupportedOperationException {
+            throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
+
         throw new UnsupportedOperationException();
     }
 
@@ -293,11 +308,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      *
      * @param function ignored.
      * @throws UnsupportedOperationException always.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws UnsupportedOperationException {
+    public final void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
+
         // Without this override the inherited Map.replaceAll default iterates entrySet()/setValue(); on an EMPTY
         // immutable map it would silently no-op instead of throwing, inconsistent with every other mutator here
         // (and with ImmutableList.replaceAll). Block it unconditionally.

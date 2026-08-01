@@ -62,12 +62,13 @@ public interface BiObjIntConsumer<T, U> extends Throwables.BiObjIntConsumer<T, U
      * BiObjIntConsumer<String, StringBuilder> combined = appender.andThen(logger);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code BiObjIntConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default BiObjIntConsumer<T, U> andThen(final BiObjIntConsumer<? super T, ? super U> after) {
+    default BiObjIntConsumer<T, U> andThen(final BiObjIntConsumer<? super T, ? super U> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, u, i) -> {
             accept(t, u, i);
             after.accept(t, u, i);

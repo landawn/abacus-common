@@ -58,12 +58,13 @@ public interface BooleanNConsumer {
      * combined.accept(true, false, true);   // Logs count then prints values
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code BooleanNConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default BooleanNConsumer andThen(final BooleanNConsumer after) {
+    default BooleanNConsumer andThen(final BooleanNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> {
             accept(args);
             after.accept(args);

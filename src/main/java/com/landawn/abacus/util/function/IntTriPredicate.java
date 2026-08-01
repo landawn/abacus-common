@@ -28,7 +28,6 @@ import com.landawn.abacus.util.cs;
  * <p>This is a functional interface whose functional method is
  * {@link #test(int, int, int)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -114,13 +113,14 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
-     *              Must not be {@code null}.
+     *
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default IntTriPredicate and(final IntTriPredicate other) {
+    default IntTriPredicate and(final IntTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -143,13 +143,14 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.
-     *              Must not be {@code null}.
+     *
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default IntTriPredicate or(final IntTriPredicate other) {
+    default IntTriPredicate or(final IntTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

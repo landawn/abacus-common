@@ -103,8 +103,11 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * @param predicate the predicate to return
      * @return the same predicate instance
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static CharPredicate of(final CharPredicate predicate) {
+    static CharPredicate of(final CharPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 
@@ -137,12 +140,13 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * CharPredicate isUpperCaseLetter = isLetter.and(isUpperCase);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default CharPredicate and(final CharPredicate other) {
+    default CharPredicate and(final CharPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) && other.test(t);
     }
 
@@ -159,12 +163,13 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * CharPredicate isAlphanumeric = isDigit.or(isLetter);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default CharPredicate or(final CharPredicate other) {
+    default CharPredicate or(final CharPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) || other.test(t);
     }
 

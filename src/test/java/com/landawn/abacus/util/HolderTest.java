@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -603,7 +604,7 @@ public class HolderTest extends TestBase {
     @Test
     public void test_ifNotNullOrElse_NullEmptyAction() {
         Holder<String> holder = Holder.of("test");
-        assertThrows(IllegalArgumentException.class, () -> holder.ifNotNullOrElse(v -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> holder.ifNotNullOrElse(v -> {
         }, null));
     }
 

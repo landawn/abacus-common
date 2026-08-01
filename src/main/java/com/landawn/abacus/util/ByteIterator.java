@@ -198,8 +198,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param iteratorSupplier A Supplier that provides the ByteIterator when needed
      * @return A ByteIterator that is initialized on first use
-     * @throws IllegalArgumentException if iteratorSupplier is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -265,10 +265,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param supplier the supplier function that generates byte values
      * @return an infinite {@code ByteIterator}
-     * @throws IllegalArgumentException if supplier is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static ByteIterator generate(final ByteSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ByteIterator() {
             @Override
@@ -302,11 +302,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param hasNext the condition that determines if more elements are available
      * @param supplier the supplier function that generates byte values
      * @return a conditional {@code ByteIterator}
-     * @throws IllegalArgumentException if any parameter is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static ByteIterator generate(final BooleanSupplier hasNext, final ByteSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ByteIterator() {
             private boolean hasNextCached = false;
@@ -498,12 +498,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * byte[] result = evens.toArray();   // returns [2, 4]
      * }</pre>
      *
-     * @param predicate the predicate to test each element (must not be {@code null})
+     * @param predicate the predicate to test each element
      * @return a new ByteIterator containing only elements that match the predicate
-     * @throws IllegalArgumentException if predicate is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public ByteIterator filter(final BytePredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final ByteIterator iter = this;
 
@@ -714,11 +714,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @param action the action to perform on each boxed element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.ByteConsumer)} instead to avoid boxing
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -737,12 +740,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element (must not be {@code null})
-     * @throws IllegalArgumentException if action is {@code null}
+     * @param action the action to perform on each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.ByteConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.ByteConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextByte());
@@ -769,14 +772,14 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element and its index (must not be {@code null})
-     * @throws IllegalArgumentException if action is {@code null}
+     * @param action the action to perform on each element and its index
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

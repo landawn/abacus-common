@@ -20,7 +20,6 @@ import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -131,7 +130,7 @@ import com.landawn.abacus.annotation.Internal;
  * <ul>
  *   <li><b>Forward Lookup:</b> {@code get(key)} - Standard Map operation</li>
  *   <li><b>Reverse Lookup:</b> {@code getByValue(value)} - Value-to-key lookup</li>
- *   <li><b>Safe Reverse Lookup:</b> {@code getByValueOrDefault(value, defaultKey)}</li>
+ *   <li><b>Safe Reverse Lookup:</b> {@code getByValueOrDefault(value, defaultValue)}</li>
  *   <li><b>Reverse Removal:</b> {@code removeByValue(value)} - Remove by value</li>
  *   <li><b>Inverse View:</b> {@code inverse()} - Swapped key-value BiMap</li>
  * </ul>
@@ -384,14 +383,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param keyMapSupplier the supplier of the empty map used for key-to-value mappings; must not be {@code null}
      * @param valueMapSupplier the supplier of the empty map used for value-to-key mappings; must not be {@code null}
-     * @throws NullPointerException if either supplier or either map returned by a supplier is {@code null}
+     * @throws IllegalArgumentException if a map returned by either supplier is {@code null}
      * @throws IllegalArgumentException if a returned map is nonempty or both suppliers return the same map instance
      */
     public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
-        final Supplier<? extends Map<K, V>> checkedKeyMapSupplier = Objects.requireNonNull(keyMapSupplier, "keyMapSupplier");
-        final Supplier<? extends Map<V, K>> checkedValueMapSupplier = Objects.requireNonNull(valueMapSupplier, "valueMapSupplier");
-        final Map<K, V> suppliedKeyMap = Objects.requireNonNull(checkedKeyMapSupplier.get(), "keyMapSupplier.get()");
-        final Map<V, K> suppliedValueMap = Objects.requireNonNull(checkedValueMapSupplier.get(), "valueMapSupplier.get()");
+        final Supplier<? extends Map<K, V>> checkedKeyMapSupplier = keyMapSupplier;
+        final Supplier<? extends Map<V, K>> checkedValueMapSupplier = valueMapSupplier;
+        final Map<K, V> suppliedKeyMap = N.checkArgNotNull(checkedKeyMapSupplier.get(), "keyMapSupplier.get()");
+        final Map<V, K> suppliedValueMap = N.checkArgNotNull(checkedValueMapSupplier.get(), "valueMapSupplier.get()");
 
         if (suppliedKeyMap == suppliedValueMap) {
             throw new IllegalArgumentException("The suppliers must return distinct map instances");
@@ -1083,6 +1082,10 @@ public final class BiMap<K, V> implements Map<K, V> {
         final K keyForValue = valueMap.get(value);
         final K keyForOldValue = oldValue == null ? null : valueMap.get(oldValue);
         final boolean sameMapping = oldValue != null && valueMap.containsKey(value) && keyForValue == keyForOldValue;
+        // Maps such as TreeMap and HashMap retain the stored key object when an equivalent key is
+        // updated. Keep that canonical key in the inverse map as well; otherwise the two directions
+        // can expose different key objects after put(equivalentKey, newValue).
+        final K canonicalKey = oldValue == null ? key : keyForOldValue;
 
         // Compare the inverse entries, rather than K.equals/V.equals, so both backing maps' own
         // equality semantics are honored (including comparator-based TreeMaps). Two equivalent
@@ -1111,7 +1114,7 @@ public final class BiMap<K, V> implements Map<K, V> {
         // put without a prior remove(key) so an existing key keeps its position in ordered backing
         // maps (LinkedHashMap re-insertion would move it to the end).
         keyMap.put(key, value);
-        valueMap.put(value, key);
+        valueMap.put(value, canonicalKey);
 
         return oldValue;
     }

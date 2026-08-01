@@ -194,7 +194,7 @@ public final class WebUtil {
         }
 
         if (hasDataOption && !isRequestBodySupported) {
-            sb.append("  // HttpRequest.body(...) only supports POST, PUT, and PATCH. Request body omitted for ")
+            sb.append("  // HttpRequest.body(...) does not support this method. Request body omitted for ")
                     .append(httpMethod.name())
                     .append('.')
                     .append(IOUtil.LINE_SEPARATOR_UNIX)
@@ -511,7 +511,8 @@ public final class WebUtil {
     }
 
     private static boolean supportsHttpRequestBodyBuilder(final HttpMethod httpMethod) {
-        return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH;
+        return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH || httpMethod == HttpMethod.DELETE
+                || httpMethod == HttpMethod.OPTIONS;
     }
 
     private static boolean supportsGeneratedOkHttpBody(final HttpMethod httpMethod) {
@@ -524,6 +525,7 @@ public final class WebUtil {
 
     private static List<String> parseCurl(final String curl) {
         N.checkArgNotEmpty(curl, cs.curl);
+
         final String str = curl.trim();
         N.checkArgument(str.length() >= 4 && str.regionMatches(true, 0, "curl", 0, 4) && (str.length() == 4 || Character.isWhitespace(str.charAt(4))),
                 "Input curl script does not start with the 'curl' command");
@@ -664,15 +666,16 @@ public final class WebUtil {
      *
      * @param url the base URL for the HTTP request, must not be {@code null}
      * @param logHandler consumer that receives the generated cURL command string
-     *                   for each request, must not be {@code null}
+     *                   for each request.
      * @return an OkHttpRequest configured with cURL logging interceptor
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if
-     *         {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
      * @see #createCurlLoggingOkHttpRequest(String, char, Consumer)
      * @see CurlInterceptor
      * @see <a href="https://github.com/mrmike/Ok2Curl">Ok2Curl - OkHttp to cURL converter</a>
      */
-    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final Consumer<? super String> logHandler) {
+    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final Consumer<? super String> logHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(logHandler, cs.logHandler);
+
         return createCurlLoggingOkHttpRequest(url, CurlInterceptor.DEFAULT_QUOTE_CHAR, logHandler);
     }
 
@@ -718,15 +721,17 @@ public final class WebUtil {
      * @param quoteChar the character to use for quoting in cURL commands,
      *                  typically single quote (') or double quote (")
      * @param logHandler consumer that receives the generated cURL command string
-     *                   for each request, must not be {@code null}
+     *                   for each request.
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if
-     *         {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
      * @see #createCurlLoggingOkHttpRequest(String, Consumer)
      * @see CurlInterceptor
      */
-    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final char quoteChar, final Consumer<? super String> logHandler) {
+    public static OkHttpRequest createCurlLoggingOkHttpRequest(final String url, final char quoteChar, final Consumer<? super String> logHandler)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(logHandler, cs.logHandler);
+
         final okhttp3.OkHttpClient client = new okhttp3.OkHttpClient().newBuilder().addInterceptor(new CurlInterceptor(quoteChar, logHandler)).build();
 
         return OkHttpRequest.create(url, client);
@@ -798,7 +803,7 @@ public final class WebUtil {
      */
     public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
             final char quoteChar) throws IllegalArgumentException {
-        N.checkArgNotNull(httpMethod, "httpMethod");
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         return buildCurlByMethodName(httpMethod.name(), url, headers, body, bodyContentType, quoteChar);
     }

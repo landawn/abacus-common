@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.function;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -174,9 +175,9 @@ public class BiPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         BiPredicate<String, String> instance = (a, b) -> false;
-        assertThrows(NullPointerException.class, () -> instance.and((java.util.function.BiPredicate) null));
-        assertThrows(NullPointerException.class, () -> instance.or((java.util.function.BiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.BiPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.or((java.util.function.BiPredicate) null));
     }
 }

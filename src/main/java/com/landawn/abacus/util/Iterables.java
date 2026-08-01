@@ -529,9 +529,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#min(Object[], Comparator)
      */
-    public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.min(a, cmp));
     }
 
@@ -569,9 +572,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#min(Iterable, Comparator)
      */
-    public static <T> Nullable<T> min(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> min(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return c == null ? Nullable.empty() : min(c.iterator(), cmp);
     }
 
@@ -609,11 +615,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#min(Iterator, Comparator)
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
-    public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? (Comparator<T>) N.NULL_MAX_COMPARATOR : cmp;
+    public static <T> Nullable<T> min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         final boolean isNullMinComparator = cmp == N.NULL_MIN_COMPARATOR;
 
         if (iter == null || !iter.hasNext()) {
@@ -652,10 +660,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the minimum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#min(Object[], Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> minBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return min(a, Comparators.nullsLastBy(keyExtractor));
     }
 
@@ -674,10 +685,14 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the minimum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#min(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> minBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return min(c, Comparators.nullsLastBy(keyExtractor));
     }
 
@@ -696,10 +711,14 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the minimum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#min(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> minBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return min(iter, Comparators.nullsLastBy(keyExtractor));
     }
 
@@ -718,10 +737,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the minimum extracted integer value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minIntOrDefaultIfEmpty(Object[], ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt minInt(final T[] a, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt minInt(final T[] a, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -755,10 +777,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the minimum extracted integer value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt minInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt minInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalInt.empty();
         }
@@ -781,10 +806,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the minimum extracted integer value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt minInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt minInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalInt.empty();
         }
@@ -818,10 +846,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the minimum extracted long value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minLongOrDefaultIfEmpty(Object[], ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong minLong(final T[] a, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong minLong(final T[] a, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalLong.empty();
         }
@@ -855,10 +886,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the minimum extracted long value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong minLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong minLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalLong.empty();
         }
@@ -881,10 +915,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the minimum extracted long value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong minLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong minLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalLong.empty();
         }
@@ -918,10 +955,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the minimum extracted double value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minDoubleOrDefaultIfEmpty(Object[], ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble minDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble minDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -955,10 +995,14 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the minimum extracted double value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble minDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble minDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalDouble.empty();
         }
@@ -981,10 +1025,14 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the minimum extracted double value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#minDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble minDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble minDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalDouble.empty();
         }
@@ -1177,9 +1225,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#max(Object[], Comparator)
      */
-    public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.max(a, cmp));
     }
 
@@ -1217,9 +1268,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#max(Iterable, Comparator)
      */
-    public static <T> Nullable<T> max(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> max(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return c == null ? Nullable.empty() : max(c.iterator(), cmp);
     }
 
@@ -1257,11 +1311,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#max(Iterator, Comparator)
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
-    public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) {
-        cmp = cmp == null ? (Comparator<T>) N.NULL_MIN_COMPARATOR : cmp;
+    public static <T> Nullable<T> max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         final boolean isNullMaxComparator = cmp == N.NULL_MAX_COMPARATOR;
 
         if (iter == null || !iter.hasNext()) {
@@ -1300,10 +1356,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the maximum value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#max(Object[], Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> maxBy(final T[] a, final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return max(a, Comparators.nullsFirstBy(keyExtractor));
     }
 
@@ -1322,10 +1381,14 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the maximum value if the iterable is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#max(Iterable, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> maxBy(final Iterable<? extends T> c, final Function<? super T, ? extends Comparable> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return max(c, Comparators.nullsFirstBy(keyExtractor));
     }
 
@@ -1344,10 +1407,14 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param keyExtractor the function to transform the elements into a comparable type for comparison.
      * @return a {@code Nullable} containing the maximum value if the iterator is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see N#max(Iterator, Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor) {
+    public static <T> Nullable<T> maxBy(final Iterator<? extends T> iter, final Function<? super T, ? extends Comparable> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return max(iter, Comparators.nullsFirstBy(keyExtractor));
     }
 
@@ -1366,10 +1433,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the maximum extracted integer value if the array is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxIntOrDefaultIfEmpty(Object[], ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt maxInt(final T[] a, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt maxInt(final T[] a, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -1403,10 +1473,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the maximum extracted integer value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxIntOrDefaultIfEmpty(Iterable, ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt maxInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt maxInt(final Iterable<? extends T> c, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalInt.empty();
         }
@@ -1429,10 +1502,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the maximum extracted integer value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxIntOrDefaultIfEmpty(Iterator, ToIntFunction, int)
      */
     @Beta
-    public static <T> OptionalInt maxInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) {
+    public static <T> OptionalInt maxInt(final Iterator<? extends T> iter, final ToIntFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalInt.empty();
         }
@@ -1466,10 +1542,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the maximum extracted long value if the array is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxLongOrDefaultIfEmpty(Object[], ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong maxLong(final T[] a, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong maxLong(final T[] a, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalLong.empty();
         }
@@ -1503,10 +1582,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the maximum extracted long value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxLongOrDefaultIfEmpty(Iterable, ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong maxLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong maxLong(final Iterable<? extends T> c, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalLong.empty();
         }
@@ -1529,10 +1611,13 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the maximum extracted long value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxLongOrDefaultIfEmpty(Iterator, ToLongFunction, long)
      */
     @Beta
-    public static <T> OptionalLong maxLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) {
+    public static <T> OptionalLong maxLong(final Iterator<? extends T> iter, final ToLongFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalLong.empty();
         }
@@ -1566,10 +1651,13 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the maximum extracted double value if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxDoubleOrDefaultIfEmpty(Object[], ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble maxDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble maxDouble(final T[] a, final ToDoubleFunction<? super T> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -1603,10 +1691,14 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the maximum extracted double value if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxDoubleOrDefaultIfEmpty(Iterable, ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble maxDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble maxDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> valueExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (c == null) {
             return OptionalDouble.empty();
         }
@@ -1629,10 +1721,14 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param valueExtractor the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the maximum extracted double value if the iterator is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      * @see N#maxDoubleOrDefaultIfEmpty(Iterator, ToDoubleFunction, double)
      */
     @Beta
-    public static <T> OptionalDouble maxDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor) {
+    public static <T> OptionalDouble maxDouble(final Iterator<? extends T> iter, final ToDoubleFunction<? super T> valueExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null || !iter.hasNext()) {
             return OptionalDouble.empty();
         }
@@ -1689,9 +1785,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the array is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#minMax(Object[], Comparator)
      */
-    public static <T> Optional<Pair<T, T>> minMax(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(a) ? Optional.empty() : Optional.of(N.minMax(a, cmp));
     }
 
@@ -1735,9 +1834,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#minMax(Iterable, Comparator)
      */
-    public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         final Iterator<? extends T> iter = c == null ? null : c.iterator();
 
         return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter, cmp));
@@ -1781,9 +1883,12 @@ public final class Iterables {
      * @param iter the iterator of elements to evaluate.
      * @param cmp the comparator to determine the order of the elements.
      * @return an {@code Optional} containing a {@code Pair} of the minimum and maximum values if the iterator is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#minMax(Iterator, Comparator)
      */
-    public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, final Comparator<? super T> cmp) {
+    public static <T> Optional<Pair<T, T>> minMax(final Iterator<? extends T> iter, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return iter == null || !iter.hasNext() ? Optional.empty() : Optional.of(N.minMax(iter, cmp));
     }
 
@@ -1840,11 +1945,14 @@ public final class Iterables {
      * @param a the array of values to find the median of.
      * @param cmp the comparator to determine the order of the values.
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#median(Object[], Comparator)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
      */
-    public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.median(a, cmp));
     }
 
@@ -1901,11 +2009,14 @@ public final class Iterables {
      * @param c the collection of values to find the median of.
      * @param cmp the comparator to determine the order of the values.
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#median(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
      */
-    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c, cmp));
     }
 
@@ -1952,9 +2063,12 @@ public final class Iterables {
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
      * @throws IllegalArgumentException if {@code k <= 0} and the array is neither {@code null} nor empty.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#kthLargest(Object[], int, Comparator)
      */
-    public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(a) || a.length < k ? Nullable.empty() : Nullable.of(N.kthLargest(a, k, cmp));
     }
 
@@ -2001,9 +2115,12 @@ public final class Iterables {
      * @param cmp the comparator used to determine the order of the collection's elements.
      * @return a {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Nullable}.
      * @throws IllegalArgumentException if {@code k <= 0} and the collection is neither {@code null} nor empty.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see N#kthLargest(Collection, int, Comparator)
      */
-    public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) {
+    public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return N.isEmpty(c) || c.size() < k ? Nullable.empty() : Nullable.of(N.kthLargest(c, k, cmp));
     }
 
@@ -2047,10 +2164,13 @@ public final class Iterables {
      * @param func the function to extract an integer value from each element.
      * @return an {@code OptionalInt} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalInt}.
      * @throws ArithmeticException if the sum overflows an {@code int}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #sumIntToLong(Iterable, ToIntFunction)
      * @see N#sumInt(Iterable, ToIntFunction)
      */
-    public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
+    public static <T> OptionalInt sumInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2102,9 +2222,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#sumIntToLong(Iterable, ToIntFunction)
      */
-    public static <T> OptionalLong sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
+    public static <T> OptionalLong sumIntToLong(final Iterable<? extends T> c, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2151,9 +2274,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a {@code long} value from each element.
      * @return an {@code OptionalLong} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalLong}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#sumLong(Iterable, ToLongFunction)
      */
-    public static <T> OptionalLong sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
+    public static <T> OptionalLong sumLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2200,9 +2326,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a double value from each element.
      * @return an {@code OptionalDouble} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#sumDouble(Iterable, ToDoubleFunction)
      */
-    public static <T> OptionalDouble sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
+    public static <T> OptionalDouble sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2254,9 +2383,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigInteger value from each element.
      * @return an {@code Optional<BigInteger>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#sumBigInteger(Iterable, Function)
      */
-    public static <T> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
+    public static <T> Optional<BigInteger> sumBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2307,9 +2440,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a BigDecimal value from each element.
      * @return an {@code Optional<BigDecimal>} containing the sum if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#sumBigDecimal(Iterable, Function)
      */
-    public static <T> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
+    public static <T> Optional<BigDecimal> sumBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2387,9 +2524,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param func the function to extract an integer value from each element.
      * @return the average of the integer values if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Object[], ToIntFunction)
      */
-    public static <T> OptionalDouble averageInt(final T[] a, final ToIntFunction<? super T> func) {
+    public static <T> OptionalDouble averageInt(final T[] a, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -2415,11 +2555,13 @@ public final class Iterables {
      * @param func the function to extract an integer value from each element.
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Object[], int, int, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -2471,11 +2613,13 @@ public final class Iterables {
      * @param func the function to extract an integer value from each element.
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Collection, int, int, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -2527,9 +2671,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract an integer value from each element.
      * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Iterable, ToIntFunction)
      */
-    public static <T> OptionalDouble averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) {
+    public static <T> OptionalDouble averageInt(final Iterable<? extends T> c, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2610,9 +2757,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param func the function to extract a {@code long} value from each element.
      * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageLong(Object[], ToLongFunction)
      */
-    public static <T> OptionalDouble averageLong(final T[] a, final ToLongFunction<? super T> func) {
+    public static <T> OptionalDouble averageLong(final T[] a, final ToLongFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -2638,11 +2788,13 @@ public final class Iterables {
      * @param func the function to extract a long value from each element.
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageLong(Object[], int, int, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -2693,11 +2845,13 @@ public final class Iterables {
      * @param func the function to extract a long value from each element.
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageLong(Collection, int, int, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -2748,9 +2902,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a long value from each element.
      * @return an {@code OptionalDouble} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageLong(Iterable, ToLongFunction)
      */
-    public static <T> OptionalDouble averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) {
+    public static <T> OptionalDouble averageLong(final Iterable<? extends T> c, final ToLongFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -2844,9 +3001,12 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param func the function to extract a {@code double} value from each element.
      * @return an {@code OptionalDouble} containing the average if the array is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageDouble(Object[], ToDoubleFunction)
      */
-    public static <T> OptionalDouble averageDouble(final T[] a, final ToDoubleFunction<? super T> func) {
+    public static <T> OptionalDouble averageDouble(final T[] a, final ToDoubleFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         if (N.isEmpty(a)) {
             return OptionalDouble.empty();
         }
@@ -2872,11 +3032,13 @@ public final class Iterables {
      * @param func the function to extract a double value from each element.
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -2933,11 +3095,13 @@ public final class Iterables {
      * @param func the function to extract a double value from each element.
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageDouble(Collection, int, int, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final ToDoubleFunction<? super T> func) throws IndexOutOfBoundsException {
+            final ToDoubleFunction<? super T> func) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+        N.checkArgNotNull(func, cs.func);
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3011,9 +3175,12 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a {@code double} value from each element.
      * @return an {@code OptionalDouble} containing the average (computed with Kahan compensated summation) if the iterable is not {@code null} or empty, otherwise an empty {@code OptionalDouble}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageDouble(Iterable, ToDoubleFunction)
      */
-    public static <T> OptionalDouble averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) {
+    public static <T> OptionalDouble averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         if (c == null) {
             return OptionalDouble.empty();
         }
@@ -3070,9 +3237,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a {@code BigInteger} value from each element; may return {@code null} to skip an element.
      * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageBigInteger(Iterable, Function)
      */
-    public static <T> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func) {
+    public static <T> Optional<BigDecimal> averageBigInteger(final Iterable<? extends T> c, final Function<? super T, BigInteger> func)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -3138,9 +3309,13 @@ public final class Iterables {
      * @param c the iterable of elements to evaluate.
      * @param func the function to extract a {@code BigDecimal} value from each element; may return {@code null} to skip an element.
      * @return an {@code Optional<BigDecimal>} containing the average if the iterable is not {@code null} or empty, otherwise an empty {@code Optional}.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageBigDecimal(Iterable, Function)
      */
-    public static <T> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func) {
+    public static <T> Optional<BigDecimal> averageBigDecimal(final Iterable<? extends T> c, final Function<? super T, BigDecimal> func)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         final Iterator<? extends T> iter = c == null ? ObjIterator.empty() : c.iterator();
 
         if (!iter.hasNext()) {
@@ -3299,10 +3474,15 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return the first element satisfying {@code predicateForFirst} if found, otherwise the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see N#findFirst(Object[], Predicate)
      * @see N#findLast(Object[], Predicate)
      */
-    public static <T> Nullable<T> findFirstOrLast(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast) {
+    public static <T> Nullable<T> findFirstOrLast(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(a)) {
             return Nullable.empty();
         }
@@ -3331,11 +3511,15 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return the first element satisfying {@code predicateForFirst} if found, otherwise the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code Nullable}.
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see N#findFirst(Iterable, Predicate)
      * @see N#findLast(Iterable, Predicate)
      */
     public static <T> Nullable<T> findFirstOrLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(c)) {
             return Nullable.empty();
         }
@@ -3364,10 +3548,15 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return the index of the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see N#findFirstIndex(Object[], Predicate)
      * @see N#findLastIndex(Object[], Predicate)
      */
-    public static <T> OptionalInt findFirstOrLastIndex(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast) {
+    public static <T> OptionalInt findFirstOrLastIndex(final T[] a, final Predicate<? super T> predicateForFirst, final Predicate<? super T> predicateForLast)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -3396,11 +3585,15 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return the index of the first element satisfying {@code predicateForFirst} if found, otherwise the index of the last element satisfying {@code predicateForLast} if found, otherwise an empty {@code OptionalInt}.
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see N#findFirstIndex(Collection, Predicate)
      * @see N#findLastIndex(Collection, Predicate)
      */
     public static <T> OptionalInt findFirstOrLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -3429,12 +3622,15 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
      * @return a {@code Pair} whose first value is the first element matching {@code predicate} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicate} (or empty {@code Nullable}).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirstAndLast(Object[], Predicate, Predicate)
      * @see #findFirstOrLast(Object[], Predicate, Predicate)
      * @see N#findFirst(Object[], Predicate)
      * @see N#findLast(Object[], Predicate)
      */
-    public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return findFirstAndLast(a, predicate, predicate);
     }
 
@@ -3458,13 +3654,17 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return a {@code Pair} whose first value is the first element matching {@code predicateForFirst} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicateForLast} (or empty {@code Nullable}).
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see #findFirstAndLast(Object[], Predicate)
      * @see #findFirstOrLast(Object[], Predicate, Predicate)
      * @see N#findFirst(Object[], Predicate)
      * @see N#findLast(Object[], Predicate)
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final T[] a, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(a)) {
             return Pair.of(Nullable.empty(), Nullable.empty());
         }
@@ -3491,12 +3691,16 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
      * @return a {@code Pair} whose first value is the first element matching {@code predicate} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicate} (or empty {@code Nullable}).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirstAndLast(Collection, Predicate, Predicate)
      * @see #findFirstOrLast(Collection, Predicate, Predicate)
      * @see N#findFirst(Iterable, Predicate)
      * @see N#findLast(Iterable, Predicate)
      */
-    public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return findFirstAndLast(c, predicate, predicate);
     }
 
@@ -3520,13 +3724,17 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return a {@code Pair} whose first value is the first element matching {@code predicateForFirst} (or empty {@code Nullable}) and whose second value is the last element matching {@code predicateForLast} (or empty {@code Nullable}).
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see #findFirstAndLast(Collection, Predicate)
      * @see #findFirstOrLast(Collection, Predicate, Predicate)
      * @see N#findFirst(Iterable, Predicate)
      * @see N#findLast(Iterable, Predicate)
      */
     public static <T> Pair<Nullable<T>, Nullable<T>> findFirstAndLast(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(c)) {
             return Pair.of(Nullable.empty(), Nullable.empty());
         }
@@ -3553,12 +3761,15 @@ public final class Iterables {
      * @param a the array of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
      * @return a {@code Pair} whose first value is the index of the first element matching {@code predicate} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicate} (or empty {@code OptionalInt}).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirstAndLastIndex(Object[], Predicate, Predicate)
      * @see #findFirstOrLastIndex(Object[], Predicate, Predicate)
      * @see N#findFirstIndex(Object[], Predicate)
      * @see N#findLastIndex(Object[], Predicate)
      */
-    public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return findFirstAndLastIndex(a, predicate, predicate);
     }
 
@@ -3582,13 +3793,17 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return a {@code Pair} whose first value is the index of the first element matching {@code predicateForFirst} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicateForLast} (or empty {@code OptionalInt}).
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see #findFirstAndLastIndex(Object[], Predicate)
      * @see #findFirstOrLastIndex(Object[], Predicate, Predicate)
      * @see N#findFirstIndex(Object[], Predicate)
      * @see N#findLastIndex(Object[], Predicate)
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final T[] a, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(a)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
@@ -3615,12 +3830,16 @@ public final class Iterables {
      * @param c the collection of elements to evaluate.
      * @param predicate the predicate to test for the first and last elements.
      * @return a {@code Pair} whose first value is the index of the first element matching {@code predicate} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicate} (or empty {@code OptionalInt}).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirstAndLastIndex(Collection, Predicate, Predicate)
      * @see #findFirstOrLastIndex(Collection, Predicate, Predicate)
      * @see N#findFirstIndex(Collection, Predicate)
      * @see N#findLastIndex(Collection, Predicate)
      */
-    public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return findFirstAndLastIndex(c, predicate, predicate);
     }
 
@@ -3644,13 +3863,17 @@ public final class Iterables {
      * @param predicateForFirst the predicate to test for the first element.
      * @param predicateForLast the predicate to test for the last element.
      * @return a {@code Pair} whose first value is the index of the first element matching {@code predicateForFirst} (or empty {@code OptionalInt}) and whose second value is the index of the last element matching {@code predicateForLast} (or empty {@code OptionalInt}).
+     * @throws IllegalArgumentException if any of {@code predicateForFirst}, {@code predicateForLast} is {@code null}.
      * @see #findFirstAndLastIndex(Collection, Predicate)
      * @see #findFirstOrLastIndex(Collection, Predicate, Predicate)
      * @see N#findFirstIndex(Collection, Predicate)
      * @see N#findLastIndex(Collection, Predicate)
      */
     public static <T> Pair<OptionalInt, OptionalInt> findFirstAndLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicateForFirst,
-            final Predicate<? super T> predicateForLast) {
+            final Predicate<? super T> predicateForLast) throws IllegalArgumentException {
+        N.checkArgNotNull(predicateForFirst, cs.predicateForFirst);
+        N.checkArgNotNull(predicateForLast, cs.predicateForLast);
+
         if (N.isEmpty(c)) {
             return Pair.of(OptionalInt.empty(), OptionalInt.empty());
         }
@@ -3693,7 +3916,7 @@ public final class Iterables {
      * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
-    public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) {
+    public static <T> void fill(final T[] a, final Supplier<? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (N.isEmpty(a)) {
@@ -3722,8 +3945,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range to fill (inclusive).
      * @param toIndex the end index of the range to fill (exclusive).
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Arrays#fill(Object[], int, int, Object)
      * @see N#fill(Object[], Object)
      * @see N#fill(Object[], int, int, Object)
@@ -3733,7 +3956,8 @@ public final class Iterables {
      * @see Suppliers#of(Object, com.landawn.abacus.util.function.Function)
      */
     @Beta
-    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier) throws IndexOutOfBoundsException {
+    public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -3762,9 +3986,10 @@ public final class Iterables {
      * }</pre>
      *
      * @param <T> the type of elements in the list.
-     * @param list the list to be filled. Must not be {@code null}.
+     * @param list the list to be filled.
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} or {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code list} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
      * @see N#setAll(List, java.util.function.IntFunction)
@@ -3806,12 +4031,13 @@ public final class Iterables {
      * }</pre>
      *
      * @param <T> the type of elements in the list.
-     * @param list the list to be filled. Must not be {@code null}.
+     * @param list the list to be filled.
      * @param fromIndex the starting index (inclusive) to begin filling.
      * @param toIndex the ending index (exclusive) to stop filling. May exceed {@code list.size()}, in which case the list is extended.
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} or {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code list} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || fromIndex > toIndex}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
      * @see N#setAll(List, java.util.function.IntFunction)
@@ -4058,12 +4284,14 @@ public final class Iterables {
         private int reverseIndex(final int index) {
             final int size = size();
             N.checkElementIndex(index, size);
+
             return (size - 1) - index;
         }
 
         private int reversePosition(final int index) {
             final int size = size();
             N.checkPositionIndex(index, size);
+
             return size - index;
         }
 
@@ -4105,6 +4333,7 @@ public final class Iterables {
         @Override
         public List<T> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
             N.checkFromToIndex(fromIndex, toIndex, size());
+
             return asReversed(forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)));
         }
 
@@ -4172,6 +4401,7 @@ public final class Iterables {
                 @Override
                 public void remove() {
                     checkRemove(canRemoveOrSet);
+
                     forwardIterator.remove();
                     canRemoveOrSet = false;
                 }
@@ -4179,6 +4409,7 @@ public final class Iterables {
                 @Override
                 public void set(final T e) {
                     N.checkState(canRemoveOrSet);
+
                     forwardIterator.set(e);
                 }
             };
@@ -4768,7 +4999,7 @@ public final class Iterables {
      * @throws IllegalArgumentException if {@code range} is {@code null}, or if its endpoints are ordered oppositely by the set's comparator.
      */
     public static <T extends Comparable<? super T>> NavigableSet<T> subSet(final NavigableSet<T> set, final Range<T> range) throws IllegalArgumentException {
-        N.checkArgNotNull(range, "range");
+        N.checkArgNotNull(range, cs.range);
 
         if (set == null) {
             return N.emptyNavigableSet();
@@ -4996,8 +5227,12 @@ public final class Iterables {
      * @return an unmodifiable {@code Collection} containing all distinct permutations of the original collection, in lexicographic order as defined by {@code comparator}.
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Collection<List<T>> orderedPermutations(final Collection<T> elements, final Comparator<? super T> comparator) {
-        return new OrderedPermutationCollection<>(N.nullToEmpty(elements), N.checkArgNotNull(comparator, "comparator"));
+    @SuppressWarnings("unchecked")
+    public static <T> Collection<List<T>> orderedPermutations(final Collection<T> elements, final Comparator<? super T> comparator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
+        return new OrderedPermutationCollection<>(N.nullToEmpty(elements), comparator);
     }
 
     /**
@@ -5161,6 +5396,7 @@ public final class Iterables {
         PowerSet(final Set<T> input) {
             inputSet = indexMap(input);
             N.checkArgument(inputSet.size() <= 30, "Too many elements to create power set: %s > 30", inputSet.size());
+
             elements = ImmutableList.copyOf(inputSet.keySet());
         }
 

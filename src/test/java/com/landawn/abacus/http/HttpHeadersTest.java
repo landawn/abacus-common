@@ -655,6 +655,17 @@ public class HttpHeadersTest extends TestBase {
         assertFalse(HttpHeaders.of("a", null).equals(HttpHeaders.of("b", null)));
     }
 
+    @Test
+    public void testEqualsAndHashCodeIgnoreUnicodeHeaderNameCase() {
+        final HttpHeaders dottedCapitalI = HttpHeaders.of("\u0130", "value");
+        final HttpHeaders asciiLowerI = HttpHeaders.of("i", "value");
+
+        assertTrue("\u0130".equalsIgnoreCase("i"));
+        assertEquals(dottedCapitalI, asciiLowerI);
+        assertEquals(asciiLowerI, dottedCapitalI);
+        assertEquals(dottedCapitalI.hashCode(), asciiLowerI.hashCode());
+    }
+
     // --- equals ---
 
     @Test

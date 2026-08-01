@@ -91,13 +91,14 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * // Then logs: "Sum: 60"
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code LongTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default LongTriConsumer andThen(final LongTriConsumer after) {
+    default LongTriConsumer andThen(final LongTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (a, b, c) -> {
             accept(a, b, c);
             after.accept(a, b, c);

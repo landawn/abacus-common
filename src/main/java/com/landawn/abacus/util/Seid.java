@@ -129,7 +129,7 @@ public class Seid implements EntityId {
      * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     public Seid(final String propName, final Object propValue) {
-        this(NameUtil.getParentName(N.checkArgNotNull(propName, "propName")));
+        this(NameUtil.getParentName(N.checkArgNotNull(propName, cs.propName)));
 
         set(propName, propValue); // NOSONAR
     }
@@ -158,7 +158,7 @@ public class Seid implements EntityId {
     private static String extractEntityName(final Map<String, Object> nameValues) {
         N.checkArgNotEmpty(nameValues, "nameValues");
 
-        return NameUtil.getParentName(N.checkArgNotNull(nameValues.keySet().iterator().next(), "propName"));
+        return NameUtil.getParentName(N.checkArgNotNull(nameValues.keySet().iterator().next(), cs.propName));
     }
 
     /**
@@ -378,11 +378,12 @@ public class Seid implements EntityId {
      * @param <T> the expected type of the property value
      * @param propName the property name
      * @return the property value, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(final String propName) {
-        final String checkedPropName = N.checkArgNotNull(propName, "propName");
+        final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
 
         if (NameUtil.isCanonicalName(entityName, checkedPropName)) {
             return (T) values.get(NameUtil.getSimpleName(checkedPropName));
@@ -456,7 +457,7 @@ public class Seid implements EntityId {
      */
     @Override
     public <T> T get(final String propName, final Class<? extends T> targetType) {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
         Object propValue = get(propName);
 
         if (propValue == null) {
@@ -490,7 +491,7 @@ public class Seid implements EntityId {
     @Deprecated
     @Internal
     public Seid set(final String propName, final Object propValue) {
-        final String checkedPropName = N.checkArgNotNull(propName, "propName");
+        final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
         final String simplePropName = NameUtil.isCanonicalName(entityName, checkedPropName) ? NameUtil.getSimpleName(checkedPropName) : checkedPropName;
 
         if (values.isEmpty() || (values.size() == 1 && values.containsKey(simplePropName))) {
@@ -545,7 +546,7 @@ public class Seid implements EntityId {
         newValues.putAll(values);
 
         for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
-            final String propName = N.checkArgNotNull(entry.getKey(), "propName");
+            final String propName = N.checkArgNotNull(entry.getKey(), cs.propName);
             final String simplePropName = NameUtil.isCanonicalName(entityName, propName) ? NameUtil.getSimpleName(propName) : propName;
             newValues.put(simplePropName, entry.getValue());
         }
@@ -572,7 +573,7 @@ public class Seid implements EntityId {
      */
     @Override
     public boolean containsKey(final String propName) {
-        final String checkedPropName = N.checkArgNotNull(propName, "propName");
+        final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
 
         if (values.isEmpty()) {
             return false;

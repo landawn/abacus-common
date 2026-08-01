@@ -59,12 +59,13 @@ public interface BiIntObjConsumer<T> extends Throwables.BiIntObjConsumer<T, Runt
      * BiIntObjConsumer<List<String>> combined = adder.andThen(printer);
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code BiIntObjConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) {
+    default BiIntObjConsumer<T> andThen(final BiIntObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (i, j, t) -> {
             accept(i, j, t);
             after.accept(i, j, t);

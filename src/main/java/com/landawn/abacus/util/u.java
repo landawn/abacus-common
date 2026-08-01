@@ -456,10 +456,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean ifPresent(final Throwables.BooleanConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean ifPresent(final Throwables.BooleanConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -484,12 +484,12 @@ public class u { // NOSONAR
          * @param action the action to be performed, if a value is present
          * @param emptyAction the empty-based action to be performed, if no value is present
          * @return this {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalBoolean ifPresentOrElse(final Throwables.BooleanConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -518,11 +518,11 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the value of this
          *         {@code OptionalBoolean}, if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean filter(final Throwables.BooleanPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalBoolean filter(final Throwables.BooleanPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -547,10 +547,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean map(final Throwables.BooleanUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -576,10 +576,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Boolean, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -605,10 +605,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Boolean, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -634,10 +634,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalLong} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Boolean, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -663,10 +663,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalDouble} describing the result of applying a mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Boolean, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Boolean, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -695,10 +695,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.BooleanFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -729,15 +729,15 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalBoolean}-bearing mapping
          *         function to the value of this {@code OptionalBoolean}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalBoolean flatMap(final Throwables.BooleanFunction<OptionalBoolean, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -754,17 +754,19 @@ public class u { // NOSONAR
          * }</pre>
          *
          * @param supplier the supplying function that produces the alternative
-         *        {@code OptionalBoolean}; must not be {@code null} and must not return {@code null}
+         *        {@code OptionalBoolean}; and must not return {@code null}
          * @return this {@code OptionalBoolean} if a value is present; otherwise the
          *         supplied {@code OptionalBoolean}
-         * @throws NullPointerException if no value is present and {@code supplier} is
-         *         {@code null}, or if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) {
+        public OptionalBoolean or(final Supplier<OptionalBoolean> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -832,8 +834,6 @@ public class u { // NOSONAR
          * Returns the contained value if present; otherwise returns the result produced
          * by the supplied {@code BooleanSupplier}.
          *
-         * <p>The supplier is checked for {@code null} before the presence check.
-         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * OptionalBoolean.of(true).orElseGet(() -> false);   // returns true
@@ -842,7 +842,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplier whose result is returned if no value is present
          * @return the contained value if present; otherwise the supplied value
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public boolean orElseGet(final BooleanSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -1010,10 +1010,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> boolean orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> boolean orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -1422,10 +1422,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed, if a value is present
          * @return this {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalChar ifPresent(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar ifPresent(final Throwables.CharConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
@@ -1457,12 +1457,12 @@ public class u { // NOSONAR
          * @param action the action to be performed, if a value is present
          * @param emptyAction the empty-based action to be performed, if no value is present
          * @return this {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalChar ifPresentOrElse(final Throwables.CharConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -1491,11 +1491,11 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the value of this
          *         {@code OptionalChar}, if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalChar filter(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalChar filter(final Throwables.CharPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -1520,10 +1520,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalChar} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar map(final Throwables.CharUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -1549,10 +1549,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalBoolean} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Character, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1578,10 +1578,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying a mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Character, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1610,10 +1610,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.CharFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -1644,15 +1644,15 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalChar}-bearing mapping
          *         function to the value of this {@code OptionalChar}, if a value is
          *         present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalChar flatMap(final Throwables.CharFunction<OptionalChar, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -1675,14 +1675,16 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalChar}, if a value is present, otherwise the
          *         {@code OptionalChar} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is
-         *         {@code null}, or if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalChar or(final Supplier<OptionalChar> supplier) {
+        public OptionalChar or(final Supplier<OptionalChar> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent()) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -1732,7 +1734,7 @@ public class u { // NOSONAR
          *
          * @param supplier a {@code CharSupplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public char orElseGet(final CharSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -1900,10 +1902,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> char orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> char orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent()) {
@@ -2345,10 +2347,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalByte ifPresent(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalByte ifPresent(final Throwables.ByteConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -2373,12 +2375,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalByte ifPresentOrElse(final Throwables.ByteConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -2407,11 +2409,11 @@ public class u { // NOSONAR
          * @return an {@code OptionalByte} describing the value of this
          *         {@code OptionalByte} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalByte filter(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalByte filter(final Throwables.BytePredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -2436,10 +2438,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalByte} describing the result of applying the mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalByte map(final Throwables.ByteUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -2465,10 +2467,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying the mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Byte, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -2497,10 +2499,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ByteFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -2526,15 +2528,15 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalByte}-bearing mapping
          *         function to the value of this {@code OptionalByte}, if a value is
          *         present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalByte flatMap(final Throwables.ByteFunction<OptionalByte, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -2554,13 +2556,16 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalByte} if a value is present, otherwise an
          *         {@code OptionalByte} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalByte or(final Supplier<OptionalByte> supplier) {
+        public OptionalByte or(final Supplier<OptionalByte> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -2608,7 +2613,7 @@ public class u { // NOSONAR
          *
          * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public byte orElseGet(final ByteSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -2775,10 +2780,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> byte orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> byte orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -3209,10 +3214,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalShort ifPresent(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalShort ifPresent(final Throwables.ShortConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -3237,12 +3242,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalShort ifPresentOrElse(final Throwables.ShortConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -3271,11 +3276,11 @@ public class u { // NOSONAR
          * @return an {@code OptionalShort} describing the value of this
          *         {@code OptionalShort} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalShort filter(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalShort filter(final Throwables.ShortPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -3300,10 +3305,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalShort} describing the result of applying the mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalShort map(final Throwables.ShortUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3329,10 +3334,10 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the result of applying the mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Short, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3361,10 +3366,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.ShortFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -3390,15 +3395,15 @@ public class u { // NOSONAR
          * @return the result of applying an {@code OptionalShort}-bearing mapping
          *         function to the value of this {@code OptionalShort}, if a value is
          *         present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalShort flatMap(final Throwables.ShortFunction<OptionalShort, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -3418,13 +3423,16 @@ public class u { // NOSONAR
          *        to be returned
          * @return this {@code OptionalShort} if a value is present, otherwise an
          *         {@code OptionalShort} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalShort or(final Supplier<OptionalShort> supplier) {
+        public OptionalShort or(final Supplier<OptionalShort> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -3472,7 +3480,7 @@ public class u { // NOSONAR
          *
          * @param supplier a supplying function to be invoked to produce a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public short orElseGet(final ShortSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -3639,10 +3647,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> short orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> short orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -4137,10 +4145,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalInt ifPresent(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt ifPresent(final Throwables.IntConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -4165,12 +4173,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalInt ifPresentOrElse(final Throwables.IntConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -4199,11 +4207,11 @@ public class u { // NOSONAR
          * @return an {@code OptionalInt} describing the value of this
          *         {@code OptionalInt} if a value is present and the value matches the
          *         given predicate, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate evaluation throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalInt filter(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalInt filter(final Throwables.IntPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -4226,10 +4234,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt map(final Throwables.IntUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4253,10 +4261,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalBoolean} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<Integer, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4280,10 +4288,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalChar} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<Integer, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4307,10 +4315,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Integer, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4334,10 +4342,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalFloat} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<Integer, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4361,10 +4369,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Integer, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4393,10 +4401,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalInt}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.IntFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -4424,15 +4432,15 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying an {@code OptionalInt}-bearing mapping function to the value of this {@code OptionalInt},
          *         if a value is present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalInt flatMap(final Throwables.IntFunction<OptionalInt, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -4449,13 +4457,16 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalInt} to be returned
          * @return this {@code OptionalInt} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalInt or(final Supplier<OptionalInt> supplier) {
+        public OptionalInt or(final Supplier<OptionalInt> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -4502,7 +4513,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public int orElseGet(final IntSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -4663,10 +4674,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> int orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> int orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -5169,10 +5180,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalLong ifPresent(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong ifPresent(final Throwables.LongConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -5196,12 +5207,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalLong ifPresentOrElse(final Throwables.LongConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -5228,11 +5239,11 @@ public class u { // NOSONAR
          * @param predicate the predicate to apply to the value if present
          * @return an {@code OptionalLong} describing the value if a value is present and matches the predicate,
          *         otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalLong filter(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalLong filter(final Throwables.LongPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -5255,10 +5266,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong map(final Throwables.LongUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5282,10 +5293,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Long, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5309,10 +5320,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Long, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5341,10 +5352,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalLong}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.LongFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -5372,15 +5383,15 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying an {@code OptionalLong}-bearing mapping function to the value of this {@code OptionalLong},
          *         if a value is present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalLong flatMap(final Throwables.LongFunction<OptionalLong, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -5397,13 +5408,16 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalLong} to be returned
          * @return this {@code OptionalLong} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalLong or(final Supplier<OptionalLong> supplier) {
+        public OptionalLong or(final Supplier<OptionalLong> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -5450,7 +5464,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result of the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public long orElseGet(final LongSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -5611,10 +5625,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> long orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> long orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -6043,10 +6057,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat ifPresent(final Throwables.FloatConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalFloat ifPresent(final Throwables.FloatConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -6070,12 +6084,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalFloat ifPresentOrElse(final Throwables.FloatConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -6102,11 +6116,11 @@ public class u { // NOSONAR
          * @param predicate the predicate to apply to the value if present
          * @return an {@code OptionalFloat} describing the value of this {@code OptionalFloat} if a value is present and matches the predicate,
          *         otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat filter(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalFloat filter(final Throwables.FloatPredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -6129,10 +6143,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalFloat} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat map(final Throwables.FloatUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalFloat map(final Throwables.FloatUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -6156,10 +6170,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Float, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Float, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -6183,10 +6197,10 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present,
          *         otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Float, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<Float, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -6215,10 +6229,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalFloat}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.FloatFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -6246,15 +6260,15 @@ public class u { // NOSONAR
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying an {@code OptionalFloat}-bearing mapping function to the value of this {@code OptionalFloat},
          *         if a value is present, otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalFloat flatMap(final Throwables.FloatFunction<OptionalFloat, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -6271,13 +6285,16 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalFloat} to be returned
          * @return this {@code OptionalFloat} if a value is present, otherwise the result of the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalFloat or(final Supplier<OptionalFloat> supplier) {
+        public OptionalFloat or(final Supplier<OptionalFloat> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -6324,7 +6341,7 @@ public class u { // NOSONAR
          *
          * @param supplier a {@code FloatSupplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public float orElseGet(final FloatSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -6485,10 +6502,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> float orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> float orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -6960,10 +6977,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble ifPresent(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble ifPresent(final Throwables.DoubleConsumer<E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent) {
@@ -6987,12 +7004,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> OptionalDouble ifPresentOrElse(final Throwables.DoubleConsumer<E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -7018,11 +7035,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if present
          * @return an {@code OptionalDouble} describing the value if present and matching the predicate, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble filter(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> OptionalDouble filter(final Throwables.DoublePredicate<E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent && predicate.test(value)) {
                 return this;
@@ -7043,10 +7060,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble map(final Throwables.DoubleUnaryOperator<E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble map(final Throwables.DoubleUnaryOperator<E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -7068,10 +7085,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Double, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<Double, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -7093,10 +7110,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Double, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<Double, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -7125,10 +7142,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code OptionalDouble}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapper function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws IllegalArgumentException, E {
+        public <T, E extends Exception> Optional<T> mapToObj(final Throwables.DoubleFunction<? extends T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
@@ -7152,15 +7169,15 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalDouble flatMap(final Throwables.DoubleFunction<OptionalDouble, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -7177,13 +7194,16 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code OptionalDouble} to be returned
          * @return this {@code OptionalDouble} if a value is present, otherwise the {@code OptionalDouble} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public OptionalDouble or(final Supplier<OptionalDouble> supplier) {
+        public OptionalDouble or(final Supplier<OptionalDouble> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent) {
                 return this;
             } else {
-                return Objects.requireNonNull(supplier.get());
+                return N.checkArgNotNull(supplier.get());
             }
         }
 
@@ -7230,7 +7250,7 @@ public class u { // NOSONAR
          *
          * @param supplier a {@code DoubleSupplier} whose result is returned if no value is present
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public double orElseGet(final DoubleSupplier supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -7393,10 +7413,10 @@ public class u { // NOSONAR
          * @param <E> the type of the exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> double orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> double orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent) {
@@ -7946,10 +7966,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code Optional}
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> Optional<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> Optional<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
@@ -7973,12 +7993,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code Optional}
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> Optional<T> ifPresentOrElse(final Throwables.Consumer<? super T, E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -8003,11 +8023,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if present
          * @return an {@code Optional} describing the value if present and matching the predicate, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> Optional<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -8035,10 +8055,10 @@ public class u { // NOSONAR
          *         function to the value of this {@code Optional}, if a value is
          *         present, otherwise an empty {@code Optional}.
          *         If the mapping function returns a {@code null} result, an empty {@code Optional} is returned.
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
+        public <U, E extends Exception> Optional<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8060,10 +8080,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalBoolean} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8085,10 +8105,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalChar} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8110,10 +8130,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalByte} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8135,10 +8155,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalShort} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8160,10 +8180,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8185,10 +8205,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalLong} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8210,10 +8230,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalFloat} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8235,10 +8255,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} describing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -8261,15 +8281,15 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying the mapping function to the value if present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Optional<U> flatMap(final Throwables.Function<? super T, Optional<U>, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -8304,14 +8324,17 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces an {@code Optional} to be returned
          * @return this {@code Optional} if a value is present, otherwise the {@code Optional} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
-        public Optional<T> or(final Supplier<? extends Optional<? extends T>> supplier) {
+        public Optional<T> or(final Supplier<? extends Optional<? extends T>> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent()) {
                 return this;
             } else {
                 final Optional<T> ret = (Optional<T>) supplier.get();
-                return Objects.requireNonNull(ret);
+                return N.checkArgNotNull(ret, "supplier result");
             }
         }
 
@@ -8358,7 +8381,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public T orElseGet(final Supplier<? extends T> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -8524,10 +8547,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent()) {
@@ -9099,10 +9122,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a value is present
          * @return this {@code Nullable} instance
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> Nullable<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> Nullable<T> ifPresent(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isPresent()) {
@@ -9126,12 +9149,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a value is present
          * @param emptyAction the empty-based action to be performed if no value is present
          * @return this {@code Nullable} instance
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifPresentOrElse(final Throwables.Consumer<? super T, E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -9156,10 +9179,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed if a {@code non-null} value is present
          * @return this {@code Nullable} instance
-         * @throws IllegalArgumentException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> Nullable<T> ifNotNull(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
+        public <E extends Exception> Nullable<T> ifNotNull(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             if (isNotNull()) {
@@ -9184,12 +9207,12 @@ public class u { // NOSONAR
          * @param action the action to be performed if a {@code non-null} value is present
          * @param emptyAction the empty-based action to be performed if the value is {@code null} or not present
          * @return this {@code Nullable} instance
-         * @throws IllegalArgumentException if {@code action} or {@code emptyAction} is {@code null}
          * @throws E if the action throws an exception
          * @throws E2 if the empty action throws an exception
+         * @throws IllegalArgumentException if any of {@code action}, {@code emptyAction} is {@code null}.
          */
         public <E extends Exception, E2 extends Exception> Nullable<T> ifNotNullOrElse(final Throwables.Consumer<? super T, E> action,
-                final Throwables.Runnable<E2> emptyAction) throws IllegalArgumentException, E, E2 {
+                final Throwables.Runnable<E2> emptyAction) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
             N.checkArgNotNull(emptyAction, cs.emptyAction);
 
@@ -9215,11 +9238,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if present
          * @return this {@code Nullable} if the value is present and matches the predicate, otherwise an empty {@code Nullable}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> Nullable<T> filter(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isPresent() && predicate.test(value)) {
                 return this;
@@ -9241,11 +9264,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the predicate may throw
          * @param predicate the predicate to apply to the value if it is not {@code null}
          * @return an {@code Optional} containing the value if it is not {@code null} and matches the predicate, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
          * @throws E if the predicate throws an exception
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-            N.checkArgNotNull(predicate, cs.Predicate);
+        public <E extends Exception> Optional<T> filterIfNotNull(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
 
             if (isNotNull() && predicate.test(value)) {
                 return Optional.of(value);
@@ -9276,10 +9299,10 @@ public class u { // NOSONAR
          * @return a {@code Nullable} containing the result of applying the mapping function to the value if
          *         present — including a present {@code Nullable} holding {@code null} when the mapper returns
          *         {@code null} — otherwise an empty {@code Nullable}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws IllegalArgumentException, E {
+        public <U, E extends Exception> Nullable<U> map(final Throwables.Function<? super T, ? extends U, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9304,9 +9327,9 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present, must not return {@code null}
          * @return an {@code Optional} containing the result of applying the mapping function to the value if present, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws NullPointerException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Optional<U> mapToNonNull(final Throwables.Function<? super T, ? extends U, E> mapper)
                 throws IllegalArgumentException, NullPointerException, E {
@@ -9332,10 +9355,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalBoolean} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalBoolean mapToBoolean(final Throwables.ToBooleanFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9358,10 +9381,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalChar} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar mapToChar(final Throwables.ToCharFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9384,10 +9407,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalByte} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalByte mapToByte(final Throwables.ToByteFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9410,10 +9433,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalShort} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalShort mapToShort(final Throwables.ToShortFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9436,10 +9459,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalInt} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToInt(final Throwables.ToIntFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9462,10 +9485,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalLong} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLong(final Throwables.ToLongFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9488,10 +9511,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalFloat} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalFloat mapToFloat(final Throwables.ToFloatFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9514,10 +9537,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return an {@code OptionalDouble} containing the result of applying the mapping function to the value if present, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalDouble mapToDouble(final Throwables.ToDoubleFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
@@ -9541,11 +9564,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return a {@code Nullable} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code Nullable}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Nullable<U> mapIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
-                throws IllegalArgumentException, E {
+                throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9570,12 +9593,12 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}, must not return {@code null}
          * @return an {@code Optional} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code Optional}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws NullPointerException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Optional<U> mapToNonNullIfNotNull(final Throwables.Function<? super T, ? extends U, E> mapper)
-                throws IllegalArgumentException, NullPointerException, E {
+                throws NullPointerException, E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9598,11 +9621,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalBoolean} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalBoolean}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalBoolean mapToBooleanIfNotNull(final Throwables.ToBooleanFunction<? super T, E> mapper)
-                throws IllegalArgumentException, E {
+                throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9625,10 +9648,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalChar} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalChar}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalChar mapToCharIfNotNull(final Throwables.ToCharFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalChar mapToCharIfNotNull(final Throwables.ToCharFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9651,10 +9674,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalByte} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalByte}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalByte mapToByteIfNotNull(final Throwables.ToByteFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalByte mapToByteIfNotNull(final Throwables.ToByteFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9677,11 +9700,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalShort} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalShort}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalShort mapToShortIfNotNull(final Throwables.ToShortFunction<? super T, E> mapper)
-                throws IllegalArgumentException, E {
+                throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9704,10 +9727,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalInt} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalInt}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalInt mapToIntIfNotNull(final Throwables.ToIntFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalInt mapToIntIfNotNull(final Throwables.ToIntFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9730,10 +9753,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalLong} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalLong}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <E extends Exception> OptionalLong mapToLongIfNotNull(final Throwables.ToLongFunction<? super T, E> mapper) throws IllegalArgumentException, E {
+        public <E extends Exception> OptionalLong mapToLongIfNotNull(final Throwables.ToLongFunction<? super T, E> mapper) throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9756,11 +9779,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalFloat} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalFloat}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalFloat mapToFloatIfNotNull(final Throwables.ToFloatFunction<? super T, E> mapper)
-                throws IllegalArgumentException, E {
+                throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9783,11 +9806,11 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return an {@code OptionalDouble} containing the result of applying the mapping function to the value if it is not {@code null}, otherwise an empty {@code OptionalDouble}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <E extends Exception> OptionalDouble mapToDoubleIfNotNull(final Throwables.ToDoubleFunction<? super T, E> mapper)
-                throws IllegalArgumentException, E {
+                throws E, IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
@@ -9813,15 +9836,15 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if present
          * @return the result of applying a {@code Nullable}-bearing mapping function to the value of this {@code Nullable}, if a value is present, otherwise an empty {@code Nullable}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Nullable<U> flatMap(final Throwables.Function<? super T, Nullable<U>, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isPresent()) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -9843,16 +9866,16 @@ public class u { // NOSONAR
          * @param <E> the type of exception that the mapping function may throw
          * @param mapper the mapping function to apply to the value if it is not {@code null}
          * @return the result of applying a {@code Nullable}-bearing mapping function to the value of this {@code Nullable}, if the value is not {@code null}, otherwise an empty {@code Nullable}
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
-         * @throws NullPointerException if the mapping function returns {@code null}
+         * @throws IllegalArgumentException if the mapping function returns {@code null}
          * @throws E if the mapping function throws an exception
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
         public <U, E extends Exception> Nullable<U> flatMapIfNotNull(final Throwables.Function<? super T, Nullable<U>, E> mapper)
                 throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             if (isNotNull()) {
-                return Objects.requireNonNull(mapper.apply(value));
+                return N.checkArgNotNull(mapper.apply(value));
             } else {
                 return empty();
             }
@@ -9885,16 +9908,18 @@ public class u { // NOSONAR
          * Nullable.<String>empty().or(() -> Nullable.of("b")).get();    // returns "b"
          * }</pre>
          *
-         * @param supplier the supplying function that produces a {@code Nullable} to be returned
+         * @param supplier the supplier used to produce a fallback {@code Nullable}; must not be {@code null}
          * @return this {@code Nullable} if a value is present, otherwise the {@code Nullable} produced by the supplying function
-         * @throws NullPointerException if no value is present and {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if the supplier returns {@code null}
          */
-        public Nullable<T> or(final Supplier<? extends Nullable<? extends T>> supplier) {
+        public Nullable<T> or(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             if (isPresent()) {
                 return this;
             } else {
                 final Nullable<T> ret = (Nullable<T>) supplier.get();
-                return Objects.requireNonNull(ret);
+                return N.checkArgNotNull(ret, "supplier result");
             }
         }
 
@@ -9908,10 +9933,9 @@ public class u { // NOSONAR
          * Nullable.<String>empty().orIfNull(() -> Nullable.of("b")).get();    // returns "b"
          * }</pre>
          *
-         * @param supplier the supplying function that produces a {@code Nullable} to be returned
+         * @param supplier the supplier used to produce a fallback {@code Nullable}; must not be {@code null}
          * @return this {@code Nullable} if the value is not {@code null}, otherwise the {@code Nullable} produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
-         * @throws NullPointerException if the value is {@code null} or not present and the supplying function returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if this is empty/null-valued and the supplier returns {@code null}
          */
         public Nullable<T> orIfNull(final Supplier<? extends Nullable<? extends T>> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -9919,7 +9943,7 @@ public class u { // NOSONAR
             if (isNotNull()) {
                 return this;
             } else {
-                return Objects.requireNonNull((Nullable<T>) supplier.get());
+                return N.checkArgNotNull((Nullable<T>) supplier.get(), "supplier result");
             }
         }
 
@@ -9988,7 +10012,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if present, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public T orElseGet(final Supplier<? extends T> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -10011,7 +10035,7 @@ public class u { // NOSONAR
          *
          * @param supplier the supplying function that produces a value to be returned
          * @return the value if it is not {@code null}, otherwise the result produced by the supplying function
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public T orElseGetIfNull(final Supplier<? extends T> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -10176,10 +10200,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if present
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if no value is present
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> T orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isPresent()) {
@@ -10342,10 +10366,10 @@ public class u { // NOSONAR
          * @param <E> the type of exception to be thrown
          * @param exceptionSupplier the supplying function that produces an exception to be thrown
          * @return the value if it is not {@code null}
-         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
          * @throws E if the value is {@code null}
+         * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
          */
-        public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, E {
+        public <E extends Throwable> T orElseThrowIfNull(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (isNotNull()) {

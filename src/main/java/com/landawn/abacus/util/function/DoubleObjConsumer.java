@@ -67,12 +67,13 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      * combined.accept(5.5, "value");   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleObjConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) {
+    default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

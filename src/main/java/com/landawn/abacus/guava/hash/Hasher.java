@@ -338,13 +338,13 @@ public interface Hasher {
     Hasher put(CharSequence charSequence, Charset charset);
 
     /**
-     * Adds an arbitrary object to this hasher's internal state using a {@link Funnel}
-     * to decompose the object into primitive values. This is a convenience method
-     * equivalent to {@code funnel.funnel(instance, this)}.
+     * Adds an arbitrary object to this hasher's internal state using a Guava {@link Funnel}
+     * to decompose the object into primitive values.
      *
-     * <p>The funnel is responsible for breaking down the object into a sequence of
-     * primitive values that can be hashed. This ensures consistent hashing of complex
-     * objects.
+     * <p>The funnel receives a Guava {@code PrimitiveSink} (not this abacus {@code Hasher}) and
+     * should therefore call Guava sink methods such as {@code putString}, {@code putInt}, and
+     * {@code putLong}. The implementation delegates to the underlying Guava hasher's
+     * {@code putObject} so those sink calls contribute to this hasher's state.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

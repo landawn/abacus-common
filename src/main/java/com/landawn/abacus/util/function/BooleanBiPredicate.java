@@ -102,12 +102,13 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * BooleanBiPredicate combined = bothTrue.and(bothFalse);   // Always false
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BooleanBiPredicate and(final BooleanBiPredicate other) {
+    default BooleanBiPredicate and(final BooleanBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -126,12 +127,13 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * BooleanBiPredicate combined = anyTrue.or(allTrue);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BooleanBiPredicate or(final BooleanBiPredicate other) {
+    default BooleanBiPredicate or(final BooleanBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

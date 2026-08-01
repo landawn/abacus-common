@@ -3136,7 +3136,7 @@ public class SheetTest extends AbstractTest {
     public void testSortRowsByColumnValues_UninitializedSheet_SingleKey() {
         Sheet<String, String, Integer> s = new Sheet<>(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"));
         assertDoesNotThrow(() -> s.sortRowsByColumnValues("c1", Comparator.naturalOrder()));
-        assertDoesNotThrow(() -> s.sortRowsByColumnValues("c1", (Comparator<Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> s.sortRowsByColumnValues("c1", (Comparator<Integer>) null));
     }
 
     // L3192: sortRowsByColumnValues(Collection, Comparator) returns early when !_isInitialized
@@ -3291,12 +3291,9 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testSortColumnsByRowValues_NullComparator_UsesNaturalOrder() {
+    public void testSortColumnsByRowValues_RejectsNullComparator() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("row"), Arrays.asList("b", "a"), new Integer[][] { { 2, 1 } });
-        s.sortColumnsByRowValues("row", (Comparator<Integer>) null);
-        List<String> keys = new ArrayList<>(s.columnKeySet());
-        assertEquals("a", keys.get(0)); // a has row=1, b has row=2; natural order puts 1 before 2
-        assertEquals("b", keys.get(1));
+        assertThrows(IllegalArgumentException.class, () -> s.sortColumnsByRowValues("row", (Comparator<Integer>) null));
     }
 
     @Test
@@ -3309,7 +3306,7 @@ public class SheetTest extends AbstractTest {
     public void testSortColumnsByRowValues_UninitializedSheet_SingleKey() {
         Sheet<String, String, Integer> s = new Sheet<>(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"));
         assertDoesNotThrow(() -> s.sortColumnsByRowValues("r1", Comparator.naturalOrder()));
-        assertDoesNotThrow(() -> s.sortColumnsByRowValues("r1", (Comparator<Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> s.sortColumnsByRowValues("r1", (Comparator<Integer>) null));
     }
 
     // L3522: sortColumnsByRowValues(Collection, Comparator) returns early when !_isInitialized
@@ -3319,14 +3316,11 @@ public class SheetTest extends AbstractTest {
         assertDoesNotThrow(() -> s.sortColumnsByRowValues(Arrays.asList("r1", "r2"), (Object[] a, Object[] b) -> 0));
     }
 
-    // L3603-3604: createComparatorForIndexedObject with null comparator (natural ordering path)
+    // A null comparator is rejected before sorting.
     @Test
-    public void testSortRowsByColumnValues_NullComparator_UsesNaturalOrder() {
+    public void testSortRowsByColumnValues_RejectsNullComparator() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("b", "a"), Arrays.asList("col"), new Integer[][] { { 2 }, { 1 } });
-        s.sortRowsByColumnValues("col", (Comparator<Integer>) null);
-        List<String> keys = new ArrayList<>(s.rowKeySet());
-        assertEquals("a", keys.get(0)); // a has col=1, b has col=2; natural order puts 1 before 2
-        assertEquals("b", keys.get(1));
+        assertThrows(IllegalArgumentException.class, () -> s.sortRowsByColumnValues("col", (Comparator<Integer>) null));
     }
 
     @Test
@@ -6220,12 +6214,14 @@ public class SheetTest extends AbstractTest {
         // had no data yet, contradicting the documented IllegalArgumentException
         final Sheet<String, String, Integer> sheet = new Sheet<>(N.asList("r1"), N.asList("c1"));
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortRowsByColumnValues("missing", null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortColumnsByRowValues("missing", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sheet.sortRowsByColumnValues("missing", Comparator.naturalOrder()));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> sheet.sortColumnsByRowValues("missing", Comparator.naturalOrder()));
 
         // valid keys remain a harmless no-op on an uninitialized sheet
-        sheet.sortRowsByColumnValues("c1", null);
-        sheet.sortColumnsByRowValues("r1", null);
+        sheet.sortRowsByColumnValues("c1", Comparator.naturalOrder());
+        sheet.sortColumnsByRowValues("r1", Comparator.naturalOrder());
     }
 
     @org.junit.jupiter.api.Test
@@ -6393,25 +6389,19 @@ public class SheetTest extends AbstractTest {
     }
 
     @Test
-    public void testSortRowsByMultipleColumnsUsesObjectArrayOrderingWhenComparatorIsNull() {
+    public void testSortRowsByMultipleColumnsRejectsNullComparator() {
         final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2", "data"),
                 new Integer[][] { { 1, 2, 10 }, { 1, 1, 20 }, { null, 9, 30 } });
 
-        s.sortRowsByColumnValues(Arrays.asList("c1", "c2"), null);
-
-        assertEquals(Arrays.asList("r3", "r2", "r1"), new ArrayList<>(s.rowKeySet()));
-        assertEquals(Arrays.asList(30, 20, 10), new ArrayList<>(s.columnValues("data")));
+        assertThrows(IllegalArgumentException.class, () -> s.sortRowsByColumnValues(Arrays.asList("c1", "c2"), null));
     }
 
     @Test
-    public void testSortColumnsByMultipleRowsUsesObjectArrayOrderingWhenComparatorIsNull() {
+    public void testSortColumnsByMultipleRowsRejectsNullComparator() {
         final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "data"), Arrays.asList("c1", "c2", "c3"),
                 new Integer[][] { { 1, 1, null }, { 2, 1, 9 }, { 10, 20, 30 } });
 
-        s.sortColumnsByRowValues(Arrays.asList("r1", "r2"), null);
-
-        assertEquals(Arrays.asList("c3", "c2", "c1"), new ArrayList<>(s.columnKeySet()));
-        assertEquals(Arrays.asList(30, 20, 10), new ArrayList<>(s.rowValues("data")));
+        assertThrows(IllegalArgumentException.class, () -> s.sortColumnsByRowValues(Arrays.asList("r1", "r2"), null));
     }
 
     @Test

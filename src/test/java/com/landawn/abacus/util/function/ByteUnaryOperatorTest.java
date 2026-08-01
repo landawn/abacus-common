@@ -103,7 +103,7 @@ public class ByteUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testComposeNullThrowsImmediately() {
+    public void testComposeRejectsNullImmediately() {
         ByteUnaryOperator instance = a -> (byte) 0;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((ByteUnaryOperator) null));
     }

@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts an {@code int}-valued and an object-valued argument,
+ * Represents an operation that accepts an {@code int}-valued argument and an object-valued argument,
  * and returns no result. This is the {@code (int, reference)} specialization of {@link java.util.function.BiConsumer}.
  * Unlike most other functional interfaces, {@code IntObjConsumer} is expected to operate via side-effects.
  *
@@ -65,13 +65,14 @@ public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeE
      * combined.accept(42, new StringBuilder("Value: "));   // Appends then prints "Value: 42"
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code IntObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default IntObjConsumer<T> andThen(final IntObjConsumer<? super T> after) {
+    default IntObjConsumer<T> andThen(final IntObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return (t, u) -> {
             accept(t, u);
             after.accept(t, u);

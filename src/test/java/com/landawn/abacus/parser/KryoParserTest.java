@@ -134,6 +134,68 @@ public class KryoParserTest extends TestBase {
         }
     }
 
+    public static class GlobalExplicitIdTarget {
+    }
+
+    public static class InstanceExplicitIdTarget {
+    }
+
+    public static class ReverseInstanceExplicitIdTarget {
+    }
+
+    public static class ReverseGlobalExplicitIdTarget {
+    }
+
+    public static class BuiltInIdInstanceTarget {
+    }
+
+    public static class BuiltInIdGlobalTarget {
+    }
+
+    public static class ImplicitInstanceRegistrationTarget {
+    }
+
+    public static class ExplicitInstanceRegistrationTarget {
+    }
+
+    public static class ImplicitInstanceSerializerTarget {
+    }
+
+    public static class ExplicitInstanceSerializerTarget {
+    }
+
+    private static final class EmptySerializer<T> extends Serializer<T> {
+        @Override
+        public void write(final Kryo kryo, final Output output, final T object) {
+        }
+
+        @Override
+        public T read(final Kryo kryo, final Input input, final Class<? extends T> type) {
+            return null;
+        }
+    }
+
+    public static class GlobalInstanceOverrideTarget {
+        String value;
+    }
+
+    public static class GlobalImplicitInstanceExplicitIdOverrideTarget {
+    }
+
+    public static class GlobalInstanceOverrideSerializer extends Serializer<GlobalInstanceOverrideTarget> {
+        @Override
+        public void write(final Kryo kryo, final Output output, final GlobalInstanceOverrideTarget object) {
+            output.writeString(object.value);
+        }
+
+        @Override
+        public GlobalInstanceOverrideTarget read(final Kryo kryo, final Input input, final Class<? extends GlobalInstanceOverrideTarget> type) {
+            final GlobalInstanceOverrideTarget result = new GlobalInstanceOverrideTarget();
+            result.value = input.readString();
+            return result;
+        }
+    }
+
     @Test
     public void testSerializePrimitiveTypes() {
         assertEquals(123, (int) parser.decode(parser.encode(123)));
@@ -177,15 +239,19 @@ public class KryoParserTest extends TestBase {
 
     @Test
     public void testGlobalRegistrationInvalidatesExistingParserPool() {
-        LateRegisteredObject warmup = new LateRegisteredObject("warmup");
-        LateRegisteredObject warmed = parser.deserialize(parser.serialize(warmup, (KryoSerConfig) null), null, LateRegisteredObject.class);
-        assertEquals("warmup", warmed.name);
+        try {
+            LateRegisteredObject warmup = new LateRegisteredObject("warmup");
+            LateRegisteredObject warmed = parser.deserialize(parser.serialize(warmup, (KryoSerConfig) null), null, LateRegisteredObject.class);
+            assertEquals("warmup", warmed.name);
 
-        ParserFactory.registerKryo(LateRegisteredObject.class, new LateRegisteredObjectSerializer());
+            ParserFactory.registerKryo(LateRegisteredObject.class, new LateRegisteredObjectSerializer());
 
-        LateRegisteredObject original = new LateRegisteredObject("late");
-        LateRegisteredObject result = parser.deserialize(parser.serialize(original, (KryoSerConfig) null), null, LateRegisteredObject.class);
-        assertEquals("late-registered", result.name);
+            LateRegisteredObject original = new LateRegisteredObject("late");
+            LateRegisteredObject result = parser.deserialize(parser.serialize(original, (KryoSerConfig) null), null, LateRegisteredObject.class);
+            assertEquals("late-registered", result.name);
+        } finally {
+            unregisterKryoForTest(LateRegisteredObject.class);
+        }
     }
 
     @Test
@@ -562,6 +628,225 @@ public class KryoParserTest extends TestBase {
     }
 
     @Test
+    public void testRegisterPrimitiveWrapperWithExplicitIdPreservesBuiltInSerializer() {
+        final int explicitId = 1_910_013;
+        parser.register(Integer.class, explicitId);
+
+        assertEquals(123, (int) parser.decode(parser.encode(123)));
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(explicitId, kryo.getRegistration(Integer.class).getId());
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+
+    @Test
+    public void testRegisterClassWithIdRejectsDuplicateIdBeforeMutation() {
+        final int occupiedId = 1_910_001;
+        final int laterValidId = 1_910_002;
+
+        parser.register(TestObject.class, occupiedId);
+        parser.register(LateRegisteredObject.class, laterValidId);
+        assertThrows(IllegalArgumentException.class, () -> parser.register(LateRegisteredObject.class, occupiedId));
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(occupiedId, kryo.getRegistration(TestObject.class).getId());
+            assertEquals(laterValidId, kryo.getRegistration(LateRegisteredObject.class).getId());
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+
+    @Test
+    public void testRegisterClassWithSerializerAndIdRejectsDuplicateIdBeforeMutation() {
+        final int occupiedId = 1_910_003;
+        final int laterValidId = 1_910_004;
+        final Serializer<LateRegisteredObject> retainedSerializer = new LateRegisteredObjectSerializer();
+
+        parser.register(TestObject.class, new CustomSerializer(), occupiedId);
+        parser.register(LateRegisteredObject.class, retainedSerializer, laterValidId);
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.register(LateRegisteredObject.class, new LateRegisteredObjectSerializer(), occupiedId));
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(occupiedId, kryo.getRegistration(TestObject.class).getId());
+            assertEquals(laterValidId, kryo.getRegistration(LateRegisteredObject.class).getId());
+            assertSame(retainedSerializer, kryo.getRegistration(LateRegisteredObject.class).getSerializer());
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+
+    @Test
+    public void testCreateKryoRejectsInstanceExplicitIdAlreadyAssignedImplicitly() {
+        parser.register(ImplicitInstanceRegistrationTarget.class);
+        final Kryo initialKryo = parser.createKryo();
+        final int implicitId;
+
+        try {
+            implicitId = initialKryo.getRegistration(ImplicitInstanceRegistrationTarget.class).getId();
+        } finally {
+            parser.recycle(initialKryo);
+        }
+
+        parser.register(ExplicitInstanceRegistrationTarget.class, implicitId);
+
+        assertThrows(IllegalArgumentException.class, parser::createKryo);
+    }
+
+    @Test
+    public void testCreateKryoRejectsInstanceExplicitSerializerIdAlreadyAssignedImplicitly() {
+        parser.register(ImplicitInstanceSerializerTarget.class, new EmptySerializer<>());
+        final Kryo initialKryo = parser.createKryo();
+        final int implicitId;
+
+        try {
+            implicitId = initialKryo.getRegistration(ImplicitInstanceSerializerTarget.class).getId();
+        } finally {
+            parser.recycle(initialKryo);
+        }
+
+        parser.register(ExplicitInstanceSerializerTarget.class, new EmptySerializer<>(), implicitId);
+
+        assertThrows(IllegalArgumentException.class, parser::createKryo);
+    }
+
+    @Test
+    public void testRegisterClassWithIdCanReplaceBuiltInRegistration() {
+        final Kryo baseline = parser.createKryo();
+        final int builtInId;
+
+        try {
+            builtInId = baseline.getRegistration(int.class).getId();
+        } finally {
+            parser.recycle(baseline);
+        }
+
+        parser.register(BuiltInIdInstanceTarget.class, builtInId);
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(builtInId, kryo.getRegistration(BuiltInIdInstanceTarget.class).getId());
+            assertSame(BuiltInIdInstanceTarget.class, kryo.getRegistration(builtInId).getType());
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+
+    @Test
+    public void testGlobalRegisterClassWithIdCanReplaceBuiltInRegistration() {
+        final Kryo baseline = parser.createKryo();
+        final int builtInId;
+
+        try {
+            builtInId = baseline.getRegistration(int.class).getId();
+        } finally {
+            parser.recycle(baseline);
+        }
+
+        try {
+            ParserFactory.registerKryo(BuiltInIdGlobalTarget.class, builtInId);
+            final Kryo kryo = parser.createKryo();
+
+            try {
+                assertEquals(builtInId, kryo.getRegistration(BuiltInIdGlobalTarget.class).getId());
+                assertSame(BuiltInIdGlobalTarget.class, kryo.getRegistration(builtInId).getType());
+            } finally {
+                parser.recycle(kryo);
+            }
+        } finally {
+            unregisterKryoForTest(BuiltInIdGlobalTarget.class);
+        }
+    }
+
+    @Test
+    public void testRegisterClassWithIdRejectsGlobalDuplicateIdBeforeMutation() {
+        final int globallyOccupiedId = 1_910_005;
+        final int laterValidId = 1_910_006;
+
+        try {
+            ParserFactory.registerKryo(GlobalExplicitIdTarget.class, globallyOccupiedId);
+            assertThrows(IllegalArgumentException.class, () -> parser.register(InstanceExplicitIdTarget.class, globallyOccupiedId));
+
+            parser.register(InstanceExplicitIdTarget.class, laterValidId);
+            final Kryo kryo = parser.createKryo();
+
+            try {
+                assertEquals(globallyOccupiedId, kryo.getRegistration(GlobalExplicitIdTarget.class).getId());
+                assertEquals(laterValidId, kryo.getRegistration(InstanceExplicitIdTarget.class).getId());
+            } finally {
+                parser.recycle(kryo);
+            }
+        } finally {
+            unregisterKryoForTest(GlobalExplicitIdTarget.class);
+        }
+    }
+
+    @Test
+    public void testInstanceRegistrationOverridesGlobalRegistrationForSameClass() {
+        final int globalId = 1_910_007;
+        final int instanceId = 1_910_008;
+        final Serializer<GlobalInstanceOverrideTarget> instanceSerializer = new GlobalInstanceOverrideSerializer();
+
+        try {
+            ParserFactory.registerKryo(GlobalInstanceOverrideTarget.class, globalId);
+            parser.register(GlobalInstanceOverrideTarget.class, instanceSerializer, instanceId);
+            final Kryo kryo = parser.createKryo();
+
+            try {
+                assertEquals(instanceId, kryo.getRegistration(GlobalInstanceOverrideTarget.class).getId());
+                assertSame(instanceSerializer, kryo.getRegistration(GlobalInstanceOverrideTarget.class).getSerializer());
+            } finally {
+                parser.recycle(kryo);
+            }
+        } finally {
+            unregisterKryoForTest(GlobalInstanceOverrideTarget.class);
+        }
+    }
+
+    @Test
+    public void testInstanceExplicitIdOverridesSameClassGlobalImplicitRegistration() {
+        final int instanceId = 1_910_012;
+
+        try {
+            ParserFactory.registerKryo(GlobalImplicitInstanceExplicitIdOverrideTarget.class);
+            parser.register(GlobalImplicitInstanceExplicitIdOverrideTarget.class, instanceId);
+            final Kryo kryo = parser.createKryo();
+
+            try {
+                assertEquals(instanceId, kryo.getRegistration(GlobalImplicitInstanceExplicitIdOverrideTarget.class).getId());
+            } finally {
+                parser.recycle(kryo);
+            }
+        } finally {
+            unregisterKryoForTest(GlobalImplicitInstanceExplicitIdOverrideTarget.class);
+        }
+    }
+
+    @Test
+    public void testCreateKryoRejectsGlobalIdRegisteredAfterInstanceConflict() {
+        final int conflictingId = 1_910_009;
+
+        parser.register(ReverseInstanceExplicitIdTarget.class, conflictingId);
+
+        try {
+            ParserFactory.registerKryo(ReverseGlobalExplicitIdTarget.class, conflictingId);
+
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+        } finally {
+            unregisterKryoForTest(ReverseGlobalExplicitIdTarget.class);
+        }
+    }
+
+    @Test
     public void testLatestRegistrationOverloadReplacesEarlierVariant() {
         final Serializer<TestObject> staleSerializer = new CustomSerializer();
         parser.register(TestObject.class, staleSerializer, 500);
@@ -629,5 +914,15 @@ public class KryoParserTest extends TestBase {
 
         assertSame(serializerFailure, thrown);
         assertEquals(0, thrown.getSuppressed().length);
+    }
+
+    private static void unregisterKryoForTest(final Class<?> type) {
+        synchronized (ParserFactory._kryoRegistrationLock) {
+            ParserFactory._kryoClassSet.remove(type);
+            ParserFactory._kryoClassIdMap.remove(type);
+            ParserFactory._kryoClassSerializerMap.remove(type);
+            ParserFactory._kryoClassSerializerIdMap.remove(type);
+            ParserFactory._kryoRegistrationVersion.incrementAndGet();
+        }
     }
 }

@@ -29,7 +29,6 @@ import com.landawn.abacus.util.cs;
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long...)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
@@ -91,13 +90,14 @@ public interface LongNConsumer {
      * combined.accept(10L, 20L, 30L);   // First processes, then logs
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code LongNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default LongNConsumer andThen(final LongNConsumer after) {
+    default LongNConsumer andThen(final LongNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> {
             accept(args);
             after.accept(args);

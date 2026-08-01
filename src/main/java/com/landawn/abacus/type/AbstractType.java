@@ -427,6 +427,19 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
+     * Checks if this type represents a {@link java.time.temporal.Temporal} type.
+     * <p>
+     * Default implementation returns {@code false}.
+     * </p>
+     *
+     * @return {@code true} if this is a {@code Temporal} type, {@code false} otherwise
+     */
+    @Override
+    public boolean isTemporal() {
+        return false;
+    }
+
+    /**
      * Checks if this type represents a primitive array.
      * <p>
      * Default implementation returns {@code false}.
@@ -627,8 +640,9 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
-     * Checks if this type is immutable.
+     * Checks whether <em>values</em> of the represented Java type are immutable.
      * Default implementation returns {@code false}.
+     * This describes the value type, not the {@code Type} handler instance itself.
      *
      * @return {@code true} if values of this type are immutable, {@code false} otherwise
      */
@@ -828,7 +842,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * </p>
      *
      * @param stmt the {@code PreparedStatement}
-     * @param columnIndex the parameter index (1-based)
+     * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
+     *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
+     *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
      * @throws SQLException if a database access error occurs
      */
@@ -866,7 +882,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * </p>
      *
      * @param stmt the {@code PreparedStatement}
-     * @param columnIndex the parameter index (1-based)
+     * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
+     *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
+     *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
      * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
      * @throws SQLException if a database access error occurs

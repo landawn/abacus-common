@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -109,14 +108,14 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * }</pre>
      *
      * @param <C> the type of the collection to create
-     * @param supplier a {@link Supplier} that provides a new empty collection instance; must not be {@code null}
+     * @param supplier a {@link Supplier} that provides a new empty collection instance
      * @return a collection containing all remaining elements from this iterator
-     * @throws NullPointerException if {@code supplier} is {@code null} or if {@code supplier.get()} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
-    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) {
-        Objects.requireNonNull(supplier, "supplier");
+    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = Objects.requireNonNull(supplier.get(), "supplier.get()");
+        final C c = N.checkArgNotNull(supplier.get(), "supplier.get()");
 
         while (hasNext()) {
             c.add(next());

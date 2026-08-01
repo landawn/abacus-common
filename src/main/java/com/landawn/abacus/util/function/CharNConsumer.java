@@ -23,7 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(char...)}.
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see CharConsumer
@@ -78,13 +77,14 @@ public interface CharNConsumer {
      * // Processed 4 chars
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code CharNConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
-    default CharNConsumer andThen(final CharNConsumer after) {
+    default CharNConsumer andThen(final CharNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return args -> {
             accept(args);
             after.accept(args);

@@ -120,7 +120,7 @@ public final class MoreExecutors {
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
         N.checkArgNotNull(executor, cs.executor);
-        N.checkArgNotNull(timeUnit, "timeUnit");
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
         N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
 
         useDaemonThreadFactory(executor);
@@ -188,7 +188,7 @@ public final class MoreExecutors {
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
             final TimeUnit timeUnit) {
         N.checkArgNotNull(executor, cs.executor);
-        N.checkArgNotNull(timeUnit, "timeUnit");
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
         N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
 
         useDaemonThreadFactory(executor);
@@ -227,6 +227,7 @@ public final class MoreExecutors {
         N.checkArgNotNull(service);
         N.checkArgNotNull(timeUnit);
         N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+
         addShutdownHook(MoreExecutors.newThread("DelayedShutdownHook-for-" + service, () -> {
             try {
                 // We'd like to log progress and failures that may arise in the
@@ -268,8 +269,17 @@ public final class MoreExecutors {
         executor.setThreadFactory(new ThreadFactory() {
             private final ThreadFactory impl = executor.getThreadFactory();
 
+            /**
+             * Creates a new daemon thread for the given runnable via the wrapped factory.
+             *
+             * @param r the runnable to execute in the new thread; must not be {@code null}
+             * @return the created thread, or {@code null} if the wrapped factory returns {@code null}
+             * @throws IllegalArgumentException if {@code r} is {@code null}
+             */
             @Override
-            public Thread newThread(final Runnable r) {
+            public Thread newThread(final Runnable r) throws IllegalArgumentException {
+                N.checkArgNotNull(r, cs.r);
+
                 final Thread res = impl.newThread(r);
 
                 if (res != null) {
@@ -291,11 +301,9 @@ public final class MoreExecutors {
      * @param name the desired name for the thread
      * @param runnable the runnable to execute in the thread
      * @return a new thread configured with the given name and runnable
-     * @throws IllegalArgumentException if {@code name} or {@code runnable} is {@code null}
      */
     static Thread newThread(final String name, final Runnable runnable) {
         N.checkArgNotNull(name);
-        N.checkArgNotNull(runnable);
 
         final Thread result = Executors.defaultThreadFactory().newThread(runnable);
         try {

@@ -64,7 +64,7 @@ public final class SnappyInputStream extends InputStream {
      * @throws IOException if an I/O error occurs during initialization
      */
     public SnappyInputStream(final InputStream is) throws IOException {
-        N.checkArgNotNull(is, "is");
+        N.checkArgNotNull(is, cs.is);
         in = new org.xerial.snappy.SnappyInputStream(is);
     }
 

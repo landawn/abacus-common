@@ -176,9 +176,21 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToHttpRequestCode(curl);
         assertNotNull(result);
         assertTrue(result.contains("String requestBody"));
-        assertFalse(result.contains(".body(requestBody)"));
-        assertTrue(result.contains("Request body omitted for DELETE"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertFalse(result.contains("Request body omitted for DELETE"));
         assertTrue(result.contains(".delete();"));
+    }
+
+    @Test
+    public void testCurl2HttpRequestOptionsWithBody() {
+        String curl = "curl -X OPTIONS https://api.example.com/users -d '{\"probe\":true}'";
+
+        String result = WebUtil.curlToHttpRequestCode(curl);
+        assertNotNull(result);
+        assertTrue(result.contains("String requestBody"));
+        assertTrue(result.contains(".body(requestBody)"));
+        assertFalse(result.contains("Request body omitted for OPTIONS"));
+        assertTrue(result.contains(".execute(HttpMethod.OPTIONS);"));
     }
 
     @Test
@@ -562,6 +574,12 @@ public class WebUtilTest extends TestBase {
 
         OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest("https://api.example.com", '"', logHandler);
         assertNotNull(request);
+    }
+
+    @Test
+    public void testCreateCurlLoggingOkHttpRequestRejectsNullLogHandler() {
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.createCurlLoggingOkHttpRequest("https://api.example.com", null));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.createCurlLoggingOkHttpRequest("https://api.example.com", '"', null));
     }
 
     @Test

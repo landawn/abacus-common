@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,25 +48,25 @@ public class TryTest extends TestBase {
     }
 
     @Test
-    public void test_instance_methods_validateCallbacksBeforeClosingResource() {
+    public void test_instance_methods_withNullCallbacks() {
         TestCloseable closeable = new TestCloseable();
         Try<TestCloseable> tryInstance = Try.with(closeable);
         Throwables.Function<TestCloseable, String, Exception> command = resource -> "result";
         Predicate<Exception> predicate = error -> true;
 
         assertThrows(IllegalArgumentException.class, () -> tryInstance.run((Throwables.Consumer<TestCloseable, Exception>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.run(resource -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.run(resource -> {
         }, (java.util.function.Consumer<Exception>) null));
         assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
-        assertThrows(IllegalArgumentException.class,
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> tryInstance.call(command, (Predicate<Exception>) null, (java.util.function.Supplier<String>) () -> "default"));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (Predicate<Exception>) null, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (Predicate<Exception>) null, "default"));
 
-        assertTrue(!closeable.isClosed(), "invalid arguments must not consume the managed resource");
+        assertFalse(closeable.isClosed(), "argument validation happens before the managed resource is closed");
     }
 
     @Test
@@ -172,7 +173,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_with_targetResource_finalAction_null_action() {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.with(stream, (Runnable) null);
         });
     }
@@ -186,7 +187,7 @@ public class TryTest extends TestBase {
 
     @Test
     public void test_with_targetResourceSupplier_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.with((Throwables.Supplier<InputStream, Exception>) null);
         });
     }
@@ -206,7 +207,7 @@ public class TryTest extends TestBase {
 
     @Test
     public void test_with_targetResourceSupplier_finalAction_null_supplier() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.with((Throwables.Supplier<InputStream, Exception>) null, () -> {
             });
         });
@@ -215,7 +216,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_with_targetResourceSupplier_finalAction_null_action() {
         Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.with(supplier, (Runnable) null);
         });
     }
@@ -794,7 +795,7 @@ public class TryTest extends TestBase {
 
     @Test
     public void test_run_cmd_actionOnError_null_cmd() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.run((Throwables.Runnable<Exception>) null, ex -> {
             });
         });
@@ -802,7 +803,7 @@ public class TryTest extends TestBase {
 
     @Test
     public void test_run_cmd_actionOnError_null_action() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.run(() -> {
             }, null);
         });
@@ -880,7 +881,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_function_null_cmd() {
         java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call((java.util.concurrent.Callable<String>) null, errorHandler);
         });
     }
@@ -888,7 +889,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_function_null_function() {
         java.util.concurrent.Callable<String> cmd = () -> "test";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call(cmd, (java.util.function.Function<Exception, String>) null);
         });
     }
@@ -905,7 +906,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_supplier_null_cmd() {
         java.util.function.Supplier<String> supplier = () -> "default";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call((java.util.concurrent.Callable<String>) null, supplier);
         });
     }
@@ -913,7 +914,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_supplier_null_supplier() {
         java.util.concurrent.Callable<String> cmd = () -> "test";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call(cmd, (java.util.function.Supplier<String>) null);
         });
     }
@@ -928,7 +929,7 @@ public class TryTest extends TestBase {
 
     @Test
     public void test_call_cmd_defaultValue_null_cmd() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call((java.util.concurrent.Callable<String>) null, "default");
         });
     }
@@ -974,7 +975,7 @@ public class TryTest extends TestBase {
     public void test_call_cmd_predicate_supplier_null_cmd() {
         java.util.function.Predicate<Exception> predicate = ex -> true;
         java.util.function.Supplier<String> supplier = () -> "default";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call((java.util.concurrent.Callable<String>) null, predicate, supplier);
         });
     }
@@ -983,7 +984,7 @@ public class TryTest extends TestBase {
     public void test_call_cmd_predicate_supplier_null_predicate() {
         java.util.concurrent.Callable<String> cmd = () -> "test";
         java.util.function.Supplier<String> supplier = () -> "default";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call(cmd, (java.util.function.Predicate<Exception>) null, supplier);
         });
     }
@@ -992,7 +993,7 @@ public class TryTest extends TestBase {
     public void test_call_cmd_predicate_supplier_null_supplier() {
         java.util.concurrent.Callable<String> cmd = () -> "test";
         java.util.function.Predicate<Exception> predicate = ex -> true;
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call(cmd, predicate, (java.util.function.Supplier<String>) null);
         });
     }
@@ -1023,7 +1024,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_predicate_defaultValue_null_cmd() {
         java.util.function.Predicate<Exception> predicate = ex -> true;
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call((java.util.concurrent.Callable<String>) null, predicate, "default");
         });
     }
@@ -1031,7 +1032,7 @@ public class TryTest extends TestBase {
     @Test
     public void test_call_cmd_predicate_defaultValue_null_predicate() {
         java.util.concurrent.Callable<String> cmd = () -> "test";
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Try.call(cmd, (java.util.function.Predicate<Exception>) null, "default");
         });
     }

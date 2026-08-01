@@ -78,7 +78,7 @@ public final class FastJson {
     }
 
     private static void checkByteRange(final byte[] json, final int offset, final int len) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkFromIndexSize(offset, len, json.length);
     }
 
@@ -145,7 +145,7 @@ public final class FastJson {
      *         or the literal string {@code "null"} if {@code obj} is {@code null}
      */
     public static String toJson(final Object obj, final JSONWriter.Feature... features) {
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.toJSONString(obj, features);
     }
@@ -168,7 +168,7 @@ public final class FastJson {
      *         or the literal string {@code "null"} if {@code obj} is {@code null}
      */
     public static String toJson(final Object obj, final JSONWriter.Context context) {
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.toJSONString(obj, context);
     }
@@ -214,7 +214,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final File output, final JSONWriter.Feature... features) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         try (OutputStream out = IOUtil.newFileOutputStream(output)) {
             JSON.writeTo(out, obj, features);
@@ -241,7 +241,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final File output, final JSONWriter.Context context) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         try (OutputStream out = IOUtil.newFileOutputStream(output)) {
             JSON.writeTo(out, obj, context);
@@ -287,7 +287,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final OutputStream output, final JSONWriter.Feature... features) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         JSON.writeTo(output, obj, features);
     }
@@ -308,7 +308,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final OutputStream output, final JSONWriter.Context context) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         JSON.writeTo(output, obj, context);
     }
@@ -359,7 +359,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final Writer output, final JSONWriter.Feature... features) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         final String json = JSON.toJSONString(obj, features);
 
@@ -387,7 +387,7 @@ public final class FastJson {
      */
     public static void toJson(final Object obj, final Writer output, final JSONWriter.Context context) {
         N.checkArgNotNull(output, cs.output);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         final String json = JSON.toJSONString(obj, context);
 
@@ -492,7 +492,7 @@ public final class FastJson {
     @MayReturnNull
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final JSONReader.Feature... features) {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.parseObject(json, targetType, features);
     }
@@ -517,7 +517,7 @@ public final class FastJson {
     @MayReturnNull
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final JSONReader.Context context) {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.parseObject(json, targetType, context);
     }
@@ -565,7 +565,7 @@ public final class FastJson {
     @MayReturnNull
     public static <T> T fromJson(final String json, final Type targetType, final JSONReader.Feature... features) {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.parseObject(json, targetType, features);
     }
@@ -590,7 +590,7 @@ public final class FastJson {
     @MayReturnNull
     public static <T> T fromJson(final String json, final Type targetType, final JSONReader.Context context) {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.parseObject(json, targetType, context);
     }
@@ -613,7 +613,7 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference) {
-        N.checkArgNotNull(typeReference, "typeReference");
+        N.checkArgNotNull(typeReference, cs.typeReference);
 
         return JSON.parseObject(json, typeReference);
     }
@@ -636,8 +636,8 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference, final JSONReader.Feature... features) {
-        N.checkArgNotNull(typeReference, "typeReference");
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(typeReference, cs.typeReference);
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.parseObject(json, typeReference, features);
     }
@@ -660,8 +660,8 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final String json, final TypeReference<T> typeReference, final JSONReader.Context context) {
-        N.checkArgNotNull(typeReference, "typeReference");
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(typeReference, cs.typeReference);
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.parseObject(json, typeReference.getType(), context);
     }
@@ -685,7 +685,7 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return JSON.parseObject(json, targetType);
@@ -710,9 +710,9 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final JSONReader.Feature... features) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.parseObject(json, targetType, features);
     }
@@ -740,9 +740,9 @@ public final class FastJson {
     @MayReturnNull
     @Beta
     public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final JSONReader.Context context) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.parseObject(IOUtil.readAllToString(json), targetType, context);
     }
@@ -767,7 +767,7 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final Reader json, final Type targetType) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return JSON.parseObject(json, targetType);
@@ -794,9 +794,9 @@ public final class FastJson {
      */
     @MayReturnNull
     public static <T> T fromJson(final Reader json, final Type targetType, final JSONReader.Feature... features) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(features, "features");
+        N.checkArgNotNull(features, cs.features);
 
         return JSON.parseObject(json, targetType, features);
     }
@@ -825,9 +825,9 @@ public final class FastJson {
     @MayReturnNull
     @Beta
     public static <T> T fromJson(final Reader json, final Type targetType, final JSONReader.Context context) {
-        N.checkArgNotNull(json, "json");
+        N.checkArgNotNull(json, cs.json);
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkArgNotNull(context, "context");
+        N.checkArgNotNull(context, cs.context);
 
         return JSON.parseObject(IOUtil.readAllToString(json), targetType, context);
     }

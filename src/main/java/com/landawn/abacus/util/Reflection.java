@@ -157,7 +157,7 @@ public final class Reflection<T> {
      * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     public static <T> Reflection<T> on(final Class<T> cls) {
-        N.checkArgNotNull(cls, "cls");
+        N.checkArgNotNull(cls, cs.cls);
 
         return new Reflection<>(cls, null);
     }

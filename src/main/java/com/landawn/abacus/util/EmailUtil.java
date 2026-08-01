@@ -313,7 +313,7 @@ public final class EmailUtil {
             final boolean isHTML, final String userName, final String password, final Properties props) throws MessagingException {
         N.checkArgNotEmpty(recipients, "recipients");
         N.checkArgNotEmpty(from, "from");
-        N.checkArgNotNull(props, "props");
+        N.checkArgNotNull(props, cs.props);
 
         final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
             @Override

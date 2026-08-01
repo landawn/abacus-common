@@ -1114,13 +1114,13 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         assertTrue(closed.get());
     }
 
-    // onClose with null handler returns same stream
+    // onClose with null handler is rejected
     @Test
     public void testOnClose_NullHandler() {
         IntStream stream = createIntStream(TEST_ARRAY);
-        IntStream same = stream.onClose(null);
-        assertSame(stream, same);
-        same.close();
+
+        assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
+        stream.close();
     }
 
     @Test

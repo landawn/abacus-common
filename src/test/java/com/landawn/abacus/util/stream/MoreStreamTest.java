@@ -2,7 +2,6 @@ package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1039,11 +1038,13 @@ public class MoreStreamTest extends TestBase {
             assertEquals("4, 5, 1, 2, 3", Stream.of(1, 2, 3, 4, 5).rotated(2).join(", "));
             assertEquals("4, 5, 1, 2, 3", Stream.of(1, 2, 3, 4, 5).map(i -> i).parallel().rotated(2).sequential().join(", "));
 
-            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).join(", ")));
-            assertFalse("1, 2, 3, 4, 5".equals(IntStream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().join(", ")));
+            // A valid shuffle may randomly retain the original order. Verify the invariant that
+            // every element is retained exactly once instead of making this test probabilistic.
+            assertEquals("1, 2, 3, 4, 5", IntStream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).sorted().join(", "));
+            assertEquals("1, 2, 3, 4, 5", IntStream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().sorted().join(", "));
 
-            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).join(", ")));
-            assertFalse("1, 2, 3, 4, 5".equals(Stream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().join(", ")));
+            assertEquals("1, 2, 3, 4, 5", Stream.of(1, 2, 3, 4, 5).shuffled().peek(N::println).sorted().join(", "));
+            assertEquals("1, 2, 3, 4, 5", Stream.of(1, 2, 3, 4, 5).parallel().shuffled().peek(N::println).sequential().sorted().join(", "));
         }
     }
 

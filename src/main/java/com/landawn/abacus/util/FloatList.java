@@ -376,7 +376,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.get(0);   // returns 9.0
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @throws NullPointerException if the specified array is {@code null}
      */
     public FloatList(final float[] a) {
@@ -397,7 +397,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * new FloatList(arr, 6);   // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * @param a the array to be used as the backing array for this list. Must not be {@code null}.
+     * @param a the array to be used as the backing array for this list.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
      * @throws IndexOutOfBoundsException if size is negative or greater than a.length
      * @throws NullPointerException if {@code a} is {@code null}
@@ -500,7 +500,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * FloatList.copyOf(arr, 0, 6);             // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied.
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new FloatList containing a copy of the elements in the specified range
@@ -937,12 +937,12 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.removeIf(x -> x > 100);   // returns false, list unchanged
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final FloatPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final FloatPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final FloatList tmp = new FloatList(size());
 
@@ -1193,6 +1193,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1336,11 +1337,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.replaceAll(x -> x + 1f);   // list is now [3.0, 5.0, 7.0]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified operator is {@code null}
+     * @param operator the operator to apply to each element.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final FloatUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final FloatUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsFloat(elementData[i]);
@@ -1358,13 +1359,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.replaceIf(x -> x > 100, 0f);                   // returns false, list unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test each element. Must not be {@code null}.
+     * @param predicate the predicate to test each element.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced, {@code false} otherwise
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final FloatPredicate predicate, final float newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final FloatPredicate predicate, final float newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2139,8 +2140,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * empty.forEach(x -> sum[0] += x);  // action never invoked; sum[0] unchanged
      * }</pre>
      *
-     * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final FloatConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2172,11 +2173,11 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @param action the action to be performed for each element.
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final FloatConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2435,7 +2436,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * All permutations occur with equal likelihood assuming that the source of randomness is fair.
      * This method modifies the list in place.
      *
-     * @param rnd the source of randomness to use to shuffle the list. Must not be {@code null}.
+     * @param rnd the source of randomness to use to shuffle the list.
      * @throws IllegalArgumentException if the specified random source is {@code null}
      */
     @Override
@@ -2673,14 +2674,15 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param supplier a function that creates a new Collection instance with the specified initial capacity
      * @return a Collection containing the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Float>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2699,13 +2701,15 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param supplier a function that creates a new Multiset instance with the specified initial capacity
      * @return a Multiset containing the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Float> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Float>> supplier) throws IndexOutOfBoundsException {
+    public Multiset<Float> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Float>> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Float> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Float> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

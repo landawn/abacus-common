@@ -48,9 +48,11 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * and {@code toCollection(...)} create detached containers. Copies are shallow: referenced
  * elements are not cloned.</p>
  *
- * <p><b>Callback contract:</b> Callback and collection-supplier parameters are validated eagerly,
- * even for empty inputs. A {@code null} callback, a {@code null} collection supplier, or a supplier
- * that returns {@code null} causes {@link NullPointerException}. Functions passed to {@code apply}
+ * <p><b>Callback contract:</b> A {@code null} collection supplier, or a {@code null} function or
+ * consumer passed to {@code apply}/{@code accept}, causes {@link NullPointerException} even for
+ * empty inputs; a supplier that returns {@code null} causes {@link IllegalArgumentException}.
+ * A {@code null} {@code foreach} action throws {@link NullPointerException} only when an element
+ * is delivered to it, so for an empty input the call is a no-op. Functions passed to {@code apply}
  * may themselves return {@code null}; that result is returned unchanged.</p>
  *
  * <p><b>Numeric contract:</b> Numeric {@code sum()} and {@code average()} methods return zero for an
@@ -81,8 +83,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 public interface NoCachingNoUpdating {
 
     private static <C> C newCollection(final IntFunction<? extends C> supplier, final int size) {
-        N.requireNonNull(supplier, cs.supplier);
-        return N.requireNonNull(supplier.apply(size), "supplier returned null");
+        return N.checkArgNotNull(supplier.apply(size), "supplier returned null");
     }
 
     private static int sumExact(final char[] values) {
@@ -148,6 +149,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableArray(final T[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -170,7 +172,8 @@ public interface NoCachingNoUpdating {
                 throw new IllegalArgumentException("Length must be non-negative: " + len);
             }
 
-            N.checkArgNotNull(componentType, "componentType");
+            N.checkArgNotNull(componentType, cs.componentType);
+
             return new DisposableArray<>(N.newArray(componentType, len));
         }
 
@@ -252,7 +255,7 @@ public interface NoCachingNoUpdating {
          */
         @SuppressWarnings("unchecked")
         public <A> A[] toArray(A[] target) throws IllegalArgumentException {
-            N.checkArgNotNull(target, "target");
+            N.checkArgNotNull(target, cs.target);
 
             final int len = length();
 
@@ -348,9 +351,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final T e : a) {
@@ -371,11 +376,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final T e : a) {
                 action.accept(e);
@@ -400,11 +405,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super T[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super T[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -428,11 +434,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super T[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super T[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -589,8 +596,8 @@ public interface NoCachingNoUpdating {
          * @param <T> the component type (not used)
          * @param componentType the component type (not used)
          * @param len the length (not used)
-         * @return never returns
-         * @throws UnsupportedOperationException always thrown
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
          * @deprecated Use {@link #create(int)} instead
          */
         @Deprecated
@@ -648,6 +655,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableBooleanArray(final boolean[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -803,9 +811,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Boolean>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Boolean>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final boolean e : a) {
@@ -829,11 +839,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.BooleanConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.BooleanConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final boolean e : a) {
                 action.accept(e);
@@ -856,11 +866,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super boolean[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -878,11 +889,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super boolean[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super boolean[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -986,6 +998,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableCharArray(final char[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -1142,9 +1155,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Character>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Character>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final char e : a) {
@@ -1245,11 +1260,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.CharConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.CharConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final char e : a) {
                 action.accept(e);
@@ -1272,11 +1287,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super char[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super char[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -1294,11 +1310,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super char[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super char[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -1402,6 +1419,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableByteArray(final byte[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -1557,9 +1575,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Byte>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Byte>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final byte e : a) {
@@ -1654,11 +1674,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.ByteConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.ByteConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final byte e : a) {
                 action.accept(e);
@@ -1681,11 +1701,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super byte[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -1703,11 +1724,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super byte[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super byte[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -1811,6 +1833,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableShortArray(final short[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -1966,9 +1989,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Short>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Short>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final short e : a) {
@@ -2063,11 +2088,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.ShortConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.ShortConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final short e : a) {
                 action.accept(e);
@@ -2090,11 +2115,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super short[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super short[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -2112,11 +2138,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super short[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super short[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -2221,6 +2248,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableIntArray(final int[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -2376,9 +2404,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Integer>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Integer>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final int e : a) {
@@ -2473,11 +2503,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.IntConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.IntConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final int e : a) {
                 action.accept(e);
@@ -2500,11 +2530,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super int[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super int[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -2522,11 +2553,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super int[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super int[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -2630,6 +2662,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableLongArray(final long[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -2785,9 +2818,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Long>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Long>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final long e : a) {
@@ -2882,11 +2917,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.LongConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.LongConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final long e : a) {
                 action.accept(e);
@@ -2909,11 +2944,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super long[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super long[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -2931,11 +2967,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super long[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super long[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -3039,6 +3076,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableFloatArray(final float[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -3194,9 +3232,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Float>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Float>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final float e : a) {
@@ -3290,11 +3330,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.FloatConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.FloatConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final float e : a) {
                 action.accept(e);
@@ -3317,11 +3357,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super float[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super float[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -3339,11 +3380,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super float[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super float[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -3448,6 +3490,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableDoubleArray(final double[] a) {
             N.checkArgNotNull(a, cs.a);
+
             this.a = a;
         }
 
@@ -3603,9 +3646,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<Double>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<Double>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, length());
 
             for (final double e : a) {
@@ -3699,11 +3744,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.DoubleConsumer<E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.DoubleConsumer<E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final double e : a) {
                 action.accept(e);
@@ -3726,11 +3771,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the array
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super double[], ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super double[], ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(a);
         }
 
@@ -3748,11 +3794,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the array
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super double[], E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super double[], E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(a);
         }
 
@@ -3859,6 +3906,7 @@ public interface NoCachingNoUpdating {
          */
         protected DisposableDeque(final Deque<T> deque) {
             N.checkArgNotNull(deque, cs.deque);
+
             this.deque = deque;
         }
 
@@ -4040,9 +4088,11 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing all elements from the deque
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) {
+        public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final C result = newCollection(supplier, size());
             result.addAll(deque);
             return result;
@@ -4062,11 +4112,11 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
 
             for (final T e : deque) {
                 action.accept(e);
@@ -4088,11 +4138,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to the deque
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super Deque<T>, ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(deque);
         }
 
@@ -4109,11 +4160,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with the deque
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super Deque<T>, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super Deque<T>, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(deque);
         }
 
@@ -4237,9 +4289,9 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @param value the new value (ignored)
-         * @return never returns
-         * @throws UnsupportedOperationException always thrown
-         * @deprecated DisposableEntry is immutable
+         * @return never returns normally
+         * @throws UnsupportedOperationException always
+         * @deprecated Unsupported; {@code DisposableEntry} is immutable. Use {@link #copy()} for a mutable entry.
          */
         @Deprecated
         @Override
@@ -4314,11 +4366,13 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the function to apply to this entry
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.Function<? super DisposableEntry<K, V>, ? extends R, E> func)
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(this);
         }
 
@@ -4335,11 +4389,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the bi-function to apply to the key and value
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, ? extends R, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <R, E extends Exception> R apply(final Throwables.BiFunction<? super K, ? super V, ? extends R, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(getKey(), getValue());
         }
 
@@ -4356,11 +4411,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the action to perform with this entry
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.Consumer<? super DisposableEntry<K, V>, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.Consumer<? super DisposableEntry<K, V>, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(this);
         }
 
@@ -4377,11 +4433,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the bi-consumer action to perform with the key and value
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super K, ? super V, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(getKey(), getValue());
         }
 
@@ -4521,11 +4578,12 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the bi-function to apply to the left and right elements
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <U, E extends Exception> U apply(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> func) throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(left(), right());
         }
 
@@ -4542,11 +4600,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the bi-consumer action to perform
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(left(), right());
         }
 
@@ -4717,11 +4776,13 @@ public interface NoCachingNoUpdating {
          * @param <E> the type of exception that the function may throw
          * @param func the tri-function to apply to the elements
          * @return the result of applying the function
-         * @throws NullPointerException if {@code func} is {@code null}
          * @throws E if the function throws an exception
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> func) throws E {
-            N.requireNonNull(func, cs.func);
+        public <U, E extends Exception> U apply(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> func)
+                throws E, IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             return func.apply(left(), middle(), right());
         }
 
@@ -4738,11 +4799,12 @@ public interface NoCachingNoUpdating {
          *
          * @param <E> the type of exception that the action may throw
          * @param action the tri-consumer action to perform
-         * @throws NullPointerException if {@code action} is {@code null}
          * @throws E if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          */
-        public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E {
-            N.requireNonNull(action, cs.action);
+        public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action);
+
             action.accept(left(), middle(), right());
         }
 

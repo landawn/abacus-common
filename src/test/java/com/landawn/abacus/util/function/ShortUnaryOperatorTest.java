@@ -153,7 +153,7 @@ public class ShortUnaryOperatorTest extends TestBase {
     }
 
     @Test
-    public void testComposeNullThrowsImmediately() {
+    public void testComposeRejectsNullImmediately() {
         ShortUnaryOperator instance = a -> (short) 0;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((ShortUnaryOperator) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((ShortUnaryOperator) null));

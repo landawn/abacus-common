@@ -266,10 +266,13 @@ public class EventBus {
      * }</pre>
      *
      * @param identifier the unique identifier for this {@code EventBus} instance
-     * @param executor the executor to use for asynchronous event delivery, or {@code null} to use the default executor
+     * @param executor the executor to use for asynchronous event delivery; must not be {@code null}
      * @return a new {@code EventBus} instance with the given identifier and executor
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public static EventBus create(final String identifier, final Executor executor) {
+    public static EventBus create(final String identifier, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return new EventBus(identifier, executor);
     }
 
@@ -320,7 +323,7 @@ public class EventBus {
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public List<Object> subscribers(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
-        N.checkArgNotNull(eventType, "eventType");
+        N.checkArgNotNull(eventType, cs.eventType);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> eventSubs = new ArrayList<>();
@@ -403,7 +406,7 @@ public class EventBus {
      * @see #countOfSubscribers()
      */
     public boolean hasSubscribers(final Class<?> eventType) throws IllegalArgumentException {
-        N.checkArgNotNull(eventType, "eventType");
+        N.checkArgNotNull(eventType, cs.eventType);
 
         synchronized (registeredSubMap) {
             for (final List<SubIdentifier> subs : registeredSubMap.values()) {
@@ -750,11 +753,12 @@ public class EventBus {
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if no subscriber methods are found
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
-    public EventBus register(final Subscriber<?> subscriber, final String eventId) {
+    public EventBus register(final Subscriber<?> subscriber, final String eventId) throws IllegalArgumentException {
+        N.checkArgNotNull(subscriber, cs.subscriber);
+
         return register(subscriber, eventId, null);
     }
 
@@ -774,11 +778,12 @@ public class EventBus {
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or the thread mode is not supported or no subscriber methods are found
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
-    public EventBus register(final Subscriber<?> subscriber, final String eventId, final ThreadMode threadMode) {
+    public EventBus register(final Subscriber<?> subscriber, final String eventId, final ThreadMode threadMode) throws IllegalArgumentException {
+        N.checkArgNotNull(subscriber, cs.subscriber);
+
         final Object tmp = subscriber;
         return register(tmp, eventId, threadMode);
     }
@@ -1105,7 +1110,7 @@ public class EventBus {
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
-        N.checkArgNotNull(eventType, "eventType");
+        N.checkArgNotNull(eventType, cs.eventType);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<Object> keyToRemove = new ArrayList<>();
@@ -1196,7 +1201,7 @@ public class EventBus {
      * @throws IllegalArgumentException if {@code eventType} is {@code null}
      */
     public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) throws IllegalArgumentException {
-        N.checkArgNotNull(eventType, "eventType");
+        N.checkArgNotNull(eventType, cs.eventType);
 
         final String normalizedEventId = Strings.isEmpty(eventId) ? null : eventId;
         final List<T> result = new ArrayList<>();

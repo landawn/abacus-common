@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,6 +22,7 @@ import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
 public class FloatIteratorTest extends TestBase {
+  
 
     @Test
     public void testEmpty_SameSingleton() {
@@ -327,12 +329,12 @@ public class FloatIteratorTest extends TestBase {
         assertEquals(3.0f, iter.nextFloat(), 0.0f);
         assertFalse(iter.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.defer(null));
     }
 
     @Test
     public void testDefer_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.defer(null));
     }
 
     @Test
@@ -380,12 +382,12 @@ public class FloatIteratorTest extends TestBase {
         assertTrue(iter.hasNext());
         assertEquals(3.0f, iter.nextFloat(), 0.0f);
 
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null));
     }
 
     @Test
     public void testGenerate_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate((FloatSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate((FloatSupplier) null));
     }
 
     // =================================================
@@ -407,8 +409,8 @@ public class FloatIteratorTest extends TestBase {
 
         assertThrows(NoSuchElementException.class, () -> iter.nextFloat());
 
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null, () -> 1.0f));
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null, () -> 1.0f));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(() -> true, null));
     }
 
     @Test
@@ -434,9 +436,9 @@ public class FloatIteratorTest extends TestBase {
         FloatSupplier supplier = () -> 0.0f;
         BooleanSupplier hasNext = () -> true;
 
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate((FloatSupplier) null));
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null, supplier));
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(hasNext, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate((FloatSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(null, supplier));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.generate(hasNext, null));
     }
 
     @Test
@@ -696,7 +698,7 @@ public class FloatIteratorTest extends TestBase {
         FloatIterator filtered2 = iter2.filter(x -> x > 10.0f);
         assertFalse(filtered2.hasNext());
 
-        assertThrows(IllegalArgumentException.class, () -> FloatIterator.of(1.0f).filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> FloatIterator.of(1.0f).filter(null));
     }
 
     @Test
@@ -713,7 +715,7 @@ public class FloatIteratorTest extends TestBase {
     public void testFilter_NullPredicate() {
         FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
 
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test

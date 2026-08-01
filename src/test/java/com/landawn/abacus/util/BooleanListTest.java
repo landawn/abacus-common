@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -34,7 +35,7 @@ public class BooleanListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.BooleanConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.BooleanConsumer) null));
     }
 
     @Test
@@ -1308,10 +1309,10 @@ public class BooleanListTest extends TestBase {
     @Test
     public void test_replaceAll_operator_null() {
         BooleanList nonEmpty = BooleanList.of(true, false);
-        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
 
         BooleanList empty = new BooleanList();
-        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
     }
 
     @Test
@@ -3338,26 +3339,24 @@ public class BooleanListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument is rejected up-front even on an EMPTY list
-        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
-        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
+        // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final BooleanList empty = new BooleanList();
-        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
-        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
-        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
 
         final BooleanList nonEmpty = BooleanList.of(true, false);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
-        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
-        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
     }
 
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
-        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
-        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
 }

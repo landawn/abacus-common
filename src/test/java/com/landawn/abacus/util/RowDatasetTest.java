@@ -3300,7 +3300,7 @@ public class RowDatasetTest extends TestBase {
         final RowDataset dataset = createFourRowCityDataset();
         IntFunction<List<Object>> rowSupplier = capacity -> new ArrayList<>();
 
-        List<List<Object>> result = dataset.toList(null, null, rowSupplier);
+        List<List<Object>> result = dataset.toList(Fn.alwaysTrue(), Fn.identity(), rowSupplier);
 
         Assertions.assertEquals(4, result.size());
         Assertions.assertEquals(4, result.get(0).size());
@@ -3311,7 +3311,7 @@ public class RowDatasetTest extends TestBase {
         RowDataset emptyDataset = new RowDataset(new ArrayList<>(), new ArrayList<>());
         IntFunction<List<Object>> rowSupplier = capacity -> new ArrayList<>();
 
-        List<List<Object>> result = emptyDataset.toList(null, null, rowSupplier);
+        List<List<Object>> result = emptyDataset.toList(Fn.alwaysTrue(), Fn.identity(), rowSupplier);
 
         Assertions.assertTrue(result.isEmpty());
     }
@@ -3485,7 +3485,8 @@ public class RowDatasetTest extends TestBase {
     @Test
     public void testToListWithRangeAndFilterAndConverterAndSupplier() {
         final RowDataset ds = createThreeRowScoreDataset();
-        List<Map<String, Object>> list = ds.toList(0, 2, col -> !col.equals("score"), null, (IntFunction<Map<String, Object>>) size -> new HashMap<>());
+        List<Map<String, Object>> list = ds.toList(0, 2, col -> !col.equals("score"), Fn.identity(),
+                (IntFunction<Map<String, Object>>) size -> new HashMap<>());
         assertEquals(2, list.size());
         assertEquals("John", list.get(0).get("name"));
         assertFalse(list.get(0).containsKey("score"));
@@ -3497,7 +3498,7 @@ public class RowDatasetTest extends TestBase {
         Predicate<String> columnFilter = col -> col.equals("name") || col.equals("age");
         IntFunction<Map<String, Object>> rowSupplier = capacity -> new HashMap<>();
 
-        List<Map<String, Object>> result = dataset.toList(1, 3, columnFilter, null, rowSupplier);
+        List<Map<String, Object>> result = dataset.toList(1, 3, columnFilter, Fn.identity(), rowSupplier);
 
         Assertions.assertEquals(2, result.size());
         Map<String, Object> firstRow = result.get(0);
@@ -4584,7 +4585,7 @@ public class RowDatasetTest extends TestBase {
         Collection<String> aggregateColumns = Arrays.asList("employee", "salary");
         String aggregateResultColumn = "employees";
 
-        Dataset grouped = groupDataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class);
+        Dataset grouped = groupDataset.groupBy(keyColumn, Fn.identity(), aggregateColumns, aggregateResultColumn, List.class);
 
         Assertions.assertEquals(2, grouped.columnCount());
         Assertions.assertEquals(2, grouped.size());
@@ -7914,7 +7915,7 @@ public class RowDatasetTest extends TestBase {
 
     @Test
     @SuppressWarnings("rawtypes")
-    public void testEmptyDatasetStillValidatesEagerCallbacks() {
+    public void testEmptyDatasetRejectsNullCallbacks() {
         final Function<DisposableObjArray, Comparable> nullKeyExtractor = null;
         final IntObjFunction<DisposableObjArray, Object> nullRowMapper = null;
         final BiFunction<Object, Object, Object> nullBiMapper = null;

@@ -3,7 +3,6 @@ package com.landawn.abacus.util.function;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,11 +102,11 @@ public class ConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenRejectsNullConsumerImmediately() {
+    public void testAndThenRejectsNullConsumerAtComposition() {
         Consumer<String> consumer = s -> {
         };
 
-        assertThrows(NullPointerException.class, () -> consumer.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> consumer.andThen(null));
     }
 
     @Test
@@ -119,9 +118,9 @@ public class ConsumerTest extends TestBase {
     }
 
     @Test
-    public void testAndThenNullThrowsImmediately() {
+    public void testAndThenRejectsNullImmediately() {
         Consumer<String> instance = a -> {
         };
-        assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Consumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Consumer) null));
     }
 }

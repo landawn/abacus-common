@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -468,6 +467,7 @@ public final class Splitter {
      */
     public static Splitter with(final CharSequence delimiter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter);
+
         final String delimiterStr = delimiter.toString();
 
         if (delimiterStr.length() == 1) {
@@ -894,14 +894,16 @@ public final class Splitter {
      *
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the split results.
-     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class, Supplier)
      */
-    public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) {
-        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+    public <C extends Collection<String>> C split(final CharSequence source, final Supplier<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        final C result = N.checkArgNotNull(supplier.get(), "supplier result");
 
         split(source, result);
 
@@ -922,15 +924,16 @@ public final class Splitter {
      *
      * @param <T> the type of elements in the result list.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param mapper a function to apply to each split string. Must not be {@code null}.
+     * @param mapper a function to apply to each split string.
      * @return a new List containing the mapped results.
-     * @throws NullPointerException if the specified mapper is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class)
      * @see #splitThenApply(CharSequence, Function)
      */
-    public <T> List<T> split(final CharSequence source, final Function<? super String, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    public <T> List<T> split(final CharSequence source, final Function<? super String, ? extends T> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final List<String> tmp = new ArrayList<>();
         split(source, tmp);
 
@@ -992,15 +995,18 @@ public final class Splitter {
      * @param <T> the target type for conversion.
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Class representing the type to convert each substring to. Must not be {@code null}.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
+     * @param targetType the Class representing the type to convert each substring to.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
-    public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
-        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        final C result = N.checkArgNotNull(supplier.get(), "supplier result");
 
         split(source, targetType, result);
 
@@ -1027,7 +1033,7 @@ public final class Splitter {
      *
      * @param <T> the target type for conversion.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Type instance used for converting strings to the target type. Must not be {@code null}.
+     * @param targetType the Type instance used for converting strings to the target type.
      * @return a new List containing the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}.
      * @see #split(CharSequence, Class)
@@ -1062,15 +1068,18 @@ public final class Splitter {
      * @param <T> the target type for conversion.
      * @param <C> the type of Collection to return.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param targetType the Type instance used for converting strings to the target type. Must not be {@code null}.
-     * @param supplier a Supplier that creates a new Collection instance to hold the results. Must not be {@code null}.
+     * @param targetType the Type instance used for converting strings to the target type.
+     * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
      * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws NullPointerException if the specified supplier is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
-    public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier) {
+    public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier)
+            throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
-        final C result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+        N.checkArgNotNull(supplier, cs.supplier);
+
+        final C result = N.checkArgNotNull(supplier.get(), "supplier result");
 
         split(source, targetType, result);
 
@@ -1255,11 +1264,13 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param mapper a function to apply to each split string. Must not be {@code null}.
+     * @param mapper a function to apply to each split string.
      * @return a String array containing the mapped results.
-     * @throws NullPointerException if the specified mapper is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) {
+    public String[] splitToArray(final CharSequence source, final Function<? super String, String> mapper) throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper);
+
         final List<String> substrs = split(source, mapper);
 
         return substrs.toArray(new String[0]);
@@ -1397,13 +1408,15 @@ public final class Splitter {
      *
      * @param <R> the type of the result.
      * @param source the CharSequence to split; may be {@code null}.
-     * @param converter a function that transforms the list of split strings into a result. Must not be {@code null}.
+     * @param converter a function that transforms the list of split strings into a result.
      * @return the result of applying the converter function to the split results.
-     * @throws NullPointerException if the specified converter is {@code null}
+     * @throws IllegalArgumentException if {@code converter} is {@code null}.
      * @see #split(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
-    public <R> R splitThenApply(final CharSequence source, final Function<? super List<String>, R> converter) {
+    public <R> R splitThenApply(final CharSequence source, final Function<? super List<String>, R> converter) throws IllegalArgumentException {
+        N.checkArgNotNull(converter, cs.converter);
+
         return converter.apply(split(source));
     }
 
@@ -1422,13 +1435,15 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param consumer a consumer that processes the list of split strings. Must not be {@code null}.
-     * @throws NullPointerException if the specified consumer is {@code null}
+     * @param consumer a consumer that processes the list of split strings.
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @see #split(CharSequence)
      * @see #splitThenApply(CharSequence, Function)
      * @see #splitThenForEach(CharSequence, Consumer)
      */
-    public void splitThenAccept(final CharSequence source, final Consumer<? super List<String>> consumer) {
+    public void splitThenAccept(final CharSequence source, final Consumer<? super List<String>> consumer) throws IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer);
+
         consumer.accept(split(source));
     }
 
@@ -1450,13 +1465,15 @@ public final class Splitter {
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
-     * @param action the Consumer to apply to each resulting substring. Must not be {@code null}.
-     * @throws NullPointerException if the specified action is {@code null}
+     * @param action the Consumer to apply to each resulting substring.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #splitToStream(CharSequence)
      * @see #splitThenAccept(CharSequence, Consumer)
      */
     @Beta
-    public void splitThenForEach(final CharSequence source, final Consumer<? super String> action) {
+    public void splitThenForEach(final CharSequence source, final Consumer<? super String> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         iterate(source).forEachRemaining(action);
     }
 
@@ -1900,10 +1917,12 @@ public final class Splitter {
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the parsed key-value pairs
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
-        public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) {
-            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+        public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
+            final M result = N.checkArgNotNull(supplier.get(), "supplier result");
 
             split(source, result);
 
@@ -2005,13 +2024,15 @@ public final class Splitter {
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
          * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Class<K> keyType, final Class<V> valueType,
-                final Supplier<? extends M> supplier) {
+                final Supplier<? extends M> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, cs.keyType);
             N.checkArgNotNull(valueType, cs.valueType);
-            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+            N.checkArgNotNull(supplier, cs.supplier);
+
+            final M result = N.checkArgNotNull(supplier.get(), "supplier result");
 
             split(source, keyType, valueType, result);
 
@@ -2043,13 +2064,15 @@ public final class Splitter {
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
          * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
-         * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Type<K> keyType, final Type<V> valueType,
-                final Supplier<? extends M> supplier) {
+                final Supplier<? extends M> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(keyType, cs.keyType);
             N.checkArgNotNull(valueType, cs.valueType);
-            final M result = Objects.requireNonNull(Objects.requireNonNull(supplier, "supplier").get(), "supplier returned null");
+            N.checkArgNotNull(supplier, cs.supplier);
+
+            final M result = N.checkArgNotNull(supplier.get(), "supplier result");
 
             split(source, keyType, valueType, result);
 
@@ -2376,13 +2399,15 @@ public final class Splitter {
          *
          * @param <T> the type of the result
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param converter a function that transforms the parsed map into a result. Must not be {@code null}.
+         * @param converter a function that transforms the parsed map into a result.
          * @return the result of applying the converter function to the parsed map
-         * @throws NullPointerException if the specified converter is {@code null}
+         * @throws IllegalArgumentException if {@code converter} is {@code null}.
          * @see #split(CharSequence)
          * @see #splitThenAccept(CharSequence, Consumer)
          */
-        public <T> T splitThenApply(final CharSequence source, final Function<? super Map<String, String>, T> converter) {
+        public <T> T splitThenApply(final CharSequence source, final Function<? super Map<String, String>, T> converter) throws IllegalArgumentException {
+            N.checkArgNotNull(converter, cs.converter);
+
             return converter.apply(split(source));
         }
 
@@ -2400,12 +2425,14 @@ public final class Splitter {
          * }</pre>
          *
          * @param source the CharSequence to split into a map; may be {@code null}
-         * @param consumer a consumer that processes the parsed map. Must not be {@code null}.
-         * @throws NullPointerException if the specified consumer is {@code null}
+         * @param consumer a consumer that processes the parsed map.
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          * @see #split(CharSequence)
          * @see #splitThenApply(CharSequence, Function)
          */
-        public void splitThenAccept(final CharSequence source, final Consumer<? super Map<String, String>> consumer) {
+        public void splitThenAccept(final CharSequence source, final Consumer<? super Map<String, String>> consumer) throws IllegalArgumentException {
+            N.checkArgNotNull(consumer, cs.consumer);
+
             consumer.accept(split(source));
         }
     }

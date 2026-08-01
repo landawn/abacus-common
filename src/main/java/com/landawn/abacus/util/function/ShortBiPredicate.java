@@ -140,12 +140,13 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result3 = inRange.test((short) 150, (short) 200);   // returns false (not both < 100)
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ShortBiPredicate and(final ShortBiPredicate other) {
+    default ShortBiPredicate and(final ShortBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -168,12 +169,13 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * boolean result3 = equalsOrBothZero.test((short) 3, (short) 7);   // returns false
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ShortBiPredicate or(final ShortBiPredicate other) {
+    default ShortBiPredicate or(final ShortBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -1809,24 +1810,24 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testRemoveAllOccurrencesIf_Predicate_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((java.util.function.Predicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((java.util.function.Predicate<String>) null));
     }
 
     @Test
     public void testRemoveAllOccurrencesIf_ObjIntPredicate_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((com.landawn.abacus.util.function.ObjIntPredicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((com.landawn.abacus.util.function.ObjIntPredicate<String>) null));
     }
 
     @Test
     public void testRemoveAllOccurrencesIf_Predicate_null() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((Predicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((Predicate<String>) null));
     }
 
     @Test
     public void testRemoveAllOccurrencesIf_ObjIntPredicate_null() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((ObjIntPredicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((ObjIntPredicate<String>) null));
     }
 
     @Test
@@ -1934,13 +1935,13 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testUpdateAllOccurrences_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.updateAllOccurrences(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.updateAllOccurrences(null));
     }
 
     @Test
     public void testUpdateAllOccurrences_nullFunction() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.updateAllOccurrences(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.updateAllOccurrences(null));
     }
 
     @Test
@@ -2058,7 +2059,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testComputeIfPresent_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.computeIfPresent("apple", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.computeIfPresent("apple", null));
     }
 
     @Test
@@ -2208,13 +2209,13 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testMerge_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.merge("apple", 5, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.merge("apple", 5, null));
     }
 
     @Test
     public void testMerge_nullFunction() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.merge("a", 1, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.merge("a", 1, null));
     }
 
     @Test
@@ -3352,24 +3353,24 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testForEach_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.forEach((java.util.function.Consumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((java.util.function.Consumer<String>) null));
     }
 
     @Test
     public void testForEach_ObjIntConsumer_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.forEach((com.landawn.abacus.util.function.ObjIntConsumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((com.landawn.abacus.util.function.ObjIntConsumer<String>) null));
     }
 
     @Test
     public void testForEach_Consumer_nullAction() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.forEach((Consumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((Consumer<String>) null));
     }
 
     @Test
     public void testForEach_ObjIntConsumer_nullAction() {
         Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.forEach((ObjIntConsumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((ObjIntConsumer<String>) null));
     }
 
     @Test
@@ -3812,6 +3813,6 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testToMapSortedByOccurrencesRejectsNullComparatorWhenEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().toMapSortedByOccurrences(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().toMapSortedByOccurrences(null));
     }
 }

@@ -97,13 +97,14 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * boolean result = canUpdate.test(1, List.of("a", "b"), "x");   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default IntBiObjPredicate<T, U> and(final IntBiObjPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> and(final IntBiObjPredicate<? super T, ? super U> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (i, t, u) -> test(i, t, u) && other.test(i, t, u);
     }
 
@@ -125,13 +126,14 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * boolean result = skip.test(0, List.of("a"), null);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default IntBiObjPredicate<T, U> or(final IntBiObjPredicate<? super T, ? super U> other) {
+    default IntBiObjPredicate<T, U> or(final IntBiObjPredicate<? super T, ? super U> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (i, t, u) -> test(i, t, u) || other.test(i, t, u);
     }
 

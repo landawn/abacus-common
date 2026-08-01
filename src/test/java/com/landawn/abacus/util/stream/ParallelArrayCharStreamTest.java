@@ -1039,8 +1039,8 @@ public class ParallelArrayCharStreamTest extends TestBase {
     @Test
     public void testOnCloseEmptyHandler() {
         CharStream stream = createCharStream(TEST_ARRAY);
-        CharStream newStream = stream.onClose(null);
-        assertSame(stream, newStream);
-        newStream.close();
+
+        assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
+        stream.close();
     }
 }

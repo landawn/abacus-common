@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -146,7 +147,7 @@ public class MergeResultTest extends TestBase {
 
     @Test
     public void testMinFirst_biFunction_withComparator_nullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> MergeResult.minFirst(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> MergeResult.minFirst(null));
     }
 
     @Test
@@ -281,7 +282,7 @@ public class MergeResultTest extends TestBase {
 
     @Test
     public void testMaxFirst_biFunction_withComparator_nullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> MergeResult.maxFirst(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> MergeResult.maxFirst(null));
     }
 
     @Test

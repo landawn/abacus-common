@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,6 +22,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.LongStream;
 
 public class LongIteratorTest extends TestBase {
+  
 
     @Test
     public void testEmpty() {
@@ -240,7 +242,7 @@ public class LongIteratorTest extends TestBase {
 
     @Test
     public void testDeferNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.defer(null));
     }
 
     @Test
@@ -295,7 +297,7 @@ public class LongIteratorTest extends TestBase {
 
     @Test
     public void testGenerateNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null));
     }
 
     @Test
@@ -307,8 +309,8 @@ public class LongIteratorTest extends TestBase {
 
     @Test
     public void testGenerateWithConditionNullChecks() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, () -> 1L));
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, () -> 1L));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(() -> true, null));
     }
 
     @Test
@@ -334,9 +336,9 @@ public class LongIteratorTest extends TestBase {
         LongSupplier supplier = () -> 0L;
         BooleanSupplier hasNext = () -> true;
 
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate((LongSupplier) null));
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, supplier));
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(hasNext, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate((LongSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(null, supplier));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.generate(hasNext, null));
     }
 
     @Test
@@ -550,7 +552,7 @@ public class LongIteratorTest extends TestBase {
 
     @Test
     public void testFilterNull() {
-        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L, 2L).filter(null));
     }
 
     @Test
@@ -567,7 +569,7 @@ public class LongIteratorTest extends TestBase {
     public void testFilter_NullPredicate() {
         LongIterator iter = LongIterator.of(1L, 2L, 3L);
 
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test
@@ -797,7 +799,7 @@ public class LongIteratorTest extends TestBase {
 
     @Test
     public void testForEachRemainingRejectsNullAction() {
-        assertThrows(NullPointerException.class, () -> LongIterator.of(1L).forEachRemaining((java.util.function.Consumer<Long>) null));
+        assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).forEachRemaining((java.util.function.Consumer<Long>) null));
     }
 
     @Test

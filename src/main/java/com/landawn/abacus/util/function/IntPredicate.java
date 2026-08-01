@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -123,14 +124,15 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntStream.of(-2, -1, 0, 1, 2, 3, 4).filter(isPositive.and(isEven)).forEach(System.out::println);   // Prints: 2 4
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default IntPredicate and(final java.util.function.IntPredicate other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default IntPredicate and(final java.util.function.IntPredicate other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return value -> test(value) && other.test(value);
     }
 
@@ -152,14 +154,15 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * IntStream.of(-2, -1, 0, 1, 2).filter(isNegative.or(isZero)).forEach(System.out::println);   // Prints: -2 -1 0
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default IntPredicate or(final java.util.function.IntPredicate other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default IntPredicate or(final java.util.function.IntPredicate other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return value -> test(value) || other.test(value);
     }
 
@@ -175,8 +178,11 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * @param predicate the predicate to return
      * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static IntPredicate of(final IntPredicate predicate) {
+    static IntPredicate of(final IntPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 

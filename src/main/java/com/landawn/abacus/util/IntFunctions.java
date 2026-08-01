@@ -290,8 +290,11 @@ public final class IntFunctions {
      * @param <T> the type of the result produced by the function
      * @param func the {@code IntFunction} to return unchanged
      * @return the same {@code IntFunction} instance passed as the argument
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
-    public static <T> IntFunction<T> of(IntFunction<T> func) {
+    public static <T> IntFunction<T> of(IntFunction<T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return func;
     }
 
@@ -1638,15 +1641,14 @@ public final class IntFunctions {
      * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if
-     *         {@code targetClass} is not a collection type, or if it is a built-in class
+     * @throws IllegalArgumentException if {@code creator} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgNotNull(creator, cs.creator);
         N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
+        N.checkArgNotNull(creator, cs.creator);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -1677,15 +1679,14 @@ public final class IntFunctions {
      * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if
-     *         {@code targetClass} is not a map type, or if it is a built-in class
+     * @throws IllegalArgumentException if {@code creator} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgNotNull(creator, cs.creator);
         N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
+        N.checkArgNotNull(creator, cs.creator);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));

@@ -606,6 +606,32 @@ public class SingleValueTypeTest extends TestBase {
         }
     }
 
+    public static class ObjectContractMethodValue {
+        private String value;
+
+        public ObjectContractMethodValue(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return "ObjectContractMethodValue[value=" + value + "]";
+        }
+    }
+
+    public static class HashCodeContractMethodValue {
+        private int value;
+
+        public HashCodeContractMethodValue(final int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value + 31;
+        }
+    }
+
     @Test
     public void testGetCreatorAndValueExtractor_UnrelatedStaticMethod_returnsSentinel() {
         // regression: the matchedFields pre-filter accepts a field when ANY public static 1-arg
@@ -615,6 +641,26 @@ public class SingleValueTypeTest extends TestBase {
         // deserializes as a raw String). Such classes must fall back to plain-object handling.
         com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, UnrelatedStaticMethodValue>, java.util.function.Function<UnrelatedStaticMethodValue, Object>> tuple = SingleValueType
                 .getCreatorAndValueExtractor(UnrelatedStaticMethodValue.class);
+
+        assertNull(tuple._1);
+        assertNull(tuple._2);
+        assertNull(tuple._3);
+    }
+
+    @Test
+    public void testGetCreatorAndValueExtractor_ObjectContractMethodIsNotValueAccessor() {
+        final com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, ObjectContractMethodValue>, java.util.function.Function<ObjectContractMethodValue, Object>> tuple = SingleValueType
+                .getCreatorAndValueExtractor(ObjectContractMethodValue.class);
+
+        assertNull(tuple._1);
+        assertNull(tuple._2);
+        assertNull(tuple._3);
+    }
+
+    @Test
+    public void testGetCreatorAndValueExtractor_HashCodeIsNotValueAccessor() {
+        final com.landawn.abacus.util.Tuple.Tuple3<Type<Object>, java.util.function.Function<String, HashCodeContractMethodValue>, java.util.function.Function<HashCodeContractMethodValue, Object>> tuple = SingleValueType
+                .getCreatorAndValueExtractor(HashCodeContractMethodValue.class);
 
         assertNull(tuple._1);
         assertNull(tuple._2);

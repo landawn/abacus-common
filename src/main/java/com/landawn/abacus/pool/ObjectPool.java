@@ -73,10 +73,12 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * // Poll object from pool
  * MyPoolable borrowed = pool.poll();
- * try {
- *     // use borrowed object
- * } finally {
- *     pool.add(borrowed);   // adds it back to the pool
+ * if (borrowed != null) {
+ *     try {
+ *         // use borrowed object
+ *     } finally {
+ *         pool.add(borrowed);   // adds it back to the pool
+ *     }
  * }
  * }</pre>
  *
@@ -154,7 +156,8 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument, must not be {@code null}
-     * @return {@code true} if successful, {@code false} if timeout elapsed before space was available
+     * @return {@code true} if successful; {@code false} if the timeout elapsed before space was
+     *         available, the element was already (or became) expired, or the memory measure rejected the element
      * @throws IllegalArgumentException if the element or unit is null
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting

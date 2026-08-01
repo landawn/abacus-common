@@ -317,12 +317,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param mapSupplier the supplier that provides the empty map to be used as the backing map.
-     * @throws NullPointerException if {@code mapSupplier} or the map it supplies is {@code null}
      * @throws IllegalArgumentException if the supplied map is not empty
      */
     @SuppressWarnings("unchecked")
     public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
-        final Map<? extends E, ?> suppliedMap = N.requireNonNull(N.requireNonNull(mapSupplier).get());
+        final Map<? extends E, ?> suppliedMap = N.requireNonNull(mapSupplier.get());
 
         if (!suppliedMap.isEmpty()) {
             throw new IllegalArgumentException("The supplied map must be empty");
@@ -1199,10 +1198,10 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param predicate the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed.
-     * @throws IllegalArgumentException if the predicate is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         Set<E> removingKeys = null;
 
@@ -1241,10 +1240,10 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param predicate the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed.
-     * @throws IllegalArgumentException if the predicate is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         Set<E> removingKeys = null;
 
@@ -1285,10 +1284,10 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param function the function to compute new counts; returning {@code null} or a non-positive
      *                 value causes the element to be removed from the multiset.
-     * @throws IllegalArgumentException if the function is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     public void updateAllOccurrences(final ObjIntFunction<? super E, Integer> function) throws IllegalArgumentException {
-        N.checkArgNotNull(function);
+        N.checkArgNotNull(function, cs.function);
 
         List<E> keyToRemove = null;
         Integer newVal = null;
@@ -1333,10 +1332,10 @@ public final class Multiset<E> implements Collection<E> {
      * @return the existing count if the element is already present; otherwise the count returned by
      *         {@code mappingFunction} when it is positive (the element is then added with that count), or
      *         {@code 0} when the function returns a non-positive value (in which case the element is not added)
-     * @throws IllegalArgumentException if the mapping function is null
+     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}
      */
     public int computeIfAbsent(final E e, final ToIntFunction<? super E> mappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(mappingFunction);
+        N.checkArgNotNull(mappingFunction, cs.mappingFunction);
 
         final int oldValue = getCount(e);
 
@@ -1369,10 +1368,10 @@ public final class Multiset<E> implements Collection<E> {
      *                          non-positive value removes the element from the multiset.
      * @return the new count of the element after applying the function, or 0 if the element was
      *         not present or was removed by the function
-     * @throws IllegalArgumentException if the remapping function is null
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
      */
     public int computeIfPresent(final E e, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final int oldValue = getCount(e);
 
@@ -1414,10 +1413,10 @@ public final class Multiset<E> implements Collection<E> {
      *                          count (0 if absent); returning {@code null} or a non-positive value
      *                          removes the element from the multiset.
      * @return the new count of the element, or 0 if the element was removed
-     * @throws IllegalArgumentException if the remapping function is null
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
      */
     public int compute(final E key, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final int oldValue = getCount(key);
         // Box to allow null return — treated as "remove" per java.util.Map.compute semantics.
@@ -1457,10 +1456,10 @@ public final class Multiset<E> implements Collection<E> {
      * @param remappingFunction the function to compute the new count from the old count and {@code value};
      *                          returning {@code null} or a non-positive value removes the element.
      * @return the new count of the element, or 0 if the element was removed
-     * @throws IllegalArgumentException if the remapping function is null
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
      */
     public int merge(final E key, final int value, final IntBiFunction<Integer> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction);
+        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final int oldValue = getCount(key);
         // Box to allow null return from the remapping function — treated as "remove" per
@@ -1927,9 +1926,12 @@ public final class Multiset<E> implements Collection<E> {
      *                 once with the number of distinct elements in this multiset as a size hint.
      * @return the map created by {@code supplier}, populated with the elements of this multiset as
      *         keys and their counts as values
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #toMap()
      */
-    public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) {
+    public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final M result = supplier.apply(backingMap.size());
 
         for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
@@ -1977,14 +1979,14 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: c=3, b=2, a=1 (descending by count)
      * }</pre>
      *
-     * @param cmp the comparator to be used for sorting the counts of the elements; must not be {@code null}
+     * @param cmp the comparator to be used for sorting the counts of the elements
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
      *         {@code cmp} induces on the counts; empty if this multiset is empty
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #toMapSortedByOccurrences()
      */
-    public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) {
-        N.checkArgNotNull(cmp, cs.comparator);
+    public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return toMapSortedBy((o1, o2) -> cmp.compare(o1.getValue().value(), o2.getValue().value()));
     }
@@ -2006,10 +2008,12 @@ public final class Multiset<E> implements Collection<E> {
      * @param cmp the comparator to be used for sorting the keys of the elements; must not be {@code null}
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
      *         {@code cmp} induces on the elements; empty if this multiset is empty
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #toMapSortedByOccurrences()
      */
-    public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) {
+    public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return toMapSortedBy(Comparators.comparingByKey(cmp));
     }
 
@@ -2085,9 +2089,12 @@ public final class Multiset<E> implements Collection<E> {
      * @param mapSupplier a function that creates a new, empty map of the desired type; it is called
      *                    once with the number of distinct elements in this multiset as a size hint.
      * @return an immutable map with the elements of this multiset as keys and their counts as values
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #toImmutableMap()
      */
-    public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) {
+    public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return ImmutableMap.wrap(toMap(mapSupplier));
     }
 
@@ -2107,11 +2114,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param action The action to be performed for each element.
-     * @throws IllegalArgumentException if the provided action is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public void forEach(final Consumer<? super E> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action);
+        N.checkArgNotNull(action, cs.action);
 
         for (E e : this) {
             action.accept(e);
@@ -2133,10 +2140,10 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param action The action to be performed for each distinct element in the multiset and its count. This can be any instance of ObjIntConsumer.
-     * @throws IllegalArgumentException if the provided action is {@code null}.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ObjIntConsumer<? super E> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action);
+        N.checkArgNotNull(action, cs.action);
 
         for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             action.accept(entry.getKey(), entry.getValue().value());
@@ -2196,8 +2203,11 @@ public final class Multiset<E> implements Collection<E> {
      * @param func the function to be applied to this multiset.
      * @return the result of applying the provided function to this multiset
      * @throws X if the provided function throws an exception of type X
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
-    public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
+    public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return func.apply(this);
     }
 
@@ -2221,8 +2231,12 @@ public final class Multiset<E> implements Collection<E> {
      * @param func the function to be applied to this multiset.
      * @return an Optional containing the result of applying the provided function to this multiset, or an empty Optional if the multiset is empty
      * @throws X if the provided function throws an exception of type X
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
-    public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X {
+    public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func)
+            throws X, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
     }
 
@@ -2238,8 +2252,11 @@ public final class Multiset<E> implements Collection<E> {
      * @param <X> the type of the exception that can be thrown by the consumer function.
      * @param action the consumer function to be applied to this multiset.
      * @throws X if the provided consumer function throws an exception of type X
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
+    public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(this);
     }
 
@@ -2261,8 +2278,11 @@ public final class Multiset<E> implements Collection<E> {
      * @param action the consumer function to be applied to this multiset.
      * @return an instance of OrElse which can be used to perform some other operation if the Multiset is empty
      * @throws X if the provided consumer function throws an exception of type X
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X {
+    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return If.is(!backingMap.isEmpty()).then(this, action);
     }
 

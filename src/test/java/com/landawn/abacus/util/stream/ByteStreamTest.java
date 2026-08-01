@@ -1819,9 +1819,22 @@ public class ByteStreamTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> ByteStream.defer(null));
     }
+ 
 
     @Test
-    public void testDefer_NullSupplier() {
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final ByteStream deferred = ByteStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
+    }
+
+    @Test
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> ByteStream.defer(null));
     }
 
@@ -2903,7 +2916,7 @@ public class ByteStreamTest extends TestBase {
 
     @Test
     public void testIterateNullOperator() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.iterate((byte) 0, (com.landawn.abacus.util.function.ByteUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.iterate((byte) 0, (com.landawn.abacus.util.function.ByteUnaryOperator) null).limit(2).count());
     }
 
     @Test
@@ -2919,12 +2932,12 @@ public class ByteStreamTest extends TestBase {
         ByteStream stream = ByteStream.generate(() -> (byte) counter.getAndIncrement()).limit(3);
         assertArrayEquals(new byte[] { 0, 1, 2 }, stream.toArray());
 
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.generate(null).limit(1).count());
     }
 
     @Test
     public void testGenerateNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.generate(null).limit(1).count());
     }
 
     @Test

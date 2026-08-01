@@ -42,6 +42,7 @@ import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.DoubleTernaryOperator;
 import com.landawn.abacus.util.function.DoubleToFloatFunction;
@@ -89,13 +90,13 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
      * Constructs a ParallelIteratorDoubleStream from a DoubleIterator with the specified configuration for parallel processing.
      * This constructor initializes all parameters for controlling parallel execution behavior.
      *
-     * @param values the DoubleIterator to stream from
+     * @param values the DoubleIterator to stream from; it is consumed lazily and must not be advanced externally
      * @param sorted whether the iterator elements are in sorted order
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitStrategy the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
      */
     ParallelIteratorDoubleStream(final DoubleIterator values, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
             final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Collection<LocalRunnable> closeHandlers) {
@@ -109,15 +110,16 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     /**
      * Constructs a ParallelIteratorDoubleStream from a DoubleStream with the specified configuration for parallel processing.
-     * The stream is converted to an iterator internally.
+     * The source stream's iterator is adopted, and the source stream's own close handlers are merged
+     * with the specified ones, so closing this stream also closes the source stream.
      *
-     * @param stream the DoubleStream to convert and stream from
+     * @param stream the source {@code DoubleStream} to iterate over; a {@code null} stream is treated as empty
      * @param sorted whether the stream elements are in sorted order
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitStrategy the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
      */
     ParallelIteratorDoubleStream(final DoubleStream stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
             final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
@@ -125,16 +127,19 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     /**
-     * Constructs a ParallelIteratorDoubleStream from a boxed Stream of Doubles with the specified configuration for parallel processing.
-     * The stream is unboxed to a DoubleIterator internally.
+     * Constructs a ParallelIteratorDoubleStream from a boxed {@code Stream<Double>} with the specified configuration for
+     * parallel processing. The source stream's iterator is adopted and unboxed to a {@code DoubleIterator}, and the
+     * source stream's own close handlers are merged with the specified ones, so closing this stream also closes
+     * the source stream. A {@code null} element in the source stream causes a {@code NullPointerException} when
+     * that element is unboxed.
      *
-     * @param stream the Stream of Double objects to convert and stream from
+     * @param stream the source boxed stream to iterate over; a {@code null} stream is treated as empty
      * @param sorted whether the stream elements are in sorted order
-     * @param maxThreadNum the maximum number of threads to use for parallel operations (0 uses default)
-     * @param splitStrategy the strategy for dividing work among threads (null uses default)
-     * @param asyncExecutor the executor for running parallel tasks (null uses default)
+     * @param maxThreadNum the maximum number of threads to use for parallel operations ({@code 0} uses the default)
+     * @param splitStrategy the strategy for dividing work among threads ({@code null} uses the default)
+     * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
-     * @param closeHandlers handlers to execute when the stream is closed
+     * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
      */
     ParallelIteratorDoubleStream(final Stream<Double> stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
             final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
@@ -143,8 +148,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream filter(final DoublePredicate predicate) throws IllegalStateException {
+    public DoubleStream filter(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.filter(predicate);
@@ -156,8 +163,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalStateException {
+    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.takeWhile(predicate);
@@ -169,8 +178,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalStateException {
+    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.dropWhile(predicate);
@@ -182,8 +193,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalStateException {
+    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.map(mapper);
@@ -196,8 +209,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalStateException {
+    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToInt(mapper);
@@ -210,8 +225,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalStateException {
+    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToLong(mapper);
@@ -224,8 +241,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalStateException {
+    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToFloat(mapper);
@@ -238,8 +257,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToObj(mapper);
@@ -250,8 +271,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -266,8 +289,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalStateException {
+    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -282,8 +307,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalStateException {
+    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -298,8 +325,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -314,8 +343,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -330,8 +361,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -346,8 +379,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -360,8 +395,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -374,8 +411,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream onEach(final DoubleConsumer action) throws IllegalStateException {
+    public DoubleStream onEach(final DoubleConsumer action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
             return super.onEach(action);
@@ -388,8 +427,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
             super.forEach(action);
@@ -428,8 +469,13 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Throwables.DoubleFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
             return super.toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -445,8 +491,12 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.DoubleFunction<? extends K, E> keyMapper,
-            final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, E {
+            final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
             return super.groupTo(keyMapper, downstream, mapFactory);
@@ -459,8 +509,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalStateException {
+    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum)) {
             return super.reduce(identity, accumulator);
@@ -507,8 +559,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalStateException {
+    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum)) {
             return super.reduce(accumulator);
@@ -567,8 +621,12 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         if (canBeSequential(maxThreadNum)) {
             return super.collect(supplier, accumulator, combiner);
@@ -607,8 +665,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.anyMatch(predicate);
@@ -652,8 +712,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.allMatch(predicate);
@@ -697,8 +759,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.noneMatch(predicate);
@@ -742,8 +806,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findFirst(predicate);
@@ -792,8 +859,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findAny(predicate);
@@ -840,8 +910,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum)) {
             return super.findLast(predicate);
@@ -888,8 +961,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream zipWith(final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalStateException {
+    public DoubleStream zipWith(final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -901,8 +976,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     }
 
     @Override
-    public DoubleStream zipWith(final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction) throws IllegalStateException {
+    public DoubleStream zipWith(final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -915,8 +993,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     @Override
     public DoubleStream zipWith(final DoubleStream b, final double valueForNoneA, final double valueForNoneB, final DoubleBinaryOperator zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitStrategy,
@@ -929,8 +1009,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     @Override
     public DoubleStream zipWith(final DoubleStream b, final DoubleStream c, final double valueForNoneA, final double valueForNoneB, final double valueForNoneC,
-            final DoubleTernaryOperator zipFunction) throws IllegalStateException {
+            final DoubleTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
             return new ParallelIteratorDoubleStream(DoubleStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
@@ -958,7 +1040,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                 tmp = sequential;
 
                 if (tmp == null) {
-                    tmp = new IteratorDoubleStream(elements, isSorted(), closeHandlers());
+                    tmp = new IteratorDoubleStream(elements, isSorted(), closeHandlersForNewStream());
                     sequential = tmp;
                 }
             }

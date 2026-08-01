@@ -110,8 +110,11 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      *
      * @param predicate the predicate to return
      * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static ShortPredicate of(final ShortPredicate predicate) {
+    static ShortPredicate of(final ShortPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 
@@ -147,12 +150,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * boolean result = combined.test((short) 50);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ShortPredicate and(final ShortPredicate other) {
+    default ShortPredicate and(final ShortPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) && other.test(t);
     }
 
@@ -172,12 +176,13 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * boolean result = notPositive.test((short) 0);   // returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default ShortPredicate or(final ShortPredicate other) {
+    default ShortPredicate or(final ShortPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) || other.test(t);
     }
 

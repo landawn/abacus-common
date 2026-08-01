@@ -197,7 +197,7 @@ public final class ParserFactory {
     /** Incremented after each global Kryo registration so existing parser pools can refresh. */
     static final AtomicLong _kryoRegistrationVersion = new AtomicLong();
 
-    /** Guards replacement of a class's registration across the four representation maps. */
+    /** Guards replacement and ID uniqueness across the four registration maps. */
     static final Object _kryoRegistrationLock = new Object();
 
     /**
@@ -584,13 +584,14 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if {@code type} is {@code null} or {@code id} is negative
+     * @throws IllegalArgumentException if {@code type} is {@code null}, {@code id} is negative, or {@code id} is assigned to another class
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
         N.checkArgNotNegative(id, "id");
 
         synchronized (_kryoRegistrationLock) {
+            checkKryoRegistrationIdAvailable(type, id);
             clearKryoRegistration(type);
             _kryoClassIdMap.put(type, id);
             _kryoRegistrationVersion.incrementAndGet();
@@ -639,7 +640,8 @@ public final class ParserFactory {
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}, or {@code id} is negative
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}, {@code id} is negative, or {@code id} is assigned to
+     *             another class
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -647,9 +649,24 @@ public final class ParserFactory {
         N.checkArgNotNegative(id, "id");
 
         synchronized (_kryoRegistrationLock) {
+            checkKryoRegistrationIdAvailable(type, id);
             clearKryoRegistration(type);
             _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
             _kryoRegistrationVersion.incrementAndGet();
+        }
+    }
+
+    private static void checkKryoRegistrationIdAvailable(final Class<?> type, final int id) {
+        for (final Map.Entry<Class<?>, Integer> entry : _kryoClassIdMap.entrySet()) {
+            if (entry.getValue().intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
+        }
+
+        for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : _kryoClassSerializerIdMap.entrySet()) {
+            if (entry.getValue()._2.intValue() == id && entry.getKey() != type) {
+                throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());
+            }
         }
     }
 

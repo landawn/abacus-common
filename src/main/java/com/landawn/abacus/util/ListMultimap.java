@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -609,7 +608,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0)).isEmpty();   // returns true
      *
      * // null keyExtractor throws
-     * ListMultimap.fromCollection(words, null);                                       // throws IllegalArgumentException
+     * ListMultimap.fromCollection(words, null);                                       // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -617,13 +616,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param c the collection of elements to be added to the ListMultimap, may be {@code null} or empty
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #fromCollection(Collection, Function, Function)
      * @see #fromMap(Map)
      */
     public static <T, K> ListMultimap<K, T> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(keyExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         final ListMultimap<K, T> multimap = N.newListMultimap(N.size(c));
 
@@ -656,7 +655,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0), String::length).isEmpty();   // returns true
      *
      * // null valueExtractor throws
-     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);                                     // throws IllegalArgumentException
+     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);                                     // throws NullPointerException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -666,14 +665,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param keyExtractor the function to generate keys for the ListMultimap
      * @param valueExtractor the function to extract values for the ListMultimap
      * @return a new instance of ListMultimap with keys and values from the specified collection
-     * @throws IllegalArgumentException if {@code keyExtractor} or {@code valueExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      * @see #fromCollection(Collection, Function)
      * @see #fromMap(Map)
      */
     public static <T, K, E> ListMultimap<K, E> fromCollection(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
-        N.checkArgNotNull(keyExtractor);
-        N.checkArgNotNull(valueExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         final ListMultimap<K, E> multimap = N.newListMultimap(N.size(c));
 
@@ -910,17 +909,18 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <E> the type of the elements in the list
      * @param <V> the type of the list
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
-     * @param valueSupplier The supplier that provides the list to be used as the value collection, must not be {@code null}
+     * @param valueSupplier the supplier that creates a new list for each newly added key; must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if the provided map or valueSupplier is {@code null}, or if the map contains a {@code null} or empty list value
+     * @throws IllegalArgumentException if {@code map} or {@code valueSupplier} is {@code null},
+     *         or if any value in the map is {@code null} or an empty list
      * @see #wrap(Map)
      */
     @Beta
     public static <K, E, V extends List<E>> ListMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
-        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
         N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
         return new ListMultimap<>((Map<K, List<E>>) map, valueSupplier);
     }
@@ -1126,12 +1126,13 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param mapSupplier the supplier function that provides a non-null {@link Map} instance; the integer argument passed to it is
      *                    the number of keys in this multimap (i.e., {@code backingMap.size()})
      * @return an ImmutableMap where each key is associated with an ImmutableList of values from the original ListMultimap
-     * @throws NullPointerException if {@code mapSupplier} or the map it returns is {@code null}
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      * @see #toImmutableMap()
      */
-    public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) {
-        Objects.requireNonNull(mapSupplier, "mapSupplier");
-        final Map<K, ImmutableList<E>> map = Objects.requireNonNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");
+    public ImmutableMap<K, ImmutableList<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableList<E>>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
+        final Map<K, ImmutableList<E>> map = N.checkArgNotNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");
 
         for (final Map.Entry<K, List<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableList.copyOf(entry.getValue()));

@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -33,7 +34,7 @@ public class DoubleListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.DoubleConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.DoubleConsumer) null));
     }
 
     @Test
@@ -1407,10 +1408,10 @@ public class DoubleListTest extends TestBase {
     @Test
     public void test_replaceAll_operator_null() {
         DoubleList nonEmpty = DoubleList.of(1.0, 2.0, 3.0);
-        assertThrows(NullPointerException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
 
         DoubleList empty = new DoubleList();
-        assertThrows(NullPointerException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
     }
 
     @Test
@@ -3203,18 +3204,16 @@ public class DoubleListTest extends TestBase {
 
     @Test
     public void test_forEach_removeIf_replaceIf_null_func() {
-        // Regression: a null functional argument is rejected up-front even on an EMPTY list
-        // (previously silently no-op'd). forEach throws IllegalArgumentException (N.checkArgNotNull);
-        // removeIf/replaceIf throw NullPointerException (N.requireNonNull).
+        // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final DoubleList empty = new DoubleList();
-        assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
-        assertThrows(NullPointerException.class, () -> empty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
-        assertThrows(NullPointerException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
 
         final DoubleList nonEmpty = DoubleList.of(1d, 2d);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
-        assertThrows(NullPointerException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
-        assertThrows(NullPointerException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
+        assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---
@@ -3237,10 +3236,10 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         final DoubleList empty = new DoubleList();
-        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, null));
-        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
-        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, null));
-        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, ignored -> null));
     }
 
 }

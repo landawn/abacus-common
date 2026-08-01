@@ -31,6 +31,7 @@ import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatBinaryOperator;
 import com.landawn.abacus.util.function.FloatConsumer;
@@ -124,10 +125,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code FloatStream} of matching elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public FloatStream filter(final FloatPredicate predicate) throws IllegalStateException {
+    public FloatStream filter(final FloatPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.filter(predicate);
@@ -150,10 +154,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code FloatStream} of the elements selected by the parallel {@code takeWhile} operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public FloatStream takeWhile(final FloatPredicate predicate) throws IllegalStateException {
+    public FloatStream takeWhile(final FloatPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.takeWhile(predicate);
@@ -176,10 +183,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code FloatStream} of the elements selected by the parallel {@code dropWhile} operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public FloatStream dropWhile(final FloatPredicate predicate) throws IllegalStateException {
+    public FloatStream dropWhile(final FloatPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.dropWhile(predicate);
@@ -198,10 +208,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code FloatStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public FloatStream map(final FloatUnaryOperator mapper) throws IllegalStateException {
+    public FloatStream map(final FloatUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.map(mapper);
@@ -221,10 +234,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code IntStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public IntStream mapToInt(final FloatToIntFunction mapper) throws IllegalStateException {
+    public IntStream mapToInt(final FloatToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToInt(mapper);
@@ -244,10 +260,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code LongStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public LongStream mapToLong(final FloatToLongFunction mapper) throws IllegalStateException {
+    public LongStream mapToLong(final FloatToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToLong(mapper);
@@ -267,10 +286,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code DoubleStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public DoubleStream mapToDouble(final FloatToDoubleFunction mapper) throws IllegalStateException {
+    public DoubleStream mapToDouble(final FloatToDoubleFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToDouble(mapper);
@@ -291,10 +313,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code Stream} of mapped objects
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> mapToObj(final FloatFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> mapToObj(final FloatFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.mapToObj(mapper);
@@ -313,10 +338,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code FloatStream} for each element
      * @return a new parallel {@code FloatStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public FloatStream flatMap(final FloatFunction<? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMap(final FloatFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -339,10 +367,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<Float>} for each element
      * @return a new parallel {@code FloatStream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public FloatStream flatmap(final FloatFunction<? extends Collection<Float>> mapper) throws IllegalStateException {
+    public FloatStream flatmap(final FloatFunction<? extends Collection<Float>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -365,10 +396,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code float[]} for each element
      * @return a new parallel {@code FloatStream} of the flattened array contents
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public FloatStream flatMapArray(final FloatFunction<float[]> mapper) throws IllegalStateException {
+    public FloatStream flatMapArray(final FloatFunction<float[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -391,10 +425,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns an {@code IntStream} for each element
      * @return a new parallel {@code IntStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public IntStream flatMapToInt(final FloatFunction<? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final FloatFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -417,10 +454,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code LongStream} for each element
      * @return a new parallel {@code LongStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public LongStream flatMapToLong(final FloatFunction<? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMapToLong(final FloatFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -443,10 +483,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code DoubleStream} for each element
      * @return a new parallel {@code DoubleStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public DoubleStream flatMapToDouble(final FloatFunction<? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMapToDouble(final FloatFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -470,10 +513,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Stream<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final FloatFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final FloatFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -495,10 +541,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final FloatFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final FloatFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             //noinspection resource
@@ -520,10 +569,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param action a non-interfering action to perform on each element
      * @return a new parallel {@code FloatStream} with the side-effecting action attached
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public FloatStream onEach(final FloatConsumer action) throws IllegalStateException {
+    public FloatStream onEach(final FloatConsumer action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.onEach(action);
@@ -548,10 +600,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             super.forEach(action);
@@ -630,12 +685,18 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.FloatFunction<? extends K, E> keyMapper,
             final Throwables.FloatFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.toMap(keyMapper, valueMapper, mergeFunction, mapFactory);
@@ -665,11 +726,15 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return a {@code Map} from keys to downstream reduction results
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, E {
+            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.groupTo(keyMapper, downstream, mapFactory);
@@ -693,10 +758,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the parallel reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public float reduce(final float identity, final FloatBinaryOperator accumulator) throws IllegalStateException {
+    public float reduce(final float identity, final FloatBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.reduce(identity, accumulator);
@@ -782,10 +850,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalFloat} with the reduction result, or empty if the stream has no elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public OptionalFloat reduce(final FloatBinaryOperator accumulator) throws IllegalStateException {
+    public OptionalFloat reduce(final FloatBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.reduce(accumulator);
@@ -888,11 +959,16 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param combiner a function that combines two result containers into one
      * @return the result of the parallel mutable reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjFloatConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.collect(supplier, accumulator, combiner);
@@ -968,10 +1044,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.anyMatch(predicate);
@@ -1049,10 +1128,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return {@code true} if all elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.allMatch(predicate);
@@ -1130,10 +1212,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return {@code true} if no elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.noneMatch(predicate);
@@ -1213,10 +1298,14 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return an {@code OptionalFloat} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findFirst(predicate);
@@ -1312,10 +1401,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return an {@code OptionalFloat} with any matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findAny(predicate);
@@ -1408,10 +1500,14 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @return an {@code OptionalFloat} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return super.findLast(predicate);
@@ -1505,10 +1601,13 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param zipFunction a function applied to corresponding elements of both streams
      * @return a new parallel {@code FloatStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public FloatStream zipWith(final FloatStream b, final FloatBinaryOperator zipFunction) throws IllegalStateException {
+    public FloatStream zipWith(final FloatStream b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return new ParallelIteratorFloatStream(FloatStream.zip(this, b, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -1532,10 +1631,14 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param zipFunction a function applied to corresponding elements of all three streams
      * @return a new parallel {@code FloatStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
-    public FloatStream zipWith(final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction) throws IllegalStateException {
+    public FloatStream zipWith(final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return new ParallelIteratorFloatStream(FloatStream.zip(this, b, c, zipFunction), false, maxThreadNum, splitStrategy, asyncExecutor,
@@ -1559,11 +1662,14 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code FloatStream} of zipped results, with length equal to the longer stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public FloatStream zipWith(final FloatStream b, final float valueForNoneA, final float valueForNoneB, final FloatBinaryOperator zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return new ParallelIteratorFloatStream(FloatStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction), false, maxThreadNum, splitStrategy,
@@ -1589,11 +1695,14 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code FloatStream} of zipped results, with length equal to the longest stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
      */
     @Override
     public FloatStream zipWith(final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB, final float valueForNoneC,
-            final FloatTernaryOperator zipFunction) throws IllegalStateException {
+            final FloatTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
             return new ParallelIteratorFloatStream(FloatStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction), false, maxThreadNum,
@@ -1633,7 +1742,7 @@ final class ParallelArrayFloatStream extends ArrayFloatStream {
             synchronized (this) {
                 tmp = sequential;
                 if (tmp == null) {
-                    tmp = new ArrayFloatStream(elements, fromIndex, toIndex, isSorted(), closeHandlers());
+                    tmp = new ArrayFloatStream(elements, fromIndex, toIndex, isSorted(), closeHandlersForNewStream());
                     sequential = tmp;
                 }
             }

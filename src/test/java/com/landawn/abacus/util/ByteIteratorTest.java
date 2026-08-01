@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,6 +21,7 @@ import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
 public class ByteIteratorTest extends TestBase {
+  
 
     // =================================================
     // empty()
@@ -267,7 +269,7 @@ public class ByteIteratorTest extends TestBase {
 
     @Test
     public void testDeferWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.defer(null));
     }
 
     @Test
@@ -342,7 +344,7 @@ public class ByteIteratorTest extends TestBase {
 
     @Test
     public void testGenerateWithNull() {
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null));
     }
 
     // =================================================
@@ -377,18 +379,18 @@ public class ByteIteratorTest extends TestBase {
 
     @Test
     public void testGenerateWithConditionNullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
     }
 
     @Test
     public void testGenerateWithConditionNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
     }
 
     @Test
     public void testGenerateWithConditionNullParams() {
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
-        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
     }
 
     // =================================================
@@ -630,7 +632,7 @@ public class ByteIteratorTest extends TestBase {
     @Test
     public void testFilterNull() {
         ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test

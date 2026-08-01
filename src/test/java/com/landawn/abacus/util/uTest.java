@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -1226,7 +1227,7 @@ public class uTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> nonNull.ifNotNullOrElse(null, () -> {
         }));
-        assertThrows(IllegalArgumentException.class, () -> nonNull.ifNotNullOrElse(s -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> nonNull.ifNotNullOrElse(s -> {
         }, null));
     }
 
@@ -3692,7 +3693,7 @@ public class uTest extends TestBase {
     @DisplayName("ifPresent / ifPresentOrElse with null action throws IllegalArgumentException")
     public void testIfPresent_NullAction() {
         assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresent(null));
-        assertThrows(IllegalArgumentException.class, () -> Optional.<String> empty().ifPresent(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Optional.<String> empty().ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> OptionalInt.of(1).ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> OptionalDouble.of(1.0).ifPresent(null));
@@ -3700,7 +3701,7 @@ public class uTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Nullable.of("v").ifPresent(null));
         assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(null, () -> {
         }));
-        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(s -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Optional.of("v").ifPresentOrElse(s -> {
         }, null));
     }
 
@@ -3833,30 +3834,45 @@ public class uTest extends TestBase {
     }
 
     @Test
-    @DisplayName("flatMap returning null throws NullPointerException")
+    @DisplayName("flatMap returning null throws IllegalArgumentException")
     public void testFlatMap_NullResult() {
-        assertThrows(NullPointerException.class, () -> Optional.of("v").flatMap(s -> null));
-        assertThrows(NullPointerException.class, () -> OptionalInt.of(1).flatMap(i -> null));
-        assertThrows(NullPointerException.class, () -> OptionalLong.of(1L).flatMap(i -> null));
-        assertThrows(NullPointerException.class, () -> OptionalFloat.of(1f).flatMap(i -> null));
-        assertThrows(NullPointerException.class, () -> OptionalDouble.of(1d).flatMap(i -> null));
-        assertThrows(NullPointerException.class, () -> Nullable.of("v").flatMap(s -> null));
-        assertThrows(NullPointerException.class, () -> Nullable.of("v").flatMapIfNotNull(s -> null));
+        assertThrows(IllegalArgumentException.class, () -> Optional.of("v").flatMap(s -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalInt.of(1).flatMap(i -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).flatMap(i -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalFloat.of(1f).flatMap(i -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalDouble.of(1d).flatMap(i -> null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.of("v").flatMap(s -> null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.of("v").flatMapIfNotNull(s -> null));
     }
 
     @Test
-    @DisplayName("or supplier returning null throws NullPointerException")
+    @DisplayName("or supplier returning null throws IllegalArgumentException")
     public void testOr_NullResult() {
-        assertThrows(NullPointerException.class, () -> Optional.empty().or(() -> null));
-        assertThrows(NullPointerException.class, () -> OptionalInt.empty().or(() -> null));
-        assertThrows(NullPointerException.class, () -> OptionalLong.empty().or(() -> null));
-        assertThrows(NullPointerException.class, () -> OptionalFloat.empty().or(() -> null));
-        assertThrows(NullPointerException.class, () -> OptionalDouble.empty().or(() -> null));
-        assertThrows(NullPointerException.class, () -> Nullable.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> Optional.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalInt.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalLong.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalFloat.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalDouble.empty().or(() -> null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.empty().or(() -> null));
 
-        // null supplier on an empty container throws NPE (not IllegalArgumentException), per the documented contract.
-        assertThrows(NullPointerException.class, () -> Optional.empty().or(null));
-        assertThrows(NullPointerException.class, () -> Nullable.empty().or(null));
+        // A null supplier is rejected eagerly with IllegalArgumentException.
+        assertThrows(IllegalArgumentException.class, () -> Optional.empty().or(null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.empty().or(null));
+    }
+
+    @Test
+    @DisplayName("or rejects a null supplier eagerly")
+    public void testOr_DoesNotEvaluateNullSupplierForPresentValue() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalBoolean.of(true).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalChar.of('a').or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalByte.of((byte) 1).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalShort.of((short) 1).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalInt.of(1).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalFloat.of(1F).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> OptionalDouble.of(1D).or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Optional.of("value").or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Nullable.of("value").or(null));
     }
 
     @Test

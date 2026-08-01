@@ -129,7 +129,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * Returns {@code null} if the input pair is {@code null}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; {@code stringOf} and {@code valueOf} are inverse operations that round-trip. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -146,16 +147,15 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
     /**
      * Parses a string representation and creates a Pair object.
      * The string should be in JSON array format: [leftValue, rightValue].
-     * Arrays with more than two elements are accepted; elements after the first two are ignored.
      * Returns {@code null} if the input string is {@code null} or empty.
      *
-     * <p>This method is the inverse of {@code stringOf} and round-trips with it: it parses the string produced by
-     * {@code stringOf} back into a value of this type. Strings produced by {@link Object#toString()} are not
-     * guaranteed to be parseable in this way.</p>
+     * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
+     * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
+     * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse, expected to be a JSON array with at least two elements
+     * @param str the string to parse, expected to be a JSON array with exactly two elements
      * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or has fewer than 2 elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly 2 elements
      * @see #valueOf(Object)
      * @see #stringOf(Pair)
      */
@@ -168,8 +168,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
 
         final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
 
-        if (a == null || a.length < 2) {
-            throw new IllegalArgumentException("Invalid Pair format. Expected array with at least 2 elements but got: " + str);
+        if (a == null || a.length != 2) {
+            throw new IllegalArgumentException("Invalid Pair format. Expected an array with exactly 2 elements [left, right] but got: " + str);
         }
 
         final L left = (L) convertTupleElement(a[0], leftType);

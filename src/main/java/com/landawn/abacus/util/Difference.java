@@ -1516,13 +1516,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>
          * For maps, this returns a map where:
          * <ul>
-         *   <li>Keys are the common keys between both maps</li>
+         *   <li>Keys are the keys present in both maps whose values are not equivalent</li>
          *   <li>Values are {@link Pair} objects containing the values from the left and right maps</li>
          * </ul>
          *
          * <p>For beans, this returns a map where:
          * <ul>
-         *   <li>Keys are the property names that exist in both beans</li>
+         *   <li>Keys are the property names that exist in both beans but whose values are not equivalent</li>
          *   <li>Values are {@link Pair} objects containing the property values from the left and right beans</li>
          * </ul>
          *
@@ -1883,9 +1883,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
          * @param map2 the second map to compare. Can be {@code null} or empty.
-         * @param valueEquivalence the predicate to determine if two values are equivalent. Must not be {@code null}.
+         * @param valueEquivalence the predicate to determine if two values are equivalent.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1955,9 +1955,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
          * @param map2 the second map to compare. Can be {@code null} or empty.
-         * @param valueEquivalence the predicate to determine if two values are equivalent for a given key. Must not be {@code null}.
+         * @param valueEquivalence the predicate to determine if two values are equivalent for a given key.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -2037,9 +2037,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param map1 the first map to compare. Can be {@code null} or empty.
          * @param map2 the second map to compare. Can be {@code null} or empty.
          * @param keysToCompare the keys to compare. If {@code null} or empty, all keys will be compared.
-         * @param valueEquivalence the predicate to determine if values are equivalent. Must not be {@code null}.
+         * @param valueEquivalence the predicate to determine if values are equivalent.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -2200,14 +2200,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K> the type of the identifier extracted from each map
          * @param a the first collection of maps to compare. Can be {@code null} or empty.
          * @param b the second collection of maps to compare. Can be {@code null} or empty.
-         * @param idExtractor Function to extract a unique identifier from each map. Must not be {@code null}.
+         * @param idExtractor Function to extract a unique identifier from each map.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
                 final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b,
-                final Function<? super Map<CK, CV>, ? extends K> idExtractor) {
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor, cs.idExtractor);
+
             return of(a, b, null, idExtractor, idExtractor);
         }
 
@@ -2254,14 +2256,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param a the first collection of maps to compare. Can be {@code null} or empty.
          * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param keysToCompare the keys to compare within each map. If {@code null} or empty, all keys are compared.
-         * @param idExtractor Function to extract a unique identifier from each map. Must not be {@code null}.
+         * @param idExtractor Function to extract a unique identifier from each map.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
                 final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b, final Collection<CK> keysToCompare,
-                final Function<? super Map<CK, CV>, ? extends K> idExtractor) {
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor, cs.idExtractor);
+
             return of(a, b, keysToCompare, idExtractor, idExtractor);
         }
 
@@ -2310,15 +2314,18 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K> the type of the identifier used to match maps between collections
          * @param a the first collection of maps to compare. Can be {@code null} or empty.
          * @param b the second collection of maps to compare. Can be {@code null} or empty.
-         * @param idExtractor1 Function to extract IDs from maps in the first collection. Must not be {@code null}.
-         * @param idExtractor2 Function to extract IDs from maps in the second collection. Must not be {@code null}.
+         * @param idExtractor1 Function to extract IDs from maps in the first collection.
+         * @param idExtractor2 Function to extract IDs from maps in the second collection.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
                 final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b,
-                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2) {
+                final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             return of(a, b, null, idExtractor1, idExtractor2);
         }
@@ -2384,11 +2391,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param a the first collection of maps to compare. Can be {@code null} or empty.
          * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param keysToCompare Keys to compare within matched maps. If {@code null} or empty, all keys are compared.
-         * @param idExtractor1 Function to extract IDs from maps in the first collection. Must not be {@code null}.
-         * @param idExtractor2 Function to extract IDs from maps in the second collection. Must not be {@code null}.
+         * @param idExtractor1 Function to extract IDs from maps in the first collection.
+         * @param idExtractor2 Function to extract IDs from maps in the second collection.
          * @return a {@code MapDifference} object containing detailed comparison results
-         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null}
          * @throws IllegalStateException if duplicate IDs are found within a single collection
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
                 final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b, final Collection<CK> keysToCompare,
@@ -2665,10 +2672,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
-         * @param valueEquivalence the predicate to determine if two property values are equivalent. Must not be {@code null}.
+         * @param valueEquivalence the predicate to determine if two property values are equivalent.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
-         *         or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2737,10 +2744,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
          * @param valueEquivalence the predicate to determine if values are equivalent for a given property;
-         *                         receives {@code (propertyName, value1, value2)}. Must not be {@code null}.
+         *                         receives {@code (propertyName, value1, value2)}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
-         *         or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2755,7 +2762,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final TriPredicate<String, ?, ?> valueEquivalence) {
+                final TriPredicate<String, ?, ?> valueEquivalence) throws IllegalArgumentException {
+            N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
+
             return of(bean1, bean2, null, valueEquivalence);
         }
 
@@ -2806,10 +2815,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
-         * @param valueEquivalence the predicate to determine if values are equivalent for a given property. Must not be {@code null}.
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class,
-         *         or if {@code valueEquivalence} is {@code null}
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -3031,13 +3040,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
-         * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
+         * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
-                final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) {
+                final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor, cs.idExtractor);
+
             return of(a, b, null, idExtractor, idExtractor);
         }
 
@@ -3082,14 +3094,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
-         * @param idExtractor the function to extract a unique identifier from each bean. Must not be {@code null}.
+         * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null} or if the collections contain non-bean objects
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
-                final Function<? super T, K> idExtractor) {
+                final Function<? super T, K> idExtractor) throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor, cs.idExtractor);
+
             return of(a, b, propNamesToCompare, idExtractor, idExtractor);
         }
 
@@ -3137,16 +3152,19 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K> the type of the identifier used to match beans between collections
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
-         * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
-         * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
+         * @param idExtractor1 the function to extract identifiers from beans in the first collection.
+         * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
-         *         or if the collections contain non-bean objects
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
-                final Function<? super T2, ? extends K> idExtractor2) {
+                final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
+
             return of(a, b, null, idExtractor1, idExtractor2);
         }
 
@@ -3204,24 +3222,24 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param a the first collection of beans to compare. Can be {@code null} or empty.
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all matching properties are compared.
-         * @param idExtractor1 the function to extract identifiers from beans in the first collection. Must not be {@code null}.
-         * @param idExtractor2 the function to extract identifiers from beans in the second collection. Must not be {@code null}.
+         * @param idExtractor1 the function to extract identifiers from beans in the first collection.
+         * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if either {@code idExtractor1} or {@code idExtractor2} is {@code null},
-         *         or if the collections contain non-bean objects
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,
                 final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
-            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
-            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             // Validate every (non-null) element in both collections, not just the first: a collection whose
             // leading element is a bean (or null) can still hold a non-bean element later, which would
             // otherwise slip through and be mishandled as a bean.
             checkAllBeanElements(a);
             checkAllBeanElements(b);
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             final List<T1> common = new ArrayList<>();
             final List<T1> onlyOnLeft = new ArrayList<>();

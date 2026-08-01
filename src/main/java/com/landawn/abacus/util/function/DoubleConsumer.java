@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -60,13 +61,14 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      * combined.accept(5.5);   // Logs then validates
      * }</pre>
      *
-     * @param after the operation to perform after this operation. Must not be {@code null}.
+     * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws NullPointerException if {@code after} is null
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      */
     @Override
-    default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) {
-        java.util.Objects.requireNonNull(after, cs.after);
+    default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) throws IllegalArgumentException {
+        N.checkArgNotNull(after, cs.after);
+
         return (final double value) -> {
             accept(value);
             after.accept(value);

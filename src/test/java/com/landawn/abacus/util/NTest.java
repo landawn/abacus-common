@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -12,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,8 +25,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.ref.WeakReference;
 import java.lang.management.ManagementFactory;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -13180,8 +13180,8 @@ public class NTest extends AbstractParserTest {
         assertEquals(Integer.valueOf(3), N.min(new Integer[] { 1, 2, 3 }, reverseComp));
         assertEquals(Integer.valueOf(1), N.max(new Integer[] { 1, 2, 3 }, reverseComp));
 
-        assertEquals(Integer.valueOf(1), N.min(new Integer[] { 1, 2, 3 }, null));
-        assertEquals(Integer.valueOf(3), N.max(new Integer[] { 1, 2, 3 }, null));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new Integer[] { 1, 2, 3 }, null));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new Integer[] { 1, 2, 3 }, null));
     }
 
     @Test
@@ -14368,19 +14368,11 @@ public class NTest extends AbstractParserTest {
         assertEquals(Arrays.asList(2, 3, 4), N.top(Arrays.asList(1, 2, 3, 4, 5), 1, 4, 6, Comparator.reverseOrder(), true));
     }
 
-    // top(int[], fromIndex, toIndex, n, Comparator) - with null comparator
+    // top(int[], fromIndex, toIndex, n, Comparator) rejects a null comparator.
     @org.junit.jupiter.api.Test
-    public void testTopIntRangeWithNullComparator() {
+    public void testTopIntRangeRejectsNullComparator() {
         int[] arr = { 5, 1, 3, 4, 2 };
-        int[] result = N.top(arr, 0, 5, 3, null);
-        assertEquals(3, result.length);
-        // Should return top 3 (largest)
-        List<Integer> resultList = new ArrayList<>();
-        for (int v : result)
-            resultList.add(v);
-        assertTrue(resultList.contains(5));
-        assertTrue(resultList.contains(4));
-        assertTrue(resultList.contains(3));
+        assertThrows(IllegalArgumentException.class, () -> N.top(arr, 0, 5, 3, null));
     }
 
     @org.junit.jupiter.api.Test
@@ -17244,7 +17236,7 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
-    public void testMergeRejectsNullSelectorEvenWhenNoComparisonIsNeeded() {
+    public void testMergeRejectsNullSelectorWhenNoComparisonIsNeeded() {
         BiFunction<Integer, Integer, MergeResult> nullSelector = null;
 
         assertThrows(IllegalArgumentException.class, () -> N.merge(new Integer[0], new Integer[0], nullSelector));
@@ -20951,6 +20943,287 @@ public class NTest extends AbstractParserTest {
     }
 
     @Test
+    public void parallelForEach_coordinatorInterruptionStopsAcceptedWorkers() throws Exception {
+        assertCoordinatorInterruptionStopsAcceptedWorkers(false);
+    }
+
+    @Test
+    public void parallelForEachIndexed_coordinatorInterruptionStopsAcceptedWorkers() throws Exception {
+        assertCoordinatorInterruptionStopsAcceptedWorkers(true);
+    }
+
+    @Test
+    public void parallelForEach_coordinatorInterruptionKeepsPriorWorkerFailureReachable() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(3);
+        final CountDownLatch blockedWorkerStarted = new CountDownLatch(1);
+        final CountDownLatch workersStarted = new CountDownLatch(3);
+        final CountDownLatch releaseBlockedWorker = new CountDownLatch(1);
+        final AtomicReference<Throwable> coordinatorFailure = new AtomicReference<>();
+        final RuntimeException firstWorkerFailure = new RuntimeException("first prior worker failure");
+        final RuntimeException secondWorkerFailure = new RuntimeException("second prior worker failure");
+        final Thread coordinator = new Thread(() -> {
+            try {
+                N.forEachInParallel(Arrays.asList(1, 2, 3).iterator(), value -> {
+                    workersStarted.countDown();
+                    assertTrue(workersStarted.await(5, TimeUnit.SECONDS));
+
+                    if (value <= 2) {
+                        throw value == 1 ? firstWorkerFailure : secondWorkerFailure;
+                    }
+
+                    blockedWorkerStarted.countDown();
+                    releaseBlockedWorker.await();
+                }, 3, executor);
+            } catch (final Throwable e) {
+                coordinatorFailure.set(e);
+            }
+        }, "NTest-prior-failure-interrupted-coordinator");
+
+        try {
+            coordinator.start();
+            assertTrue(workersStarted.await(5, TimeUnit.SECONDS));
+            assertTrue(blockedWorkerStarted.await(5, TimeUnit.SECONDS));
+            final Throwable priorWorkerFailure = awaitAggregatedWorkerFailure(firstWorkerFailure, secondWorkerFailure, 5, TimeUnit.SECONDS);
+            assertNotNull(priorWorkerFailure, "Both worker failures must be recorded before interruption");
+
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+
+            assertFalse(coordinator.isAlive());
+            final Throwable interruption = findCause(coordinatorFailure.get(), InterruptedException.class);
+            assertNotNull(interruption);
+            assertTrue(Arrays.asList(interruption.getSuppressed()).contains(priorWorkerFailure),
+                    "The interruption returned to the caller must retain the earlier worker failure");
+        } finally {
+            releaseBlockedWorker.countDown();
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void parallelForEach_waitingWorkerDoesNotPullAfterCoordinatorInterruption() throws Exception {
+        assertWaitingWorkerDoesNotPullAfterCoordinatorInterruption(false);
+    }
+
+    @Test
+    public void parallelForEachIndexed_waitingWorkerDoesNotPullAfterCoordinatorInterruption() throws Exception {
+        assertWaitingWorkerDoesNotPullAfterCoordinatorInterruption(true);
+    }
+
+    private static void assertWaitingWorkerDoesNotPullAfterCoordinatorInterruption(final boolean indexed) throws Exception {
+        final AtomicInteger nextCalls = new AtomicInteger();
+        final AtomicInteger consumerCalls = new AtomicInteger();
+        final Iterator<Integer> iterator = new Iterator<>() {
+            private boolean consumed;
+
+            @Override
+            public boolean hasNext() {
+                return !consumed;
+            }
+
+            @Override
+            public Integer next() {
+                consumed = true;
+                nextCalls.incrementAndGet();
+                return 1;
+            }
+        };
+        final AtomicReference<Thread> workerRef = new AtomicReference<>();
+        final ExecutorService executor = Executors.newFixedThreadPool(1, command -> {
+            final Thread worker = new Thread(command, "NTest-cancellation-race-worker");
+            workerRef.set(worker);
+            return worker;
+        });
+        final AtomicReference<Throwable> coordinatorFailure = new AtomicReference<>();
+        final Thread coordinator = new Thread(() -> {
+            try {
+                if (indexed) {
+                    N.forEachIndexedInParallel(iterator, (index, value) -> consumerCalls.incrementAndGet(), 1, executor);
+                } else {
+                    N.forEachInParallel(iterator, value -> consumerCalls.incrementAndGet(), 1, executor);
+                }
+            } catch (final Throwable e) {
+                coordinatorFailure.set(e);
+            }
+        }, "NTest-cancellation-race-coordinator");
+
+        try {
+            synchronized (iterator) {
+                coordinator.start();
+                assertTrue(awaitWorkerState(workerRef, Thread.State.BLOCKED, 5, TimeUnit.SECONDS),
+                        "Worker must pass the cancellation check and contend for the iterator monitor");
+
+                coordinator.interrupt();
+                coordinator.join(TimeUnit.SECONDS.toMillis(5));
+                assertFalse(coordinator.isAlive());
+                assertNotNull(findCause(coordinatorFailure.get(), InterruptedException.class));
+            }
+        } finally {
+            coordinator.interrupt();
+            coordinator.join(TimeUnit.SECONDS.toMillis(5));
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+
+        assertEquals(0, nextCalls.get(), "A cancelled worker waiting for the iterator monitor must not pull another element");
+        assertEquals(0, consumerCalls.get());
+    }
+
+    @Test
+    public void parallelForEach_sameExceptionInstanceDoesNotEscapeWorkerAggregation() throws Exception {
+        assertSameExceptionInstanceDoesNotEscapeWorkerAggregation(false);
+    }
+
+    @Test
+    public void parallelForEachIndexed_sameExceptionInstanceDoesNotEscapeWorkerAggregation() throws Exception {
+        assertSameExceptionInstanceDoesNotEscapeWorkerAggregation(true);
+    }
+
+    private static void assertSameExceptionInstanceDoesNotEscapeWorkerAggregation(final boolean indexed) throws Exception {
+        final AtomicReference<Throwable> uncaught = new AtomicReference<>();
+        final AtomicInteger workerNumber = new AtomicInteger();
+        final ExecutorService executor = Executors.newFixedThreadPool(2, command -> {
+            final Thread worker = new Thread(command, "NTest-shared-failure-worker-" + workerNumber.incrementAndGet());
+            worker.setUncaughtExceptionHandler((thread, failure) -> uncaught.compareAndSet(null, failure));
+            return worker;
+        });
+        final CountDownLatch actionsStarted = new CountDownLatch(2);
+        final RuntimeException sharedFailure = new RuntimeException("shared failure");
+
+        try {
+            final RuntimeException reported = assertThrows(RuntimeException.class, () -> {
+                if (indexed) {
+                    N.forEachIndexedInParallel(Arrays.asList(1, 2).iterator(), (index, value) -> {
+                        actionsStarted.countDown();
+                        assertTrue(actionsStarted.await(5, TimeUnit.SECONDS));
+                        throw sharedFailure;
+                    }, 2, executor);
+                } else {
+                    N.forEachInParallel(Arrays.asList(1, 2).iterator(), value -> {
+                        actionsStarted.countDown();
+                        assertTrue(actionsStarted.await(5, TimeUnit.SECONDS));
+                        throw sharedFailure;
+                    }, 2, executor);
+                }
+            });
+
+            assertSame(sharedFailure, reported);
+        } finally {
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+
+        assertTrue(uncaught.get() == null, "Error aggregation must not attempt Throwable self-suppression: " + uncaught.get());
+    }
+
+    private static void assertCoordinatorInterruptionStopsAcceptedWorkers(final boolean indexed) throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        final CountDownLatch workersStarted = new CountDownLatch(2);
+        final CountDownLatch releaseWorkers = new CountDownLatch(1);
+        final AtomicInteger processed = new AtomicInteger();
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final AtomicBoolean interruptRestored = new AtomicBoolean();
+        final List<Integer> values = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            values.add(i);
+        }
+
+        final Thread coordinator = new Thread(() -> {
+            try {
+                if (indexed) {
+                    N.forEachIndexedInParallel(values.iterator(), (index, value) -> {
+                        processed.incrementAndGet();
+                        workersStarted.countDown();
+                        releaseWorkers.await();
+                    }, 2, executor);
+                } else {
+                    N.forEachInParallel(values.iterator(), value -> {
+                        processed.incrementAndGet();
+                        workersStarted.countDown();
+                        releaseWorkers.await();
+                    }, 2, executor);
+                }
+            } catch (final Throwable e) {
+                failure.set(e);
+            } finally {
+                interruptRestored.set(Thread.currentThread().isInterrupted());
+            }
+        }, "NTest-interrupted-parallel-coordinator");
+
+        try {
+            coordinator.start();
+            assertTrue(workersStarted.await(5, TimeUnit.SECONDS), "Both workers must enter the consumer");
+
+            coordinator.interrupt();
+            coordinator.join(5000);
+
+            assertFalse(coordinator.isAlive(), "Interrupted coordinator must return promptly");
+            assertNotNull(failure.get());
+            assertTrue(failure.get().getCause() instanceof InterruptedException);
+            assertTrue(interruptRestored.get());
+        } finally {
+            releaseWorkers.countDown();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+
+            if (coordinator.isAlive()) {
+                coordinator.interrupt();
+                coordinator.join(5000);
+            }
+        }
+
+        assertEquals(2, processed.get(), "Accepted workers must stop after their in-flight actions complete");
+    }
+
+    private static Throwable awaitAggregatedWorkerFailure(final Throwable firstFailure, final Throwable secondFailure, final long timeout,
+            final TimeUnit unit) throws InterruptedException {
+        final long deadline = System.nanoTime() + unit.toNanos(timeout);
+
+        while (System.nanoTime() - deadline < 0) {
+            if (Arrays.asList(firstFailure.getSuppressed()).contains(secondFailure)) {
+                return firstFailure;
+            } else if (Arrays.asList(secondFailure.getSuppressed()).contains(firstFailure)) {
+                return secondFailure;
+            }
+
+            Thread.sleep(1);
+        }
+
+        return null;
+    }
+
+    private static boolean awaitWorkerState(final AtomicReference<Thread> workerRef, final Thread.State expectedState, final long timeout,
+            final TimeUnit unit) {
+        final long deadline = System.nanoTime() + unit.toNanos(timeout);
+
+        while (System.nanoTime() - deadline < 0) {
+            final Thread worker = workerRef.get();
+
+            if (worker != null && worker.getState() == expectedState) {
+                return true;
+            }
+
+            Thread.yield();
+        }
+
+        return false;
+    }
+
+    private static Throwable findCause(final Throwable failure, final Class<? extends Throwable> causeType) {
+        Throwable current = failure;
+
+        while (current != null && !causeType.isInstance(current)) {
+            current = current.getCause();
+        }
+
+        return current;
+    }
+
+    @Test
     public void forEach_array_flatMap_biConsumer() throws Exception {
         String[] array = { "a", "b" };
         List<Tuple.Tuple2<String, Integer>> result = new ArrayList<>();
@@ -22012,7 +22285,7 @@ public class NTest extends AbstractParserTest {
 
     @Test
     public void testAsyncExecuteWithNullExecutor() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             N.asyncExecute(() -> {
             }, null);
         });
@@ -24242,10 +24515,10 @@ public class NTest extends AbstractParserTest {
         assertEquals(1, trueCount.get());
         assertEquals(1, falseCount.get());
 
-        N.ifOrElse(true, null, falseCount::incrementAndGet);
+        assertThrows(IllegalArgumentException.class, () -> N.ifOrElse(true, null, falseCount::incrementAndGet));
         assertEquals(1, falseCount.get());
 
-        N.ifOrElse(false, trueCount::incrementAndGet, null);
+        assertThrows(IllegalArgumentException.class, () -> N.ifOrElse(false, trueCount::incrementAndGet, null));
         assertEquals(1, trueCount.get());
     }
 

@@ -66,14 +66,14 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is null
-     *
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(ShortUnaryOperator)
      */
-    default ShortUnaryOperator compose(final ShortUnaryOperator before) {
+    default ShortUnaryOperator compose(final ShortUnaryOperator before) throws IllegalArgumentException {
         N.checkArgNotNull(before, cs.before);
+
         return v -> applyAsShort(before.applyAsShort(v));
     }
 
@@ -90,14 +90,14 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result = doubleThenAddTen.applyAsShort((short) 5);   // returns 20 (5*2 + 10)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is null
-     *
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(ShortUnaryOperator)
      */
-    default ShortUnaryOperator andThen(final ShortUnaryOperator after) {
+    default ShortUnaryOperator andThen(final ShortUnaryOperator after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
+
         return t -> after.applyAsShort(applyAsShort(t));
     }
 

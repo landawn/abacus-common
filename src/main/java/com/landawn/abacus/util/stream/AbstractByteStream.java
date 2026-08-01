@@ -214,8 +214,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream skipUntil(final BytePredicate predicate) throws IllegalStateException {
+    public ByteStream skipUntil(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return dropWhile(t -> !predicate.test(t));
     }
@@ -231,29 +233,37 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalStateException {
+    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMap(t -> ByteStream.of(mapper.apply(t)));
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMapToObj(t -> Stream.of(mapper.apply(t)));
     }
 
     @Override
-    public <T> Stream<T> flatMapArrayToObj(final ByteFunction<T[]> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapArrayToObj(final ByteFunction<T[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return flatMapToObj(t -> Stream.of(mapper.apply(t)));
     }
 
     @Override
-    public ByteStream mapPartial(final ByteFunction<OptionalByte> mapper) {
+    public ByteStream mapPartial(final ByteFunction<OptionalByte> mapper) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             //noinspection resource
@@ -265,8 +275,11 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream rangeMap(final ByteBiPredicate sameRange, final ByteBinaryOperator mapper) throws IllegalStateException {
+    public ByteStream rangeMap(final ByteBiPredicate sameRange, final ByteBinaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(sameRange, cs.sameRange);
+        checkArgNotNull(mapper, cs.mapper);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -300,8 +313,12 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public <T> Stream<T> rangeMapToObj(final ByteBiPredicate sameRange, final ByteBiFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> rangeMapToObj(final ByteBiPredicate sameRange, final ByteBiFunction<? extends T> mapper)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(sameRange, cs.sameRange);
+        checkArgNotNull(mapper, cs.mapper);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -335,8 +352,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public Stream<ByteList> collapse(final ByteBiPredicate collapsible) throws IllegalStateException {
+    public Stream<ByteList> collapse(final ByteBiPredicate collapsible) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -368,8 +387,12 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream collapse(final ByteBiPredicate collapsible, final ByteBinaryOperator mergeFunction) throws IllegalStateException {
+    public ByteStream collapse(final ByteBiPredicate collapsible, final ByteBinaryOperator mergeFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -400,8 +423,12 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream collapse(final ByteTriPredicate collapsible, final ByteBinaryOperator mergeFunction) throws IllegalStateException {
+    public ByteStream collapse(final ByteTriPredicate collapsible, final ByteBinaryOperator mergeFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(collapsible, cs.collapsible);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -435,6 +462,7 @@ abstract class AbstractByteStream extends ByteStream {
     @Override
     public ByteStream skip(final long n, final ByteConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
         checkArgNotNull(action, cs.action);
 
@@ -462,8 +490,11 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream filter(final BytePredicate predicate, final ByteConsumer onDrop) throws IllegalStateException {
+    public ByteStream filter(final BytePredicate predicate, final ByteConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(onDrop, cs.onDrop);
 
         return filter(value -> {
             if (!predicate.test(value)) {
@@ -476,8 +507,11 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream dropWhile(final BytePredicate predicate, final ByteConsumer onDrop) throws IllegalStateException {
+    public ByteStream dropWhile(final BytePredicate predicate, final ByteConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(onDrop, cs.onDrop);
 
         return dropWhile(value -> {
             if (predicate.test(value)) {
@@ -519,8 +553,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream scan(final ByteBinaryOperator accumulator) throws IllegalStateException {
+    public ByteStream scan(final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -546,8 +582,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream scan(final byte init, final ByteBinaryOperator accumulator) throws IllegalStateException {
+    public ByteStream scan(final byte init, final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         final ByteIteratorEx iter = iteratorEx();
 
@@ -567,8 +605,11 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream scan(final byte init, final boolean initIncluded, final ByteBinaryOperator accumulator) throws IllegalStateException {
+    public ByteStream scan(final byte init, final boolean initIncluded, final ByteBinaryOperator accumulator)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         if (!initIncluded) {
             return scan(init, accumulator);
@@ -1175,8 +1216,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream mergeWith(final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalStateException {
+    public ByteStream mergeWith(final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (isParallel()) {
             return ByteStream.merge(this, b, nextSelector).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
@@ -1186,70 +1229,96 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public ByteStream zipWith(final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalStateException {
+    public ByteStream zipWith(final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return ByteStream.zip(this, b, zipFunction);
     }
 
     @Override
-    public ByteStream zipWith(final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction) throws IllegalStateException {
+    public ByteStream zipWith(final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return ByteStream.zip(this, b, c, zipFunction);
     }
 
     @Override
     public ByteStream zipWith(final ByteStream b, final byte valueForNoneA, final byte valueForNoneB, final ByteBinaryOperator zipFunction)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return ByteStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB, final byte valueForNoneC,
-            final ByteTernaryOperator zipFunction) throws IllegalStateException {
+            final ByteTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(zipFunction, cs.zipFunction);
 
         return ByteStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Throwables.ByteFunction<? extends V, E2> valueMapper) throws IllegalStateException, E, E2 {
+            final Throwables.ByteFunction<? extends V, E2> valueMapper) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
 
         return toMap(keyMapper, valueMapper, Suppliers.ofMap());
     }
 
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Throwables.ByteFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2 {
+            final Throwables.ByteFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         return toMap(keyMapper, valueMapper, Fn.throwingMerger(), mapFactory);
     }
 
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Throwables.ByteFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction) throws IllegalStateException, E, E2 {
+            final Throwables.ByteFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction)
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         return toMap(keyMapper, valueMapper, mergeFunction, Suppliers.ofMap());
     }
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Collector<? super Byte, ?, D> downstream) throws IllegalStateException, E {
+            final Collector<? super Byte, ?, D> downstream) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
 
     @Override
-    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (isParallel()) {
             final AtomicInteger idx = new AtomicInteger(0);
@@ -1322,8 +1391,10 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return findFirst(predicate);
     }
@@ -1393,11 +1464,6 @@ abstract class AbstractByteStream extends ByteStream {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @throws IllegalArgumentException if {@code joiner} is {@code null}
-     */
     @Override
     public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
@@ -1418,8 +1484,11 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator) throws IllegalStateException {
+    public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
 
         @SuppressWarnings("UnnecessaryLocalVariable")
         final BiConsumer<R, R> combiner = collectingCombiner;

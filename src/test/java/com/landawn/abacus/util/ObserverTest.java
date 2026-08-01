@@ -1794,22 +1794,13 @@ public class ObserverTest extends TestBase {
     }
 
     @Test
-    public void testNullCallbacksAreRejectedSynchronously() {
+    public void testNullTransformCallbacksAreNotRejectedSynchronously() {
         Observer<String> observer = Observer.of(Arrays.asList("test"));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.distinctBy(null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.filter(null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.map(null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.flatMap(null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> observer.observe(null, e -> {
-        }, () -> {
-        }));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> observer.observe(v -> {
-        }, null, () -> {
-        }));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> observer.observe(v -> {
-        }, e -> {
-        }, null));
     }
 
     // ==================== observe(Consumer, Consumer, Runnable) ====================

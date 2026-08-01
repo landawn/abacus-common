@@ -1064,8 +1064,8 @@ public class ListMultimapTest extends TestBase {
     public void testToImmutableMapRejectsNullSupplierAndNullSuppliedMapEvenWhenEmpty() {
         final ListMultimap<String, Integer> multimap = new ListMultimap<>();
 
-        Assertions.assertThrows(NullPointerException.class, () -> multimap.toImmutableMap(null));
-        Assertions.assertThrows(NullPointerException.class, () -> multimap.toImmutableMap(size -> null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.toImmutableMap(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.toImmutableMap(size -> null));
     }
 
     //

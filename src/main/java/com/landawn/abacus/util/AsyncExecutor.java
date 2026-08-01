@@ -143,6 +143,7 @@ public class AsyncExecutor {
             throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, cs.coreThreadPoolSize);
         N.checkArgNotNegative(maxThreadPoolSize, cs.maxThreadPoolSize);
+
         if (coreThreadPoolSize == 0 && maxThreadPoolSize == 0) {
             throw new IllegalArgumentException("coreThreadPoolSize and maxThreadPoolSize cannot both be zero");
         }
@@ -221,8 +222,11 @@ public class AsyncExecutor {
      * @param command the Runnable command to be executed asynchronously; may throw checked exceptions
      * @return a ContinuableFuture representing the pending completion of this action
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) {
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+
         return execute(new FutureTask<>(() -> {
             command.run();
             return null;
@@ -248,8 +252,13 @@ public class AsyncExecutor {
      * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending completion of this action
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if any of {@code command}, {@code finallyAction} is {@code null}.
      */
-    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable finallyAction) {
+    public ContinuableFuture<Void> execute(final Throwables.Runnable<? extends Exception> command, final java.lang.Runnable finallyAction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+        N.checkArgNotNull(finallyAction, cs.finallyAction);
+
         return execute(new FutureTask<>(() -> {
             try {
                 command.run();
@@ -322,8 +331,11 @@ public class AsyncExecutor {
      * @param command the Callable command to be executed asynchronously; may throw exceptions
      * @return a ContinuableFuture representing the pending result of this computation
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      */
-    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
+    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+
         return execute(new FutureTask<>(command));
     }
 
@@ -347,8 +359,12 @@ public class AsyncExecutor {
      * @param finallyAction the Runnable to be executed after the command completes (in a finally block)
      * @return a ContinuableFuture representing the pending result of this computation
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if any of {@code command}, {@code finallyAction} is {@code null}.
      */
-    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final java.lang.Runnable finallyAction) {
+    public <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final java.lang.Runnable finallyAction) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+        N.checkArgNotNull(finallyAction, cs.finallyAction);
+
         return execute(new FutureTask<>(() -> {
             try {
                 return command.call();
@@ -425,9 +441,13 @@ public class AsyncExecutor {
      *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
      * @return a ContinuableFuture representing the pending completion of this action (including retries)
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if any of {@code command}, {@code retryCondition} is {@code null}.
      */
     public ContinuableFuture<Void> executeWithRetry(final Throwables.Runnable<? extends Exception> command, final int retryTimes,
-            final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) {
+            final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+        N.checkArgNotNull(retryCondition, cs.retryCondition);
+
         return execute(() -> {
             Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition).run(command);
             return null;
@@ -457,13 +477,17 @@ public class AsyncExecutor {
      * @param command the Callable to be executed asynchronously; may throw exceptions
      * @param retryTimes the maximum number of retry attempts (0 means no retry, only initial attempt)
      * @param retryIntervalInMillis the interval in milliseconds to wait between retry attempts
-     * @param retryCondition the bi-predicate to determine whether to retry based on the result and exception;
-     *                       receives (result, exception) where one may be {@code null}, returns {@code true} to retry, {@code false} to complete
+     * @param retryCondition bi-predicate that receives the result (may be {@code null} on failure) and the exception
+     *                       (may be {@code null} on success) and returns {@code true} to retry; must not be {@code null}
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
+     * @throws IllegalArgumentException if any of {@code command}, {@code retryCondition} is {@code null}.
      */
     public <R> ContinuableFuture<R> executeWithRetry(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
-            final BiPredicate<? super R, ? super Exception> retryCondition) {
+            final BiPredicate<? super R, ? super Exception> retryCondition) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
+        N.checkArgNotNull(retryCondition, cs.retryCondition);
+
         return execute(() -> {
             final Retry<R> retry = Retry.withFixedDelay(retryTimes, retryIntervalInMillis, retryCondition);
             return retry.call(command);

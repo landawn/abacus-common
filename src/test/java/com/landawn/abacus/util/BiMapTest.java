@@ -1,7 +1,7 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -746,8 +746,8 @@ public class BiMapTest extends AbstractTest {
     public void testConstructorRejectsNullSuppliersAndNullResults() {
         assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>((Supplier<Map<String, Integer>>) null, HashMap::new));
         assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, (Supplier<Map<Integer, String>>) null));
-        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
-        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
     }
 
     @Test
@@ -1020,6 +1020,22 @@ public class BiMapTest extends AbstractTest {
         assertEquals(1, map.size());
         assertEquals(Integer.valueOf(1), map.get("alpha"));
         assertEquals("Alpha", map.getByValue(1));
+    }
+
+    @Test
+    public void testPutEquivalentKeyWithNewValueKeepsCanonicalKeyInInverse() {
+        final BiMap<String, Integer> map = new BiMap<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER), HashMap::new);
+        final String canonicalKey = new String("Alpha");
+        final String equivalentKey = new String("ALPHA");
+        map.put(canonicalKey, 1);
+
+        map.put(equivalentKey, 2);
+
+        assertEquals(1, map.size());
+        assertSame(canonicalKey, map.keySet().iterator().next());
+        assertSame(canonicalKey, map.getByValue(2));
+        assertSame(canonicalKey, map.inverse().get(2));
+        assertTrue(map.inverse().containsEntry(2, canonicalKey));
     }
 
     @Test

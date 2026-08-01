@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedXmlWriter;
+import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
@@ -1531,6 +1534,18 @@ public class XmlParserImplTest extends TestBase {
         // as an empty <a2></a2> element.
         Assertions.assertTrue(xml.contains("<a1><map><name>x</name></map></a1>"), "first reference must be fully serialized: " + xml);
         Assertions.assertTrue(xml.contains("<a2><map><name>x</name></map></a2>"), "second reference must be fully serialized: " + xml);
+    }
+
+    @Test
+    public void testValueFormattingPropagatesToJsonBackedCollections() {
+        final XmlSerConfig config = new XmlSerConfig().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME).setWriteBigDecimalAsPlain(true);
+
+        final String xml = staxParser.serialize(Arrays.asList(new Date(0), new BigDecimal("1E+3")), config);
+
+        Assertions.assertTrue(xml.contains("T"), "ISO-8601 formatting must be used inside a collection: " + xml);
+        Assertions.assertFalse(xml.contains("[0,"), "the collection must not fall back to the JSON LONG default: " + xml);
+        Assertions.assertTrue(xml.contains("1000"), "plain BigDecimal formatting must be used inside a collection: " + xml);
+        Assertions.assertFalse(xml.contains("1E+3"), "scientific notation must not leak from the JSON defaults: " + xml);
     }
 
     // TODO: Remaining XmlParserImpl coverage gaps are in internal stream/DOM recursion branches that require synthetic XML reader states and target-type resolution not exposed as stable public fixtures.

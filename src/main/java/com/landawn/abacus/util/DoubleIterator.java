@@ -206,11 +206,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * });
      * }</pre>
      *
-     * @param iteratorSupplier a {@link Supplier} that provides the {@code DoubleIterator} when needed;
-     *        must not be {@code null}
+     * @param iteratorSupplier a {@link Supplier} that provides the {@code DoubleIterator} when needed
      * @return a lazily initialized {@code DoubleIterator}
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -275,9 +274,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * randomIter.limit(5).foreachRemaining(System.out::println);
      * }</pre>
      *
-     * @param supplier the {@link DoubleSupplier} that generates values; must not be {@code null}
+     * @param supplier the {@link DoubleSupplier} that generates values
      * @return an infinite {@code DoubleIterator} whose {@code hasNext()} always returns {@code true}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static DoubleIterator generate(final DoubleSupplier supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
@@ -309,15 +308,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * );
      * }</pre>
      *
-     * @param hasNext the {@link BooleanSupplier} that determines if more elements exist;
-     *        must not be {@code null}
-     * @param supplier the {@link DoubleSupplier} that generates values; must not be {@code null}
+     * @param hasNext the {@link BooleanSupplier} that determines if more elements exist
+     * @param supplier the {@link DoubleSupplier} that generates values
      * @return a conditional {@code DoubleIterator}
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static DoubleIterator generate(final BooleanSupplier hasNext, final DoubleSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new DoubleIterator() {
             private boolean hasNextCached = false;
@@ -496,12 +494,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // iter will only return 3.5, 4.5
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return a new {@code DoubleIterator} containing only elements that satisfy the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public DoubleIterator filter(final DoublePredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final DoubleIterator iter = this;
 
@@ -696,12 +694,15 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each double — avoid this
      * }</pre>
      *
-     * @param action the action to perform on each element; must not be {@code null}
+     * @param action the action to perform on each element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -716,12 +717,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextDouble());
@@ -740,14 +741,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each (index, value) pair; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each (index, value) pair
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -39,7 +40,7 @@ public class IntListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.IntConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (java.util.function.IntConsumer) null));
     }
 
     @Test
@@ -1112,7 +1113,7 @@ public class IntListTest extends TestBase {
     @Test
     public void test_removeIf_null() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(NullPointerException.class, () -> list.removeIf(null));
+        assertThrows(IllegalArgumentException.class, () -> list.removeIf(null));
     }
 
     @Test
@@ -1602,10 +1603,10 @@ public class IntListTest extends TestBase {
     @Test
     public void test_replaceAll_operator_null() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(NullPointerException.class, () -> list.replaceAll((java.util.function.IntUnaryOperator) null));
+        assertThrows(IllegalArgumentException.class, () -> list.replaceAll((java.util.function.IntUnaryOperator) null));
 
         IntList empty = new IntList();
-        assertThrows(NullPointerException.class, () -> empty.replaceAll((java.util.function.IntUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((java.util.function.IntUnaryOperator) null));
     }
 
     @Test
@@ -1642,7 +1643,7 @@ public class IntListTest extends TestBase {
     @Test
     public void test_replaceIf_null() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(NullPointerException.class, () -> list.replaceIf(null, 99));
+        assertThrows(IllegalArgumentException.class, () -> list.replaceIf(null, 99));
     }
 
     @Test
@@ -3876,10 +3877,10 @@ public class IntListTest extends TestBase {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         final IntList empty = new IntList();
-        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, null));
-        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
-        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, null));
-        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, ignored -> null));
     }
 
 }

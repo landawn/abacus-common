@@ -1,11 +1,11 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -429,35 +429,35 @@ public class WrapperTest extends TestBase {
 
     @Test
     public void test_of_withCustomFunctions_nullHashFunction() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Wrapper.of("test", null, (s1, s2) -> s1.equals(s2));
         });
     }
 
     @Test
     public void test_of_withCustomFunctions_nullEqualsFunction() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Wrapper.of("test", String::hashCode, null);
         });
     }
 
     @Test
     public void test_of_withToString_nullHashFunction() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Wrapper.of("test", null, (s1, s2) -> s1.equals(s2), String::toUpperCase);
         });
     }
 
     @Test
     public void test_of_withToString_nullEqualsFunction() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Wrapper.of("test", String::hashCode, null, String::toUpperCase);
         });
     }
 
     @Test
     public void test_of_withToString_nullToStringFunction() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Wrapper.of("test", String::hashCode, String::equals, null);
         });
     }

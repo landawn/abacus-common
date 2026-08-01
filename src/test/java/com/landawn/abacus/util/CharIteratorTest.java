@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,6 +19,7 @@ import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
 
 public class CharIteratorTest extends TestBase {
+ 
 
     @Test
     public void testEmpty_singleton() {
@@ -256,7 +258,7 @@ public class CharIteratorTest extends TestBase {
 
     @Test
     public void testDefer_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.defer(null));
     }
 
     @Test
@@ -322,17 +324,17 @@ public class CharIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate((CharSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate((CharSupplier) null));
     }
 
     @Test
     public void testGenerate_conditional_nullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(null, () -> 'x'));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(null, () -> 'x'));
     }
 
     @Test
     public void testGenerate_conditional_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(() -> true, null));
     }
 
     @Test
@@ -580,7 +582,7 @@ public class CharIteratorTest extends TestBase {
 
     @Test
     public void testFilter_nullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').filter(null));
     }
 
     @Test

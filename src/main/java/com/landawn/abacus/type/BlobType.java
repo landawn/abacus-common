@@ -81,6 +81,17 @@ public class BlobType extends AbstractType<Blob> {
     }
 
     /**
+     * Indicates that {@code Blob} values do not support the type system's string-based
+     * serialization path. They must be handled through the dedicated JDBC operations.
+     *
+     * @return {@code false}, because both string conversion directions are unsupported
+     */
+    @Override
+    public boolean isSerializable() {
+        return false;
+    }
+
+    /**
      * Not supported for {@code Blob} types.
      * {@code Blob} objects contain raw binary data with no meaningful string representation.
      *

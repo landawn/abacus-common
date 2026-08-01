@@ -158,11 +158,14 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @param filter the predicate to use for filtering (ignored)
      * @return never returns normally
      * @throws UnsupportedOperationException always
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
-    public final boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException {
+    public final boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException, IllegalArgumentException {
+        N.checkArgNotNull(filter, cs.filter);
+
         throw new UnsupportedOperationException();
     }
 

@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.pool;
 
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
+
 /**
  * Factory class for creating various types of object pools.
  * This class provides static factory methods to create ObjectPool and KeyedObjectPool instances
@@ -169,12 +172,14 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
-     * @param memoryMeasure the function to calculate memory size of pool elements; required when {@code maxMemorySize > 0}
+     * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
-            final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
+            final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
+        N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
+
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
@@ -223,9 +228,9 @@ public final class PoolFactory { //NOSONAR
      * pool.capacity();   // returns 500
      * pool.size();       // returns 0
      *
-     * // No memory limit (maxMemorySize 0, null measure)
+     * // No memory limit (maxMemorySize 0; the measure is still required)
      * ObjectPool<Poolable> plain = PoolFactory.createObjectPool(
-     *     500, 30_000, EvictionPolicy.ACCESS_COUNT, true, 0.2f, 0L, null);
+     *     500, 30_000, EvictionPolicy.ACCESS_COUNT, true, 0.2f, 0L, measure);
      * plain.capacity();  // returns 500
      * }</pre>
      *
@@ -236,12 +241,15 @@ public final class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of pool elements; required when {@code maxMemorySize > 0}
+     * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with full configuration
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
-            final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
+            final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
+
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 
@@ -352,12 +360,15 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes the pool can use
-     * @param memoryMeasure the function to calculate memory size of key-value pairs; required when {@code maxMemorySize > 0}
+     * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
-            final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+            final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
+
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
     }
 
@@ -423,13 +434,15 @@ public final class PoolFactory { //NOSONAR
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
-     * @param memoryMeasure the function to calculate memory size of key-value pairs; required when {@code maxMemorySize > 0}
+     * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with full configuration
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,
-            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
+            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException {
+        N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
+
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
     }
 }

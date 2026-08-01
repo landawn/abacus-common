@@ -170,13 +170,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a stateless intermediate operation. The sorted state and comparator of this
      * stream are preserved in the returned stream.
      *
-     * @param predicate the predicate to apply to each element; must not be {@code null}
+     * @param predicate the predicate to apply to each element
      * @return a new stream containing only the elements that match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean hasNext = false;
@@ -219,14 +222,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a short-circuit stateful intermediate operation. The sorted state and
      * comparator of this stream are preserved in the returned stream.
      *
-     * @param predicate the predicate to apply to each element to decide whether to include it;
-     *                  must not be {@code null}
+     * @param predicate the predicate to apply to each element to decide whether to include it
      * @return a new stream containing the longest prefix of elements matching the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean hasMore = true;
@@ -269,14 +274,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a stateful intermediate operation. The sorted state and comparator of this
      * stream are preserved in the returned stream.
      *
-     * @param predicate the predicate applied to leading elements to decide how many to skip;
-     *                  must not be {@code null}
+     * @param predicate the predicate applied to leading elements to decide how many to skip
      * @return a new stream that drops the longest prefix of elements matching the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalStateException {
+    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean hasNext = false;
@@ -327,13 +334,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a stateless intermediate operation. The resulting stream is not sorted.
      *
      * @param <R> the type of elements produced by the mapper
-     * @param mapper the function to apply to each element; must not be {@code null}
+     * @param mapper the function to apply to each element
      * @return a new stream consisting of mapped elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Override
-    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalStateException {
+    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @Override
@@ -342,7 +352,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() throws IllegalArgumentException {
+            public R next() {
                 return mapper.apply(elements.next());
             }
 
@@ -354,12 +364,15 @@ class IteratorStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(mapper, cs.mapper);
+
         final int windowSize = 2;
         checkArgPositive(increment, cs.increment); //NOSONAR
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @SuppressWarnings("unchecked")
             private final T none = (T) NONE;
+
             private T prev = none;
             private R ret = null;
             private boolean toSkip = false;
@@ -412,6 +425,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <R> Stream<R> slidingMap(final int increment, final boolean ignoreNotPaired, final TriFunction<? super T, ? super T, ? super T, ? extends R> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final int windowSize = 3;
         checkArgPositive(increment, cs.increment);
@@ -488,8 +503,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> mapFirst(final Function<? super T, ? extends T> mapperForFirst) throws IllegalStateException {
+    public Stream<T> mapFirst(final Function<? super T, ? extends T> mapperForFirst) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForFirst, cs.mapperForFirst);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean isFirst = true;
@@ -500,7 +517,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() throws IllegalArgumentException {
+            public T next() {
                 if (isFirst) {
                     isFirst = false;
                     return mapperForFirst.apply(elements.next());
@@ -534,8 +551,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForFirst, cs.mapperForFirst);
+        checkArgNotNull(mapperForElse, cs.mapperForElse);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean isFirst = true;
@@ -546,7 +566,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() throws IllegalArgumentException {
+            public R next() {
                 if (isFirst) {
                     isFirst = false;
                     return mapperForFirst.apply(elements.next());
@@ -559,8 +579,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> mapLast(final Function<? super T, ? extends T> mapperForLast) throws IllegalStateException {
+    public Stream<T> mapLast(final Function<? super T, ? extends T> mapperForLast) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForLast, cs.mapperForLast);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private boolean hasNext = false;
@@ -572,7 +594,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() throws IllegalArgumentException {
+            public T next() {
                 next = elements.next();
 
                 if (hasNext = elements.hasNext()) {
@@ -587,8 +609,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapperForLast, cs.mapperForLast);
+        checkArgNotNull(mapperForElse, cs.mapperForElse);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @Override
@@ -597,7 +622,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() throws IllegalArgumentException {
+            public R next() {
                 final T next = elements.next();
 
                 if (elements.hasNext()) {
@@ -611,8 +636,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalStateException {
+    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new CharIteratorEx() { //NOSONAR
             @Override
@@ -621,7 +648,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() throws IllegalArgumentException {
+            public char nextChar() {
                 return mapper.applyAsChar(elements.next());
             }
 
@@ -629,8 +656,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalStateException {
+    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ByteIteratorEx() { //NOSONAR
             @Override
@@ -639,7 +668,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() throws IllegalArgumentException {
+            public byte nextByte() {
                 return mapper.applyAsByte(elements.next());
             }
 
@@ -647,8 +676,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalStateException {
+    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ShortIteratorEx() { //NOSONAR
             @Override
@@ -657,7 +688,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() throws IllegalArgumentException {
+            public short nextShort() {
                 return mapper.applyAsShort(elements.next());
             }
 
@@ -665,8 +696,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalStateException {
+    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             @Override
@@ -675,7 +708,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() throws IllegalArgumentException {
+            public int nextInt() {
                 return mapper.applyAsInt(elements.next());
             }
 
@@ -683,8 +716,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalStateException {
+    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             @Override
@@ -693,7 +728,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() throws IllegalArgumentException {
+            public long nextLong() {
                 return mapper.applyAsLong(elements.next());
             }
 
@@ -701,8 +736,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalStateException {
+    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new FloatIteratorEx() { //NOSONAR
             @Override
@@ -711,7 +748,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() throws IllegalArgumentException {
+            public float nextFloat() {
                 return mapper.applyAsFloat(elements.next());
             }
 
@@ -719,8 +756,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalStateException {
+    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
             @Override
@@ -729,7 +768,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() throws IllegalArgumentException {
+            public double nextDouble() {
                 return mapper.applyAsDouble(elements.next());
             }
 
@@ -737,8 +776,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ObjIteratorEx<R> iter = new ObjIteratorEx<>() {
             private Iterator<? extends R> cur = null;
@@ -794,8 +835,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private Iterator<? extends R> cur = null;
@@ -824,8 +867,10 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @SuppressFBWarnings
     @Override
-    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalStateException {
+    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private R[] cur = null;
@@ -860,8 +905,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalStateException {
+    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
@@ -917,8 +964,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public CharStream flatMapArrayToChar(final Function<? super T, char[]> mapper) throws IllegalStateException {
+    public CharStream flatMapArrayToChar(final Function<? super T, char[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToChar(mapper);
@@ -957,8 +1006,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalStateException {
+    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
@@ -1014,8 +1065,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ByteStream flatMapArrayToByte(final Function<? super T, byte[]> mapper) throws IllegalStateException {
+    public ByteStream flatMapArrayToByte(final Function<? super T, byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToByte(mapper);
@@ -1054,8 +1107,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalStateException {
+    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private ShortIterator cur = null;
@@ -1111,8 +1166,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public ShortStream flatMapArrayToShort(final Function<? super T, short[]> mapper) throws IllegalStateException {
+    public ShortStream flatMapArrayToShort(final Function<? super T, short[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToShort(mapper);
@@ -1151,8 +1208,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
@@ -1208,8 +1267,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public IntStream flatMapArrayToInt(final Function<? super T, int[]> mapper) throws IllegalStateException {
+    public IntStream flatMapArrayToInt(final Function<? super T, int[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToInt(mapper);
@@ -1248,8 +1309,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
@@ -1305,8 +1368,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public LongStream flatMapArrayToLong(final Function<? super T, long[]> mapper) throws IllegalStateException {
+    public LongStream flatMapArrayToLong(final Function<? super T, long[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToLong(mapper);
@@ -1345,8 +1410,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
@@ -1402,8 +1469,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public FloatStream flatMapArrayToFloat(final Function<? super T, float[]> mapper) throws IllegalStateException {
+    public FloatStream flatMapArrayToFloat(final Function<? super T, float[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToFloat(mapper);
@@ -1442,8 +1511,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
@@ -1499,8 +1570,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public DoubleStream flatMapArrayToDouble(final Function<? super T, double[]> mapper) throws IllegalStateException {
+    public DoubleStream flatMapArrayToDouble(final Function<? super T, double[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArrayToDouble(mapper);
@@ -1542,6 +1615,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <C extends Collection<T>> Stream<C> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -1637,8 +1711,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <C extends Collection<T>> Stream<C> split(final Predicate<? super T> predicate, final Supplier<? extends C> collectionSupplier)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private T next = (T) NONE;
@@ -1686,6 +1763,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <R> Stream<R> split(final Predicate<? super T> predicate, final Collector<? super T, ?, R> collector)
             throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -1739,6 +1818,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <C extends Collection<T>> Stream<C> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -2170,7 +2250,9 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public Stream<T> top(final int n, final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
+        checkArgNotNull(comparator, cs.comparator);
 
         if (n == 0) {
             return newStream(ObjIteratorEx.empty(), false, null);
@@ -2263,26 +2345,36 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                         aar = queue.toArray((T[]) new Object[queue.size()]);
                     } else {
-                        final Comparator<? super T> cmp = comparator == null ? NATURAL_COMPARATOR : comparator;
+                        final Comparator<? super T> cmp = comparator;
                         // Do not preallocate from the caller-supplied limit. The source may be tiny
                         // even when n is very large, and PriorityQueue(int, ...) allocates eagerly.
-                        final Queue<T> heap = new PriorityQueue<>(cmp);
+                        // Wrap values because PriorityQueue rejects null elements even when its
+                        // comparator supports them (as Abacus' natural comparator does).
+                        final Queue<Holder<T>> heap = new PriorityQueue<>((a, b) -> cmp.compare(a.value(), b.value()));
 
+                        Holder<T> holder = null;
                         T next = null;
+
                         while (elements.hasNext()) {
                             next = elements.next();
 
                             if (heap.size() >= n) {
-                                if (cmp.compare(next, heap.peek()) > 0) {
-                                    heap.poll();
-                                    heap.offer(next);
+                                if (cmp.compare(next, heap.peek().value()) > 0) {
+                                    holder = heap.poll();
+                                    holder.setValue(next);
+                                    heap.offer(holder);
                                 }
                             } else {
-                                heap.offer(next);
+                                heap.offer(Holder.of(next));
                             }
                         }
 
-                        aar = heap.toArray((T[]) new Object[heap.size()]);
+                        aar = (T[]) new Object[heap.size()];
+                        int i = 0;
+
+                        for (final Holder<T> e : heap) {
+                            aar[i++] = e.value();
+                        }
                     }
 
                     to = aar.length;
@@ -2297,13 +2389,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a stateless intermediate operation. The sorted state and comparator are
      * preserved in the returned stream.
      *
-     * @param action the action to perform on each element; must not be {@code null}
+     * @param action the action to perform on each element
      * @return a new stream that passes each element through {@code action} before yielding it
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Override
-    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalStateException {
+    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @Override
@@ -2322,8 +2417,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <E extends Exception, E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E> action, final Throwables.Runnable<E2> onComplete)
-            throws E, E2 {
+            throws IllegalArgumentException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
+        checkArgNotNull(onComplete, cs.onComplete);
 
         try {
             while (elements.hasNext()) {
@@ -2338,8 +2436,11 @@ class IteratorStream<T> extends AbstractStream<T> {
 
     @Override
     public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalStateException, E, E2 {
+            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(action, cs.action);
 
         Iterable<? extends U> c = null;
         T next = null;
@@ -2364,8 +2465,12 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
-            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws E, E2, E3 {
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
+        checkArgNotNull(flatMapper, cs.flatMapper);
+        checkArgNotNull(flatMapper2, cs.flatMapper2);
+        checkArgNotNull(action, cs.action);
 
         Iterable<T2> c2 = null;
         Iterable<T3> c3 = null;
@@ -2397,6 +2502,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <E extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E> action)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         final int windowSize = 2;
         checkArgPositive(increment, cs.increment);
@@ -2435,6 +2542,8 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <E extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         final int windowSize = 3;
         checkArgPositive(increment, cs.increment);
@@ -2541,8 +2650,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException {
+    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final C result = supplier.get();
@@ -2575,8 +2686,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Multiset<T> toMultiset(final Supplier<? extends Multiset<T>> supplier) throws IllegalStateException {
+    public Multiset<T> toMultiset(final Supplier<? extends Multiset<T>> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final Multiset<T> result = supplier.get();
@@ -2594,8 +2707,13 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -2615,8 +2733,12 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E extends Exception, E2 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -2639,15 +2761,17 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * <p>This is a terminal operation. The stream is closed after this call.
      *
-     * @param accumulator a function that combines the running result with the next element;
-     *                    must not be {@code null}
+     * @param accumulator a function that combines the running result with the next element
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException {
+    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             if (!elements.hasNext()) {
@@ -2674,14 +2798,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param <U> the type of the accumulated result
      * @param identity the initial accumulation value
-     * @param accumulator a function combining the running result with the next element;
-     *                    must not be {@code null}
+     * @param accumulator a function combining the running result with the next element
      * @return the result of folding all elements left-to-right, starting from {@code identity}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public <U> U foldLeft(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalStateException {
+    public <U> U foldLeft(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             U result = identity;
@@ -2702,14 +2828,17 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * <p>This is a terminal operation. The stream is closed after this call.
      *
-     * @param accumulator the function to combine elements right-to-left; must not be {@code null}
+     * @param accumulator the function to combine elements right-to-left
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public Optional<T> foldRight(final BinaryOperator<T> accumulator) {
+    public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         //noinspection resource
         return reversed().foldLeft(accumulator);
@@ -2723,14 +2852,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param <U> the type of the accumulated result
      * @param identity the initial accumulation value
-     * @param accumulator a function combining the running result with the next element right-to-left;
-     *                    must not be {@code null}
+     * @param accumulator a function combining the running result with the next element right-to-left
      * @return the result of folding all elements right-to-left, starting from {@code identity}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public <U> U foldRight(final U identity, final BiFunction<? super U, ? super T, U> accumulator) {
+    public <U> U foldRight(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         //noinspection resource
         return reversed().foldLeft(identity, accumulator);
@@ -2744,14 +2875,17 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation.
      *
      * @param accumulator the associative, non-interfering, stateless function used to reduce
-     *                    elements; must not be {@code null}
+     *                    elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         return foldLeft(accumulator);
     }
@@ -2765,16 +2899,19 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param <U> the type of the accumulated result
      * @param identity the identity value for the accumulation function
-     * @param accumulator a function to integrate a stream element into the running result;
-     *                    must not be {@code null}
-     * @param combiner a function to combine two partial results (unused in sequential mode);
-     *                 must not be {@code null}
+     * @param accumulator a function to integrate a stream element into the running result
+     * @param combiner a function to combine two partial results (unused in sequential mode)
      * @return the result of accumulating all elements with {@code accumulator}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} or {@code combiner} is {@code null}
      */
     @Override
-    public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+    public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner)
+            throws IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         return foldLeft(identity, accumulator);
     }
@@ -2787,18 +2924,21 @@ class IteratorStream<T> extends AbstractStream<T> {
      * mode the combiner is not invoked.
      *
      * @param <R> the type of the mutable result container
-     * @param supplier a function that creates a new result container; must not be {@code null}
-     * @param accumulator a function that folds an element into the result container;
-     *                    must not be {@code null}
-     * @param combiner a function that merges two result containers (unused in sequential mode);
-     *                 must not be {@code null}
+     * @param supplier a function that creates a new result container
+     * @param accumulator a function that folds an element into the result container
+     * @param combiner a function that merges two result containers (unused in sequential mode)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         try {
             final R result = supplier.get();
@@ -2971,14 +3111,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation. When the stream is sorted according to the given comparator,
      * the first element is returned in O(1) time. The stream is closed after this call.
      *
-     * @param comparator the comparator used to compare elements; if {@code null}, nulls-last natural
-     *                   ordering is used
+     * @param comparator the comparator used to compare elements
      * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(comparator, cs.comparator);
 
         try {
             if (!elements.hasNext()) {
@@ -2986,8 +3128,6 @@ class IteratorStream<T> extends AbstractStream<T> {
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
                 return Optional.of(elements.next());
             }
-
-            comparator = comparator == null ? NULL_MAX_COMPARATOR : comparator;
 
             T candidate = elements.next();
             T next = null;
@@ -3013,14 +3153,16 @@ class IteratorStream<T> extends AbstractStream<T> {
      * the last element is returned by scanning to the end of the iterator. The stream is closed
      * after this call.
      *
-     * @param comparator the comparator used to compare elements; if {@code null}, nulls-first natural
-     *                   ordering is used
+     * @param comparator the comparator used to compare elements
      * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(comparator, cs.comparator);
 
         try {
             if (!elements.hasNext()) {
@@ -3035,7 +3177,6 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return Optional.of(next);
             }
 
-            comparator = comparator == null ? NULL_MIN_COMPARATOR : comparator;
             T candidate = elements.next();
             T next = null;
 
@@ -3055,7 +3196,9 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     public Optional<T> kthLargest(final int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(k, cs.k);
+        checkArgNotNull(comparator, cs.comparator);
 
         try {
             if (!elements.hasNext()) {
@@ -3074,25 +3217,29 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return queue.size() < k ? Optional.empty() : Optional.of(queue.peek());
             }
 
-            comparator = comparator == null ? NATURAL_COMPARATOR : comparator;
+            final Comparator<? super T> cmp = comparator;
             // Grow with the number of encountered elements instead of eagerly allocating k slots.
-            final Queue<T> queue = new PriorityQueue<>(comparator);
+            // PriorityQueue itself forbids null, so store non-null wrappers and let the
+            // supplied comparator decide where wrapped null values rank.
+            final Queue<Holder<T>> queue = new PriorityQueue<>((a, b) -> cmp.compare(a.value(), b.value()));
+            Holder<T> holder = null;
             T e = null;
 
             while (elements.hasNext()) {
                 e = elements.next();
 
                 if (queue.size() < k) {
-                    queue.offer(e);
+                    queue.offer(Holder.of(e));
                 } else {
-                    if (comparator.compare(e, queue.peek()) > 0) {
-                        queue.poll();
-                        queue.offer(e);
+                    if (cmp.compare(e, queue.peek().value()) > 0) {
+                        holder = queue.poll();
+                        holder.setValue(e);
+                        queue.offer(holder);
                     }
                 }
             }
 
-            return queue.size() < k ? Optional.empty() : Optional.of(queue.peek());
+            return queue.size() < k ? Optional.empty() : Optional.of(queue.peek().value());
         } finally {
             close();
         }
@@ -3124,14 +3271,18 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to apply to elements; must not be {@code null}
+     * @param predicate the predicate to apply to elements
      * @return {@code true} if at least one element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             while (elements.hasNext()) {
@@ -3153,15 +3304,19 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to apply to elements; must not be {@code null}
+     * @param predicate the predicate to apply to elements
      * @return {@code true} if all elements match the predicate (or the stream is empty),
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             while (elements.hasNext()) {
@@ -3183,15 +3338,19 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to apply to elements; must not be {@code null}
+     * @param predicate the predicate to apply to elements
      * @return {@code true} if no element matches the predicate (or the stream is empty),
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             while (elements.hasNext()) {
@@ -3210,9 +3369,11 @@ class IteratorStream<T> extends AbstractStream<T> {
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E> predicate)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNegative(atLeast, cs.atLeast);
-        checkArgNotNegative(atMost, cs.atMost);
         checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
+        checkArgNotNegative(atMost, cs.atMost);
+        checkArgNotNull(predicate, cs.predicate);
 
         long cnt = 0;
 
@@ -3236,14 +3397,18 @@ class IteratorStream<T> extends AbstractStream<T> {
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test elements against; must not be {@code null}
+     * @param predicate the predicate to test elements against
      * @return an Optional containing the first matching element, or an empty Optional if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             T e = null;
@@ -3270,14 +3435,18 @@ class IteratorStream<T> extends AbstractStream<T> {
      * match. The stream is closed after this call.
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the predicate to test elements against; must not be {@code null}
+     * @param predicate the predicate to test elements against
      * @return an Optional containing the last matching element, or an empty Optional if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
     @Override
-    public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
+            throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             T result = (T) NONE;
@@ -3369,8 +3538,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> appendIfEmpty(final Supplier<? extends Stream<T>> supplier) throws IllegalStateException {
+    public Stream<T> appendIfEmpty(final Supplier<? extends Stream<T>> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         final Holder<Stream<T>> holder = new Holder<>();
 
@@ -3432,8 +3603,10 @@ class IteratorStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Stream<T> ifEmpty(final Runnable action) throws IllegalStateException {
+    public Stream<T> ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private ObjIteratorEx<T> iter;
@@ -3513,7 +3686,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         return new ParallelIteratorStream<>(elements, isSorted(), comparator(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
-                closeHandlers());
+                closeHandlersForNewStream());
     }
 
     /**

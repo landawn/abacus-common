@@ -231,7 +231,7 @@ public class PermutationIteratorTest extends TestBase {
 
     @Test
     public void testOrderedRejectsNullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(Arrays.asList(1, 2), null));
+        assertThrows(IllegalArgumentException.class, () -> PermutationIterator.ordered(Arrays.asList(3, 1, 2), null));
     }
 
     @Test

@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1134,15 +1135,7 @@ public final class ParserUtil {
             typeName = type.name();
 
             final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap = new HashMap<>();
-
-            if (beanType instanceof ParameterizedType pType) {
-                final java.lang.reflect.Type[] typeArgs = pType.getActualTypeArguments();
-                final TypeVariable<?>[] typeParams = beanClass.getTypeParameters();
-
-                for (int i = 0, len = typeParams.length; i < len; i++) {
-                    typeParamArgMap.put(typeParams[i], typeArgs[i]);
-                }
-            }
+            collectTypeArguments(beanType, typeParamArgMap, new HashSet<>());
 
             propNameList = Beans.getPropNameList(beanClass);
 
@@ -1423,6 +1416,66 @@ public final class ParserUtil {
             }
 
             isMarkedAsBean = tmpIsMarkedToBean;
+        }
+
+        private static void collectTypeArguments(final java.lang.reflect.Type currentType, final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap,
+                final Set<Class<?>> visitedClasses) {
+            final Class<?> currentClass;
+
+            if (currentType instanceof ParameterizedType parameterizedType && parameterizedType.getRawType() instanceof Class<?>) {
+                currentClass = (Class<?>) parameterizedType.getRawType();
+
+                if (!visitedClasses.add(currentClass)) {
+                    return;
+                }
+
+                // A non-static member type can use type variables declared by its enclosing
+                // class. Collect only the lexical owner's bindings here: the member does not
+                // inherit the owner's superclass/interfaces, and visiting that hierarchy would
+                // wrongly prevent the member's own (nearer) superclass binding from winning.
+                collectOwnerTypeArguments(parameterizedType.getOwnerType(), typeParamArgMap);
+
+                final TypeVariable<?>[] typeParams = currentClass.getTypeParameters();
+                final java.lang.reflect.Type[] typeArgs = parameterizedType.getActualTypeArguments();
+
+                for (int i = 0, len = typeParams.length; i < len; i++) {
+                    if (!typeParams[i].equals(typeArgs[i])) {
+                        typeParamArgMap.put(typeParams[i], typeArgs[i]);
+                    }
+                }
+            } else if (currentType instanceof Class<?>) {
+                currentClass = (Class<?>) currentType;
+
+                if (!visitedClasses.add(currentClass)) {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            collectTypeArguments(currentClass.getGenericSuperclass(), typeParamArgMap, visitedClasses);
+
+            for (final java.lang.reflect.Type interfaceType : currentClass.getGenericInterfaces()) {
+                collectTypeArguments(interfaceType, typeParamArgMap, visitedClasses);
+            }
+        }
+
+        private static void collectOwnerTypeArguments(final java.lang.reflect.Type ownerType,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
+            if (!(ownerType instanceof ParameterizedType parameterizedOwner) || !(parameterizedOwner.getRawType() instanceof Class<?> ownerClass)) {
+                return;
+            }
+
+            collectOwnerTypeArguments(parameterizedOwner.getOwnerType(), typeParamArgMap);
+
+            final TypeVariable<?>[] typeParams = ownerClass.getTypeParameters();
+            final java.lang.reflect.Type[] typeArgs = parameterizedOwner.getActualTypeArguments();
+
+            for (int i = 0, len = typeParams.length; i < len; i++) {
+                if (!typeParams[i].equals(typeArgs[i])) {
+                    typeParamArgMap.put(typeParams[i], typeArgs[i]);
+                }
+            }
         }
 
         /**
@@ -3485,15 +3538,9 @@ public final class ParserUtil {
                         : setMethod != null ? setMethod.getGenericParameterTypes()[0] : getMethod.getGenericReturnType();
 
                 if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
-                    return Type.of(typeParamArgMap.get(genericType));
+                    return getType(typeParamArgMap.get(genericType), typeParamArgMap);
                 } else if (genericType instanceof GenericArrayType genericArrayType) {
-                    if (typeParamArgMap.containsKey(genericArrayType.getGenericComponentType())) {
-                        final Class<?> componentActual = (Class<?>) typeParamArgMap.get(genericArrayType.getGenericComponentType());
-
-                        return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
-                    } else {
-                        return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
-                    }
+                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
                 } else if (genericType instanceof ParameterizedType parameterizedType) {
                     return getType(parameterizedType, typeParamArgMap);
                 } else {
@@ -3552,15 +3599,9 @@ public final class ParserUtil {
 
         private <T> Type<T> getType(java.lang.reflect.Type genericType, final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
             if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
-                return Type.of(typeParamArgMap.get(genericType));
+                return getType(typeParamArgMap.get(genericType), typeParamArgMap);
             } else if (genericType instanceof GenericArrayType genericArrayType) {
-                if (typeParamArgMap.containsKey(genericArrayType.getGenericComponentType())) {
-                    final Class<?> componentActual = (Class<?>) typeParamArgMap.get(genericArrayType.getGenericComponentType());
-
-                    return Type.<T> of(Array.newInstance(componentActual, 0).getClass());
-                } else {
-                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
-                }
+                return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
             } else if (genericType instanceof ParameterizedType parameterizedType) {
                 final java.lang.reflect.Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
                 final List<Type<?>> actualArgTypes = new ArrayList<>(actualTypeArguments.length);
@@ -3886,9 +3927,9 @@ public final class ParserUtil {
          * Creates an XML name tag and precomputes common XML fragments for the given name.
          *
          * <p>When {@code isBean} is {@code true}, this tag uses {@code <bean name="...">}
-         * elements. Otherwise it uses {@code <property name="...">} elements. If a
-         * non-empty {@code typeName} is provided, {@code type="..."} attributes are
-         * included in the generated fragments.</p>
+         * elements. Otherwise it uses {@code <property name="...">} elements. The
+         * {@code *WithType} fragment variants embed {@code typeName} (with angle brackets
+         * escaped) as a {@code type="..."} attribute.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3959,7 +4000,8 @@ public final class ParserUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * DateTimeReaderWriter<java.util.Date> readerWriter = PropInfo.propFuncMap.get(java.util.Date.class);
+         * DateTimeReaderWriter<java.util.Date> readerWriter =
+         *         (DateTimeReaderWriter<java.util.Date>) PropInfo.propFuncMap.get(java.util.Date.class);
          * java.util.Date value = readerWriter.read(propInfo, "2026-01-01");
          * }</pre>
          *

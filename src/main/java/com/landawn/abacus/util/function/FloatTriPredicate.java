@@ -25,7 +25,6 @@ import com.landawn.abacus.util.cs;
  * This interface is similar to {@link java.util.function.BiPredicate} but accepts three arguments
  * instead of two.</p>
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -101,13 +100,14 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * boolean result = combined.test(10.0f, 20.0f, 30.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default FloatTriPredicate and(final FloatTriPredicate other) {
+    default FloatTriPredicate and(final FloatTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) && other.test(a, b, c);
     }
 
@@ -129,13 +129,14 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * boolean result = combined.test(0.0f, 5.0f, 10.0f);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default FloatTriPredicate or(final FloatTriPredicate other) {
+    default FloatTriPredicate or(final FloatTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b, c) -> test(a, b, c) || other.test(a, b, c);
     }
 

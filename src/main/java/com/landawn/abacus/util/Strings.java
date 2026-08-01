@@ -1853,16 +1853,18 @@ public final class Strings {
      *
      * @param <T> the type of {@code CharSequence}
      * @param str the {@code charSequence} to check for {@code null}
-     * @param defaultValueSupplier the supplier that provides the default value if {@code str} is {@code null}
+     * @param defaultValueSupplier the non-null supplier that provides the default value if {@code str} is {@code null}
      * @return {@code str} if it is not {@code null}, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified {@code charSequence} is {@code null}.
-     * @throws NullPointerException if {@code defaultValueSupplier} is {@code null} and {@code str} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
      * @see #defaultIfNull(CharSequence, CharSequence)
      * @see #defaultIfEmpty(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
      * @see N#defaultIfNull(Object, Supplier)
      */
     public static <T extends CharSequence> T defaultIfNull(final T str, final Supplier<? extends T> defaultValueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValueSupplier, cs.defaultValueSupplier);
+
         if (str == null) {
             return N.checkArgNotNull(defaultValueSupplier.get(), cs.defaultValue);
         }
@@ -1921,7 +1923,7 @@ public final class Strings {
      * @param defaultValueSupplier the supplier that provides the default value if {@code str} is empty
      * @return {@code str} if it is not empty, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
-     * @throws NullPointerException if {@code defaultValueSupplier} is {@code null} and {@code str} is empty
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
      * @see #defaultIfEmpty(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfBlank(CharSequence, Supplier)
@@ -1929,6 +1931,8 @@ public final class Strings {
      * @see N#defaultIfEmpty(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> defaultValueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValueSupplier, cs.defaultValueSupplier);
+
         if (isEmpty(str)) {
             return N.checkArgNotEmpty(defaultValueSupplier.get(), cs.defaultValue);
         }
@@ -1988,7 +1992,7 @@ public final class Strings {
      * @param defaultValueSupplier the supplier that provides the default value if {@code str} is blank
      * @return {@code str} if it is not blank, otherwise the value provided by {@code defaultValueSupplier}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
-     * @throws NullPointerException if {@code defaultValueSupplier} is {@code null} and {@code str} is blank
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null}.
      * @see #defaultIfBlank(CharSequence, CharSequence)
      * @see #defaultIfNull(CharSequence, Supplier)
      * @see #defaultIfEmpty(CharSequence, Supplier)
@@ -1996,6 +2000,8 @@ public final class Strings {
      * @see N#defaultIfBlank(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> defaultValueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(defaultValueSupplier, cs.defaultValueSupplier);
+
         if (isBlank(str)) {
             return N.checkArgNotBlank(defaultValueSupplier.get(), cs.defaultValue);
         }
@@ -2878,6 +2884,7 @@ public final class Strings {
      */
     public static String center(String str, final int minLength, String padStr) throws IllegalArgumentException {
         N.checkArgNotNegative(minLength, cs.minLength);
+
         // N.checkArgNotEmpty(padStr, "padStr");
 
         if (str == null) {
@@ -3522,8 +3529,7 @@ public final class Strings {
 
     /**
      * <p>
-     * Converts a String to lower case as per {@link String#toLowerCase(Locale)}
-     * .
+     * Converts a String to lower case as per {@link String#toLowerCase(Locale)}.
      * </p>
      *
      * <p>
@@ -3614,7 +3620,7 @@ public final class Strings {
 
     /**
      * <p>
-     * Converts a String to upper case as per {@link String#toUpperCase(Locale)}
+     * Converts a String to upper case as per {@link String#toUpperCase(Locale)}.
      * </p>
      *
      * <p>
@@ -4625,11 +4631,14 @@ public final class Strings {
      * @param str the string to be processed, may be {@code null} or empty. If it's {@code null} or empty, the method will return the input string.
      * @param converter the function used to convert each word. This function should accept a string and return a string.
      * @return the processed string with all words converted using the provided converter function, or the original string if it's {@code null} or empty.
+     * @throws IllegalArgumentException if {@code converter} is {@code null}.
      * @see #convertWords(String, String, Function)
      * @see #convertWords(String, String, Collection, Function)
      */
     @MayReturnNull
-    public static String convertWords(final String str, final Function<? super String, String> converter) {
+    public static String convertWords(final String str, final Function<? super String, String> converter) throws IllegalArgumentException {
+        N.checkArgNotNull(converter, cs.converter);
+
         return convertWords(str, " ", converter);
     }
 
@@ -4653,6 +4662,7 @@ public final class Strings {
      * @param converter the function used to convert each word.
      * @return the processed string with all words converted using the provided converter function, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @throws IllegalArgumentException if {@code converter} is {@code null}.
      * @see #convertWords(String, Function)
      * @see #convertWords(String, String, Collection, Function)
      */
@@ -4660,6 +4670,7 @@ public final class Strings {
     public static String convertWords(final String str, final String delimiter, final Function<? super String, String> converter)
             throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotNull(converter, cs.converter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -4697,6 +4708,7 @@ public final class Strings {
      * @param converter the function used to convert each word. If a word is in the excludedWords collection, it will not be converted.
      * @return the processed string with all non-excluded words converted using the provided converter function, or the original string if it's {@code null} or empty.
      * @throws IllegalArgumentException if the provided delimiter is empty.
+     * @throws IllegalArgumentException if {@code converter} is {@code null}.
      * @see #convertWords(String, Function)
      * @see #convertWords(String, String, Function)
      */
@@ -4704,6 +4716,7 @@ public final class Strings {
     public static String convertWords(final String str, final String delimiter, final Collection<String> excludedWords,
             final Function<? super String, String> converter) throws IllegalArgumentException {
         N.checkArgNotEmpty(delimiter, cs.delimiter); // NOSONAR
+        N.checkArgNotNull(converter, cs.converter); // NOSONAR
 
         if (str == null || str.isEmpty()) {
             return str;
@@ -13561,11 +13574,15 @@ public final class Strings {
      * @param inclusiveBeginIndex the starting index of the substring (inclusive).
      * @param funcOfExclusiveEndIndex function that calculates the end index based on the begin index.
      * @return the substring determined by the indices, or {@code null} if the input is invalid.
+     * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
      * @see StrUtil#substring(String, int, IntUnaryOperator)
      * @see #substring(String, int, int)
      */
     @MayReturnNull
-    public static String substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
+    public static String substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
         if (str == null || inclusiveBeginIndex < 0) {
             return null;
         }
@@ -13601,11 +13618,15 @@ public final class Strings {
      * @param funcOfInclusiveBeginIndex function that calculates the begin index based on the end index.
      * @param exclusiveEndIndex the ending index of the substring (exclusive).
      * @return the substring determined by the indices, or {@code null} if the input is invalid.
+     * @throws IllegalArgumentException if {@code funcOfInclusiveBeginIndex} is {@code null}.
      * @see StrUtil#substring(String, IntUnaryOperator, int)
      * @see #substring(String, int, int)
      */
     @MayReturnNull
-    public static String substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
+    public static String substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfInclusiveBeginIndex, cs.funcOfInclusiveBeginIndex);
+
         if (str == null || exclusiveEndIndex < 0) {
             return null;
         }
@@ -15359,10 +15380,14 @@ public final class Strings {
      * @param exclusiveBeginIndex the exclusive beginning index (the character at this index is not included).
      * @param funcOfExclusiveEndIndex a function that calculates the exclusive end index based on the begin index.
      * @return the substring between the specified indices, or {@code null} if invalid parameters are provided.
+     * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
         if (str == null || exclusiveBeginIndex < -1 || exclusiveBeginIndex >= str.length()) {
             return null;
         }
@@ -15404,10 +15429,14 @@ public final class Strings {
      * @param funcOfExclusiveBeginIndex a function that calculates the exclusive begin index based on the end index.
      * @param exclusiveEndIndex the exclusive ending index (the character at this index is not included).
      * @return the substring between the specified indices, or {@code null} if invalid parameters are provided.
+     * @throws IllegalArgumentException if {@code funcOfExclusiveBeginIndex} is {@code null}.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex) {
+    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfExclusiveBeginIndex, cs.funcOfExclusiveBeginIndex);
+
         if (str == null || exclusiveEndIndex <= 0) {
             return null;
         }
@@ -15451,10 +15480,14 @@ public final class Strings {
      * @param delimiterOfExclusiveBeginIndex the delimiter marking the beginning of the substring (non-inclusive).
      * @param funcOfExclusiveEndIndex a function that calculates the exclusive end index based on the start index after the delimiter.
      * @return the substring between the delimiter and calculated end index, or {@code null} if invalid parameters are provided.
+     * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final String delimiterOfExclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
         if (str == null || delimiterOfExclusiveBeginIndex == null || delimiterOfExclusiveBeginIndex.length() > str.length()) {
             return null;
         }
@@ -15505,10 +15538,14 @@ public final class Strings {
      * @param funcOfExclusiveBeginIndex a function that calculates the exclusive begin index based on the end index of the delimiter.
      * @param delimiterOfExclusiveEndIndex the delimiter marking the end of the substring (non-inclusive).
      * @return the substring between the calculated begin index and delimiter, or {@code null} if invalid parameters are provided.
+     * @throws IllegalArgumentException if {@code funcOfExclusiveBeginIndex} is {@code null}.
      * @see #substringBetween(String, int, int)
      */
     @MayReturnNull
-    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex) {
+    public static String substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final String delimiterOfExclusiveEndIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(funcOfExclusiveBeginIndex, cs.funcOfExclusiveBeginIndex);
+
         if (str == null || delimiterOfExclusiveEndIndex == null || delimiterOfExclusiveEndIndex.length() > str.length()) {
             return null;
         }
@@ -19357,13 +19394,16 @@ public final class Strings {
      * @param c the iterable whose elements are to be joined, may be {@code null} or empty
      * @param entryDelimiter the delimiter to use between entries
      * @param keyValueDelimiter the delimiter to use between keys and values
-     * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
-     * @param valueExtractor function to extract values from elements. Must not be {@code null}.
+     * @param keyExtractor function to extract keys from elements.
+     * @param valueExtractor function to extract values from elements.
      * @return a string representation of the iterable's elements, or an empty string if the iterable is {@code null} or empty.
-     * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T> String joinEntries(final Iterable<? extends T> c, final String entryDelimiter, final String keyValueDelimiter,
             final Function<? super T, ?> keyExtractor, final Function<? super T, ?> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         return joinEntries(c, entryDelimiter, keyValueDelimiter, EMPTY, EMPTY, false, keyExtractor, valueExtractor);
     }
 
@@ -19410,11 +19450,10 @@ public final class Strings {
      * @param prefix the string to place at the start of the result. It can be empty.
      * @param suffix the string to place at the end of the result. It can be empty.
      * @param trim if {@code true}, trims the string representations of extracted keys and values.
-     * @param keyExtractor function to extract keys from elements. Must not be {@code null}.
-     * @param valueExtractor function to extract values from elements. Must not be {@code null}.
+     * @param keyExtractor function to extract keys from elements.
+     * @param valueExtractor function to extract values from elements.
      * @return a string representation of the iterable's elements with prefix and suffix, or just prefix+suffix if the iterable is {@code null} or empty.
-     * @throws IllegalArgumentException if keyExtractor or valueExtractor is null
-     *
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      * @see #join(Iterable)
      * @see #join(Iterable, String)
      * @see #joinEntries(Map, String, String)
@@ -22214,6 +22253,11 @@ public final class Strings {
      *     <td>{@code OptionalInt/Long/Float/Double/Optional<T>}</td>
      *     <td>Returns empty Optional</td>
      *   </tr>
+     *   <tr>
+     *     <td>{@code indexOf/lastIndexOf/contains(..., delimiter)}</td>
+     *     <td>{@code int}/{@code boolean}</td>
+     *     <td>Returns {@code -1}/{@code false} if not found as a delimited token</td>
+     *   </tr>
      * </table>
      *
      * <h2>Method Categories</h2>
@@ -22263,6 +22307,16 @@ public final class Strings {
      *   <li>{@link #createBigInteger(String)} - Parse to {@link u.Optional}{@code <BigInteger>}</li>
      *   <li>{@link #createBigDecimal(String)} - Parse to {@link u.Optional}{@code <BigDecimal>}</li>
      *   <li>{@link #createNumber(String)} - Parse to appropriate number type</li>
+     * </ul>
+     *
+     * <h3>5. Delimited Token Search</h3>
+     * <p>These methods search for {@code valueToFind} as a whole token delimited by {@code delimiter}
+     * (rather than as a plain substring), returning {@code int} indices or {@code boolean}:</p>
+     * <ul>
+     *   <li>{@link #indexOf(String, String, String)} - First index of a delimited token</li>
+     *   <li>{@link #lastIndexOf(String, String, String)} - Last index of a delimited token</li>
+     *   <li>{@link #contains(String, String, String)} - Whether a delimited token is present</li>
+     *   <li>{@code IgnoreCase} variants of all three</li>
      * </ul>
      *
      * <h2>Usage Examples</h2>
@@ -22336,6 +22390,8 @@ public final class Strings {
      *   <li>Methods returning {@link Optional} return empty Optional for {@code null} input</li>
      *   <li>{@code OrElse} methods return the default value for {@code null} input</li>
      *   <li>{@code OrElseItself} methods return {@code null} for {@code null} input (preserving the original)</li>
+     *   <li>Token-search methods returning {@code int}/{@code boolean} return {@code -1}/{@code false}
+     *       when the input string or value is {@code null}</li>
      * </ul>
      *
      * @see Strings
@@ -22979,9 +23035,13 @@ public final class Strings {
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes {@code inclusiveBeginIndex} and returns the exclusive end index.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
-        public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static Optional<String> substring(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
             return Optional.ofNullable(Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
 
@@ -23005,9 +23065,13 @@ public final class Strings {
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return an {@code Optional<String>} containing the substring if valid, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfInclusiveBeginIndex} is {@code null}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
-        public static Optional<String> substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
+        public static Optional<String> substring(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfInclusiveBeginIndex, cs.funcOfInclusiveBeginIndex);
+
             return Optional.ofNullable(Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex));
         }
 
@@ -23087,11 +23151,14 @@ public final class Strings {
          * @param funcOfExclusiveEndIndex a function that takes {@code inclusiveBeginIndex} and returns the exclusive end index.
          * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
         public static String substringOrElse(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex,
-                final String defaultStr) {
+                final String defaultStr) throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
             final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -23116,11 +23183,14 @@ public final class Strings {
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @param defaultStr the default string to return if substring extraction fails, can be {@code null}.
          * @return the substring if it exists, otherwise {@code defaultStr}.
+         * @throws IllegalArgumentException if {@code funcOfInclusiveBeginIndex} is {@code null}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
         public static String substringOrElse(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex,
-                final String defaultStr) {
+                final String defaultStr) throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfInclusiveBeginIndex, cs.funcOfInclusiveBeginIndex);
+
             final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? defaultStr : ret;
@@ -23203,11 +23273,15 @@ public final class Strings {
          * @param inclusiveBeginIndex the starting index (inclusive) of the substring.
          * @param funcOfExclusiveEndIndex a function that takes {@code inclusiveBeginIndex} and returns the exclusive end index.
          * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
          * @see Strings#substring(String, int, IntUnaryOperator)
          */
         @Beta
         @MayReturnNull
-        public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
+        public static String substringOrElseItself(final String str, final int inclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
+
             final String ret = Strings.substring(str, inclusiveBeginIndex, funcOfExclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -23231,11 +23305,15 @@ public final class Strings {
          * @param funcOfInclusiveBeginIndex a function that takes the exclusive end index and returns the inclusive begin index.
          * @param exclusiveEndIndex the ending index (exclusive) of the substring.
          * @return the substring if it exists, otherwise {@code str} itself, or {@code null} if {@code str} is {@code null}.
+         * @throws IllegalArgumentException if {@code funcOfInclusiveBeginIndex} is {@code null}.
          * @see Strings#substring(String, IntUnaryOperator, int)
          */
         @Beta
         @MayReturnNull
-        public static String substringOrElseItself(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex) {
+        public static String substringOrElseItself(final String str, final IntUnaryOperator funcOfInclusiveBeginIndex, final int exclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfInclusiveBeginIndex, cs.funcOfInclusiveBeginIndex);
+
             final String ret = Strings.substring(str, funcOfInclusiveBeginIndex, exclusiveEndIndex);
 
             return ret == null ? str : ret;
@@ -24404,7 +24482,7 @@ public final class Strings {
          * begin index. The function receives the begin index and should return the corresponding end
          * index. If the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for {@code null} input string or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -24421,12 +24499,12 @@ public final class Strings {
          * @param exclusiveBeginIndex the starting index (exclusive).
          * @param funcOfExclusiveEndIndex function to calculate the ending index based on begin index.
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
          * @see Strings#substringBetween(String, int, IntUnaryOperator)
          */
-        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex) {
-            if (funcOfExclusiveEndIndex == null) {
-                return Optional.empty();
-            }
+        public static Optional<String> substringBetween(final String str, final int exclusiveBeginIndex, final IntUnaryOperator funcOfExclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
 
             return Optional.ofNullable(Strings.substringBetween(str, exclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
@@ -24439,7 +24517,7 @@ public final class Strings {
          * end index. The function receives the end index and should return the corresponding begin
          * index. If the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for {@code null} input string or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -24456,12 +24534,12 @@ public final class Strings {
          * @param funcOfExclusiveBeginIndex function to calculate the starting index based on end index.
          * @param exclusiveEndIndex the ending index (exclusive).
          * @return {@code Optional<String>} containing the substring if valid indices, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveBeginIndex} is {@code null}.
          * @see Strings#substringBetween(String, IntUnaryOperator, int)
          */
-        public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex) {
-            if (funcOfExclusiveBeginIndex == null) {
-                return Optional.empty();
-            }
+        public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex, final int exclusiveEndIndex)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveBeginIndex, cs.funcOfExclusiveBeginIndex);
 
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, exclusiveEndIndex));
         }
@@ -24475,7 +24553,7 @@ public final class Strings {
          * delimiter is not found or the function returns an invalid index, an empty {@code Optional}
          * is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for {@code null} input string, delimiter, or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -24492,13 +24570,12 @@ public final class Strings {
          * @param delimiterOfExclusiveBeginIndex the string delimiter marking the beginning (exclusive).
          * @param funcOfExclusiveEndIndex function to calculate the ending index based on delimiter position.
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveEndIndex} is {@code null}.
          * @see Strings#substringBetween(String, String, IntUnaryOperator)
          */
         public static Optional<String> substringBetween(final String str, final String delimiterOfExclusiveBeginIndex,
-                final IntUnaryOperator funcOfExclusiveEndIndex) {
-            if (funcOfExclusiveEndIndex == null) {
-                return Optional.empty();
-            }
+                final IntUnaryOperator funcOfExclusiveEndIndex) throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveEndIndex, cs.funcOfExclusiveEndIndex);
 
             return Optional.ofNullable(Strings.substringBetween(str, delimiterOfExclusiveBeginIndex, funcOfExclusiveEndIndex));
         }
@@ -24512,7 +24589,7 @@ public final class Strings {
          * the delimiter position and should return the begin index. If the delimiter is not found
          * or the function returns an invalid index, an empty {@code Optional} is returned.</p>
          *
-         * <p>The method returns an empty {@code Optional} for {@code null} input string, delimiter, or function.</p>
+         * <p>The method returns an empty {@code Optional} for {@code null} input string or delimiter.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -24529,13 +24606,12 @@ public final class Strings {
          * @param funcOfExclusiveBeginIndex function to calculate the starting index based on delimiter position.
          * @param delimiterOfExclusiveEndIndex the string delimiter marking the end (exclusive).
          * @return {@code Optional<String>} containing the substring if found, otherwise empty.
+         * @throws IllegalArgumentException if {@code funcOfExclusiveBeginIndex} is {@code null}.
          * @see Strings#substringBetween(String, IntUnaryOperator, String)
          */
         public static Optional<String> substringBetween(final String str, final IntUnaryOperator funcOfExclusiveBeginIndex,
-                final String delimiterOfExclusiveEndIndex) {
-            if (funcOfExclusiveBeginIndex == null) {
-                return Optional.empty();
-            }
+                final String delimiterOfExclusiveEndIndex) throws IllegalArgumentException {
+            N.checkArgNotNull(funcOfExclusiveBeginIndex, cs.funcOfExclusiveBeginIndex);
 
             return Optional.ofNullable(Strings.substringBetween(str, funcOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex));
         }

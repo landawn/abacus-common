@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -206,8 +207,8 @@ public class SplitterTest extends AbstractTest {
     public void testMapSplitterSupplierValidationIsEager() {
         Splitter.MapSplitter mapSplitter = Splitter.MapSplitter.with(",", "=");
 
-        assertThrows(NullPointerException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) null));
-        assertThrows(NullPointerException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
+        assertThrows(IllegalArgumentException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) null));
+        assertThrows(IllegalArgumentException.class, () -> mapSplitter.split(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
 
         boolean[] supplierCalled = { false };
         assertThrows(IllegalArgumentException.class,
@@ -1499,9 +1500,9 @@ public class SplitterTest extends AbstractTest {
     public void testMapperAndSupplierValidationIsEager() {
         Splitter splitter = Splitter.with(',');
 
-        assertThrows(NullPointerException.class, () -> splitter.split(null, (Function<String, String>) null));
-        assertThrows(NullPointerException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) null));
-        assertThrows(NullPointerException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) () -> null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> splitter.split(null, (Function<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) null));
+        assertThrows(IllegalArgumentException.class, () -> splitter.split(null, (java.util.function.Supplier<List<String>>) () -> null));
 
         boolean[] supplierCalled = { false };
         assertThrows(IllegalArgumentException.class, () -> splitter.split("", (Class<Integer>) null, (java.util.function.Supplier<List<Integer>>) () -> {

@@ -679,7 +679,7 @@ public class HashFunctionTest extends TestBase {
         assertEquals(hash1, hash2);
         assertNotEquals(hash1, hash3);
 
-        assertThrows(NullPointerException.class, () -> hashFunction.hash(person1, null));
+        assertThrows(IllegalArgumentException.class, () -> hashFunction.hash(person1, null));
         assertThrows(NullPointerException.class, () -> hashFunction.hash(null, personFunnel));
     }
 

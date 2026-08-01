@@ -24,6 +24,7 @@ import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -68,8 +69,7 @@ class CurlInterceptor implements Interceptor {
      * This constructor uses {@link #DEFAULT_QUOTE_CHAR} as the quote character.
      *
      * @param logHandler A consumer function that handles the generated cURL command string.
-     *                   This is typically used to log or store the command. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
+     *                   This is typically used to log or store the command.
      * @see #CurlInterceptor(char, Consumer)
      */
     public CurlInterceptor(final Consumer<? super String> logHandler) {
@@ -86,7 +86,9 @@ class CurlInterceptor implements Interceptor {
      * @throws IllegalArgumentException if {@code logHandler} is {@code null}
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
-        this.logHandler = N.checkArgNotNull(logHandler, "logHandler");
+        N.checkArgNotNull(logHandler, cs.logHandler);
+
+        this.logHandler = logHandler;
         this.quoteChar = quoteChar;
     }
 

@@ -190,6 +190,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
 
     /**
      * Returns an iterator over the elements in this buffer in proper sequence.
+     * The returned iterator covers the elements present at the time of this call; elements appended
+     * afterwards are not visible to it.
      *
      * @return an iterator over the elements in this buffer
      */
@@ -256,7 +258,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         /**
          * Constructs a SpinedBuffer.OfInt with the default initial capacity.
          * The buffer grows automatically as elements are appended, so no capacity has to be
-        * estimated up front.
+         * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -286,7 +288,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * System.out.println(buffer.size());   // prints 100
          * }</pre>
          *
-         * @param initialCapacity the initial capacity for the buffer
+         * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
          * @throws IllegalArgumentException if the initial capacity is negative
          */
         public OfInt(final int initialCapacity) throws IllegalArgumentException {
@@ -456,7 +458,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         /**
          * Constructs a SpinedBuffer.OfLong with the default initial capacity.
          * The buffer grows automatically as elements are appended, so no capacity has to be
-        * estimated up front.
+         * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -486,7 +488,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * System.out.println(buffer.size());   // prints 100
          * }</pre>
          *
-         * @param initialCapacity the initial capacity for the buffer
+         * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
          * @throws IllegalArgumentException if the initial capacity is negative
          */
         public OfLong(final int initialCapacity) throws IllegalArgumentException {
@@ -656,7 +658,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         /**
          * Constructs a SpinedBuffer.OfDouble with the default initial capacity.
          * The buffer grows automatically as elements are appended, so no capacity has to be
-        * estimated up front.
+         * estimated up front.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -686,7 +688,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * System.out.println(buffer.size());   // prints 100
          * }</pre>
          *
-         * @param initialCapacity the initial capacity for the buffer
+         * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
          * @throws IllegalArgumentException if the initial capacity is negative
          */
         public OfDouble(final int initialCapacity) throws IllegalArgumentException {

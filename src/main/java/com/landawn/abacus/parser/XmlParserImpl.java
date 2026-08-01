@@ -1095,7 +1095,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param source the XML string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
-     * @return the deserialized object of type {@code T}; returns default value if source is empty
+     * @return the deserialized object of type {@code T}; returns the target type's default value if {@code source} is {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
@@ -1132,7 +1132,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param source the XML string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
-     * @return the deserialized object of type {@code T}; returns default value if source is empty
+     * @return the deserialized object of type {@code T}; returns the target type's default value if {@code source} is {@code null} or empty
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */

@@ -1,11 +1,12 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -415,7 +416,7 @@ public class ObjIteratorTest extends TestBase {
 
     @Test
     public void testDefer_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.defer(null));
     }
 
     @Test
@@ -448,7 +449,7 @@ public class ObjIteratorTest extends TestBase {
         assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
         assertEquals(1, callCount.get());
     }
-
+    
     // ==================== generate(Supplier) ====================
 
     @Test
@@ -575,7 +576,7 @@ public class ObjIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_infinite_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate((Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate((Supplier<String>) null));
     }
 
     @Test
@@ -587,12 +588,12 @@ public class ObjIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_withHasNext_nullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(null, () -> "value"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(null, () -> "value"));
     }
 
     @Test
     public void testGenerate_withHasNext_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(() -> true, null));
     }
 
     @Test
@@ -607,12 +608,12 @@ public class ObjIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_withState_nullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, null, x -> x));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, null, x -> x));
     }
 
     @Test
     public void testGenerate_withState_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, x -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, x -> true, null));
     }
 
     @Test
@@ -624,12 +625,12 @@ public class ObjIteratorTest extends TestBase {
 
     @Test
     public void testGenerate_withBiPredicate_nullHasNext() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, null, (s, p) -> p));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, null, (s, p) -> p));
     }
 
     @Test
     public void testGenerate_withBiPredicate_nullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, (s, p) -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.generate(0, (s, p) -> true, null));
     }
 
     @Test
@@ -1514,8 +1515,8 @@ public class ObjIteratorTest extends TestBase {
     }
 
     @Test
-    public void testDistinctByRejectsNullExtractorEagerly() {
-        assertThrows(IllegalArgumentException.class, () -> ObjIterator.empty().distinctBy(null));
+    public void testDistinctByRejectsNullExtractorAtConstruction() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ObjIterator.empty().distinctBy(null));
     }
 
 }

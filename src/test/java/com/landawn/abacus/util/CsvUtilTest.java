@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -99,7 +100,7 @@ public class CsvUtilTest extends TestBase {
         Function<String, String[]> customParser = line -> line.split(";");
         CsvUtil.setHeaderParser(customParser);
         assertSame(customParser, CsvUtil.getCurrentHeaderParser());
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.setHeaderParser(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CsvUtil.setHeaderParser(null));
     }
 
     // ===================== Additional tests for untested methods =====================
@@ -107,7 +108,7 @@ public class CsvUtilTest extends TestBase {
     @Test
     @DisplayName("Test setHeaderParser with null throws exception")
     public void testSetHeaderParser_Null() {
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.setHeaderParser(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CsvUtil.setHeaderParser(null));
     }
 
     @Test
@@ -119,13 +120,13 @@ public class CsvUtilTest extends TestBase {
         };
         CsvUtil.setLineParser(customParser);
         assertSame(customParser, CsvUtil.getCurrentLineParser());
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.setLineParser(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CsvUtil.setLineParser(null));
     }
 
     @Test
     @DisplayName("Test setLineParser with null throws exception")
     public void testSetLineParser_Null() {
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.setLineParser(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CsvUtil.setLineParser(null));
     }
 
     @Test
@@ -957,7 +958,7 @@ public class CsvUtilTest extends TestBase {
     @Test
     public void testLoad_ReaderBeanClass_EmptyReader_ReturnsEmptyDataset() {
         Reader reader = new StringReader("");
-        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, Person.class);
+        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class);
         assertEquals(0, ds.size());
     }
 
@@ -966,7 +967,7 @@ public class CsvUtilTest extends TestBase {
     public void testLoad_ReaderBeanClass_ColumnNotInBean_UsesRawStringValue() {
         // CSV has "unknownColumn" which does not exist in Person bean -> propInfos[i] == null -> uses raw string
         Reader reader = new StringReader("id,name,unknownColumn\n1,John,someRawValue");
-        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, Person.class);
+        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class);
         assertEquals(3, ds.columnCount());
         assertEquals("someRawValue", ds.get(0, 2)); // "unknownColumn" is at index 2
     }
@@ -976,7 +977,7 @@ public class CsvUtilTest extends TestBase {
     public void testLoad_ReaderBeanClass_SelectedColumnNotInBean_UsesRawStringValue() {
         // selectColumnNames contains "unknownColumn" which exists in CSV but not in Person -> raw string stored
         Reader reader = new StringReader("id,name,unknownColumn\n1,John,rawValue");
-        Dataset ds = CsvUtil.load(reader, List.of("id", "unknownColumn"), 0, Long.MAX_VALUE, null, Person.class);
+        Dataset ds = CsvUtil.load(reader, List.of("id", "unknownColumn"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class);
         assertEquals(2, ds.columnCount());
         assertEquals("rawValue", ds.get(0, 1)); // "unknownColumn" is at column index 1
     }
@@ -985,7 +986,7 @@ public class CsvUtilTest extends TestBase {
     @Test
     public void testLoad_ReaderBeanClass_HeaderOnlyReader_ReturnsEmptyDataset() {
         Reader reader = new StringReader("id,name,age\n");
-        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, Person.class);
+        Dataset ds = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class);
         assertEquals(0, ds.size());
         assertEquals(3, ds.columnCount());
     }
@@ -1138,7 +1139,7 @@ public class CsvUtilTest extends TestBase {
         typeMap.put("age", Type.of(Integer.class));
 
         try (Reader reader = new StringReader(testCsvContent)) {
-            Dataset result = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, typeMap);
+            Dataset result = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), typeMap);
             assertNotNull(result);
             assertEquals(5, result.size());
         }
@@ -1148,7 +1149,7 @@ public class CsvUtilTest extends TestBase {
     @DisplayName("Test load(Reader, selectColumns, offset, count, rowFilter, columnTypeMap) with empty map throws exception")
     public void testLoad_ReaderWithEmptyColumnTypeMap() throws IOException {
         try (Reader reader = new StringReader(testCsvContent)) {
-            assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, new HashMap<>()));
+            assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(reader, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), new HashMap<>()));
         }
     }
 
@@ -1156,13 +1157,13 @@ public class CsvUtilTest extends TestBase {
     @Test
     public void testLoad_ReaderBeanClass_InvalidSelectColumns_ThrowsIllegalArgument() {
         Reader reader = new StringReader("id,name,age\n1,John,25");
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(reader, List.of("nonexistent"), 0, Long.MAX_VALUE, null, Person.class));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(reader, List.of("nonexistent"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class));
     }
 
     // CsvLoader.load() with invalid selectColumnNames from reader -> exercises L1340
     @Test
     public void testLoad_FileWithSelectColumnNamesAndBeanClass_InvalidColumns_ThrowsIllegalArgument() throws IOException {
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent"), 0, Long.MAX_VALUE, null, Person.class));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class));
     }
 
     @Test
@@ -1639,7 +1640,7 @@ public class CsvUtilTest extends TestBase {
     @Test
     @DisplayName("Test stream(File, selectColumns, offset, count, rowFilter, targetClass)")
     public void testStream_FileWithOffsetAndFilter() {
-        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 0, Long.MAX_VALUE, null, Person.class)) {
+        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class)) {
             List<Person> result = stream.toList();
             assertEquals(5, result.size());
         }
@@ -1649,7 +1650,7 @@ public class CsvUtilTest extends TestBase {
     @DisplayName("Test stream(File, selectColumns, offset, count, rowFilter, biFunction)")
     public void testStream_FileWithBiFunctionMapper() {
         BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0) + ":" + row.get(1);
-        try (Stream<String> stream = CsvUtil.stream(testCsvFile, null, 0, Long.MAX_VALUE, null, mapper)) {
+        try (Stream<String> stream = CsvUtil.stream(testCsvFile, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), mapper)) {
             List<String> result = stream.toList();
             assertEquals(5, result.size());
             assertEquals("1:John", result.get(0));
@@ -1740,7 +1741,7 @@ public class CsvUtilTest extends TestBase {
     public void testStream_ReaderUnsupportedTargetType_MultipleColumns_ThrowsIllegalArgument() {
         Reader reader = new StringReader("id,name\n1,John");
         // String is not array/collection/map/bean, and we select 2 columns -> L2100
-        try (Stream<String> stream = CsvUtil.stream(reader, List.of("id", "name"), 0, Long.MAX_VALUE, null, String.class, false)) {
+        try (Stream<String> stream = CsvUtil.stream(reader, List.of("id", "name"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), String.class, false)) {
             assertThrows(IllegalArgumentException.class, stream::toList);
         }
     }
@@ -2397,7 +2398,7 @@ public class CsvUtilTest extends TestBase {
 
     @Test
     @DisplayName("Null row mappers are rejected when the stream is created")
-    public void testStreamRejectsNullRowMapperEagerly() {
+    public void testStreamRejectsNullRowMapperAtConstruction() {
         final BiFunction<List<String>, DisposableArray<String>, String> mapper = null;
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(new StringReader("id\n1\n"), mapper, false));
     }
@@ -3158,7 +3159,7 @@ public class CsvUtilTest extends TestBase {
 
             BiFunction<List<String>, DisposableArray<String>, String> mapper = (columns, row) -> row.get(0);
 
-            try (Stream<String> stream = CsvUtil.stream(new StringReader(""), null, 0, Long.MAX_VALUE, null, mapper, false)) {
+            try (Stream<String> stream = CsvUtil.stream(new StringReader(""), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), mapper, false)) {
                 assertTrue(stream.toList().isEmpty());
             }
 
@@ -3322,7 +3323,7 @@ public class CsvUtilTest extends TestBase {
     public void testLoad_ColumnTypeMap_EmptySelectColumns_ZeroColumns() {
         Map<String, Type<?>> typeMap = new HashMap<>();
         typeMap.put("age", Type.of(Integer.class));
-        Dataset ds = CsvUtil.load(new StringReader(testCsvContent), List.<String> of(), 0, Long.MAX_VALUE, (Predicate<? super String[]>) null, typeMap);
+        Dataset ds = CsvUtil.load(new StringReader(testCsvContent), List.<String> of(), 0, Long.MAX_VALUE, Fn.alwaysTrue(), typeMap);
         assertEquals(0, ds.columnCount());
     }
 

@@ -147,7 +147,7 @@ public class ClobReaderType extends ReaderType {
      * Extracts a character {@link Reader} from a {@link Clob}.
      * This is a package-private utility used by both {@code get} overloads.
      * Closing the returned reader closes the delegate and calls {@link Clob#free()}.
-     * This method therefore assumes ownership of a non-null {@code clob}.
+     * This method therefore assumes ownership of the {@code clob}.
      *
      * @param clob the {@link Clob} to read from; may be {@code null}
      * @return a {@link Reader} for the CLOB's character stream,

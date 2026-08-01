@@ -56,6 +56,7 @@ public class DatesTest extends TestBase {
         assertFalse(result);
 
         assertNotNull(Dates.registerDateCreator(java.util.Date.class, java.util.Date::new));
+        assertThrows(IllegalArgumentException.class, () -> Dates.registerDateCreator(java.util.Date.class, null));
     }
 
     // ===== registerCalendarCreator =====
@@ -74,6 +75,8 @@ public class DatesTest extends TestBase {
             cal.setTimeInMillis(millis);
             return cal;
         }));
+
+        assertThrows(IllegalArgumentException.class, () -> Dates.registerCalendarCreator(Calendar.class, null));
     }
 
     @Test

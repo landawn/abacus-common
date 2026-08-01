@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.annotation.Beta;
@@ -546,11 +545,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param consumer the action to be performed for each element
-     * @throws NullPointerException if the specified consumer is null
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     @Override
-    public void forEach(final Consumer<? super T> consumer) {
-        Objects.requireNonNull(consumer, "consumer");
+    public void forEach(final Consumer<? super T> consumer) throws IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer);
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);
@@ -572,12 +571,13 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <E> the type of exception that the consumer may throw
      * @param consumer the action to be performed for each element
-     * @throws IllegalArgumentException if the specified consumer is null
      * @throws E if the consumer throws an exception
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     @Beta
-    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E { // NOSONAR
-        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
+    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer); // NOSONAR
+        // NOSONAR
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);
@@ -603,12 +603,13 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <E> the type of exception that the consumer may throw
      * @param consumer an IntObjConsumer that accepts the index and the element
-     * @throws IllegalArgumentException if the specified consumer is null
      * @throws E if the consumer throws an exception
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     @Beta
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws IllegalArgumentException, E { // NOSONAR
-        N.checkArgNotNull(consumer, "consumer"); // NOSONAR
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer); // NOSONAR
+        // NOSONAR
 
         for (int i = 0; i < length; i++) {
             consumer.accept(i, elements[i]);

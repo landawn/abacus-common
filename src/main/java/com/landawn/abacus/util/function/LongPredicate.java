@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -144,14 +145,15 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * boolean result = positiveAndEven.test(4L);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default LongPredicate and(final java.util.function.LongPredicate other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default LongPredicate and(final java.util.function.LongPredicate other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return value -> test(value) && other.test(value);
     }
 
@@ -172,14 +174,15 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * boolean result = nonPositive.test(0L);   // Returns true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
     @Override
-    default LongPredicate or(final java.util.function.LongPredicate other) {
-        java.util.Objects.requireNonNull(other, cs.other);
+    default LongPredicate or(final java.util.function.LongPredicate other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
+
         return value -> test(value) || other.test(value);
     }
 
@@ -197,8 +200,11 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * @param predicate the predicate to return
      * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static LongPredicate of(final LongPredicate predicate) {
+    static LongPredicate of(final LongPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 

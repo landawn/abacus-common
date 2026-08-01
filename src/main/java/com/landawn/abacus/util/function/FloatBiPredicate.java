@@ -43,7 +43,6 @@ import com.landawn.abacus.util.cs;
  * NaN compares equal to itself and greater than all other {@code float} values, and {@code 0.0f}
  * and {@code -0.0f} are distinct.</p>
  *
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Predicate
@@ -163,12 +162,13 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * boolean result = combined.test(3.0f, 4.0f);   // true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default FloatBiPredicate and(final FloatBiPredicate other) {
+    default FloatBiPredicate and(final FloatBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) && other.test(a, b);
     }
 
@@ -190,12 +190,13 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      * boolean result = combined.test(-1.0f, -2.0f);   // true
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default FloatBiPredicate or(final FloatBiPredicate other) {
+    default FloatBiPredicate or(final FloatBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (a, b) -> test(a, b) || other.test(a, b);
     }
 

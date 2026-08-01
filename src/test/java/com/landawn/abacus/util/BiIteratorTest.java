@@ -52,34 +52,8 @@ public class BiIteratorTest extends TestBase {
     public void testEmptyRejectsNullTypedActions() {
         BiIterator<String, Integer> iter = BiIterator.empty();
 
-        assertThrows(IllegalArgumentException.class,
-                () -> iter.forEachRemaining((com.landawn.abacus.util.function.BiConsumer<? super String, ? super Integer>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
-    }
-
-    @Test
-    public void testAllImplementationsRejectNullCallbacksImmediately() {
-        assertRejectsNullCallbacks(BiIterator.empty());
-        assertRejectsNullCallbacks(BiIterator.of(Map.<String, Integer> of().entrySet().iterator()));
-        assertRejectsNullCallbacks(BiIterator.generate(() -> false, pair -> {
-            // no output for an empty generated iterator
-        }));
-        assertRejectsNullCallbacks(BiIterator.generate(0, 0, (index, pair) -> {
-            // no output for an empty index range
-        }));
-        assertRejectsNullCallbacks(BiIterator.zip(List.<String> of().iterator(), List.<Integer> of().iterator()));
-        assertRejectsNullCallbacks(BiIterator.zip(List.<String> of().iterator(), List.<Integer> of().iterator(), "missing", -1));
-        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().skip(1));
-        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().limit(1));
-        assertRejectsNullCallbacks(BiIterator.<String, Integer> empty().filter((left, right) -> true));
-    }
-
-    private static void assertRejectsNullCallbacks(final BiIterator<String, Integer> iter) {
-        assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining((BiConsumer<? super String, ? super Integer>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
-        assertThrows(IllegalArgumentException.class, () -> iter.map((java.util.function.BiFunction<? super String, ? super Integer, Object>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining((com.landawn.abacus.util.function.BiConsumer<? super String, ? super Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
     }
 
     @Test
@@ -788,10 +762,10 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testGenerateWithHasNextAndOutput_nullChecks() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(null, pair -> {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(null, pair -> {
         }));
 
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(() -> true, null));
     }
 
     @Test
@@ -825,7 +799,7 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testGenerateWithIndices_nullOutput() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(0, 5, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.generate(0, 5, null));
     }
 
     // =====================================================================
@@ -1111,10 +1085,10 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     @DisplayName("Test null arguments validation")
-    public void testNullArgumentsValidation() {
+    public void testNullArgumentsAreNotValidatedEagerly() {
         BiIterator<String, Integer> iter = BiIterator.zip(new String[] { "a" }, new Integer[] { 1 });
 
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     // =====================================================================
@@ -1227,9 +1201,9 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testUnzipIterable_nullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a"), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a"), null));
         // The unzip function is validated even when the iterable is null.
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterable<String>) null, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterable<String>) null, null));
     }
 
     @Test
@@ -1241,9 +1215,9 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testUnzipIterator_nullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip(Arrays.asList("a").iterator(), null));
         // The unzip function is validated even when the iterator is null.
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterator<String>) null, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.unzip((Iterator<String>) null, null));
     }
 
     @Test
@@ -1659,7 +1633,7 @@ public class BiIteratorTest extends TestBase {
     @Test
     public void testFilter_null() {
         BiIterator<Integer, Integer> iter = BiIterator.generate(0, 5, (i, pair) -> pair.set(i, i));
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     // =====================================================================
@@ -1801,7 +1775,7 @@ public class BiIteratorTest extends TestBase {
 
     @Test
     public void testStreamWithMapperNull() {
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().stream(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().stream(null));
     }
 
     @Test

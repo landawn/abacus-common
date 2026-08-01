@@ -484,7 +484,9 @@ public final class Iterators {
      * @see N#count(Iterator, Predicate)
      */
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate); //NOSONAR
+        N.checkArgNotNull(predicate, cs.predicate);
+
+        //NOSONAR
 
         if (iter == null) {
             return 0;
@@ -2123,6 +2125,8 @@ public final class Iterators {
 
             @Override
             protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+                N.checkArgNotNull(action, cs.action);
+
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2130,8 +2134,14 @@ public final class Iterators {
                 cur.next(action);
             }
 
+            /**
+             * Performs the given action for each remaining pair of elements from this concatenated iterator.
+             *
+             * @param action the action to perform on each remaining pair; must not be {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}
+             */
             @Override
-            public void forEachRemaining(final BiConsumer<? super A, ? super B> action) {
+            public void forEachRemaining(final BiConsumer<? super A, ? super B> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
                 final Throwables.BiConsumer<? super A, ? super B, RuntimeException> actionE = Fnn.from(action);
@@ -2141,8 +2151,16 @@ public final class Iterators {
                 }
             }
 
+            /**
+             * Performs the given action for each remaining pair of elements from this concatenated iterator.
+             *
+             * @param <E> the type of exception the action may throw
+             * @param action the action to perform on each remaining pair; must not be {@code null}
+             * @throws E if the action throws an exception
+             * @throws IllegalArgumentException if {@code action} is {@code null}
+             */
             @Override
-            public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E {
+            public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E, IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
                 while (hasNext()) {
@@ -2150,8 +2168,16 @@ public final class Iterators {
                 }
             }
 
+            /**
+             * Returns an iterator that applies the given mapping function to each remaining pair of elements.
+             *
+             * @param <R> the type of elements returned by the mapped iterator
+             * @param mapper the function to apply to each pair; must not be {@code null}
+             * @return an iterator of mapped results
+             * @throws IllegalArgumentException if {@code mapper} is {@code null}
+             */
             @Override
-            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) {
+            public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
                 N.checkArgNotNull(mapper, cs.mapper);
 
                 return new ObjIterator<>() {
@@ -2234,6 +2260,8 @@ public final class Iterators {
             @Override
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
                     throws NoSuchElementException, E {
+                N.checkArgNotNull(action, cs.action);
+
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2241,8 +2269,14 @@ public final class Iterators {
                 cur.next(action);
             }
 
+            /**
+             * Performs the given action for each remaining triple of elements from this concatenated iterator.
+             *
+             * @param action the action to perform on each remaining triple; must not be {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}
+             */
             @Override
-            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) {
+            public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
                 while (hasNext()) {
@@ -2250,8 +2284,17 @@ public final class Iterators {
                 }
             }
 
+            /**
+             * Performs the given action for each remaining triple of elements from this concatenated iterator.
+             *
+             * @param <E> the type of exception the action may throw
+             * @param action the action to perform on each remaining triple; must not be {@code null}
+             * @throws E if the action throws an exception
+             * @throws IllegalArgumentException if {@code action} is {@code null}
+             */
             @Override
-            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E {
+            public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
+                    throws E, IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
                 while (hasNext()) {
@@ -2259,8 +2302,16 @@ public final class Iterators {
                 }
             }
 
+            /**
+             * Returns an iterator that applies the given mapping function to each remaining triple of elements.
+             *
+             * @param <R> the type of elements returned by the mapped iterator
+             * @param mapper the function to apply to each triple; must not be {@code null}
+             * @return an iterator of mapped results
+             * @throws IllegalArgumentException if {@code mapper} is {@code null}
+             */
             @Override
-            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) {
+            public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
                 N.checkArgNotNull(mapper, cs.mapper);
 
                 return new ObjIterator<>() {
@@ -2449,6 +2500,8 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
+        N.checkArgNotNull(nextSelector, cs.nextSelector);
+
         final Iterator<? extends T> iterA = N.iterate(a);
         final Iterator<? extends T> iterB = N.iterate(b);
 
@@ -2542,7 +2595,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmp);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return merge(sortedA, sortedB, MergeResult.minFirst(cmp));
     }
@@ -2589,6 +2642,8 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp)
             throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         final Iterator<? extends T> iterA = N.iterate(sortedA);
         final Iterator<? extends T> iterB = N.iterate(sortedB);
 
@@ -2623,7 +2678,7 @@ public final class Iterators {
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.function);
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ObjIterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -2670,7 +2725,9 @@ public final class Iterators {
      * @see #zip(Iterable, Iterable, Object, Object, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         final Iterator<? extends A> iterA = N.iterate(a);
         final Iterator<? extends B> iterB = N.iterate(b);
 
@@ -2706,7 +2763,7 @@ public final class Iterators {
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.function);
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ObjIterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -2757,7 +2814,9 @@ public final class Iterators {
      * @see #zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
-            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         final Iterator<? extends A> iterA = N.iterate(a);
         final Iterator<? extends B> iterB = N.iterate(b);
         final Iterator<? extends C> iterC = N.iterate(c);
@@ -2794,7 +2853,7 @@ public final class Iterators {
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.function);
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ObjIterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -2844,7 +2903,9 @@ public final class Iterators {
      * @see #zip(Iterable, Iterable, BiFunction)
      */
     public static <A, B, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA, final B valueForNoneB,
-            final BiFunction<? super A, ? super B, ? extends R> zipFunction) {
+            final BiFunction<? super A, ? super B, ? extends R> zipFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         final Iterator<? extends A> iterA = N.iterate(a);
         final Iterator<? extends B> iterB = N.iterate(b);
 
@@ -2886,7 +2947,7 @@ public final class Iterators {
     public static <A, B, C, R> ObjIterator<R> zip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.function);
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return new ObjIterator<>() {
             private final Iterator<? extends A> iterA = a == null ? ObjIterator.<A> empty() : a;
@@ -2944,7 +3005,10 @@ public final class Iterators {
      * @see #zip(Iterable, Iterable, Iterable, TriFunction)
      */
     public static <A, B, C, R> ObjIterator<R> zip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
-            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction) {
+            final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunction, cs.zipFunction);
+
         final Iterator<? extends A> iterA = N.iterate(a);
         final Iterator<? extends B> iterB = N.iterate(b);
         final Iterator<? extends C> iterC = N.iterate(c);
@@ -2976,11 +3040,15 @@ public final class Iterators {
      * @param iter the original Iterator to be unzipped.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
      * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see N#unzip(Iterator, BiConsumer)
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(unzip, cs.unzip);
+
         return BiIterator.unzip(iter, unzip);
     }
 
@@ -3008,11 +3076,15 @@ public final class Iterators {
      * @param c the original Iterable to be unzipped.
      * @param unzip a BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
      * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see N#unzip(Iterable, BiConsumer)
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip) {
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> c, final BiConsumer<? super T, Pair<A, B>> unzip)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(unzip, cs.unzip);
+
         return BiIterator.unzip(N.iterate(c), unzip);
     }
 
@@ -3047,7 +3119,7 @@ public final class Iterators {
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip)
             throws IllegalArgumentException {
-        N.checkArgNotNull(unzip, "unzip");
+        N.checkArgNotNull(unzip, cs.unzip);
 
         return TriIterator.unzip(iter, unzip);
     }
@@ -3084,7 +3156,7 @@ public final class Iterators {
     @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip)
             throws IllegalArgumentException {
-        N.checkArgNotNull(unzip, "unzip");
+        N.checkArgNotNull(unzip, cs.unzip);
 
         return TriIterator.unzip(N.iterate(c), unzip);
     }
@@ -3609,7 +3681,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -3641,7 +3713,7 @@ public final class Iterators {
      * @see Maps#filter(Map, BiPredicate)
      */
     public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -3704,7 +3776,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -3735,7 +3807,7 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -3798,7 +3870,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -3830,7 +3902,7 @@ public final class Iterators {
      */
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
             throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -3897,7 +3969,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -3931,7 +4003,7 @@ public final class Iterators {
      * @see #skipUntil(Iterator, Predicate)
      */
     public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -4003,7 +4075,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (c == null) {
             return ObjIterator.empty();
@@ -4038,7 +4110,7 @@ public final class Iterators {
      */
     @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -4280,8 +4352,9 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Beta
-    public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, cs.mapper);
+    public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
         if (c == null) {
             return ObjIterator.empty();
@@ -4309,8 +4382,9 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper) { //NOSONAR
-        N.checkArgNotNull(mapper, cs.mapper);
+    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
         if (iter == null) {
             return ObjIterator.empty();
@@ -4365,8 +4439,12 @@ public final class Iterators {
      * @param iter the original iterator to be processed.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iter, elementConsumer, Fn.emptyAction());
     }
 
@@ -4389,9 +4467,13 @@ public final class Iterators {
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(iter, 0, Long.MAX_VALUE, elementConsumer, onComplete);
     }
 
@@ -4413,9 +4495,12 @@ public final class Iterators {
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iter, offset, count, elementConsumer, Fn.emptyAction());
     }
 
@@ -4445,9 +4530,13 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(iter, offset, count, 0, 0, elementConsumer, onComplete);
     }
 
@@ -4477,12 +4566,15 @@ public final class Iterators {
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer)} instead.
      */
     @Deprecated
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iter, offset, count, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
@@ -4518,13 +4610,17 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
     @Deprecated
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws E, E2 {
+            throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementConsumer, onComplete);
     }
 
@@ -4562,11 +4658,14 @@ public final class Iterators {
      * @param elementConsumer the action to perform for each selected element.
      * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iter, options, elementConsumer, Fn.emptyAction());
     }
 
@@ -4607,15 +4706,19 @@ public final class Iterators {
      * @param options the slicing and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} value is ignored.
      * @param elementConsumer the action to perform for each selected element.
-     * @param onComplete the action to perform after successful processing, or {@code null} for no completion action.
+     * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
      * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         final IterateOptions opts = options == null ? IterateOptions.builder().build() : options;
 
         forEach(iter, opts.offset(), opts.count(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
@@ -4640,9 +4743,12 @@ public final class Iterators {
      * @param iterators the original collection of iterators to be processed.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iterators, elementConsumer, Fn.emptyAction());
     }
 
@@ -4669,9 +4775,13 @@ public final class Iterators {
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(iterators, 0, Long.MAX_VALUE, elementConsumer, onComplete);
     }
 
@@ -4703,9 +4813,12 @@ public final class Iterators {
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iterators, offset, count, elementConsumer, Fn.emptyAction());
     }
 
@@ -4741,9 +4854,14 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
+            throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(iterators, offset, count, 0, 0, 0, elementConsumer, onComplete);
     }
 
@@ -4781,12 +4899,15 @@ public final class Iterators {
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
      */
     @Deprecated
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iterators, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
@@ -4830,13 +4951,17 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
     @Deprecated
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
             final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
-            final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementConsumer, onComplete);
     }
 
@@ -4870,12 +4995,16 @@ public final class Iterators {
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
      */
     @Deprecated
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
     }
 
@@ -4916,6 +5045,7 @@ public final class Iterators {
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      * @throws Error if the {@code elementConsumer} throws an error.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
@@ -4926,14 +5056,13 @@ public final class Iterators {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
                 "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
-        N.checkArgNotNull(elementConsumer, "elementConsumer");
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         if (N.isEmpty(iterators)) {
             // onComplete is documented to run after all elements have been processed - vacuously
             // true here; a collection of empty iterators runs it too, so the empty collection must.
-            if (onComplete != null) {
-                onComplete.run();
-            }
+            onComplete.run();
 
             return;
         }
@@ -4957,9 +5086,7 @@ public final class Iterators {
                     elementConsumer.accept(iteratorII.next());
                 }
 
-                if (onComplete != null) {
-                    onComplete.run();
-                }
+                onComplete.run();
             } else {
                 final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
                 final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
@@ -4972,6 +5099,10 @@ public final class Iterators {
                             try {
                                 while (errorHolder.value() == null) {
                                     synchronized (iteratorII) {
+                                        if (errorHolder.value() != null) {
+                                            break;
+                                        }
+
                                         if (iteratorII.hasNext()) {
                                             element = iteratorII.next();
                                         } else {
@@ -5000,6 +5131,19 @@ public final class Iterators {
                     try {
                         countDownLatch.await();
                     } catch (final InterruptedException e) {
+                        // Publish cancellation before interrupting the workers. This stops workers
+                        // that finish (or ignore) their current consumer invocation from taking
+                        // another element, while shutdownNow wakes interruptible consumers.
+                        synchronized (errorHolder) {
+                            final Throwable priorFailure = errorHolder.value();
+                            errorHolder.setValue(e);
+
+                            if (priorFailure != null && priorFailure != e) {
+                                e.addSuppressed(priorFailure);
+                            }
+                        }
+
+                        executorService.shutdownNow();
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
 
@@ -5065,11 +5209,14 @@ public final class Iterators {
      * @param elementConsumer the action to perform for each selected element.
      * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+
         forEach(iterators, options, elementConsumer, Fn.emptyAction());
     }
 
@@ -5116,15 +5263,20 @@ public final class Iterators {
      * @param options the slicing, reading and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread reading and processing).
      * @param elementConsumer the action to perform for each selected element.
-     * @param onComplete the action to perform after successful processing, or {@code null} for no completion action.
+     * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
      * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final IterateOptions options, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2 {
+            final IterateOptions options, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
+            throws E, E2, IllegalArgumentException {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
         final IterateOptions opts = options == null ? IterateOptions.builder().build() : options;
 
         forEach(iterators, opts.offset(), opts.count(), opts.readThreads(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);

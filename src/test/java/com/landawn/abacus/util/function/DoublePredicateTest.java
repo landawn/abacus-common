@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -239,10 +238,10 @@ public class DoublePredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         DoublePredicate instance = a -> false;
-        assertThrows(NullPointerException.class, () -> instance.and((java.util.function.DoublePredicate) null));
-        assertThrows(NullPointerException.class, () -> instance.or((java.util.function.DoublePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.DoublePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.or((java.util.function.DoublePredicate) null));
     }
 
     @Test

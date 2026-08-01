@@ -112,9 +112,9 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison; must not be {@code null}
+     * @param cmp the comparator to use for comparison
      * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
@@ -164,9 +164,9 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison; must not be {@code null}
+     * @param cmp the comparator to use for comparison
      * @return {@link #TAKE_FIRST} if a is greater than or equal to b, {@link #TAKE_SECOND} otherwise
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
@@ -216,9 +216,9 @@ public enum MergeResult {
      * }</pre>
      *
      * @param <T> the type of the values being compared
-     * @param cmp the comparator to use for comparison (must not be {@code null})
+     * @param cmp the comparator to use for comparison
      * @return a BiFunction that uses the comparator to determine merge results
-     * @throws IllegalArgumentException if cmp is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
@@ -268,9 +268,9 @@ public enum MergeResult {
      * }</pre>
      *
      * @param <T> the type of the values being compared
-     * @param cmp the comparator to use for comparison (must not be {@code null})
+     * @param cmp the comparator to use for comparison
      * @return a BiFunction that uses the comparator to determine merge results
-     * @throws IllegalArgumentException if cmp is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);

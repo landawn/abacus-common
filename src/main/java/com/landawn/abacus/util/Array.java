@@ -293,7 +293,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}.
+     * @param componentType the Class object representing the component type of the new array.
      * @param length the length of the new array.
      * @return a new array of the specified component type and length.
      * @throws NegativeArraySizeException if the specified length is negative.
@@ -324,7 +324,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}.
+     * @param componentType the Class object representing the component type of the new array.
      * @param dimensions the dimensions of the new array. Must not be {@code null} or empty.
      * @return a new multi-dimensional array of the specified component type and dimensions.
      * @throws IllegalArgumentException if the component type or dimensions are not valid for array creation.

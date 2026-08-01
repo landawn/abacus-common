@@ -102,7 +102,7 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code httpClient} is {@code null}
      */
     HttpRequest(final HttpClient httpClient) {
-        this.httpClient = N.checkArgNotNull(httpClient, "httpClient");
+        this.httpClient = N.checkArgNotNull(httpClient, cs.httpClient);
     }
 
     /**
@@ -997,44 +997,6 @@ public final class HttpRequest {
     }
 
     /**
-     * Executes a PATCH request and returns the response as an HttpResponse.
-     * PATCH requests typically apply a partial update to a resource on the server.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * HttpResponse response = HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .patch();
-     * }</pre>
-     *
-     * @return The HttpResponse object containing status code, headers, and response body
-     * @throws UncheckedIOException if an I/O error occurs during the request
-     */
-    public HttpResponse patch() throws UncheckedIOException {
-        return patch(HttpResponse.class);
-    }
-
-    /**
-     * Executes a PATCH request and deserializes the response to the specified type.
-     * PATCH requests typically apply a partial update to a resource on the server.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * User updatedUser = HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .patch(User.class);
-     * }</pre>
-     *
-     * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs during the request
-     */
-    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
-        return execute(HttpMethod.PATCH, resultClass);
-    }
-
-    /**
      * Executes a HEAD request and returns the response as an HttpResponse.
      * HEAD requests retrieve only the headers (metadata) without the response body,
      * useful for checking resource existence or getting metadata without downloading the full content.
@@ -1078,6 +1040,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return The HttpResponse object containing status code, headers, and response body
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws UncheckedIOException if an I/O error occurs during the request
      */
     @Beta
@@ -1100,17 +1063,21 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if an I/O error occurs
      */
     @Beta
     public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        checkSupportedMethod(httpMethod);
 
         try {
-            return httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), resultClass);
+            final Object requestData = requestFor(httpMethod);
+            return requestTarget == RequestTarget.BODY ? httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), resultClass)
+                    : httpClient.execute(httpMethod, requestData, checkSettings(), resultClass);
         } finally {
             doAfterExecution();
         }
@@ -1130,17 +1097,25 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if an I/O error occurs during the request or file writing
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        checkSupportedMethod(httpMethod);
 
         try {
-            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
+            final Object requestData = requestFor(httpMethod);
+
+            if (requestTarget == RequestTarget.BODY) {
+                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+            } else {
+                httpClient.execute(httpMethod, requestData, checkSettings(), output);
+            }
         } finally {
             doAfterExecution();
         }
@@ -1161,17 +1136,25 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if an I/O error occurs during the request or stream writing
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        checkSupportedMethod(httpMethod);
 
         try {
-            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
+            final Object requestData = requestFor(httpMethod);
+
+            if (requestTarget == RequestTarget.BODY) {
+                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+            } else {
+                httpClient.execute(httpMethod, requestData, checkSettings(), output);
+            }
         } finally {
             doAfterExecution();
         }
@@ -1192,19 +1175,34 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if an I/O error occurs during the request or writing
      */
     @Beta
     public void execute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        checkSupportedMethod(httpMethod);
 
         try {
-            httpClient.execute(httpMethod, requestFor(httpMethod), checkSettings(), output);
+            final Object requestData = requestFor(httpMethod);
+
+            if (requestTarget == RequestTarget.BODY) {
+                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+            } else {
+                httpClient.execute(httpMethod, requestData, checkSettings(), output);
+            }
         } finally {
             doAfterExecution();
+        }
+    }
+
+    private static void checkSupportedMethod(final HttpMethod httpMethod) {
+        if (httpMethod == HttpMethod.PATCH) {
+            throw new UnsupportedOperationException(
+                    "HttpMethod.PATCH is not supported by the underlying java.net.HttpURLConnection; see HttpMethod#PATCH for workarounds");
         }
     }
 
@@ -1221,11 +1219,12 @@ public final class HttpRequest {
             throw new IllegalStateException("query(...) is only supported for GET and DELETE requests");
         }
 
-        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH) {
+        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH || httpMethod == HttpMethod.DELETE
+                || httpMethod == HttpMethod.OPTIONS) {
             return request;
         }
 
-        throw new IllegalStateException("body(...) is only supported for POST, PUT, and PATCH requests");
+        throw new IllegalStateException("body(...) is only supported for POST, PUT, PATCH, DELETE, and OPTIONS requests");
     }
 
     void doAfterExecution() {
@@ -1264,8 +1263,11 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncGet(HttpResponse.class, executor);
     }
 
@@ -1303,8 +1305,11 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(HttpMethod.GET, resultClass, executor);
     }
 
@@ -1341,8 +1346,11 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncPost(HttpResponse.class, executor);
     }
 
@@ -1383,8 +1391,11 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(HttpMethod.POST, resultClass, executor);
     }
 
@@ -1421,8 +1432,11 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncPut(HttpResponse.class, executor);
     }
 
@@ -1463,8 +1477,11 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(HttpMethod.PUT, resultClass, executor);
     }
 
@@ -1499,8 +1516,11 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncDelete(HttpResponse.class, executor);
     }
 
@@ -1539,86 +1559,12 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(HttpMethod.DELETE, resultClass, executor);
-    }
-
-    /**
-     * Executes an asynchronous PATCH request and returns a ContinuableFuture with the HttpResponse.
-     * PATCH requests typically apply a partial update to a resource on the server.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .asyncPatch()
-     *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
-     * }</pre>
-     *
-     * @return A ContinuableFuture that will complete with the HttpResponse
-     */
-    public ContinuableFuture<HttpResponse> asyncPatch() {
-        return asyncPatch(HttpResponse.class);
-    }
-
-    /**
-     * Executes an asynchronous PATCH request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .asyncPatch(executor)
-     *     .getThenAccept(response -> System.out.println("Status: " + response.statusCode()));
-     * }</pre>
-     *
-     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete with the HttpResponse
-     */
-    public ContinuableFuture<HttpResponse> asyncPatch(final Executor executor) {
-        return asyncPatch(HttpResponse.class, executor);
-    }
-
-    /**
-     * Executes an asynchronous PATCH request and deserializes the response to the specified type.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .asyncPatch(User.class)
-     *     .getThenAccept(user -> System.out.println("Updated: " + user));
-     * }</pre>
-     *
-     * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete with the deserialized response
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
-        return asyncExecute(HttpMethod.PATCH, resultClass);
-    }
-
-    /**
-     * Executes an asynchronous PATCH request with a custom executor and deserializes the response to the specified type.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ExecutorService executor = Executors.newFixedThreadPool(4);
-     * HttpRequest.url("http://localhost:18080/users/123")
-     *     .jsonBody(partialUpdate)
-     *     .asyncPatch(User.class, executor)
-     *     .getThenAccept(user -> System.out.println("Updated: " + user));
-     * }</pre>
-     *
-     * @param <T> The type of the response object
-     * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete with the deserialized response
-     */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) {
-        return asyncExecute(HttpMethod.PATCH, resultClass, executor);
     }
 
     /**
@@ -1652,8 +1598,11 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncHead(HttpResponse.class, executor);
     }
 
@@ -1685,8 +1634,11 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
-    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) {
+    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(HttpMethod.HEAD, resultClass, executor);
     }
 
@@ -1724,9 +1676,12 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor) {
+    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         return asyncExecute(httpMethod, HttpResponse.class, executor);
     }
 
@@ -1773,12 +1728,13 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
             throws IllegalArgumentException {
         N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(executor, cs.executor);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);
         return execute(cmd, executor);
@@ -1828,9 +1784,12 @@ public final class HttpRequest {
      * @param output The file to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the file
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 
@@ -1884,9 +1843,13 @@ public final class HttpRequest {
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the stream
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 
@@ -1940,9 +1903,12 @@ public final class HttpRequest {
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the writer
+     * @throws IllegalArgumentException if {@code executor} is {@code null}
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(executor, cs.executor);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 

@@ -184,7 +184,7 @@ public class BiIntObjPredicateTest extends TestBase {
     }
 
     @Test
-    public void testAndNullThrowsImmediately() {
+    public void testAndRejectsNullImmediately() {
         BiIntObjPredicate<String> instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((BiIntObjPredicate) null));
     }

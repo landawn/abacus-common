@@ -1224,15 +1224,13 @@ public final class ClassUtil {
      *                                  logging warnings for failed attempts. If {@code false}, throws an exception
      *                                  immediately when any class loading operation fails.
      * @param predicate a filtering predicate applied to each successfully loaded class. Only classes for which
-     *                  this predicate returns {@code true} are included in the result list. Must not be {@code null}.
+     *                  this predicate returns {@code true} are included in the result list.
      *                  Use {@code Fn.alwaysTrue()} to include all discovered classes without filtering.
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
      *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
      *         discovery order; duplicate classes may appear if multiple resources overlap.
-     * @throws IllegalArgumentException if no classpath resources are found
-     *                                  for the specified package (e.g., package does not exist, typo in package name,
-     *                                  or attempting to scan JDK packages which are not supported), or if
-     *                                  {@code pkgName} is empty or {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code pkgName} is {@code null} or empty, or if no resources are
+     *                                  found for the specified package (e.g., the package does not exist or is a JDK package)
      * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
      *                              resource enumeration. This typically indicates file system issues, corrupted
      *                              JAR files, or insufficient permissions for accessing classpath resources.
@@ -1240,6 +1238,7 @@ public final class ClassUtil {
      *                         operation fails. The exception will contain details about the specific class
      *                         that failed to load and the underlying cause of the failure.
      *
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findClassesInPackage(String, boolean, boolean)
      * @see java.lang.ClassLoader#getResources(String)
      * @see java.util.function.Predicate
@@ -1248,7 +1247,7 @@ public final class ClassUtil {
     public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotEmpty(pkgName, "pkgName");
-        N.checkArgNotNull(predicate, "predicate");
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Looking for classes in package: " + pkgName);

@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util.function;
 
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -87,16 +88,16 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long result = add10ThenMultiplyBy3.applyAsLong(5L);   // returns 45L ((5 + 10) * 3)
      * }</pre>
      *
-     * @param before the operator to apply before this operator is applied. Must not be {@code null}.
+     * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws NullPointerException if {@code before} is null
-     *
+     * @throws IllegalArgumentException if {@code before} is {@code null}
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
     @Override
-    default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) {
-        java.util.Objects.requireNonNull(before, cs.before);
+    default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) throws IllegalArgumentException {
+        N.checkArgNotNull(before, cs.before);
+
         return (final long v) -> applyAsLong(before.applyAsLong(v));
     }
 
@@ -116,16 +117,16 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long result = multiplyBy2ThenSubtract5.applyAsLong(10L);   // returns 15L ((10 * 2) - 5)
      * }</pre>
      *
-     * @param after the operator to apply after this operator is applied. Must not be {@code null}.
+     * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws NullPointerException if {@code after} is null
-     *
+     * @throws IllegalArgumentException if {@code after} is {@code null}
      * @see #compose(java.util.function.LongUnaryOperator)
      */
     @Override
-    default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) {
-        java.util.Objects.requireNonNull(after, cs.after);
+    default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) throws IllegalArgumentException {
+        N.checkArgNotNull(after, cs.after);
+
         return (final long t) -> after.applyAsLong(applyAsLong(t));
     }
 

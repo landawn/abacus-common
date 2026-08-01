@@ -57,6 +57,9 @@ public class ExceptionUtilTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(null, e -> new RuntimeException()));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(CustomCheckedException.class, null));
+        // A non-builtin exception class: only the null-mapper check can throw here
+        // (old code proceeded to the registry and threw NPE instead).
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(MockitoException.class, null, true));
     }
 
     @Test

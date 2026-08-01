@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -43,10 +44,11 @@ import com.landawn.abacus.parser.entity.ImmutableEntity5;
 import com.landawn.abacus.parser.entity.ImmutableEntity6;
 import com.landawn.abacus.parser.entity.RecordB;
 import com.landawn.abacus.util.Beans;
-import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.EnumType;
+import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.TypeReference;
 
 import lombok.Value;
 import lombok.experimental.Accessors;
@@ -2453,6 +2455,92 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(null, bi.getPropInfo("GETFIRSTNAME")); // caches a miss
         org.junit.jupiter.api.Assertions.assertNotNull(bi.getPropInfo("getFirstName"));
         assertEquals("firstName", bi.getPropInfo("getFirstName").name);
+    }
+
+    public static class GenericArrayBean<T> {
+        public T[] values;
+    }
+
+    @Test
+    public void test_getBeanInfo_genericArrayWithParameterizedComponent() {
+        final java.lang.reflect.Type beanType = new TypeReference<GenericArrayBean<List<String>>>() {
+            // Capture the complete parameterized bean type.
+        }.javaType();
+
+        final PropInfo values = ParserUtil.getBeanInfo(beanType).getPropInfo("values");
+
+        assertEquals(List[].class, values.type.javaType());
+    }
+
+    public static class GenericBaseBean<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+    }
+
+    public static class IntermediateGenericBean<T> extends GenericBaseBean<T> {
+    }
+
+    public static class LocalDateGenericBean extends IntermediateGenericBean<LocalDate> {
+    }
+
+    public static class GenericOwner<T> {
+        public class InnerGenericBean extends GenericBaseBean<T> {
+        }
+    }
+
+    public static class OwnerPrecedenceBean<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+
+        public class InnerBean extends OwnerPrecedenceBean<String> {
+        }
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesInheritedGenericTypeArguments() {
+        final PropInfo value = ParserUtil.getBeanInfo(LocalDateGenericBean.class).getPropInfo("value");
+
+        assertEquals(LocalDate.class, value.type.javaType());
+
+        final LocalDateGenericBean bean = N.fromJson("{\"value\":\"2026-01-02\"}", LocalDateGenericBean.class);
+        assertEquals(LocalDate.of(2026, 1, 2), bean.getValue());
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesGenericTypeArgumentsFromParameterizedOwner() {
+        final java.lang.reflect.Type beanType = new TypeReference<GenericOwner<LocalDate>.InnerGenericBean>() {
+            // Capture both the non-static inner class and its parameterized owner.
+        }.javaType();
+
+        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
+
+        assertEquals(LocalDate.class, value.type.javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_inheritedTypeArgumentOverridesParameterizedOwner() {
+        final java.lang.reflect.Type beanType = new TypeReference<OwnerPrecedenceBean<LocalDate>.InnerBean>() {
+            // The inner bean explicitly inherits OwnerPrecedenceBean<String>; that nearer
+            // superclass binding must override the lexical owner's LocalDate binding.
+        }.javaType();
+
+        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
+
+        assertEquals(String.class, value.type.javaType());
     }
 
 }

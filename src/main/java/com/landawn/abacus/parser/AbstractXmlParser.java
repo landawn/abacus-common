@@ -810,17 +810,36 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             return jsc;
         }
 
+        final JsonSerConfig baseConfig;
+
         if (config.isCircularReferenceSupported()) {
             if (!config.isFailOnEmptyBean()) {
-                return jscWithCircularRefAndEmptyBeanSupported;
+                baseConfig = jscWithCircularRefAndEmptyBeanSupported;
             } else {
-                return jscWithCircularRefSupported;
+                baseConfig = jscWithCircularRefSupported;
             }
         } else if (!config.isFailOnEmptyBean()) {
-            return jscWithEmptyBeanSupported;
+            baseConfig = jscWithEmptyBeanSupported;
+        } else {
+            baseConfig = jsc;
         }
 
-        return jsc;
+        // XML uses the JSON serializer for raw-JSON properties and for compact scalar
+        // arrays/collections. Preserve the JSON syntax choices needed by that embedding
+        // (notably quoted strings and compact layout), but forward every shared setting
+        // that changes the serialized values. Otherwise a scalar Date/BigDecimal/bean and
+        // the same value inside a JSON-backed collection are serialized differently.
+        return baseConfig.copy()
+                .setIgnoredPropNames(config.getIgnoredPropNames())
+                .setExclusion(config.getExclusion())
+                .setSkipTransientField(config.isSkipTransientField())
+                .setDateTimeFormat(config.getDateTimeFormat())
+                .setPropNamingPolicy(config.getPropNamingPolicy())
+                .setWriteLongAsString(config.isWriteLongAsString())
+                .setWriteNullStringAsEmpty(config.isWriteNullStringAsEmpty())
+                .setWriteNullNumberAsZero(config.isWriteNullNumberAsZero())
+                .setWriteNullBooleanAsFalse(config.isWriteNullBooleanAsFalse())
+                .setWriteBigDecimalAsPlain(config.isWriteBigDecimalAsPlain());
     }
 
     /**

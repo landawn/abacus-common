@@ -190,10 +190,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Iterator is not created until first use
      * }</pre>
      *
-     * @param iteratorSupplier a Supplier that provides the {@code BooleanIterator} when needed, must not be {@code null}
+     * @param iteratorSupplier a Supplier that provides the {@code BooleanIterator} when needed
      * @return a {@code BooleanIterator} that is initialized on the first call to {@code hasNext()} or {@code nextBoolean()}
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -255,12 +255,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Generates infinite random boolean values
      * }</pre>
      *
-     * @param supplier the supplier function to generate boolean values; must not be {@code null}
+     * @param supplier the supplier function to generate boolean values
      * @return an infinite {@code BooleanIterator} whose {@code hasNext()} always returns {@code true}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static BooleanIterator generate(final BooleanSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new BooleanIterator() {
             @Override
@@ -290,15 +290,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Generates 5 boolean values based on even/odd counter
      * }</pre>
      *
-     * @param hasNext the {@link BooleanSupplier} that determines if there are more elements;
-     *        must not be {@code null}
-     * @param supplier the supplier function to generate boolean values; must not be {@code null}
+     * @param hasNext the {@link BooleanSupplier} that determines if there are more elements
+     * @param supplier the supplier function to generate boolean values
      * @return a conditional {@code BooleanIterator}
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static BooleanIterator generate(final BooleanSupplier hasNext, final BooleanSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new BooleanIterator() {
             private boolean hasNextCached = false;
@@ -475,12 +474,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Will only return true values
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return a new {@code BooleanIterator} containing only elements that satisfy the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public BooleanIterator filter(final BooleanPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final BooleanIterator iter = this;
 
@@ -669,13 +668,15 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * iter.forEachRemaining(value -> System.out.println(value));   // Boxes each boolean — avoid this
      * }</pre>
      *
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @param action the action to be performed for each element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -691,12 +692,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextBoolean());
@@ -715,14 +716,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param <E> the type of exception that the action may throw
-     * @param action the action to be performed for each (index, value) pair; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each (index, value) pair
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

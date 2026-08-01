@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyChar;
@@ -136,6 +137,12 @@ public class PairTypeTest extends TestBase {
         assertNotNull(result);
         assertEquals("123", result.left());
         assertEquals(Integer.valueOf(456), result.right());
+    }
+
+    @Test
+    public void testValueOfRequiresExactlyTwoElements() {
+        assertThrows(IllegalArgumentException.class, () -> stringIntPairType.valueOf("[\"only-left\"]"));
+        assertThrows(IllegalArgumentException.class, () -> stringIntPairType.valueOf("[\"left\", 1, \"unexpected\"]"));
     }
 
     @Test

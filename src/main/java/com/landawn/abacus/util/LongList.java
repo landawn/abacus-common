@@ -378,7 +378,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * new LongList(null);   // throws NullPointerException
      * }</pre>
      *
-     * @param a the array whose elements are to be placed into this list. Must not be {@code null}.
+     * @param a the array whose elements are to be placed into this list.
      * @throws NullPointerException if {@code a} is {@code null}
      */
     public LongList(final long[] a) {
@@ -404,7 +404,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * new LongList(a, 5);                   // throws IndexOutOfBoundsException (size > a.length)
      * }</pre>
      *
-     * @param a the array to be used as the internal storage for this list. Must not be {@code null}.
+     * @param a the array to be used as the internal storage for this list.
      * @param size the number of elements in the list, must be between 0 and {@code a.length} (inclusive)
      * @throws IndexOutOfBoundsException if {@code size} is negative or greater than {@code a.length}
      * @throws NullPointerException if {@code a} is {@code null}
@@ -502,7 +502,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * LongList.copyOf(a, 1, 6);                   // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * @param a the array from which a range is to be copied. Must not be {@code null}.
+     * @param a the array from which a range is to be copied.
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new LongList containing a copy of the elements in the specified range
@@ -1050,12 +1050,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * boolean noChange = list.removeIf(i -> i > 99);   // returns false; list unchanged
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed. Must not be {@code null}.
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed from this list
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
-    public boolean removeIf(final LongPredicate p) {
-        N.requireNonNull(p, cs.predicate);
+    public boolean removeIf(final LongPredicate p) throws IllegalArgumentException {
+        N.checkArgNotNull(p, cs.p);
 
         final LongList tmp = new LongList(size());
 
@@ -1316,6 +1316,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
+
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
     }
 
@@ -1467,11 +1468,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * list.replaceAll(x -> x + 1L);    // list is now [11, 21, 31]
      * }</pre>
      *
-     * @param operator the operator to apply to each element. Must not be {@code null}.
-     * @throws NullPointerException if the specified operator is {@code null}
+     * @param operator the operator to apply to each element.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
-    public void replaceAll(final LongUnaryOperator operator) {
-        N.requireNonNull(operator, "operator");
+    public void replaceAll(final LongUnaryOperator operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
         for (int i = 0, len = size(); i < len; i++) {
             elementData[i] = operator.applyAsLong(elementData[i]);
@@ -1491,13 +1492,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * boolean noChange = list.replaceIf(x -> x > 99, 1L);   // returns false; list unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test each element. Must not be {@code null}.
+     * @param predicate the predicate to test each element.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced
-     * @throws NullPointerException if the specified predicate is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public boolean replaceIf(final LongPredicate predicate, final long newValue) {
-        N.requireNonNull(predicate, cs.predicate);
+    public boolean replaceIf(final LongPredicate predicate, final long newValue) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
 
         boolean result = false;
 
@@ -2291,8 +2292,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * new LongList().forEach(x -> sum[0]++);   // no-op on empty list
      * }</pre>
      *
-     * @param action the action to be performed for each element. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to be performed for each element.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final LongConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
@@ -2329,11 +2330,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to index 0
-     * @param action the action to be performed for each element. Must not be {@code null}.
+     * @param action the action to be performed for each element.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
         N.checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), size);
         N.checkArgNotNull(action, cs.action);
 
@@ -2935,17 +2936,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new collection of the desired type,
      *                given the size of the range
      * @return a collection containing the elements in the specified range
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
     public <C extends Collection<Long>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2964,16 +2965,17 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new {@code Multiset} instance,
      *                given the size of the range
      * @return a {@code Multiset} containing the elements in the specified range with their counts
-     * @throws NullPointerException if {@code supplier} is {@code null} or returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
     @Override
-    public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier) throws IndexOutOfBoundsException {
+    public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
+        N.checkArgNotNull(supplier, cs.supplier);
 
-        N.requireNonNull(supplier, cs.supplier);
-        final Multiset<Long> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Long> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);

@@ -241,8 +241,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream filter(final LongPredicate predicate) throws IllegalStateException {
+    public LongStream filter(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private boolean hasNext = false;
@@ -276,8 +278,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream takeWhile(final LongPredicate predicate) throws IllegalStateException {
+    public LongStream takeWhile(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private boolean hasMore = true;
@@ -311,8 +315,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream dropWhile(final LongPredicate predicate) throws IllegalStateException {
+    public LongStream dropWhile(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private boolean hasNext = false;
@@ -414,8 +420,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream map(final LongUnaryOperator mapper) throws IllegalStateException {
+    public LongStream map(final LongUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -426,7 +434,7 @@ class ArrayLongStream extends AbstractLongStream {
             }
 
             @Override
-            public long nextLong() throws IllegalArgumentException {
+            public long nextLong() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -448,8 +456,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public IntStream mapToInt(final LongToIntFunction mapper) throws IllegalStateException {
+    public IntStream mapToInt(final LongToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -460,7 +470,7 @@ class ArrayLongStream extends AbstractLongStream {
             }
 
             @Override
-            public int nextInt() throws IllegalArgumentException {
+            public int nextInt() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -482,8 +492,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public FloatStream mapToFloat(final LongToFloatFunction mapper) throws IllegalStateException {
+    public FloatStream mapToFloat(final LongToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new FloatIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -494,7 +506,7 @@ class ArrayLongStream extends AbstractLongStream {
             }
 
             @Override
-            public float nextFloat() throws IllegalArgumentException {
+            public float nextFloat() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -516,8 +528,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public DoubleStream mapToDouble(final LongToDoubleFunction mapper) throws IllegalStateException {
+    public DoubleStream mapToDouble(final LongToDoubleFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -528,7 +542,7 @@ class ArrayLongStream extends AbstractLongStream {
             }
 
             @Override
-            public double nextDouble() throws IllegalArgumentException {
+            public double nextDouble() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -550,8 +564,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <T> Stream<T> mapToObj(final LongFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> mapToObj(final LongFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -562,7 +578,7 @@ class ArrayLongStream extends AbstractLongStream {
             }
 
             @Override
-            public T next() throws IllegalArgumentException {
+            public T next() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -589,8 +605,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream flatMap(final LongFunction<? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMap(final LongFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final LongIteratorEx iter = new LongIteratorEx() {
             private int cursor = fromIndex;
@@ -647,8 +665,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream flatmap(final LongFunction<? extends Collection<Long>> mapper) throws IllegalStateException {
+    public LongStream flatmap(final LongFunction<? extends Collection<Long>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -678,8 +698,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream flatMapArray(final LongFunction<long[]> mapper) throws IllegalStateException {
+    public LongStream flatMapArray(final LongFunction<long[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArray(mapper);
@@ -719,8 +741,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public IntStream flatMapToInt(final LongFunction<? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMapToInt(final LongFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
@@ -777,8 +801,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public FloatStream flatMapToFloat(final LongFunction<? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMapToFloat(final LongFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private int cursor = fromIndex;
@@ -835,8 +861,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public DoubleStream flatMapToDouble(final LongFunction<? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMapToDouble(final LongFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private int cursor = fromIndex;
@@ -893,8 +921,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapToObj(final LongFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final LongFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
             private int cursor = fromIndex;
@@ -951,8 +981,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final LongFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final LongFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -1050,7 +1082,9 @@ class ArrayLongStream extends AbstractLongStream {
     @Override
     public LongStream top(final int n, final Comparator<? super Long> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
+        checkArgNotNull(comparator, cs.comparator);
 
         if (n == 0) {
             return newStream(elements, fromIndex, fromIndex, isSorted());
@@ -1143,8 +1177,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream onEach(final LongConsumer action) throws IllegalStateException {
+    public LongStream onEach(final LongConsumer action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -1181,8 +1217,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1252,8 +1290,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <C extends Collection<Long>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException {
+    public <C extends Collection<Long>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final C result = supplier.get();
@@ -1286,8 +1326,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public Multiset<Long> toMultiset(final Supplier<? extends Multiset<Long>> supplier) throws IllegalStateException {
+    public Multiset<Long> toMultiset(final Supplier<? extends Multiset<Long>> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final Multiset<Long> result = supplier.get();
@@ -1305,8 +1347,13 @@ class ArrayLongStream extends AbstractLongStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper,
             final Throwables.LongFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -1325,6 +1372,9 @@ class ArrayLongStream extends AbstractLongStream {
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.LongFunction<? extends K, E> keyMapper,
             final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -1417,8 +1467,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public long reduce(final long identity, final LongBinaryOperator accumulator) throws IllegalStateException {
+    public long reduce(final long identity, final LongBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             long result = identity;
@@ -1434,8 +1486,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public OptionalLong reduce(final LongBinaryOperator accumulator) throws IllegalStateException {
+    public OptionalLong reduce(final LongBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             if (fromIndex == toIndex) {
@@ -1456,8 +1510,12 @@ class ArrayLongStream extends AbstractLongStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         try {
             final R result = supplier.get();
@@ -1584,8 +1642,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1601,8 +1661,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1618,8 +1680,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1635,8 +1699,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1652,8 +1718,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = toIndex - 1; i >= fromIndex; i--) {
@@ -1797,8 +1865,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream appendIfEmpty(final Supplier<? extends LongStream> supplier) throws IllegalStateException {
+    public LongStream appendIfEmpty(final Supplier<? extends LongStream> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         if (fromIndex == toIndex) {
             final Holder<LongStream> holder = new Holder<>();
@@ -1860,8 +1930,10 @@ class ArrayLongStream extends AbstractLongStream {
     }
 
     @Override
-    public LongStream ifEmpty(final Runnable action) throws IllegalStateException {
+    public LongStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (fromIndex == toIndex) {
             return newStream(new LongIteratorEx() { //NOSONAR
@@ -1917,7 +1989,7 @@ class ArrayLongStream extends AbstractLongStream {
         assertNotClosed();
 
         return new ParallelArrayLongStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
-                closeHandlers());
+                closeHandlersForNewStream());
     }
 
     @Override

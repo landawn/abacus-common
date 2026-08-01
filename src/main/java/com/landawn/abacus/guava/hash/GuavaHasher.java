@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Package-private implementation of {@link Hasher} that wraps a Google Guava
@@ -326,9 +327,12 @@ final class GuavaHasher implements Hasher {
      * @param instance the object instance to add
      * @param funnel the funnel that translates the object into bytes
      * @return this hasher instance
+     * @throws IllegalArgumentException if {@code funnel} is {@code null}
      */
     @Override
-    public <T> Hasher put(final T instance, final Funnel<? super T> funnel) {
+    public <T> Hasher put(final T instance, final Funnel<? super T> funnel) throws IllegalArgumentException {
+        N.checkArgNotNull(funnel, cs.funnel);
+
         gHasher.putObject(instance, funnel);
         return this;
     }

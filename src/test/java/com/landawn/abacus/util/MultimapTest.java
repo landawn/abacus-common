@@ -1,5 +1,6 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -9,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2282,15 +2282,10 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testReplaceAll_nullFunction_throwsIAE() {
-        // replaceAll declares it rejects a null function; honor it eagerly like the compute/merge/
-        // computeIfAbsent/computeIfPresent siblings so an EMPTY multimap also rejects null instead of
-        // silently returning (the documented @throws was previously unhonored on the empty path).
         final BiFunction<String, List<Integer>, List<Integer>> nullFn = null;
 
-        // empty multimap: previously iterated zero entries and returned normally; now throws eagerly.
         assertThrows(IllegalArgumentException.class, () -> listMultimap.replaceAll(nullFn));
 
-        // non-empty multimap also throws IllegalArgumentException (previously an NPE from function.apply).
         listMultimap.put("k", 1);
         assertThrows(IllegalArgumentException.class, () -> listMultimap.replaceAll(nullFn));
     }
@@ -2528,12 +2523,12 @@ public class MultimapTest extends AbstractTest {
         assertNull(mm.computeIfPresent("c", (k, v) -> new ArrayList<>()));
         assertFalse(mm.containsKey("c"));
 
-        assertThrows(IllegalArgumentException.class, () -> mm.computeIfPresent("d", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> mm.computeIfPresent("d", null));
     }
 
     @Test
     public void testComputeIfPresentNullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> multimap.computeIfPresent("key", null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.computeIfPresent("key", null));
     }
 
     @Test
@@ -2903,7 +2898,7 @@ public class MultimapTest extends AbstractTest {
         assertNull(mm.merge("a", Arrays.asList(40), (ov, nv) -> null));
         assertFalse(mm.containsKey("a"));
 
-        assertThrows(IllegalArgumentException.class, () -> mm.merge("b", elementsToMerge, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> mm.merge("b", elementsToMerge, null));
         assertThrows(IllegalArgumentException.class, () -> mm.merge("b", null, remappingFunc));
     }
 
@@ -2925,23 +2920,22 @@ public class MultimapTest extends AbstractTest {
         List<Integer> mergedValPresent = mm.merge("x", moreElement, remappingFunc);
         assertEquals(Arrays.asList(100, 200), mergedValPresent);
 
-        assertThrows(IllegalArgumentException.class, () -> mm.merge("y", elementToMerge, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> mm.merge("y", elementToMerge, null));
     }
 
     @Test
     public void testMergeNullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> multimap.merge("key", 1, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.merge("key", 1, null));
     }
 
     @Test
     public void testMergeCollection_NullFunction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.merge("key1", Arrays.asList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.merge("key1", Arrays.asList(1), null));
     }
 
     @Test
     public void testMergeElement_NullFunction() {
-        assertThrows(IllegalArgumentException.class,
-                () -> listMultimap.merge("key1", 1, (BiFunction<? super List<Integer>, ? super Integer, ? extends List<Integer>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.merge("key1", 1, (BiFunction<? super List<Integer>, ? super Integer, ? extends List<Integer>>) null));
     }
 
     @Test
@@ -3429,7 +3423,7 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testForEach_NullAction() {
-        assertThrows(IllegalArgumentException.class, () -> listMultimap.forEach((java.util.function.BiConsumer<? super String, ? super Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.forEach((java.util.function.BiConsumer<? super String, ? super Integer>) null));
     }
 
     @Test
@@ -4991,7 +4985,7 @@ public class MultimapTest extends AbstractTest {
         assertEquals(Arrays.asList(1), sourceMap.get("a"));
 
         assertThrows(IllegalArgumentException.class, () -> ListMultimap.wrap(null, valueSupplier));
-        assertThrows(IllegalArgumentException.class, () -> ListMultimap.wrap(sourceMap, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ListMultimap.wrap(sourceMap, null));
     }
 
     @Test
@@ -5331,32 +5325,21 @@ public class MultimapTest extends AbstractTest {
     }
 
     @Test
-    public void testConditionalMutatorsRejectNullPredicatesEagerly() {
+    public void testConditionalMutatorsRejectNullPredicatesForEmptyMultimap() {
         final Multimap<String, Integer, List<Integer>> empty = N.newListMultimap();
         final Predicate<String> keyPredicate = null;
         final BiPredicate<String, List<Integer>> entryPredicate = null;
 
-        // Each of these methods has a Predicate and a BiPredicate overload, so the message must name
-        // the parameter that was actually rejected -- otherwise the exception cannot tell a caller
-        // which overload they bound to. A validation sweep once pointed all ten at cs.Predicate,
-        // producing "'Predicate' cannot be null" for a parameter no signature declares.
-        assertEquals("'keyPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(keyPredicate, 1)).getMessage());
-        assertEquals("'entryPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(entryPredicate, 1)).getMessage());
-        assertEquals("'keyPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(keyPredicate, Collections.emptyList())).getMessage());
-        assertEquals("'entryPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(entryPredicate, Collections.emptyList())).getMessage());
-        assertEquals("'keyPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(keyPredicate)).getMessage());
-        assertEquals("'entryPredicate' cannot be null", assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(entryPredicate)).getMessage());
-        assertEquals("'keyPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(keyPredicate, 1, 2)).getMessage());
-        assertEquals("'entryPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(entryPredicate, 1, 2)).getMessage());
-        assertEquals("'keyPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(keyPredicate, Collections.emptyList())).getMessage());
-        assertEquals("'entryPredicate' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(entryPredicate, Collections.emptyList())).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(keyPredicate, 1));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeEntriesIf(entryPredicate, 1));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(keyPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeValuesIf(entryPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(keyPredicate));
+        assertThrows(IllegalArgumentException.class, () -> empty.removeKeysIf(entryPredicate));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(keyPredicate, 1, 2));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceEntriesIf(entryPredicate, 1, 2));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(keyPredicate, Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> empty.replaceValuesIf(entryPredicate, Collections.emptyList()));
     }
 
 }

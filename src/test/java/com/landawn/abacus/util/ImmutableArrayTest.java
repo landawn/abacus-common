@@ -335,7 +335,7 @@ public class ImmutableArrayTest extends TestBase {
     @Test
     public void testForEach_NullConsumer() {
         ImmutableArray<String> array = ImmutableArray.of("a");
-        Assertions.assertThrows(NullPointerException.class, () -> array.forEach((Consumer<String>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> array.forEach((Consumer<String>) null));
     }
 
     @Test

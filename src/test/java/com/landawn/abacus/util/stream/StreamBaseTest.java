@@ -272,7 +272,7 @@ public class StreamBaseTest extends TestBase {
         Assertions.assertThrows(IllegalStateException.class, () -> stream2.throwIfEmpty(() -> new IllegalStateException("Custom empty message")).count());
 
         Stream<Integer> stream3 = createStream();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> stream3.throwIfEmpty(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> stream3.throwIfEmpty(null).count());
     }
 
     @Test
@@ -490,10 +490,8 @@ public class StreamBaseTest extends TestBase {
     @Test
     public void testSpsAndPspRejectNullOperationsBeforeChangingStreamMode() {
         final java.util.function.Function<Stream<Integer>, Stream<Integer>> nullOps = null;
-        final AtomicBoolean closed = new AtomicBoolean(false);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).onClose(() -> closed.set(true)).sps(nullOps));
-        Assertions.assertTrue(closed.get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(nullOps));
         Assertions.assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).sps(2, nullOps));
 
         final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -669,6 +667,75 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
+    public void testClosingExplicitIteratorDerivedStreamsClosesEveryParentSpecialization() {
+        final Stream<Integer> objectParent = createStream(1, 2, 3);
+        objectParent.flatMap(Stream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, objectParent::count);
+
+        final CharStream charParent = CharStream.of('a', 'b');
+        charParent.flatMap(CharStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, charParent::count);
+
+        final ByteStream byteParent = ByteStream.of((byte) 1, (byte) 2);
+        byteParent.flatMap(ByteStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, byteParent::count);
+
+        final ShortStream shortParent = ShortStream.of((short) 1, (short) 2);
+        shortParent.flatMap(ShortStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, shortParent::count);
+
+        final IntStream intParent = IntStream.of(1, 2);
+        intParent.flatMap(IntStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, intParent::count);
+
+        final LongStream longParent = LongStream.of(1L, 2L);
+        longParent.flatMap(LongStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, longParent::count);
+
+        final FloatStream floatParent = FloatStream.of(1F, 2F);
+        floatParent.flatMap(FloatStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, floatParent::count);
+
+        final DoubleStream doubleParent = DoubleStream.of(1D, 2D);
+        doubleParent.flatMap(DoubleStream::of).close();
+        Assertions.assertThrows(IllegalStateException.class, doubleParent::count);
+
+        final AtomicInteger closeCount = new AtomicInteger();
+        final IntStream parentWithCloseHandler = IntStream.of(1).onClose(closeCount::incrementAndGet);
+        parentWithCloseHandler.flatMap(IntStream::of).close();
+        Assertions.assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testClosingExecutionModeViewClosesSourceStream() {
+        final Stream<Integer> sequentialSource = createStream(1, 2);
+        sequentialSource.parallel(2).close();
+        Assertions.assertThrows(IllegalStateException.class, sequentialSource::count);
+
+        final Stream<Integer> parallelSource = createStream(1, 2).parallel(2);
+        parallelSource.sequential().close();
+        Assertions.assertThrows(IllegalStateException.class, parallelSource::count);
+
+        final Stream<Integer> iteratorSequentialSource = Stream.of(Arrays.asList(1, 2).iterator());
+        iteratorSequentialSource.parallel(2).close();
+        Assertions.assertThrows(IllegalStateException.class, iteratorSequentialSource::count);
+
+        final Stream<Integer> iteratorParallelSource = Stream.of(Arrays.asList(1, 2).iterator()).parallel(2);
+        iteratorParallelSource.sequential().close();
+        Assertions.assertThrows(IllegalStateException.class, iteratorParallelSource::count);
+
+        final AtomicInteger primitiveCloseCount = new AtomicInteger();
+        final IntStream primitiveArraySource = IntStream.of(1, 2).onClose(primitiveCloseCount::incrementAndGet);
+        primitiveArraySource.parallel(2).close();
+        Assertions.assertEquals(1, primitiveCloseCount.get());
+        Assertions.assertThrows(IllegalStateException.class, primitiveArraySource::count);
+
+        final IntStream primitiveIteratorSource = IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2)).parallel(2);
+        primitiveIteratorSource.sequential().close();
+        Assertions.assertThrows(IllegalStateException.class, primitiveIteratorSource::count);
+    }
+
+    @Test
     public void testClose() {
         Stream<Integer> stream = createStream(1, 2, 3);
         Assertions.assertDoesNotThrow(() -> stream.close());
@@ -793,8 +860,7 @@ public class StreamBaseTest extends TestBase {
 
     @Test
     public void testNewCloseHandler() {
-        LocalRunnable handler1 = StreamBase.newCloseHandler((Runnable) null);
-        Assertions.assertEquals(StreamBase.EMPTY_CLOSE_HANDLER, handler1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StreamBase.newCloseHandler((Runnable) null));
 
         LocalRunnable localRunnable = LocalRunnable.wrap(Fn.jr(() -> {
         }));
@@ -1641,8 +1707,7 @@ public class StreamBaseTest extends TestBase {
 
     @Test
     public void testLocalRunnable() {
-        LocalRunnable wrapped1 = LocalRunnable.wrap((Runnable) null);
-        Assertions.assertSame(StreamBase.EMPTY_CLOSE_HANDLER, wrapped1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> LocalRunnable.wrap((Runnable) null));
 
         LocalRunnable localRunnable = LocalRunnable.wrap(Fn.jr(() -> {
         }));

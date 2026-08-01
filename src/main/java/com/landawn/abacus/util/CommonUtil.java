@@ -2284,7 +2284,7 @@ sealed class CommonUtil permits N {
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@code N.toString(Object)} (arrays and Iterables are rendered element-wise; an Iterator argument is rendered element-wise as well, which consumes the iterator).
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@code N.toString(Object)} (arrays and Collections are rendered element-wise; any other object - including an Iterable that is not a Collection, or an Iterator - is rendered via its own {@code toString()} and is not iterated/consumed).
      * @throws IllegalArgumentException if {@code expression} is false
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs)
@@ -3061,10 +3061,13 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param expression a boolean expression
-     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
+     * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes; must not be {@code null}
      * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code errorMessageSupplier} is {@code null}.
      */
     public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(errorMessageSupplier, cs.errorMessageSupplier);
+
         if (!expression) {
             throw new IllegalArgumentException(errorMessageSupplier.get());
         }
@@ -3366,7 +3369,7 @@ sealed class CommonUtil permits N {
      *
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
-     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@code N.toString(Object)} (arrays and Iterables are rendered element-wise; an Iterator argument is rendered element-wise as well, which consumes the iterator).
+     * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@code N.toString(Object)} (arrays and Collections are rendered element-wise; any other object - including an Iterable that is not a Collection, or an Iterator - is rendered via its own {@code toString()} and is not iterated/consumed).
      * @throws IllegalStateException if {@code expression} is false
      */
     public static void checkState(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs) throws IllegalStateException {
@@ -4131,8 +4134,12 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes
      * @throws IllegalStateException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code errorMessageSupplier} is {@code null}.
      */
-    public static void checkState(final boolean expression, final Supplier<String> errorMessageSupplier) throws IllegalStateException {
+    public static void checkState(final boolean expression, final Supplier<String> errorMessageSupplier)
+            throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(errorMessageSupplier, cs.errorMessageSupplier);
+
         if (!expression) {
             throw new IllegalStateException(errorMessageSupplier.get());
         }
@@ -4242,6 +4249,7 @@ sealed class CommonUtil permits N {
      *            verbatim as the message.
      * @return the {@code non-null} object reference that was validated
      * @throws NullPointerException if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if {@code errorMessageSupplier} is {@code null}.
      * @see #checkArgNotNull(Object, String)
      * @see Objects#requireNonNull(Object, String)
      * @see Objects#requireNonNull(Object, Supplier)
@@ -4249,7 +4257,9 @@ sealed class CommonUtil permits N {
      * @see Objects#requireNonNullElseGet(Object, Supplier)
      */
     @Beta
-    public static <T> T requireNonNull(final T obj, final Supplier<String> errorMessageSupplier) throws NullPointerException {
+    public static <T> T requireNonNull(final T obj, final Supplier<String> errorMessageSupplier) throws NullPointerException, IllegalArgumentException {
+        N.checkArgNotNull(errorMessageSupplier, cs.errorMessageSupplier);
+
         if (obj == null) {
             final String errorMessage = errorMessageSupplier.get();
 
@@ -10811,12 +10821,15 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the object
      * @param obj the object to check, may be {@code null}
-     * @param supplierForDefault the supplier that provides the default value if {@code obj} is {@code null}
+     * @param supplierForDefault the non-null supplier that provides the default value if {@code obj} is {@code null}
      * @return {@code obj} if it is not {@code null}, otherwise the value provided by {@code supplierForDefault}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified object is {@code null}.
+     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfNull(CharSequence, Supplier)
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForDefault, cs.supplierForDefault);
+
         if (obj == null) {
             return checkArgNotNull(supplierForDefault.get(), cs.defaultValue);
         }
@@ -10862,9 +10875,12 @@ sealed class CommonUtil permits N {
      * @param supplierForDefault the supplier that provides the default value if {@code str} is empty
      * @return {@code str} if it is not empty, otherwise the value provided by {@code supplierForDefault}
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
+     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfEmpty(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForDefault, cs.supplierForDefault);
+
         if (isEmpty(str)) {
             return checkArgNotEmpty(supplierForDefault.get(), cs.defaultValue);
         }
@@ -10910,9 +10926,12 @@ sealed class CommonUtil permits N {
      * @param supplierForDefault the supplier to provide the default value if the string is blank
      * @return the string if not blank, or the value from the supplier if blank
      * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
+     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfBlank(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
+        N.checkArgNotNull(supplierForDefault, cs.supplierForDefault);
+
         if (isBlank(str)) {
             return checkArgNotBlank(supplierForDefault.get(), cs.defaultValue);
         }
@@ -11288,13 +11307,18 @@ sealed class CommonUtil permits N {
      * N.registerConverter(String.class, (value, targetType) -> value);              // throws IllegalArgumentException (built-in class)
      * }</pre>
      *
-     * @param srcClass the source class that the converter can convert from. This must not be a built-in class.
-     * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class.
-     * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
-     * @throws IllegalArgumentException if the specified {@code srcClass} is a built-in class or if either {@code srcClass} or {@code converter} is {@code null}.
+     * @param srcClass the source class that the converter can convert from; must not be {@code null} and must not be a built-in class
+     * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class;
+     *                  must not be {@code null}
+     * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call
+     * @throws IllegalArgumentException if {@code srcClass} or {@code converter} is {@code null}, or if {@code srcClass}
+     *         is a built-in class (primitive, primitive array, or package name starting with {@code "java."},
+     *         {@code "javax."}, or {@code "com.landawn.abacus."})
      * @see Converters#register(Class, BiFunction)
      */
     public static boolean registerConverter(@NotNull final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
+        N.checkArgNotNull(converter, cs.converter);
+
         return Converters.register(srcClass, converter);
     }
 
@@ -12688,9 +12712,12 @@ sealed class CommonUtil permits N {
      * @param interfaceClass the Class object of the interface for the proxy class to implement; must not be {@code null}
      * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @throws IllegalArgumentException if {@code h} is {@code null}.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
-    public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) {
+    public static <T> T newProxyInstance(final Class<T> interfaceClass, final InvocationHandler h) throws IllegalArgumentException {
+        N.checkArgNotNull(h, cs.h);
+
         return newProxyInstance(asArray(interfaceClass), h);
     }
 
@@ -12710,9 +12737,12 @@ sealed class CommonUtil permits N {
      * @param interfaceClasses the array of Class objects of the interfaces for the proxy class to implement; must not be {@code null}
      * @param h the invocation handler to dispatch method invocations to. It's an object that implements the InvocationHandler interface.
      * @return a proxy instance that implements the specified interface(s) and dispatches method invocations to the specified invocation handler.
+     * @throws IllegalArgumentException if {@code h} is {@code null}.
      * @see java.lang.reflect.Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
      */
-    public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) {
+    public static <T> T newProxyInstance(final Class<?>[] interfaceClasses, final InvocationHandler h) throws IllegalArgumentException {
+        N.checkArgNotNull(h, cs.h);
+
         ClassLoader classLoader = N.class.getClassLoader();
 
         if (interfaceClasses != null && interfaceClasses.length > 0) {
@@ -13192,15 +13222,18 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.newTreeSet(Comparator.naturalOrder());   // returns empty TreeSet
-     * N.newTreeSet((Comparator<String>) null);   // returns TreeSet using natural ordering
+     * N.newTreeSet((Comparator<String>) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of elements in the set
      * @param comparator the comparator that will be used to order this set.
      * @return a new instance of a TreeSet
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see java.util.TreeSet#TreeSet(Comparator)
      */
-    public static <T> TreeSet<T> newTreeSet(final Comparator<? super T> comparator) { //NOSONAR
+    public static <T> TreeSet<T> newTreeSet(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator); //NOSONAR
+
         return new TreeSet<>(comparator);
     }
 
@@ -13377,8 +13410,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the multiset
      * @param mapSupplier the supplier that provides the map to be used to store element/occurrence pairs
      * @return a new instance of a Multiset backed by the map provided by the specified supplier
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
      */
-    public static <T> Multiset<T> newMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) {
+    public static <T> Multiset<T> newMultiset(final Supplier<? extends Map<T, ?>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         return new Multiset<>(mapSupplier);
     }
 
@@ -13566,6 +13602,7 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be placed into this map
      * @param keyExtractor the function to extract a key from a collection element
      * @return a new instance of a HashMap containing the elements from the specified collection
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #toMap(Iterable, Function)
      * @see #toMap(Iterable, Function, Function)
      * @see #toMap(Iterable, Function, Function, IntFunction)
@@ -13573,7 +13610,10 @@ sealed class CommonUtil permits N {
      * @deprecated use {@link #toMap(Iterable, Function)} instead (identical behavior, including later-wins handling of duplicate keys).
      */
     @Deprecated
-    public static <K, V> HashMap<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor) {
+    public static <K, V> HashMap<K, V> newHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         // checkArgNotNull(keyExtractor);
 
         if (isEmpty(c)) {
@@ -13660,6 +13700,7 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be placed into this map
      * @param keyExtractor the function to extract a key from a collection element
      * @return a new instance of a LinkedHashMap containing the elements from the specified collection
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #toMap(Iterable, Function)
      * @see #toMap(Iterable, Function, Function)
      * @see #toMap(Iterable, Function, Function, IntFunction)
@@ -13667,7 +13708,10 @@ sealed class CommonUtil permits N {
      * @deprecated use {@code toMap(c, keyExtractor, Fn.identity(), LinkedHashMap::new)} instead (identical behavior, including later-wins handling of duplicate keys).
      */
     @Deprecated
-    public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor) {
+    public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(final Collection<? extends V> c, final Function<? super V, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         if (isEmpty(c)) {
             return newLinkedHashMap();
         }
@@ -13712,8 +13756,11 @@ sealed class CommonUtil permits N {
      * @param <V> the type of mapped values
      * @param comparator the comparator that will be used to order this map
      * @return a new instance of a TreeMap with the specified comparator
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(final Comparator<C> comparator) { //NOSONAR
+    public static <C, K extends C, V> TreeMap<K, V> newTreeMap(final Comparator<C> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator); //NOSONAR
+
         return new TreeMap<>(comparator);
     }
 
@@ -13944,8 +13991,13 @@ sealed class CommonUtil permits N {
      * @param keyMapSupplier the supplier that provides the map to store <i>key/value</i> pairs
      * @param valueMapSupplier the supplier that provides the map to store <i>value/key</i> pairs
      * @return a new instance of a BiMap with the specified key and value map suppliers
+     * @throws IllegalArgumentException if any of {@code keyMapSupplier}, {@code valueMapSupplier} is {@code null}.
      */
-    public static <K, V> BiMap<K, V> newBiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) {
+    public static <K, V> BiMap<K, V> newBiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyMapSupplier, cs.keyMapSupplier);
+        N.checkArgNotNull(valueMapSupplier, cs.valueMapSupplier);
+
         return new BiMap<>(keyMapSupplier, valueMapSupplier);
     }
 
@@ -13964,9 +14016,13 @@ sealed class CommonUtil permits N {
      * @param mapSupplier the supplier that provides the map to store <i>key/value</i> pairs
      * @param valueSupplier the supplier that provides the collection to store values
      * @return a new instance of a Multimap with the specified map and value suppliers
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
     public static <K, E, V extends Collection<E>> Multimap<K, E, V> newMultimap(final Supplier<? extends Map<K, V>> mapSupplier,
-            final Supplier<? extends V> valueSupplier) {
+            final Supplier<? extends V> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         return new Multimap<>(mapSupplier, valueSupplier);
     }
 
@@ -14062,9 +14118,13 @@ sealed class CommonUtil permits N {
      * @param mapSupplier the supplier that provides the map to store entries
      * @param valueSupplier the supplier that provides the list to store values
      * @return a new instance of a ListMultimap with the specified map and value suppliers
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
     public static <K, E> ListMultimap<K, E> newListMultimap(final Supplier<? extends Map<K, List<E>>> mapSupplier,
-            final Supplier<? extends List<E>> valueSupplier) {
+            final Supplier<? extends List<E>> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         return new ListMultimap<>(mapSupplier, valueSupplier);
     }
 
@@ -14104,8 +14164,12 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be placed into this ListMultimap
      * @param keyExtractor the function to extract keys from the specified collection elements
      * @return a new instance of a ListMultimap with the keys extracted from the specified collection elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> ListMultimap<K, T> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return ListMultimap.fromCollection(c, keyExtractor);
     }
 
@@ -14125,9 +14189,13 @@ sealed class CommonUtil permits N {
      * @param keyExtractor the function to extract keys from the collection elements
      * @param valueExtractor the function to extract values from the collection elements
      * @return a new instance of a ListMultimap with the keys and values extracted from the specified collection
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T, K, E> ListMultimap<K, E> newListMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends E> valueExtractor) {
+            final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         return ListMultimap.fromCollection(c, keyExtractor, valueExtractor);
     }
 
@@ -14331,9 +14399,13 @@ sealed class CommonUtil permits N {
      * @param mapSupplier the supplier that provides the map to store entries
      * @param valueSupplier the supplier that provides the set to store values
      * @return a new instance of a SetMultimap with the specified map and value suppliers
+     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
      */
-    public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier,
-            final Supplier<? extends Set<E>> valueSupplier) {
+    public static <K, E> SetMultimap<K, E> newSetMultimap(final Supplier<? extends Map<K, Set<E>>> mapSupplier, final Supplier<? extends Set<E>> valueSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
         return new SetMultimap<>(mapSupplier, valueSupplier);
     }
 
@@ -14373,8 +14445,12 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be placed into this SetMultimap
      * @param keyExtractor the function to extract keys from the specified collection elements
      * @return a new instance of a SetMultimap with the keys extracted from the specified collection elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> SetMultimap<K, T> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         return SetMultimap.fromCollection(c, keyExtractor);
     }
 
@@ -14394,9 +14470,13 @@ sealed class CommonUtil permits N {
      * @param keyExtractor the function to extract keys from the collection elements
      * @param valueExtractor the function to extract values from the collection elements
      * @return a new instance of a SetMultimap with the keys and values extracted from the specified collection
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T, K, E> SetMultimap<K, E> newSetMultimap(final Collection<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends E> valueExtractor) {
+            final Function<? super T, ? extends E> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         return SetMultimap.fromCollection(c, keyExtractor, valueExtractor);
     }
 
@@ -15496,8 +15576,11 @@ sealed class CommonUtil permits N {
      * @param c the collection to be converted into an array.
      * @param arraySupplier the function to generate a new array of the appropriate type and size.
      * @return an array containing the elements of the collection
+     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}.
      */
-    public static <A> A[] toArray(final Collection<? extends A> c, final IntFunction<A[]> arraySupplier) {
+    public static <A> A[] toArray(final Collection<? extends A> c, final IntFunction<A[]> arraySupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(arraySupplier, cs.arraySupplier);
+
         if (isEmpty(c)) {
             return arraySupplier.apply(0);
         }
@@ -15522,10 +15605,12 @@ sealed class CommonUtil permits N {
      * @param arraySupplier the function to generate a new array of the appropriate type and size.
      * @return the array containing the elements of the specified portion of the collection.
      * @throws IndexOutOfBoundsException if the specified {@code fromIndex} or {@code toIndex} is out of the collection's range.
+     * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}.
      */
     public static <A> A[] toArray(final Collection<? extends A> c, final int fromIndex, final int toIndex, final IntFunction<A[]> arraySupplier)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
+        N.checkArgNotNull(arraySupplier, cs.arraySupplier);
 
         if (isEmpty(c)) {
             return arraySupplier.apply(0);
@@ -18246,10 +18331,13 @@ sealed class CommonUtil permits N {
      * @param a the boolean array to be converted. Can be {@code null}.
      * @param supplier a function that provides a new instance of the desired Collection type. The function receives the expected capacity as a parameter.
      * @return a Collection of Boolean objects containing the values from the boolean array. Returns an empty Collection if {@code a} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18271,12 +18359,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Boolean objects containing the values from the specified range of the boolean array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Boolean>> C toCollection(final boolean[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18304,10 +18394,13 @@ sealed class CommonUtil permits N {
      * @param a the char array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Character objects containing the values from the char array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Character>> C toCollection(final char[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Character>> C toCollection(final char[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18329,12 +18422,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Character objects containing the values from the specified range of the char array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Character>> C toCollection(final char[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18362,10 +18457,13 @@ sealed class CommonUtil permits N {
      * @param a the byte array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Byte objects containing the values from the byte array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Byte>> C toCollection(final byte[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Byte>> C toCollection(final byte[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18387,12 +18485,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Byte objects containing the values from the specified range of the byte array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Byte>> C toCollection(final byte[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18420,10 +18520,13 @@ sealed class CommonUtil permits N {
      * @param a the short array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Short objects containing the values from the short array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Short>> C toCollection(final short[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Short>> C toCollection(final short[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18445,12 +18548,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Short objects containing the values from the specified range of the short array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Short>> C toCollection(final short[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18478,10 +18583,13 @@ sealed class CommonUtil permits N {
      * @param a the int array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Integer objects containing the values from the int array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Integer>> C toCollection(final int[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Integer>> C toCollection(final int[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18503,12 +18611,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Integer objects containing the values from the specified range of the int array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Integer>> C toCollection(final int[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18536,10 +18646,13 @@ sealed class CommonUtil permits N {
      * @param a the long array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Long objects containing the values from the long array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Long>> C toCollection(final long[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Long>> C toCollection(final long[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18561,12 +18674,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Long objects containing the values from the specified range of the long array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Long>> C toCollection(final long[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18594,10 +18709,13 @@ sealed class CommonUtil permits N {
      * @param a the float array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Float objects containing the values from the float array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Float>> C toCollection(final float[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Float>> C toCollection(final float[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18619,12 +18737,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Float objects containing the values from the specified range of the float array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Float>> C toCollection(final float[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18652,10 +18772,13 @@ sealed class CommonUtil permits N {
      * @param a the double array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Double objects containing the values from the double array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <C extends Collection<Double>> C toCollection(final double[] a, final IntFunction<? extends C> supplier) {
+    public static <C extends Collection<Double>> C toCollection(final double[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         return toCollection(a, 0, len(a), supplier);
     }
 
@@ -18677,12 +18800,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of Double objects containing the values from the specified range of the double array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <C extends Collection<Double>> C toCollection(final double[] a, final int fromIndex, final int toIndex,
-            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18711,10 +18836,13 @@ sealed class CommonUtil permits N {
      * @param a the array to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of objects containing the values from the array
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <T, C extends Collection<T>> C toCollection(final T[] a, final IntFunction<? extends C> supplier) {
+    public static <T, C extends Collection<T>> C toCollection(final T[] a, final IntFunction<? extends C> supplier) throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isEmpty(a)) {
             return supplier.apply(0);
         }
@@ -18741,12 +18869,14 @@ sealed class CommonUtil permits N {
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of objects containing the values from the specified range of the array
      * @throws IndexOutOfBoundsException if the specified indices are out of the array's range
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
     public static <T, C extends Collection<T>> C toCollection(final T[] a, final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+        N.checkArgNotNull(supplier, cs.supplier); // NOSONAR
 
         if (fromIndex == toIndex) {
             return supplier.apply(0);
@@ -18780,10 +18910,14 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of objects containing the values from the Iterable
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see IntFunctions#ofList()
      * @see IntFunctions#ofSet()
      */
-    public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> c, final IntFunction<? extends C> supplier) {
+    public static <T, C extends Collection<T>> C toCollection(final Iterable<? extends T> c, final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         if (isEmptyCollection(c)) {
             return supplier.apply(0);
         }
@@ -18827,10 +18961,14 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to be converted
      * @param supplier a function that provides a new instance of the desired Collection type
      * @return a Collection of objects containing the values from the Iterator
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Suppliers#ofList()
      * @see Suppliers#ofSet()
      */
-    public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> supplier) {
+    public static <T, C extends Collection<T>> C toCollection(final Iterator<? extends T> iter, final Supplier<? extends C> supplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(supplier, cs.supplier);
+
         final C c = supplier.get();
 
         if (iter == null) {
@@ -18862,8 +19000,11 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to be converted
      * @param keyExtractor a function that extracts keys from the elements of the Iterable
      * @return a Map containing the elements of the Iterable, with keys extracted by the keyExtractor function
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> Map<K, T> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         if (isEmptyCollection(c)) {
             return new HashMap<>(0);
         }
@@ -18896,9 +19037,13 @@ sealed class CommonUtil permits N {
      * @param keyExtractor a function that extracts keys from the elements of the Iterable
      * @param valueExtractor a function that extracts values from the elements of the Iterable
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T, K, V> Map<K, V> toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (isEmptyCollection(c)) {
             return new HashMap<>(0);
         }
@@ -18934,9 +19079,14 @@ sealed class CommonUtil permits N {
      * @param valueExtractor a function that extracts values from the elements of the Iterable
      * @param mapSupplier a function that provides a new instance of the desired Map type; its {@code int} argument is an initial-capacity hint (the size of {@code c} when known, otherwise {@code 0}). This is an {@code IntFunction} (rather than a plain {@code Supplier}) so the implementation can pre-size the map; the corresponding {@code Iterator} overloads take a {@code Supplier} because an Iterator has no known size.
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier} is {@code null}.
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (isEmptyCollection(c)) {
             return mapSupplier.apply(0);
         }
@@ -18973,13 +19123,19 @@ sealed class CommonUtil permits N {
      * @param mergeFunction a function to merge values when duplicate keys are encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type; its {@code int} argument is an initial-capacity hint (the size of {@code c} when known, otherwise {@code 0}). This is an {@code IntFunction} (rather than a plain {@code Supplier}) so the implementation can pre-size the map; the corresponding {@code Iterator} overloads take a {@code Supplier} because an Iterator has no known size.
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mergeFunction}, {@code mapSupplier} is {@code null}.
      * @see Fn#throwingMerger()
      * @see Fn#replacingMerger()
      * @see Fn#ignoringMerger()
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
-            final IntFunction<? extends M> mapSupplier) {
+            final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (isEmptyCollection(c)) {
             return mapSupplier.apply(0);
         }
@@ -19020,8 +19176,12 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to be converted
      * @param keyExtractor a function that extracts keys from the elements of the Iterator
      * @return a Map containing the elements of the Iterator, with keys extracted by the keyExtractor function
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor) {
+    public static <T, K> Map<K, T> toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         if (iter == null) {
             return new HashMap<>();
         }
@@ -19054,13 +19214,17 @@ sealed class CommonUtil permits N {
      * @param <K> the type of keys in the resulting Map
      * @param <V> the type of values in the resulting Map
      * @param iter the Iterator to be converted. Can be {@code null}. The iterator will be consumed by this operation.
-     * @param keyExtractor a function that extracts keys from the elements of the Iterator. Cannot be {@code null}.
-     * @param valueExtractor a function that extracts values from the elements of the Iterator. Cannot be {@code null}.
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator.
+     * @param valueExtractor a function that extracts values from the elements of the Iterator.
      * @return a HashMap containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions.
      *         Returns an empty HashMap if {@code iter} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public static <T, K, V> Map<K, V> toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor) {
+            final Function<? super T, ? extends V> valueExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+
         if (iter == null) {
             return new HashMap<>();
         }
@@ -19095,14 +19259,19 @@ sealed class CommonUtil permits N {
      * @param <V> the type of values in the resulting Map
      * @param <M> the type of Map to be returned
      * @param iter the Iterator to be converted. Can be {@code null}. The iterator will be consumed by this operation.
-     * @param keyExtractor a function that extracts keys from the elements of the Iterator. Cannot be {@code null}.
-     * @param valueExtractor a function that extracts values from the elements of the Iterator. Cannot be {@code null}.
-     * @param mapSupplier a function that provides a new instance of the desired Map type. Cannot be {@code null}.
+     * @param keyExtractor a function that extracts keys from the elements of the Iterator.
+     * @param valueExtractor a function that extracts values from the elements of the Iterator.
+     * @param mapSupplier a function that provides a new instance of the desired Map type.
      * @return a Map of the specified type containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions.
      *         Returns an empty Map of the specified type if {@code iter} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier} is {@code null}.
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
-            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) {
+            final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -19144,13 +19313,19 @@ sealed class CommonUtil permits N {
      * @param mergeFunction a function that merges values if the same key is encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type
      * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mergeFunction}, {@code mapSupplier} is {@code null}.
      * @see Fn#throwingMerger()
      * @see Fn#replacingMerger()
      * @see Fn#ignoringMerger()
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final BiFunction<? super V, ? super V, ? extends V> mergeFunction,
-            final Supplier<? extends M> mapSupplier) {
+            final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(valueExtractor, cs.valueExtractor);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
         if (iter == null) {
             return mapSupplier.get();
         }
@@ -20927,11 +21102,10 @@ sealed class CommonUtil permits N {
      * @param b the second object value
      * @param cmp the comparator to be used
      * @return 0 if both values are equal; a value greater than {@code 0} if the first value is greater than the second; a value less than {@code 0} if the first value is less than the second
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> int compare(final T a, final T b, final Comparator<? super T> cmp) {
-        if (cmp == null) {
-            return NATURAL_COMPARATOR.compare(a, b);
-        }
+    public static <T> int compare(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return cmp.compare(a, b);
     }
@@ -22133,7 +22307,7 @@ sealed class CommonUtil permits N {
      * Compares two arrays using the specified comparator.
      *
      * <p>If both arrays are {@code null} or empty, returns 0. If only the first array is {@code null} or empty, returns -1.
-     * If only the second array is {@code null} or empty, returns 1. If the comparator is {@code null}, uses natural ordering.</p>
+     * If only the second array is {@code null} or empty, returns 1.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22144,17 +22318,18 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the arrays
      * @param a the first array to compare, may be {@code null}
      * @param b the second array to compare, may be {@code null}
-     * @param cmp the comparator to compare array elements, may be {@code null}
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) {
+    public static <T> int compare(final T[] a, final T[] b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return isEmpty(b) ? 0 : -1;
         } else if (isEmpty(b)) {
             return 1;
         }
-
-        cmp = checkComparator(cmp);
 
         int ret = 0;
 
@@ -22182,22 +22357,23 @@ sealed class CommonUtil permits N {
      * @param b the second array to compare, may be {@code null}
      * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
-     * @param cmp the comparator to compare array elements, may be {@code null} (uses natural ordering)
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code len} is negative
      * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
+        checkArgNotNegative(len, cs.len);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return 0;
         }
 
-        cmp = checkComparator(cmp);
         int ret = 0;
 
         for (int i = fromIndexA, j = fromIndexB, k = 0; k < len; i++, j++, k++) {
@@ -22295,18 +22471,19 @@ sealed class CommonUtil permits N {
      * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
      * @throws IllegalArgumentException if the specified length is negative
      * @throws IndexOutOfBoundsException if the specified indices are out of range
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, size(a));
         checkFromIndexSize(fromIndexB, len, size(b));
+        checkArgNotNegative(len, cs.len);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return 0;
         }
 
-        cmp = checkComparator(cmp);
         final Iterator<T> iterA = a.iterator();
         final Iterator<T> iterB = b.iterator();
 
@@ -22345,8 +22522,11 @@ sealed class CommonUtil permits N {
      * @param b the second iterable to compare
      * @param cmp the comparator to compare elements from iterables
      * @return a negative integer, zero, or a positive integer as the first iterable is less than, equal to, or greater than the second iterable
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> int compare(final Iterable<T> a, final Iterable<T> b, Comparator<? super T> cmp) {
+    public static <T> int compare(final Iterable<T> a, final Iterable<T> b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (a == b) { // the mismatch siblings carry the same guard; also keeps the single-iteration note true for self-compare.
             return 0;
         }
@@ -22359,8 +22539,6 @@ sealed class CommonUtil permits N {
         } else if (iterB == null) {
             return !iterA.hasNext() ? 0 : 1;
         }
-
-        cmp = checkComparator(cmp);
 
         return compare(iterA, iterB, cmp);
     }
@@ -22379,13 +22557,14 @@ sealed class CommonUtil permits N {
      * @param b the second iterator to compare
      * @param cmp the comparator to compare elements from iterators
      * @return a negative integer, zero, or a positive integer as the first iterator is less than, equal to, or greater than the second iterator
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> int compare(final Iterator<T> a, final Iterator<T> b, Comparator<? super T> cmp) {
+    public static <T> int compare(final Iterator<T> a, final Iterator<T> b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (a == b) { // without this, a self-compare would pair consecutive elements of the same iterator.
             return 0;
         }
-
-        cmp = checkComparator(cmp);
 
         final Iterator<T> iterA = a == null ? ObjIterator.empty() : a;
         final Iterator<T> iterB = b == null ? ObjIterator.empty() : b;
@@ -22547,11 +22726,12 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is less than the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean lessThan(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return cmp.compare(a, b) < 0;
     }
@@ -22588,12 +22768,13 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #le(Object, Object, Comparator)
      */
-    public static <T> boolean lessThanOrEqual(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean lessThanOrEqual(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return cmp.compare(a, b) <= 0;
     }
@@ -22629,11 +22810,12 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is greater than the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean greaterThan(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return cmp.compare(a, b) > 0;
     }
@@ -22670,12 +22852,13 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #ge(Object, Object, Comparator)
      */
-    public static <T> boolean greaterThanOrEqual(final T a, final T b, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean greaterThanOrEqual(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return cmp.compare(a, b) >= 0;
     }
@@ -22719,12 +22902,15 @@ sealed class CommonUtil permits N {
      * @param value the value to check, may be {@code null} if the comparator supports {@code null} values
      * @param min the minimum value, may be {@code null} if the comparator supports {@code null} values
      * @param max the maximum value, may be {@code null} if the comparator supports {@code null} values
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the value is between the minimum and maximum values, inclusive; {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @deprecated Use {@link #geAndLe(Object, Object, Object, Comparator)} instead.
      */
     @Deprecated
-    public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) {
+    public static <T> boolean isBetween(final T value, final T min, final T max, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return geAndLe(value, min, max, cmp);
     }
 
@@ -22760,11 +22946,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is less than or equal to the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #lessThanOrEqual(Object, Object, Comparator)
      */
-    public static <T> boolean le(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean le(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return lessThanOrEqual(a, b, cmp);
     }
 
@@ -22799,11 +22988,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is less than the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #lessThan(Object, Object, Comparator)
      */
-    public static <T> boolean lt(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean lt(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return lessThan(a, b, cmp);
     }
 
@@ -22839,11 +23031,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is greater than or equal to the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #greaterThanOrEqual(Object, Object, Comparator)
      */
-    public static <T> boolean ge(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean ge(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return greaterThanOrEqual(a, b, cmp);
     }
 
@@ -22878,11 +23073,14 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the objects being compared
      * @param a the first object to compare, may be {@code null}
      * @param b the second object to compare, may be {@code null}
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the first object is greater than the second, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #greaterThan(Object, Object, Comparator)
      */
-    public static <T> boolean gt(final T a, final T b, Comparator<? super T> cmp) {
+    public static <T> boolean gt(final T a, final T b, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         return greaterThan(a, b, cmp);
     }
 
@@ -22923,11 +23121,12 @@ sealed class CommonUtil permits N {
      * @param value the value to check, may be {@code null} if the comparator supports {@code null} values
      * @param min the minimum value, may be {@code null} if the comparator supports {@code null} values
      * @param max the maximum value, may be {@code null} if the comparator supports {@code null} values
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the value is greater than the minimum and less than the maximum, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean gtAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp.compare(value, min) <= 0) {
             return false;
@@ -22973,11 +23172,12 @@ sealed class CommonUtil permits N {
      * @param value the value to check, may be {@code null} if the comparator supports {@code null} values
      * @param min the minimum value, may be {@code null} if the comparator supports {@code null} values
      * @param max the maximum value, may be {@code null} if the comparator supports {@code null} values
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the value is greater than or equal to the minimum and less than the maximum, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean geAndLt(final T value, final T min, final T max, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp.compare(value, min) < 0) {
             return false;
@@ -23023,11 +23223,12 @@ sealed class CommonUtil permits N {
      * @param value the value to check, may be {@code null} if the comparator supports {@code null} values
      * @param min the minimum value, may be {@code null} if the comparator supports {@code null} values
      * @param max the maximum value, may be {@code null} if the comparator supports {@code null} values
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the value is greater than or equal to the minimum and less than or equal to the maximum, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean geAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp.compare(value, min) < 0) {
             return false;
@@ -23073,11 +23274,12 @@ sealed class CommonUtil permits N {
      * @param value the value to check, may be {@code null} if the comparator supports {@code null} values
      * @param min the minimum value, may be {@code null} if the comparator supports {@code null} values
      * @param max the maximum value, may be {@code null} if the comparator supports {@code null} values
-     * @param cmp the comparator to use for comparison, if {@code null}, the natural ordering of the objects will be used
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return {@code true} if the value is greater than the minimum and less than or equal to the maximum, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean gtAndLe(final T value, final T min, final T max, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp.compare(value, min) <= 0) {
             return false;
@@ -24964,9 +25166,12 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return a {@code Nullable} containing the first element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirstNonNull(Object[], Predicate)
      */
-    public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findFirst(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return Nullable.empty();
         }
@@ -24994,8 +25199,11 @@ sealed class CommonUtil permits N {
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
      * @return a {@code Nullable} containing the first element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findFirst(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmptyCollection(c)) {
             return Nullable.empty();
         }
@@ -25022,8 +25230,11 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to search
      * @param predicate the predicate to apply to elements of the iterator
      * @return a {@code Nullable} containing the first element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findFirst(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (iter == null) {
             return Nullable.empty();
         }
@@ -25055,8 +25266,11 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return a {@code Nullable} containing the last element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findLast(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return Nullable.empty();
         }
@@ -25083,8 +25297,11 @@ sealed class CommonUtil permits N {
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
      * @return a {@code Nullable} containing the last element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findLast(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return (Nullable<T>) findLast(c, predicate, false);
     }
 
@@ -25103,8 +25320,11 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to search; may be {@code null}
      * @param predicate the predicate to apply to elements of the iterator
      * @return a {@code Nullable} containing the last element that matches the predicate, or an empty {@code Nullable} if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Nullable<T> findLast(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> Nullable<T> findLast(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (iter == null) {
             return Nullable.empty();
         }
@@ -25210,9 +25430,12 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findFirst(Object[], Predicate)
      */
-    public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findFirstNonNull(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return Optional.empty();
         }
@@ -25239,8 +25462,11 @@ sealed class CommonUtil permits N {
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findFirstNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmptyCollection(c)) {
             return Optional.empty();
         }
@@ -25267,8 +25493,11 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to search
      * @param predicate the predicate to apply to elements of the iterator
      * @return an Optional containing the first {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findFirstNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (iter == null) {
             return Optional.empty();
         }
@@ -25299,8 +25528,11 @@ sealed class CommonUtil permits N {
      * @param a the array to search
      * @param predicate the predicate to apply to elements of the array
      * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findLastNonNull(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return Optional.empty();
         }
@@ -25327,8 +25559,11 @@ sealed class CommonUtil permits N {
      * @param c the iterable to search
      * @param predicate the predicate to apply to elements of the iterable
      * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findLastNonNull(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return (Optional<T>) findLast(c, predicate, true);
     }
 
@@ -25347,8 +25582,11 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to search; may be {@code null}
      * @param predicate the predicate to apply to elements of the iterator
      * @return an Optional containing the last {@code non-null} element that matches the predicate, or an empty Optional if no such element is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Optional<T> findLastNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) {
+    public static <T> Optional<T> findLastNonNull(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (iter == null) {
             return Optional.empty();
         }
@@ -26597,11 +26835,11 @@ sealed class CommonUtil permits N {
      * @param b the second array
      * @param keyExtractor the function used to extract comparison keys from array elements
      * @return the index of the first mismatch, or -1 if the arrays are identical or both are {@code null} or empty.
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T> int mismatch(final T[] a, final T[] b, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (a == b) {
             return -1;
@@ -26646,16 +26884,16 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param keyExtractor the function used to extract comparison keys from array elements
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative or {@code keyExtractor} is {@code null}
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
     public static <T> int mismatch(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len,
             final Function<? super T, ?> keyExtractor) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(keyExtractor, cs.keyExtractor);
-        checkArgNotNegative(len, cs.len);
-        checkFromIndexSize(fromIndexA, len, len(a)); // NOSONAR
+        checkFromIndexSize(fromIndexA, len, len(a));
         checkFromIndexSize(fromIndexB, len, len(b));
+        checkArgNotNegative(len, cs.len);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return -1;
@@ -26770,16 +27008,16 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param keyExtractor the function used to extract comparison keys from collection elements
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the collections are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative or {@code keyExtractor} is {@code null}
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
     public static <T> int mismatch(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len,
             final Function<? super T, ?> keyExtractor) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArgNotNull(keyExtractor, cs.keyExtractor);
-        checkArgNotNegative(len, cs.len);
         checkFromIndexSize(fromIndexA, len, size(a));
         checkFromIndexSize(fromIndexB, len, size(b));
+        checkArgNotNegative(len, cs.len);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if ((fromIndexA == fromIndexB && a == b) || len == 0) {
             return -1;
@@ -26823,11 +27061,11 @@ sealed class CommonUtil permits N {
      * @param b the second iterable
      * @param keyExtractor the function used to extract comparison keys from iterable elements
      * @return the index of the first mismatch, or -1 if the iterables are identical or both are {@code null} or empty
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (a == b) {
             return -1;
@@ -26862,11 +27100,11 @@ sealed class CommonUtil permits N {
      * @param b the second iterator
      * @param keyExtractor the function used to extract comparison keys from iterator elements
      * @return the index of the first mismatch, or -1 if the iterators are identical or both are {@code null} or empty
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], Object[])
      */
     public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
-        checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (a == b) {
             return -1;
@@ -29620,11 +29858,14 @@ sealed class CommonUtil permits N {
      * @param pair the pair whose elements are to be swapped
      * @param predicate the predicate to determine if the elements should be swapped
      * @return {@code true} if the left and right elements are swapped, otherwise {@code false}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #swap(Pair)
      * @see Pair#swap()
      */
     @Beta
-    public static <T> boolean swapIf(final Pair<T, T> pair, final Predicate<? super Pair<T, T>> predicate) {
+    public static <T> boolean swapIf(final Pair<T, T> pair, final Predicate<? super Pair<T, T>> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(pair)) {
             pair.set(pair.right(), pair.left());
             return true;
@@ -29676,11 +29917,14 @@ sealed class CommonUtil permits N {
      * @param triple the triple whose elements are to be swapped
      * @param predicate the predicate to determine if the elements should be swapped
      * @return {@code true} if the left and right elements are swapped, otherwise {@code false}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #swap(Triple)
      * @see Triple#swap()
      */
     @Beta
-    public static <T, M> boolean swapIf(final Triple<T, M, T> triple, final Predicate<? super Triple<T, M, T>> predicate) {
+    public static <T, M> boolean swapIf(final Triple<T, M, T> triple, final Predicate<? super Triple<T, M, T>> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (predicate.test(triple)) {
             final T left = triple.left();
             triple.setLeft(triple.right());
@@ -33485,13 +33729,14 @@ sealed class CommonUtil permits N {
      * @param a the array to be checked
      * @param cmp the comparator to determine the order of the array
      * @return {@code true} if the array is sorted according to the specified comparator, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Comparators#naturalOrder()
      * @see Comparators#nullsFirst()
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) {
-        cmp = checkComparator(cmp);
+    public static <T> boolean isSorted(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final int len = len(a);
 
@@ -33526,15 +33771,16 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator to determine the order of the array
      * @return {@code true} if the specified range of the array is sorted according to the specified comparator, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Comparators#naturalOrder()
      * @see Comparators#nullsFirst()
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp) throws IndexOutOfBoundsException {
+    public static <T> boolean isSorted(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
-
-        cmp = checkComparator(cmp);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (toIndex - fromIndex < 2) {
             return true;
@@ -33655,17 +33901,18 @@ sealed class CommonUtil permits N {
      * @param c the collection to be checked
      * @param cmp the comparator to determine the order of the collection
      * @return {@code true} if the collection is sorted according to the specified comparator, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Comparators#naturalOrder()
      * @see Comparators#nullsFirst()
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> boolean isSorted(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> boolean isSorted(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (size(c) < 2) {
             return true;
         }
-
-        cmp = checkComparator(cmp);
 
         final Iterator<? extends T> iter = c.iterator();
         T prev = iter.next();
@@ -33699,20 +33946,20 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator to determine the order of the collection
      * @return {@code true} if the specified range of the collection is sorted according to the specified comparator, {@code false} otherwise
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Comparators#naturalOrder()
      * @see Comparators#nullsFirst()
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
     public static <T> boolean isSorted(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (toIndex - fromIndex < 2) {
             return true;
         }
-
-        cmp = checkComparator(cmp);
 
         final Iterator<? extends T> iter = c.iterator();
         int cursor = 0;
@@ -34184,7 +34431,8 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
-     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the array. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -34193,7 +34441,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void sort(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> void sort(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return;
         }
@@ -34214,8 +34464,9 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the array. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -34224,8 +34475,10 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
+    public static <T> void sort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return;
@@ -34298,7 +34551,8 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
-     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used
+     * @param cmp the comparator to determine the order of the list. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -34307,7 +34561,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) {
+    public static <T> void sort(final List<? extends T> list, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(list)) {
             return;
         }
@@ -34328,8 +34584,9 @@ sealed class CommonUtil permits N {
      * @param list the list to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the list. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#sort(Object[])
      * @see Arrays#sort(Object[], Comparator)
      * @see Arrays#sort(Object[], int, int, Comparator)
@@ -34339,8 +34596,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void sort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(list));
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
@@ -34386,11 +34644,15 @@ sealed class CommonUtil permits N {
      * @param <U> the type of the key values, which must be comparable
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void sortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void sortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.comparingBy(keyExtractor));
     }
 
@@ -34410,11 +34672,15 @@ sealed class CommonUtil permits N {
      * @param <U> the type of the key values, which must be comparable
      * @param list the List to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T, U extends Comparable<? super U>> void sortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void sortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.comparingBy(keyExtractor));
     }
 
@@ -34430,8 +34696,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void sortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.comparingInt(keyExtractor));
     }
 
@@ -34447,8 +34716,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void sortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.comparingInt(keyExtractor));
     }
 
@@ -34465,8 +34737,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void sortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.comparingLong(keyExtractor));
     }
 
@@ -34482,8 +34757,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void sortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.comparingLong(keyExtractor));
     }
 
@@ -34500,8 +34778,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void sortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.comparingFloat(keyExtractor));
     }
 
@@ -34517,8 +34798,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void sortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.comparingFloat(keyExtractor));
     }
 
@@ -34535,8 +34819,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the key values from the array elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void sortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.comparingDouble(keyExtractor));
     }
 
@@ -34552,8 +34839,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the key values from the list elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void sortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void sortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.comparingDouble(keyExtractor));
     }
 
@@ -35157,7 +35447,8 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the objects being compared
      * @param a the array to be sorted
-     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the array. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -35166,7 +35457,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) {
+    public static <T> void parallelSort(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return;
         }
@@ -35187,8 +35480,9 @@ sealed class CommonUtil permits N {
      * @param a the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param cmp the comparator to determine the order of the array. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the array. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -35197,8 +35491,10 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp) throws IndexOutOfBoundsException {
+    public static <T> void parallelSort(final T[] a, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || fromIndex == toIndex) {
             return;
@@ -35275,7 +35571,8 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
-     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used
+     * @param cmp the comparator to determine the order of the list. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -35284,7 +35581,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#nullsLast()
      * @see Comparators#comparingBy(Function)
      */
-    public static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) {
+    public static <T> void parallelSort(final List<? extends T> list, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(list)) {
             return;
         }
@@ -35305,8 +35604,9 @@ sealed class CommonUtil permits N {
      * @param list the list to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param cmp the comparator to determine the order of the list. A {@code null} value indicates that the elements' natural ordering should be used.
+     * @param cmp the comparator to determine the order of the list. Must not be {@code null}.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#parallelSort(Comparable[])
      * @see Arrays#parallelSort(Object[], Comparator)
      * @see Arrays#parallelSort(Object[], int, int, Comparator)
@@ -35316,8 +35616,9 @@ sealed class CommonUtil permits N {
      * @see Comparators#comparingBy(Function)
      */
     public static <T> void parallelSort(final List<? extends T> list, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(list));
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if ((isEmpty(list) && fromIndex == 0 && toIndex == 0) || fromIndex == toIndex) {
             return;
@@ -35384,13 +35685,17 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the array
      * @param <U> the type of the comparable keys extracted by the key extractor function
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
-     * @param keyExtractor the function used to extract comparable keys from elements for comparison - must not be {@code null}
+     * @param keyExtractor the function used to extract comparable keys from elements for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      * @see #parallelSort(Object[], Comparator)
      */
-    public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(a, Comparators.comparingBy(keyExtractor));
     }
 
@@ -35429,13 +35734,17 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the list
      * @param <U> the type of the comparable keys extracted by the key extractor function
      * @param list the list to be sorted - if {@code null} or empty, the method returns immediately without effect
-     * @param keyExtractor the function used to extract comparable keys from elements for comparison - must not be {@code null}
+     * @param keyExtractor the function used to extract comparable keys from elements for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Comparators#comparingBy(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsFirst(Function)
      * @see Comparators#comparingByIfNotNullOrElseNullsLast(Function)
      * @see #parallelSort(List, Comparator)
      */
-    public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void parallelSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(list, Comparators.comparingBy(keyExtractor));
     }
 
@@ -35452,8 +35761,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the int key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(a, Comparators.comparingInt(keyExtractor));
     }
 
@@ -35469,8 +35781,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function used to extract the int key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(list, Comparators.comparingInt(keyExtractor));
     }
 
@@ -35487,8 +35802,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the long key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(a, Comparators.comparingLong(keyExtractor));
     }
 
@@ -35504,8 +35822,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function used to extract the long key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(list, Comparators.comparingLong(keyExtractor));
     }
 
@@ -35522,8 +35843,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the float key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(a, Comparators.comparingFloat(keyExtractor));
     }
 
@@ -35539,8 +35863,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function used to extract the float key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(list, Comparators.comparingFloat(keyExtractor));
     }
 
@@ -35557,8 +35884,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function used to extract the double key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(a, Comparators.comparingDouble(keyExtractor));
     }
 
@@ -35574,8 +35904,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function used to extract the double key for comparison
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void parallelSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void parallelSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         parallelSort(list, Comparators.comparingDouble(keyExtractor));
     }
 
@@ -36055,12 +36388,16 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param <U> the type of comparable keys extracted from the elements
      * @param a the array to be sorted - if {@code null} or empty, the method returns immediately without effect
-     * @param keyExtractor the function to extract comparable keys from the elements - must not be {@code null}
+     * @param keyExtractor the function to extract comparable keys from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #reverseSortBy(List, Function)
      * @see #sortBy(Object[], Function)
      * @see Comparators#reversedComparingBy(Function)
      */
-    public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final T[] a, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.reversedComparingBy(keyExtractor));
     }
 
@@ -36077,8 +36414,12 @@ sealed class CommonUtil permits N {
      * @param <U> the type of keys extracted from the elements, which must be comparable
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the keys from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T, U extends Comparable<? super U>> void reverseSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor) {
+    public static <T, U extends Comparable<? super U>> void reverseSortBy(final List<? extends T> list, final Function<? super T, ? extends U> keyExtractor)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.reversedComparingBy(keyExtractor));
     }
 
@@ -36095,8 +36436,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the int key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByInt(final T[] a, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.reversedComparingInt(keyExtractor));
     }
 
@@ -36112,8 +36456,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the int key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByInt(final List<? extends T> list, final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.reversedComparingInt(keyExtractor));
     }
 
@@ -36130,8 +36477,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the long key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByLong(final T[] a, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.reversedComparingLong(keyExtractor));
     }
 
@@ -36147,8 +36497,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the long key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByLong(final List<? extends T> list, final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.reversedComparingLong(keyExtractor));
     }
 
@@ -36165,8 +36518,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the float key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByFloat(final T[] a, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.reversedComparingFloat(keyExtractor));
     }
 
@@ -36182,8 +36538,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the float key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByFloat(final List<? extends T> list, final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.reversedComparingFloat(keyExtractor));
     }
 
@@ -36200,8 +36559,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the array
      * @param a the array to be sorted
      * @param keyExtractor the function to extract the double key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByDouble(final T[] a, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(a, Comparators.reversedComparingDouble(keyExtractor));
     }
 
@@ -36217,8 +36579,11 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be sorted
      * @param keyExtractor the function to extract the double key from the elements
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) {
+    public static <T> void reverseSortByDouble(final List<? extends T> list, final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+
         sort(list, Comparators.reversedComparingDouble(keyExtractor));
     }
 
@@ -36733,9 +37098,12 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator by which the array is ordered
      * @return the index of the value to be searched, if it is contained in the array;
      *         otherwise, <code>(-(insertion point) - 1)</code>, or {@code -1} if the array is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#binarySearch(Object[], Object, Comparator)
      */
-    public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) {
+    public static <T> int binarySearch(final T[] a, final T valueToFind, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
         }
@@ -36764,11 +37132,13 @@ sealed class CommonUtil permits N {
      * @return the index of the value to be searched, if it is contained in the array within the specified range;
      *         otherwise, <code>(-(insertion point) - 1)</code>, or {@code -1} if the array is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Arrays#binarySearch(Object[], int, int, Object, Comparator)
      */
     public static <T> int binarySearch(final T[] a, final int fromIndex, final int toIndex, final T valueToFind, final Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a)) {
             return INDEX_NOT_FOUND;
@@ -36856,9 +37226,12 @@ sealed class CommonUtil permits N {
      * @param cmp the comparator by which the list is ordered
      * @return the index of the value to be searched, if it is contained in the list;
      *         otherwise, <code>(-(insertion point) - 1)</code>, or {@code -1} if the list is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Collections#binarySearch(List, Object, Comparator)
      */
-    public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) {
+    public static <T> int binarySearch(final List<? extends T> list, final T valueToFind, final Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(list)) {
             return INDEX_NOT_FOUND;
         }
@@ -36886,17 +37259,17 @@ sealed class CommonUtil permits N {
      * @return the index of the value to be searched, if it is contained in the list within the specified range;
      *         otherwise, <code>(-(insertion point) - 1)</code>, or {@code -1} if the list is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see Collections#binarySearch(List, Object, Comparator)
      */
     public static <T> int binarySearch(final List<? extends T> list, final int fromIndex, final int toIndex, final T valueToFind, Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(list));
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(list)) {
             return INDEX_NOT_FOUND;
         }
-
-        cmp = checkComparator(cmp);
 
         if (fromIndex == 0 && toIndex == list.size()) {
             return Collections.binarySearch(list, valueToFind, cmp);
@@ -38455,8 +38828,11 @@ sealed class CommonUtil permits N {
      * @param a the array to search within
      * @param predicate the predicate to apply to elements of the array
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> OptionalInt findFirstIndex(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> OptionalInt findFirstIndex(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -38486,9 +38862,13 @@ sealed class CommonUtil permits N {
      * @param valueToFind the second argument to the predicate
      * @param predicate the predicate to apply to elements of the array
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T, U> OptionalInt findFirstIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findFirstIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -38515,8 +38895,11 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @param predicate the predicate to apply to elements of the collection
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> OptionalInt findFirstIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> OptionalInt findFirstIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -38549,9 +38932,13 @@ sealed class CommonUtil permits N {
      * @param valueToFind the second argument to the predicate
      * @param predicate the predicate to apply to elements of the collection
      * @return an OptionalInt containing the index of the first matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findFirstIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -38582,8 +38969,11 @@ sealed class CommonUtil permits N {
      * @param a the array to search within
      * @param predicate the predicate to apply to elements of the array
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> OptionalInt findLastIndex(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> OptionalInt findLastIndex(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -38613,9 +39003,13 @@ sealed class CommonUtil permits N {
      * @param valueToFind the second argument to the predicate
      * @param predicate the predicate to apply to elements of the array
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T, U> OptionalInt findLastIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findLastIndex(final T[] a, final U valueToFind, final BiPredicate<? super T, ? super U> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(a)) {
             return OptionalInt.empty();
         }
@@ -38642,8 +39036,11 @@ sealed class CommonUtil permits N {
      * @param c the collection to search within
      * @param predicate the predicate to apply to elements of the collection
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> OptionalInt findLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> OptionalInt findLastIndex(final Collection<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -38700,9 +39097,13 @@ sealed class CommonUtil permits N {
      * @param valueToFind the second argument to the predicate
      * @param predicate the predicate to apply to elements of the collection
      * @return an OptionalInt containing the index of the last matching element, or an empty OptionalInt if no match is found
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate) {
+    public static <T, U> OptionalInt findLastIndex(final Collection<? extends T> c, final U valueToFind, final BiPredicate<? super T, ? super U> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         if (isEmpty(c)) {
             return OptionalInt.empty();
         }
@@ -38766,19 +39167,21 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within - may be {@code null} or empty
-     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with {@code null} values treated as maximum
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return an array of indices where minimum elements are located according to the comparator, in ascending order.
      *         Returns an empty array if the input array is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #indicesOfMin(Comparable[])
      * @see #indicesOfMin(Collection, Comparator)
      * @see #indicesOfMax(Object[], Comparator)
      */
-    public static <T> int[] indicesOfMin(final T[] a, Comparator<? super T> cmp) {
+    public static <T> int[] indicesOfMin(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
-        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
         final IntList result = new IntList();
         final int len = len(a);
         T candidate = a[0];
@@ -38862,21 +39265,23 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within - may be {@code null} or empty
-     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with {@code null} values treated as maximum
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return an array of indices where minimum elements are located according to the comparator.
      *         Returns an empty array if the input collection is {@code null} or empty.
      *         The indices are in ascending order.
-     * @throws ClassCastException if elements are not mutually comparable using the comparator (or natural ordering when {@code cmp} is {@code null})
+     * @throws ClassCastException if elements are not mutually comparable using the comparator
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #indicesOfMin(Collection)
      * @see #indicesOfMax(Collection, Comparator)
      * @see #indicesOfMin(Object[], Comparator)
      */
-    public static <T> int[] indicesOfMin(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> int[] indicesOfMin(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }
 
-        cmp = cmp == null ? (Comparator<T>) NULL_MAX_COMPARATOR : cmp;
         final IntList result = new IntList();
         final Iterator<? extends T> iter = c.iterator();
 
@@ -38974,21 +39379,23 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within - may be {@code null} or empty
-     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with {@code null} values treated as minimum
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return an array of indices where maximum elements are located according to the comparator.
      *         Returns an empty array if the input array is {@code null} or empty.
      *         The indices are in ascending order.
-     * @throws ClassCastException if elements are not mutually comparable using the comparator (or natural ordering when {@code cmp} is {@code null})
+     * @throws ClassCastException if elements are not mutually comparable using the comparator
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #indicesOfMax(Comparable[])
      * @see #indicesOfMin(Object[], Comparator)
      * @see #indicesOfMax(Collection, Comparator)
      */
-    public static <T> int[] indicesOfMax(final T[] a, Comparator<? super T> cmp) {
+    public static <T> int[] indicesOfMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(a)) {
             return EMPTY_INT_ARRAY;
         }
 
-        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
         final IntList result = new IntList();
         final int len = len(a);
         T candidate = a[0];
@@ -39072,21 +39479,23 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within - may be {@code null} or empty
-     * @param cmp the comparator to compare elements - if {@code null}, uses natural ordering with {@code null} values treated as minimum
+     * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return an array of indices where maximum elements are located according to the comparator.
      *         Returns an empty array if the input collection is {@code null} or empty.
      *         The indices are in ascending order.
-     * @throws ClassCastException if elements are not mutually comparable using the comparator (or natural ordering when {@code cmp} is {@code null})
+     * @throws ClassCastException if elements are not mutually comparable using the comparator
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #indicesOfMax(Collection)
      * @see #indicesOfMin(Collection, Comparator)
      * @see #indicesOfMax(Object[], Comparator)
      */
-    public static <T> int[] indicesOfMax(final Collection<? extends T> c, Comparator<? super T> cmp) {
+    public static <T> int[] indicesOfMax(final Collection<? extends T> c, Comparator<? super T> cmp) throws IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
+
         if (isEmpty(c)) {
             return EMPTY_INT_ARRAY;
         }
 
-        cmp = cmp == null ? (Comparator<T>) NULL_MIN_COMPARATOR : cmp;
         final IntList result = new IntList();
         final Iterator<? extends T> iter = c.iterator();
 
@@ -39307,14 +39716,17 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within - may be {@code null} or empty
-     * @param predicate the predicate to test each element - must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return an array of indices of all elements that match the predicate, in ascending order.
      *         Returns an empty array if no element matches or if the input array is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #indicesOfAll(Object[], Predicate, int)
      * @see #indicesOfAll(Collection, Predicate)
      * @see #findFirstIndex(Object[], Predicate)
      */
-    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate) {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return indicesOfAll(a, predicate, 0);
     }
 
@@ -39334,14 +39746,17 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the array
      * @param a the array to search within - may be {@code null} or empty
-     * @param predicate the predicate to test each element - must not be {@code null}
+     * @param predicate the predicate to test each element
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
      * @return an array of indices of all matching elements at or after {@code fromIndex}, in ascending order.
      *         Returns an empty array if no element matches, the array is {@code null}/empty, or {@code fromIndex} is beyond the array length.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #indicesOfAll(Object[], Predicate)
      * @see #indicesOfAll(Collection, Predicate, int)
      */
-    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int fromIndex) {
+    public static <T> int[] indicesOfAll(final T[] a, final Predicate<? super T> predicate, final int fromIndex) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final int len = len(a);
 
         if (len == 0 || fromIndex >= len) {
@@ -39370,14 +39785,17 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search within - may be {@code null} or empty
-     * @param predicate the predicate to test each element - must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return an array of indices (positions in iteration order) of all elements that match the predicate, in ascending order.
      *         Returns an empty array if no element matches or if the collection is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #indicesOfAll(Collection, Predicate, int)
      * @see #indicesOfAll(Object[], Predicate)
      * @see #findFirstIndex(Collection, Predicate)
      */
-    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate) {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return indicesOfAll(c, predicate, 0);
     }
 
@@ -39415,16 +39833,20 @@ sealed class CommonUtil permits N {
      *
      * @param <T> the type of elements in the collection
      * @param c the collection to search - may be {@code null} or empty
-     * @param predicate the predicate to test each element - must not be {@code null}
+     * @param predicate the predicate to test each element
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as {@code 0}
      * @return an array of indices where elements satisfy the predicate. Returns an empty array if no matches are found,
      *         the collection is {@code null}/empty, or {@code fromIndex} is beyond the collection size. The indices are in ascending order.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #indicesOfAll(Collection, Predicate)
      * @see #indicesOfAll(Object[], Predicate, int)
      * @see #findFirstIndex(Collection, Predicate)
      * @see #indexOf(Collection, Object, int)
      */
-    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex) {
+    public static <T> int[] indicesOfAll(final Collection<? extends T> c, final Predicate<? super T> predicate, final int fromIndex)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         final int size = size(c);
 
         if (size == 0 || fromIndex >= size) {

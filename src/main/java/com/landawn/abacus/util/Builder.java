@@ -251,7 +251,7 @@ public class Builder<T> {
      * @throws IllegalArgumentException if {@code val} is {@code null}
      */
     Builder(final T val) {
-        N.checkArgNotNull(val, "val");
+        N.checkArgNotNull(val, cs.val);
 
         this.val = val;
     }
@@ -652,7 +652,7 @@ public class Builder<T> {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Builder<T> of(final T val) throws IllegalArgumentException {
-        N.checkArgNotNull(val, "val");
+        N.checkArgNotNull(val, cs.val);
 
         final Function<Object, Builder> func = creatorMap.get(val.getClass());
 
@@ -718,10 +718,13 @@ public class Builder<T> {
      *     .val();
      * }</pre>
      *
-     * @param consumer the action to perform on the wrapped value, must not be {@code null}
+     * @param consumer the action to perform on the wrapped value,
      * @return this builder instance for method chaining
+     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
-    public Builder<T> accept(final Consumer<? super T> consumer) {
+    public Builder<T> accept(final Consumer<? super T> consumer) throws IllegalArgumentException {
+        N.checkArgNotNull(consumer, cs.consumer);
+
         consumer.accept(val);
 
         return this;
@@ -736,10 +739,13 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <R> the type of the result of the function
-     * @param func the function to apply to the wrapped value, must not be {@code null}
+     * @param func the function to apply to the wrapped value,
      * @return the result of applying the function to the wrapped value
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
-    public <R> R apply(final Function<? super T, ? extends R> func) {
+    public <R> R apply(final Function<? super T, ? extends R> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return func.apply(val);
     }
 
@@ -2940,9 +2946,12 @@ public class Builder<T> {
          * @param key the key with which the specified value is to be associated
          * @param supplier the supplier that produces the value to be associated with the specified key
          * @return this builder instance
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          * @see Map#putIfAbsent(Object, Object)
          */
-        public MapBuilder<K, V, M> putIfAbsent(final K key, final Supplier<V> supplier) {
+        public MapBuilder<K, V, M> putIfAbsent(final K key, final Supplier<V> supplier) throws IllegalArgumentException {
+            N.checkArgNotNull(supplier, cs.supplier);
+
             final V v = val.get(key);
 
             if (v == null) {
@@ -3332,8 +3341,11 @@ public class Builder<T> {
          * @param columnNames the collection of column names to rename
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) {
+        public DatasetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.renameColumns(columnNames, func);
 
             return this;
@@ -3349,8 +3361,11 @@ public class Builder<T> {
          *
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder renameColumns(final Function<? super String, String> func) {
+        public DatasetBuilder renameColumns(final Function<? super String, String> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.renameColumns(func);
 
             return this;
@@ -3409,8 +3424,11 @@ public class Builder<T> {
          * @param fromColumnName the name of the source column
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(newColumnName, fromColumnName, func);
 
             return this;
@@ -3430,8 +3448,12 @@ public class Builder<T> {
          * @param fromColumnName the name of the source column
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func) {
+        public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
 
             return this;
@@ -3451,9 +3473,12 @@ public class Builder<T> {
          * @param fromColumnNames the names of the source columns
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
         public DatasetBuilder addColumn(final String newColumnName, final Collection<String> fromColumnNames,
-                final Function<? super DisposableObjArray, ?> func) {
+                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -3473,9 +3498,12 @@ public class Builder<T> {
          * @param fromColumnNames the names of the source columns
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Collection<String> fromColumnNames,
-                final Function<? super DisposableObjArray, ?> func) {
+                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -3494,8 +3522,12 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of two source columns
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -3515,9 +3547,12 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of two source columns
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple2<String, String> fromColumnNames,
-                final BiFunction<?, ?, ?> func) {
+                final BiFunction<?, ?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -3536,8 +3571,12 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of three source columns
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func) {
+        public DatasetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(newColumnName, fromColumnNames, func);
 
             return this;
@@ -3557,9 +3596,12 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of three source columns
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple3<String, String, String> fromColumnNames,
-                final TriFunction<?, ?, ?, ?> func) {
+                final TriFunction<?, ?, ?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
 
             return this;
@@ -3609,8 +3651,11 @@ public class Builder<T> {
          *
          * @param filter the predicate to test column names; columns returning {@code true} are removed
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code filter} is {@code null}.
          */
-        public DatasetBuilder removeColumns(final Predicate<? super String> filter) {
+        public DatasetBuilder removeColumns(final Predicate<? super String> filter) throws IllegalArgumentException {
+            N.checkArgNotNull(filter, cs.filter);
+
             val.removeColumns(filter);
 
             return this;
@@ -3628,8 +3673,11 @@ public class Builder<T> {
          * @param columnName the name of the column to update
          * @param func the function to transform each value in the column
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder updateColumn(final String columnName, final Function<?, ?> func) {
+        public DatasetBuilder updateColumn(final String columnName, final Function<?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.updateColumn(columnName, func);
 
             return this;
@@ -3648,9 +3696,12 @@ public class Builder<T> {
          * @param func the function to transform values in the specified columns; it receives the row index,
          *             the column name and the current value
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          * @see Dataset#updateColumns(Collection, IntBiObjFunction)
          */
-        public DatasetBuilder updateColumns(final Collection<String> columnNames, final IntBiObjFunction<String, ?, ?> func) {
+        public DatasetBuilder updateColumns(final Collection<String> columnNames, final IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.updateColumns(columnNames, func);
 
             return this;
@@ -3730,9 +3781,12 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the function that combines values from the source columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
          */
         public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName,
-                final Function<? super DisposableObjArray, ?> combineFunc) {
+                final Function<? super DisposableObjArray, ?> combineFunc) throws IllegalArgumentException {
+            N.checkArgNotNull(combineFunc, cs.combineFunc);
+
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -3751,8 +3805,12 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the binary function to combine values from the two columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
          */
-        public DatasetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc) {
+        public DatasetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(combineFunc, cs.combineFunc);
+
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -3771,9 +3829,12 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
          */
         public DatasetBuilder combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName,
-                final TriFunction<?, ?, ?, ?> combineFunc) {
+                final TriFunction<?, ?, ?, ?> combineFunc) throws IllegalArgumentException {
+            N.checkArgNotNull(combineFunc, cs.combineFunc);
+
             val.combineColumns(columnNames, newColumnName, combineFunc);
 
             return this;
@@ -3793,8 +3854,12 @@ public class Builder<T> {
          * @param newColumnNames the names of the new columns to create
          * @param divideFunc the function that splits a value into multiple values
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code divideFunc} is {@code null}.
          */
-        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc) {
+        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(divideFunc, cs.divideFunc);
+
             val.divideColumn(columnName, newColumnNames, divideFunc);
 
             return this;
@@ -3819,8 +3884,12 @@ public class Builder<T> {
          * @param newColumnNames the names of the new columns to create
          * @param output the consumer that populates the output array with divided values
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code output} is {@code null}.
          */
-        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output) {
+        public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output)
+                throws IllegalArgumentException {
+            N.checkArgNotNull(output, cs.output);
+
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -3843,9 +3912,12 @@ public class Builder<T> {
          * @param newColumnNames a tuple containing the names of two new columns
          * @param output the consumer that populates the output pair
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code output} is {@code null}.
          */
         public DatasetBuilder divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
-                final BiConsumer<?, Pair<Object, Object>> output) {
+                final BiConsumer<?, Pair<Object, Object>> output) throws IllegalArgumentException {
+            N.checkArgNotNull(output, cs.output);
+
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -3869,9 +3941,12 @@ public class Builder<T> {
          * @param newColumnNames a tuple containing the names of three new columns
          * @param output the consumer that populates the output triple
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code output} is {@code null}.
          */
         public DatasetBuilder divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
-                final BiConsumer<?, Triple<Object, Object, Object>> output) {
+                final BiConsumer<?, Triple<Object, Object, Object>> output) throws IllegalArgumentException {
+            N.checkArgNotNull(output, cs.output);
+
             val.divideColumn(columnName, newColumnNames, output);
 
             return this;
@@ -3888,8 +3963,11 @@ public class Builder<T> {
          *
          * @param func the function to transform all values in the dataset
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        public DatasetBuilder updateAll(final Function<?, ?> func) {
+        public DatasetBuilder updateAll(final Function<?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.updateAll(func);
 
             return this;
@@ -3912,9 +3990,12 @@ public class Builder<T> {
          * @param func the function applied to each cell; receives the row index, column name, and
          *             current value, and returns the new value
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          * @see Dataset#updateAll(IntBiObjFunction)
          */
-        public DatasetBuilder updateAll(final IntBiObjFunction<String, ?, ?> func) {
+        public DatasetBuilder updateAll(final IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException {
+            N.checkArgNotNull(func, cs.func);
+
             val.updateAll(func);
 
             return this;
@@ -3931,8 +4012,11 @@ public class Builder<T> {
          * @param predicate the condition to test each value
          * @param newValue the replacement value for matching elements
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) {
+        public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) throws IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
+
             val.replaceIf(predicate, newValue);
 
             return this;
@@ -3953,9 +4037,12 @@ public class Builder<T> {
          *                  should be replaced
          * @param newValue the replacement value for cells satisfying the predicate
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          * @see Dataset#replaceIf(IntBiObjPredicate, Object)
          */
-        public DatasetBuilder replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue) {
+        public DatasetBuilder replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue) throws IllegalArgumentException {
+            N.checkArgNotNull(predicate, cs.predicate);
+
             val.replaceIf(predicate, newValue);
 
             return this;
@@ -4042,7 +4129,9 @@ public class Builder<T> {
      * @throws ClassCastException if {@code comparator} is {@code null} and the compared objects are not mutually {@link Comparable}
      * @throws IllegalArgumentException if the comparator itself throws this exception
      */
-    public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) {
+    public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
+
         return new ComparisonBuilder().compare(left, right, comparator);
     }
 
@@ -4328,11 +4417,14 @@ public class Builder<T> {
      * @param <T> the type of objects being compared
      * @param left the first object to compare
      * @param right the second object to compare
-     * @param predicate the predicate to check equality, must not be {@code null}
+     * @param predicate the predicate to check equality,
      * @return a new EquivalenceBuilder for method chaining
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate) {
+    public static <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return new EquivalenceBuilder().equals(left, right, predicate);
     }
 
@@ -4558,9 +4650,11 @@ public class Builder<T> {
      * @param value the object to hash
      * @param func the function that computes the hash code for the value
      * @return a new HashCodeBuilder for method chaining
-     * @throws IllegalArgumentException if {@code func} is {@code null}
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
-    public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) {
+    public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return new HashCodeBuilder().hash(value, func);
     }
 
@@ -4766,8 +4860,7 @@ public class Builder<T> {
          * If the result of this comparison chain has not already been determined,
          * this method uses the provided comparator to compare the objects.
          *
-         * <p>If the comparator is {@code null}, the natural ordering is used (objects must
-         * implement Comparable). This allows for flexible comparison strategies.</p>
+         * <p>The comparator must not be {@code null}. This allows for flexible comparison strategies.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -4779,19 +4872,15 @@ public class Builder<T> {
          * @param <T> the type of objects being compared
          * @param left the first object to compare, may be {@code null}
          * @param right the second object to compare, may be {@code null}
-         * @param comparator the comparator to use, or {@code null} for natural ordering
+         * @param comparator the comparator used to compare {@code left} and {@code right}; must not be {@code null}
          * @return this ComparisonBuilder instance for method chaining
-         * @throws ClassCastException if {@code comparator} is {@code null} and the compared
-         *         objects are not mutually {@link Comparable}
-         * @throws IllegalArgumentException if the comparator itself throws this exception
+         * @throws IllegalArgumentException if {@code comparator} is {@code null}
          */
         public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
+            N.checkArgNotNull(comparator, cs.comparator);
+
             if (result == 0) {
-                if (comparator == null) {
-                    result = Comparators.NATURAL_ORDER.compare(left, right);
-                } else {
-                    result = comparator.compare(left, right);
-                }
+                result = comparator.compare(left, right);
             }
 
             return this;
@@ -5274,9 +5363,9 @@ public class Builder<T> {
          * @param <T> the type of objects being compared
          * @param left the first object to compare
          * @param right the second object to compare
-         * @param predicate the predicate to check equality, must not be {@code null}
+         * @param predicate the predicate to check equality,
          * @return this EquivalenceBuilder instance for method chaining
-         * @throws IllegalArgumentException if predicate is {@code null}
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
         public <T> EquivalenceBuilder equals(final T left, final T right, final BiPredicate<? super T, ? super T> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate, cs.predicate);
@@ -5651,9 +5740,9 @@ public class Builder<T> {
          *
          * @param <T> the type of the value
          * @param value the value to hash
-         * @param func the function to compute the hash code, must not be {@code null}
+         * @param func the function to compute the hash code,
          * @return this HashCodeBuilder instance for method chaining
-         * @throws IllegalArgumentException if func is {@code null}
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
         public <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException {
             N.checkArgNotNull(func, cs.func);

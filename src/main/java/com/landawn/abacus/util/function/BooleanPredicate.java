@@ -77,8 +77,11 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      *
      * @param predicate the predicate to return
      * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      */
-    static BooleanPredicate of(final BooleanPredicate predicate) {
+    static BooleanPredicate of(final BooleanPredicate predicate) throws IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
+
         return predicate;
     }
 
@@ -112,12 +115,13 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * BooleanPredicate combined = isTrue.and(alwaysTrue);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BooleanPredicate and(final BooleanPredicate other) {
+    default BooleanPredicate and(final BooleanPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) && other.test(t);
     }
 
@@ -136,12 +140,13 @@ public interface BooleanPredicate extends Throwables.BooleanPredicate<RuntimeExc
      * BooleanPredicate combined = isTrue.or(alwaysFalse);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BooleanPredicate or(final BooleanPredicate other) {
+    default BooleanPredicate or(final BooleanPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return t -> test(t) || other.test(t);
     }
 

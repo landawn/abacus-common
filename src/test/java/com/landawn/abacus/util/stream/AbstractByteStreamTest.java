@@ -484,7 +484,7 @@ public class AbstractByteStreamTest extends TestBase {
 
     @Test
     public void testSkipWithActionNullAction() {
-        assertThrows(IllegalArgumentException.class, () -> stream.skip(2, null));
+        assertThrows(IllegalArgumentException.class, () -> stream.skip(2, null).count());
     }
 
     @Test

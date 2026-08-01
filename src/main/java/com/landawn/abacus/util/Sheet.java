@@ -958,6 +958,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     @MayReturnNull
     public V set(final R rowKey, final C columnKey, final V value) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+
         final int rowIndex = getRowIndex(rowKey);
         final int columnIndex = getColumnIndex(columnKey);
 
@@ -1147,16 +1148,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param source the source Sheet from which to get the values
-     * @param mergeFunction the function used to combine the values; takes the current value from this Sheet and the
-     *        value from the source Sheet (either may be {@code null}) and returns the value to store
+     * @param mergeFunction the function used to combine conflicting cell values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
      * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
      * @see #putAll(Sheet)
      * @see #set(Object, Object, Object)
      * @see #merge(Sheet, BiFunction)
      */
     public void putAll(final Sheet<? extends R, ? extends C, ? extends V> source, final BiFunction<? super V, ? super V, ? extends V> mergeFunction)
             throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
         checkFrozen();
 
         if (!this.rowKeySet().containsAll(source.rowKeySet())) {
@@ -1565,9 +1567,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public void addRow(final R rowKey, final Collection<? extends V> row) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the sheet permanently inconsistent.
-        N.checkArgNotNull(rowKey, "rowKey");
+        N.checkArgNotNull(rowKey, cs.rowKey);
 
         if (_rowKeySet.contains(rowKey)) {
             throw new IllegalArgumentException("Row '" + rowKey + "' already exists"); //NOSONAR
@@ -1633,9 +1636,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     public void addRow(final int rowIndex, final R rowKey, final Collection<? extends V> row)
             throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
         checkFrozen();
+
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the sheet permanently inconsistent.
-        N.checkArgNotNull(rowKey, "rowKey");
+        N.checkArgNotNull(rowKey, cs.rowKey);
 
         final int rowLength = rowCount();
         final int columnLength = columnCount();
@@ -1708,13 +1712,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowKey the key of the row to be updated
-     * @param func the function to apply to each value in the row; receives current value (may be {@code null}) and returns new value
+     * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #updateColumn(Object, Function)
      * @see #updateAll(Function)
      */
     public void updateRow(final R rowKey, final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
         checkFrozen();
 
         final int rowIndex = this.getRowIndex(rowKey);
@@ -1923,9 +1929,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     public void renameRow(final R rowKey, final R newRowKey) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
         checkRowKey(rowKey);
+
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the renamed row's data unreachable.
-        N.checkArgNotNull(newRowKey, "newRowKey");
+        N.checkArgNotNull(newRowKey, cs.newRowKey);
 
         if (_rowKeySet.contains(newRowKey)) {
             throw new IllegalArgumentException("Invalid new row key: " + N.toString(newRowKey) + ". It's already in the row key set.");
@@ -2224,9 +2231,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public void addColumn(final C columnKey, final Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the sheet permanently inconsistent.
-        N.checkArgNotNull(columnKey, "columnKey");
+        N.checkArgNotNull(columnKey, cs.columnKey);
 
         if (_columnKeySet.contains(columnKey)) {
             throw new IllegalArgumentException("Column '" + columnKey + "' already exists");
@@ -2287,9 +2295,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     public void addColumn(final int columnIndex, final C columnKey, final Collection<? extends V> column)
             throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
         checkFrozen();
+
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the sheet permanently inconsistent.
-        N.checkArgNotNull(columnKey, "columnKey");
+        N.checkArgNotNull(columnKey, cs.columnKey);
 
         final int rowLength = rowCount();
         final int columnLength = columnCount();
@@ -2357,13 +2366,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKey the key of the column to be updated
-     * @param func the function to apply to each value in the column; receives current value (may be {@code null}) and returns new value
+     * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #updateRow(Object, Function)
      * @see #updateAll(Function)
      */
     public void updateColumn(final C columnKey, final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
         checkFrozen();
 
         final int columnIndex = this.getColumnIndex(columnKey);
@@ -2570,7 +2581,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         this.checkColumnKey(columnKey);
         // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
         // already modified, leaving the renamed column's data unreachable.
-        N.checkArgNotNull(newColumnKey, "newColumnKey");
+        N.checkArgNotNull(newColumnKey, cs.newColumnKey);
 
         if (_columnKeySet.contains(newColumnKey)) {
             throw new IllegalArgumentException("Invalid new column key: " + N.toString(newColumnKey) + ". It's already in the column key set.");
@@ -2780,13 +2791,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains: {{2, 4}, {6, null}}
      * }</pre>
      *
-     * @param func the function to apply to each value; receives current value (may be {@code null}) and returns new value
+     * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #updateAll(IntBiFunction)
      * @see #updateAll(TriFunction)
      * @see #replaceIf(Predicate, Object)
      */
-    public void updateAll(final Function<? super V, ? extends V> func) throws IllegalStateException {
+    public void updateAll(final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -2824,10 +2837,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param func the function to apply; receives row and column indices (zero-based) and returns new value
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #updateAll(Function)
      * @see #updateAll(TriFunction)
      */
-    public void updateAll(final IntBiFunction<? extends V> func) throws IllegalStateException {
+    public void updateAll(final IntBiFunction<? extends V> func) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -2869,12 +2884,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * //  {"row2-col1-C", "row2-col2-D"}}
      * }</pre>
      *
-     * @param func the function to apply; receives row key, column key, and current value (may be {@code null}), returns new value
+     * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #updateAll(Function)
      * @see #updateAll(IntBiFunction)
      */
-    public void updateAll(final TriFunction<? super R, ? super C, ? super V, ? extends V> func) throws IllegalStateException {
+    public void updateAll(final TriFunction<? super R, ? super C, ? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -2919,14 +2936,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.replaceIf(Objects::isNull, -1);
      * }</pre>
      *
-     * @param predicate the predicate to test each value; receives current value (may be {@code null})
+     * @param predicate the predicate used to test values; must not be {@code null}
      * @param newValue the value to replace matching cells with
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #replaceIf(IntBiPredicate, Object)
      * @see #replaceIf(TriPredicate, Object)
      * @see #updateAll(Function)
      */
-    public void replaceIf(final Predicate<? super V> predicate, final V newValue) throws IllegalStateException {
+    public void replaceIf(final Predicate<? super V> predicate, final V newValue) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -2970,10 +2989,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param predicate the predicate to test; receives row and column indices (zero-based)
      * @param newValue the value to replace matching cells with
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #replaceIf(Predicate, Object)
      * @see #replaceIf(TriPredicate, Object)
      */
-    public void replaceIf(final IntBiPredicate predicate, final V newValue) throws IllegalStateException {
+    public void replaceIf(final IntBiPredicate predicate, final V newValue) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -3014,13 +3035,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains: {{0, 2}, {0, 4}}
      * }</pre>
      *
-     * @param predicate the predicate to test; receives row key, column key, and current value (may be {@code null})
+     * @param predicate the predicate used to test values; must not be {@code null}
      * @param newValue the value to replace matching cells with
      * @throws IllegalStateException if this Sheet is frozen
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #replaceIf(Predicate, Object)
      * @see #replaceIf(IntBiPredicate, Object)
      */
-    public void replaceIf(final TriPredicate<? super R, ? super C, ? super V> predicate, final V newValue) throws IllegalStateException {
+    public void replaceIf(final TriPredicate<? super R, ? super C, ? super V> predicate, final V newValue)
+            throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
 
         if (rowCount() > 0 && columnCount() > 0) {
@@ -3083,7 +3107,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Reorders the rows according to the specified comparator applied to their keys.
      * All row data moves with their respective keys to maintain data integrity.
-     * If the comparator is {@code null}, natural ordering is used (row keys must implement {@code Comparable}).
+     * The comparator must not be {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3099,13 +3123,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Rows are now ordered: ["a", "medium", "long_name"]
      * }</pre>
      *
-     * @param cmp the comparator to determine row key ordering; {@code null} for natural ordering
+     * @param cmp the comparator to determine row key ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws ClassCastException if {@code cmp} is {@code null} and the row keys are not mutually comparable, or if comparing two row keys throws a ClassCastException
+     * @throws ClassCastException if comparing two row keys throws a ClassCastException
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortByRowKey()
      * @see #sortByColumnKey(Comparator)
      */
-    public void sortByRowKey(final Comparator<? super R> cmp) throws IllegalStateException {
+    public void sortByRowKey(final Comparator<? super R> cmp) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         final int rowLength = rowCount();
@@ -3174,8 +3200,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the rows in the Sheet based on the values in the specified column.
      * <p>
      * Reorders rows according to the values in the specified column using the specified comparator.
-     * All data across all columns is reordered to maintain row integrity. If the comparator is {@code null},
-     * natural ordering is used (values must implement {@code Comparable}).
+     * All data across all columns is reordered to maintain row integrity. The comparator
+     * must not be {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3197,14 +3223,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKey the key of the column whose values will determine the row ordering
-     * @param cmp the comparator to determine the order of values; {@code null} for natural ordering
+     * @param cmp the comparator to determine the order of values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the column key does not exist in this Sheet
-     * @throws ClassCastException if {@code cmp} is {@code null} and the column's values are not mutually comparable
+     * @throws ClassCastException if comparing two column values throws a ClassCastException
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
-    public void sortRowsByColumnValues(final C columnKey, final Comparator<? super V> cmp) throws IllegalStateException {
+    public void sortRowsByColumnValues(final C columnKey, final Comparator<? super V> cmp) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         // Resolve (and validate) the key even when uninitialized: the documented IllegalArgumentException
@@ -3311,15 +3339,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKeysToSort the keys of columns whose values will determine row ordering; must not be
      *            {@code null} or empty, and every key must exist in this Sheet
-     * @param cmp the comparator applied to arrays of values from the specified columns; if {@code null}, arrays are compared
-     *            lexicographically with {@code null} elements ordered first, as by {@link Comparators#OBJECT_ARRAY_COMPARATOR}
+     * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code columnKeysToSort} is {@code null} or empty (an empty collection
      *         is accepted only on a zero-column Sheet), or if any specified column key does not exist in this Sheet
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
-    public void sortRowsByColumnValues(final Collection<C> columnKeysToSort, final Comparator<? super Object[]> cmp) throws IllegalStateException {
+    public void sortRowsByColumnValues(final Collection<C> columnKeysToSort, final Comparator<? super Object[]> cmp)
+            throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         if (columnKeysToSort == null || (columnKeysToSort.isEmpty() && N.notEmpty(_columnKeySet))) {
@@ -3452,8 +3482,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the columns in the Sheet based on the column keys using the specified comparator.
      * <p>
      * Reorders columns according to the specified comparator applied to column keys.
-     * The data in all rows is reordered to match the new column order. If the comparator is {@code null},
-     * natural ordering is used (column keys must implement {@code Comparable}).
+     * The data in all rows is reordered to match the new column order. The comparator
+     * must not be {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3470,13 +3500,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data becomes: {{2, 3, 1}, {5, 6, 4}}
      * }</pre>
      *
-     * @param cmp the comparator to determine the order of the column keys; {@code null} for natural ordering
+     * @param cmp the comparator to determine the order of the column keys; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws ClassCastException if {@code cmp} is {@code null} and the column keys are not mutually comparable, or if comparing two column keys throws a ClassCastException
+     * @throws ClassCastException if comparing two column keys throws a ClassCastException
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortByColumnKey()
      * @see #sortByRowKey(Comparator)
      */
-    public void sortByColumnKey(final Comparator<? super C> cmp) throws IllegalStateException {
+    public void sortByColumnKey(final Comparator<? super C> cmp) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         final int columnLength = _columnKeySet.size();
@@ -3536,8 +3568,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Sorts the columns in the Sheet based on the values in the specified row.
      * <p>
      * Reorders the columns according to the values in the specified row using the specified comparator.
-     * This effectively sorts the "vertical" arrangement of data based on a "horizontal" slice. If the
-     * comparator is {@code null}, natural ordering is used (values must implement {@code Comparable}).
+     * This effectively sorts the "vertical" arrangement of data based on a "horizontal" slice. The
+     * comparator must not be {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3558,14 +3590,16 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowKey the key of the row whose values will determine the column ordering
-     * @param cmp the comparator to apply to values in the specified row; {@code null} for natural ordering
+     * @param cmp the comparator to apply to values in the specified row; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key does not exist in this Sheet
-     * @throws ClassCastException if {@code cmp} is {@code null} and the row's values are not mutually comparable
+     * @throws ClassCastException if comparing two row values throws a ClassCastException
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
-    public void sortColumnsByRowValues(final R rowKey, final Comparator<? super V> cmp) throws IllegalStateException {
+    public void sortColumnsByRowValues(final R rowKey, final Comparator<? super V> cmp) throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         // Resolve (and validate) the key even when uninitialized: the documented IllegalArgumentException
@@ -3662,15 +3696,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKeysToSort the keys of rows whose values will determine column ordering; must not be
      *            {@code null} or empty, and every key must exist in this Sheet
-     * @param cmp the comparator applied to arrays of values from the specified rows; if {@code null}, arrays are compared
-     *            lexicographically with {@code null} elements ordered first, as by {@link Comparators#OBJECT_ARRAY_COMPARATOR}
+     * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code rowKeysToSort} is {@code null} or empty (an empty collection
      *         is accepted only on a zero-row Sheet), or if any specified row key does not exist in this Sheet
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
-    public void sortColumnsByRowValues(final Collection<R> rowKeysToSort, final Comparator<? super Object[]> cmp) throws IllegalStateException {
+    public void sortColumnsByRowValues(final Collection<R> rowKeysToSort, final Comparator<? super Object[]> cmp)
+            throws IllegalStateException, IllegalArgumentException {
+        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
 
         if (rowKeysToSort == null || (rowKeysToSort.isEmpty() && N.notEmpty(_rowKeySet))) {
@@ -4020,12 +4056,15 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <U> the type of values in the other Sheet
      * @param <X> the type of values in the resulting merged Sheet
      * @param b the other Sheet to merge with this one
-     * @param mergeFunction function to combine values; receives value from this Sheet and other Sheet (either may be {@code null})
+     * @param mergeFunction the function used to combine conflicting cell values; must not be {@code null}
      * @return a new Sheet containing the merged result
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
      * @see #putAll(Sheet, BiFunction)
      */
-    public <U, X> Sheet<R, C, X> merge(final Sheet<? extends R, ? extends C, ? extends U> b,
-            final BiFunction<? super V, ? super U, ? extends X> mergeFunction) {
+    public <U, X> Sheet<R, C, X> merge(final Sheet<? extends R, ? extends C, ? extends U> b, final BiFunction<? super V, ? super U, ? extends X> mergeFunction)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
+
         final Sheet<R, C, U> sheetB = (Sheet<R, C, U>) b;
 
         final Set<R> newRowKeySet = N.newLinkedHashSet(this.rowKeySet());
@@ -4331,10 +4370,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEachColumnMajor(Throwables.TriConsumer)
      * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         if (_isInitialized) {
             for (final R rowKey : _rowKeySet) {
                 for (final C columnKey : _columnKeySet) {
@@ -4372,10 +4415,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEachRowMajor(Throwables.TriConsumer)
      * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         if (_isInitialized) {
             for (final C columnKey : _columnKeySet) {
                 for (final R rowKey : _rowKeySet) {
@@ -4413,10 +4460,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEachRowMajor(Throwables.TriConsumer)
      * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachNonNullRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachNonNullRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         if (_isInitialized) {
             V value = null;
 
@@ -4452,10 +4503,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEachColumnMajor(Throwables.TriConsumer)
      * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
-    public <E extends Exception> void forEachNonNullColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action) throws E {
+    public <E extends Exception> void forEachNonNullColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         if (_isInitialized) {
             V value = null;
 
@@ -5882,11 +5937,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Sheet, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
+     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
      * @see #rows()
      * @see #rows(int, int, IntObjFunction)
      * @see #columns(IntObjFunction)
      */
-    public <T> Stream<Pair<R, T>> rows(final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
+    public <T> Stream<Pair<R, T>> rows(final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(rowMapper, cs.rowMapper);
+
         return rows(0, rowCount(), rowMapper);
     }
 
@@ -5924,11 +5982,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *                  The integer represents the index of the row in the Sheet, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
+     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
      * @see #rows(IntObjFunction)
      * @see #columns(int, int, IntObjFunction)
      */
-    public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper) {
+    public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
+            throws IllegalArgumentException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
+        N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         // Invoke the mapper once per selected row even when the row array is empty.
         if (rowCount() == 0) {
@@ -6130,11 +6191,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Sheet, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
+     * @throws IllegalArgumentException if {@code columnMapper} is {@code null}.
      * @see #columns()
      * @see #columns(int, int, IntObjFunction)
      * @see #rows(IntObjFunction)
      */
-    public <T> Stream<Pair<C, T>> columns(final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
+    public <T> Stream<Pair<C, T>> columns(final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) throws IllegalArgumentException {
+        N.checkArgNotNull(columnMapper, cs.columnMapper);
+
         return columns(0, columnCount(), columnMapper);
     }
 
@@ -6172,12 +6236,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *                     The integer represents the index of the column in the Sheet, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
+     * @throws IllegalArgumentException if {@code columnMapper} is {@code null}.
      * @see #columns(IntObjFunction)
      * @see #rows(int, int, IntObjFunction)
      */
     public <T> Stream<Pair<C, T>> columns(final int fromColumnIndex, final int toColumnIndex,
-            final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) {
+            final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) throws IllegalArgumentException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
+        N.checkArgNotNull(columnMapper, cs.columnMapper);
 
         // Invoke the mapper once per selected column even when the column array is empty.
         if (columnCount() == 0) {
@@ -6548,9 +6614,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param func the function to apply to this Sheet
      * @return the result produced by applying the function to this Sheet
      * @throws E if the function throws an exception
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #applyIfNotEmpty(Throwables.Function)
      */
-    public <T, E extends Exception> T apply(final Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
+    public <T, E extends Exception> T apply(final Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         return func.apply(this);
     }
 
@@ -6585,10 +6654,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return an Optional containing the result if both axes are non-empty and the function returned a
      *         {@code non-null} value, or an empty Optional otherwise
      * @throws E if the function throws an exception
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #apply(Throwables.Function)
      * @see #isEmpty()
      */
-    public <T, E extends Exception> Optional<T> applyIfNotEmpty(final Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E {
+    public <T, E extends Exception> Optional<T> applyIfNotEmpty(final Throwables.Function<? super Sheet<R, C, V>, T, E> func)
+            throws E, IllegalArgumentException {
+        N.checkArgNotNull(func, cs.func);
+
         if (!isEmpty()) {
             return Optional.ofNullable(func.apply(this));
         } else {
@@ -6622,9 +6695,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on this Sheet
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         action.accept(this);
     }
 
@@ -6660,10 +6736,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param action the action to perform if this Sheet has at least one row and one column
      * @return OrElse.TRUE if the action was executed, or OrElse.FALSE if either axis was empty
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #accept(Throwables.Consumer)
      * @see #isEmpty()
      */
-    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         if (!isEmpty()) {
             action.accept(this);
 

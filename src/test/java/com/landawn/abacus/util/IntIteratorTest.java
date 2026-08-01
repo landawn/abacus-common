@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +26,7 @@ public class IntIteratorTest extends TestBase {
     @Test
     public void testEmpty_SameSingleton() {
         assertSame(IntIterator.EMPTY, IntIterator.empty());
-    }
+    } 
 
     // =================================================
     // empty()
@@ -353,7 +354,7 @@ public class IntIteratorTest extends TestBase {
 
     @Test
     public void test_defer_null_supplier() {
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.defer(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.defer(null));
     }
 
     // =================================================
@@ -390,7 +391,7 @@ public class IntIteratorTest extends TestBase {
 
     @Test
     public void test_generate_null_supplier() {
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((java.util.function.IntSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((java.util.function.IntSupplier) null));
     }
 
     // =================================================
@@ -413,8 +414,8 @@ public class IntIteratorTest extends TestBase {
 
     @Test
     public void test_generate_conditional_null_params() {
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(null, () -> 1));
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(() -> true, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(null, () -> 1));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(() -> true, null));
     }
 
     @Test
@@ -440,9 +441,9 @@ public class IntIteratorTest extends TestBase {
         IntSupplier supplier = () -> 0;
         BooleanSupplier hasNext = () -> true;
 
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((IntSupplier) null));
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(null, supplier));
-        assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(hasNext, null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate((IntSupplier) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(null, supplier));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntIterator.generate(hasNext, null));
     }
 
     @Test
@@ -706,7 +707,7 @@ public class IntIteratorTest extends TestBase {
     @Test
     public void test_filter_null_predicate() {
         IntIterator iter = IntIterator.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
     }
 
     @Test

@@ -1644,9 +1644,22 @@ public class ShortStreamTest extends TestBase {
         assertArrayEquals(new short[] { 1, 2, 3 }, stream.toArray());
         assertEquals(1, counter.get());
     }
+ 
 
     @Test
-    public void testDefer_Null() {
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final ShortStream deferred = ShortStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
+    }
+
+    @Test
+    public void testDeferRejectsNullSupplier() {
         assertThrows(IllegalArgumentException.class, () -> ShortStream.defer(null));
     }
 
@@ -3200,7 +3213,7 @@ public class ShortStreamTest extends TestBase {
 
     @Test
     public void testGenerate_Null() {
-        assertThrows(IllegalArgumentException.class, () -> ShortStream.generate(null));
+        assertThrows(IllegalArgumentException.class, () -> ShortStream.generate(null).limit(1).count());
     }
 
     @Test

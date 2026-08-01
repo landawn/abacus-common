@@ -79,12 +79,13 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * BiIntObjPredicate<String> combined = positiveSum.and(notEmpty);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ANDed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BiIntObjPredicate<T> and(final BiIntObjPredicate<? super T> other) {
+    default BiIntObjPredicate<T> and(final BiIntObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (i, j, t) -> test(i, j, t) && other.test(i, j, t);
     }
 
@@ -103,12 +104,13 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      * BiIntObjPredicate<String> combined = largeSum.or(longString);
      * }</pre>
      *
-     * @param other a predicate that will be logically-ORed with this predicate. Must not be {@code null}.
+     * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is null
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      */
-    default BiIntObjPredicate<T> or(final BiIntObjPredicate<? super T> other) {
+    default BiIntObjPredicate<T> or(final BiIntObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
+
         return (i, j, t) -> test(i, j, t) || other.test(i, j, t);
     }
 

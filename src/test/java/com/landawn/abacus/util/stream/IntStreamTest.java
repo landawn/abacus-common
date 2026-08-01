@@ -1876,6 +1876,18 @@ public class IntStreamTest extends TestBase {
         stream.count();
         assertEquals(1, counter.get());
     }
+ 
+    @Test
+    public void testDefer_supplierReturningNullProducesEmptyStream() {
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final IntStream deferred = IntStream.defer(() -> {
+            supplierCalls.incrementAndGet();
+            return null;
+        });
+
+        assertEquals(0, deferred.count());
+        assertEquals(1, supplierCalls.get());
+    }
 
     @Test
     public void testStreamCreatedFromDefer() {

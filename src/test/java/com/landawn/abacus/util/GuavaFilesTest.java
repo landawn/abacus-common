@@ -40,7 +40,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
-import com.landawn.abacus.guava.Traverser;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSink;
@@ -50,6 +49,7 @@ import com.google.common.io.InsecureRecursiveDeleteException;
 import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.guava.Files;
+import com.landawn.abacus.guava.Traverser;
 
 public class GuavaFilesTest extends TestBase {
 

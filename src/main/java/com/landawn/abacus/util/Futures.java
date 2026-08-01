@@ -415,18 +415,22 @@ public final class Futures {
      * @param cf1 the first future to compose, must not be {@code null}.
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results. Receives both Future objects
-     *                         as parameters and returns the composed result. Must not be {@code null}.
+     *                         as parameters and returns the composed result.
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when both input futures are done.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException,
      *                         or TimeoutException, the exception is wrapped in a RuntimeException and thrown.
+     * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Future, Future, Throwables.BiFunction, Throwables.Function)
      * @see #combine(Future, Future, Throwables.BiFunction)
      * @see ContinuableFuture
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
-            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, ? extends Exception> zipFunctionForGet) {
+            final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, ? extends Exception> zipFunctionForGet)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+
         return compose(cf1, cf2, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2));
     }
 
@@ -516,20 +520,25 @@ public final class Futures {
      * @param cf1 the first future to compose, must not be {@code null}.
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
-     *                         Receives both Future objects. Must not be {@code null}.
+     *                         Receives both Future objects.
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple4 containing:
      *                              (_1: future1, _2: future2, _3: timeout value, _4: TimeUnit)
-     *                              Must not be {@code null}.
+     *
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
      * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
+     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
      * @see #compose(Future, Future, Throwables.BiFunction)
      * @see Tuple4
      * @see TimeUnit
      */
     public static <T1, T2, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2,
             final Throwables.BiFunction<? super Future<T1>, ? super Future<T2>, ? extends R, ? extends Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet) {
+            final Throwables.Function<? super Tuple4<Future<T1>, Future<T2>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+        N.checkArgNotNull(zipFunctionTimeoutGet, cs.zipFunctionTimeoutGet);
+
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1)),
@@ -604,16 +613,20 @@ public final class Futures {
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param cf3 the third future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results. Receives all three Future objects
-     *                         and returns the composed result. Must not be {@code null}.
+     *                         and returns the composed result.
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when all three input futures are done.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
+     * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Future, Future, Future, Throwables.TriFunction, Throwables.Function)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
-            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, ? extends Exception> zipFunctionForGet) {
+            final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, ? extends Exception> zipFunctionForGet)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+
         return compose(cf1, cf2, cf3, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1, t._2, t._3));
     }
 
@@ -715,20 +728,25 @@ public final class Futures {
      * @param cf2 the second future to compose, must not be {@code null}.
      * @param cf3 the third future to compose, must not be {@code null}.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
-     *                         Receives all three Future objects. Must not be {@code null}.
+     *                         Receives all three Future objects.
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple5 containing:
      *                              (_1: future1, _2: future2, _3: future3, _4: timeout value, _5: TimeUnit)
-     *                              Must not be {@code null}.
+     *
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
      * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
+     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
      * @see #compose(Future, Future, Future, Throwables.TriFunction)
      * @see Tuple5
      * @see TimeUnit
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> compose(final Future<T1> cf1, final Future<T2> cf2, final Future<T3> cf3,
             final Throwables.TriFunction<? super Future<T1>, ? super Future<T2>, ? super Future<T3>, ? extends R, ? extends Exception> zipFunctionForGet,
-            final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet) {
+            final Throwables.Function<? super Tuple5<Future<T1>, Future<T2>, Future<T3>, Long, TimeUnit>, R, ? extends Exception> zipFunctionTimeoutGet)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+        N.checkArgNotNull(zipFunctionTimeoutGet, cs.zipFunctionTimeoutGet);
+
         final List<Future<?>> cfs = Arrays.asList(cf1, cf2, cf3);
 
         return compose(cfs, c -> zipFunctionForGet.apply((Future<T1>) c.get(0), (Future<T2>) c.get(1), (Future<T3>) c.get(2)),
@@ -831,17 +849,19 @@ public final class Futures {
      * @param <R> the result type of the composed future.
      * @param cfs the collection of input futures, must not be {@code null} or empty.
      * @param zipFunctionForGet the function that combines the futures' results. Receives the collection
-     *                         of Future objects and returns the composed result. Must not be {@code null}.
+     *                         of Future objects and returns the composed result.
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when all input futures are done.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if {@code zipFunctionForGet} is {@code null}.
      * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
+     * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Collection, Throwables.Function, Throwables.Function)
      * @see #combine(Collection, Throwables.Function)
      */
     public static <T, FC extends Collection<? extends Future<? extends T>>, R> ContinuableFuture<R> compose(final FC cfs,
-            final Throwables.Function<? super FC, ? extends R, ? extends Exception> zipFunctionForGet) {
+            final Throwables.Function<? super FC, ? extends R, ? extends Exception> zipFunctionForGet) throws IllegalArgumentException {
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+
         return compose(cfs, zipFunctionForGet, t -> zipFunctionForGet.apply(t._1));
     }
 
@@ -970,13 +990,14 @@ public final class Futures {
      * @param <R> the result type of the composed future.
      * @param cfs the collection of input futures, must not be {@code null} or empty.
      * @param zipFunctionForGet the function that combines the futures' results for regular get() operations.
-     *                         Receives the collection of Future objects. Must not be {@code null}.
+     *                         Receives the collection of Future objects.
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 containing:
-     *                              (_1: futures collection, _2: timeout value, _3: TimeUnit). Must not be {@code null}.
+     *                              (_1: futures collection, _2: timeout value, _3: TimeUnit).
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if either function is {@code null}.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
      * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
      *                         ExecutionException, or TimeoutException.
+     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
      * @see #compose(Collection, Throwables.Function)
      * @see Tuple3
      * @see TimeUnit
@@ -985,11 +1006,12 @@ public final class Futures {
             final Throwables.Function<? super FC, ? extends R, ? extends Exception> zipFunctionForGet,
             final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, ? extends Exception> zipFunctionTimeoutGet)
             throws IllegalArgumentException {
-        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty"); //NOSONAR
-        N.checkArgNotNull(zipFunctionForGet);
-        N.checkArgNotNull(zipFunctionTimeoutGet);
+        N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
+        N.checkArgNotNull(zipFunctionForGet, cs.zipFunctionForGet);
+        N.checkArgNotNull(zipFunctionTimeoutGet, cs.zipFunctionTimeoutGet); //NOSONAR
 
         final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGetToUse = (Throwables.Function<? super FC, ? extends R, Exception>) zipFunctionForGet;
+
         final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGetToUse = (Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception>) zipFunctionTimeoutGet;
 
         return ContinuableFuture.wrap(new Future<>() {
@@ -1359,14 +1381,17 @@ public final class Futures {
      * @param cf1 the first future, must not be {@code null}.
      * @param cf2 the second future, must not be {@code null}.
      * @param action the function to apply to both results. Receives the actual values (not the
-     *               futures). Must not be {@code null}.
+     *               futures).
      * @return a {@code ContinuableFuture} whose successful result is produced by {@code action}
      *         after both results are retrieved. {@code get()} may fail before a later input completes;
      *         if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
-            final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) {
+            final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return allOf(Arrays.asList(cf1, cf2)).map(t -> action.apply((T1) t.get(0), (T2) t.get(1)));
     }
 
@@ -1397,14 +1422,17 @@ public final class Futures {
      * @param cf2 the second future, must not be {@code null}.
      * @param cf3 the third future, must not be {@code null}.
      * @param action the function to apply to all three results. Receives the actual values (not
-     *               the futures). Must not be {@code null}.
+     *               the futures).
      * @return a {@code ContinuableFuture} whose successful result is produced by {@code action}
      *         after all three results are retrieved. {@code get()} may fail before a later input
      *         completes; if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public static <T1, T2, T3, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2, final Future<? extends T3> cf3,
-            final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) {
+            final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         return allOf(Arrays.asList(cf1, cf2, cf3)).map(t -> action.apply((T1) t.get(0), (T2) t.get(1), (T3) t.get(2)));
     }
 
@@ -1432,18 +1460,21 @@ public final class Futures {
      * @param <R> the result type after applying the action.
      * @param cfs the collection of futures to combine, must not be {@code null} or empty.
      * @param action the function to apply to the list of results, in iteration order of
-     *               {@code cfs}. Must not be {@code null}.
+     *               {@code cfs}.
      * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
      *         applied to the list of all completed results. Calling {@code get()} on it waits
      *         for all input futures and may throw {@link InterruptedException} or
      *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #combine(Future, Future, Throwables.BiFunction)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
     public static <T, R> ContinuableFuture<R> combine(final Collection<? extends Future<? extends T>> cfs,
-            final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) {
+            final Throwables.Function<List<T>, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         final ContinuableFuture<List<T>> f = allOf(cfs);
         return f.map(action);
     }
@@ -1532,6 +1563,7 @@ public final class Futures {
 
     private static <T> ContinuableFuture<List<T>> allOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
+
         final List<Future<? extends T>> futures = new ArrayList<>(cfs);
 
         return ContinuableFuture.wrap(new Future<>() {
@@ -1688,6 +1720,7 @@ public final class Futures {
 
     private static <T> ContinuableFuture<T> anyOf2(final Collection<? extends Future<? extends T>> cfs) {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
+
         final List<Future<? extends T>> futures = new ArrayList<>(cfs);
 
         return ContinuableFuture.wrap(new Future<>() {
@@ -2051,13 +2084,14 @@ public final class Futures {
      *                      {@code null}.
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out).
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or if
-     *         {@code resultHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
      * @see #iterate(Collection)
      * @see #iterate(Collection, long, TimeUnit, Function)
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs,
-            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(resultHandler, cs.resultHandler);
+
         return iterate02(cfs, resultHandler);
     }
 
@@ -2101,19 +2135,19 @@ public final class Futures {
      * @param totalTimeoutForAll the maximum time to wait for all results; must be positive.
      * @param unit the time unit of {@code totalTimeoutForAll}, must not be {@code null}.
      * @param resultHandler the function to transform each {@code Result}, including
-     *                      timeout-failure handling. Must not be {@code null}.
+     *                      timeout-failure handling.
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out) with timeout enforcement. Once the total timeout
      *         elapses, a final {@code Result} carrying a {@link TimeoutException} is passed to
      *         {@code resultHandler}.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty,
-     *         {@code totalTimeoutForAll} is not positive, or {@code unit} or
-     *         {@code resultHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
      * @see #iterate(Collection, Function)
      * @see #iterate(Collection, long, TimeUnit)
      */
     public static <T, R> ObjIterator<R> iterate(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
-            final Function<? super Result<T, Exception>, ? extends R> resultHandler) {
+            final Function<? super Result<T, Exception>, ? extends R> resultHandler) throws IllegalArgumentException {
+        N.checkArgNotNull(resultHandler, cs.resultHandler);
+
         return iterate02(cfs, totalTimeoutForAll, unit, resultHandler);
     }
 
@@ -2127,7 +2161,6 @@ public final class Futures {
         N.checkArgument(N.notEmpty(cfs), "The specified collection cannot be null or empty");
         N.checkArgPositive(totalTimeoutForAll, cs.totalTimeoutForAll);
         N.checkArgNotNull(unit, cs.unit);
-        N.checkArgNotNull(resultHandler, cs.resultHandler);
 
         final long startTimeInNanos = System.nanoTime();
         final long totalTimeoutForAllInNanos = totalTimeoutForAll == Long.MAX_VALUE ? Long.MAX_VALUE : unit.toNanos(totalTimeoutForAll);

@@ -30,8 +30,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
@@ -41,7 +43,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
-import com.landawn.abacus.util.Splitter.MapSplitter;
 
 /**
  * Utility methods for URL encoding and decoding
@@ -423,7 +424,6 @@ public final class URLEncodedUtil {
     }
 
     private static final int RADIX = 16;
-    private static final MapSplitter PARAMS_SPLITTER = MapSplitter.with(String.valueOf(QP_SEP_A), NAME_VALUE_SEPARATOR).trimResults();
 
     private URLEncodedUtil() {
         // Utility class - prevent instantiation
@@ -866,7 +866,7 @@ public final class URLEncodedUtil {
                 final String str = source.toString();
 
                 if (str.contains(NAME_VALUE_SEPARATOR)) {
-                    encode(PARAMS_SPLITTER.split(str), charset, NamingPolicy.NO_CHANGE, output);
+                    encodeParameterString(str, charset, output);
                 } else {
                     encodeFormFields(str, charset, output);
                 }
@@ -875,6 +875,54 @@ public final class URLEncodedUtil {
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Encodes an unescaped {@code name=value&name=value} parameter string without routing it
+     * through a map. Keeping the entries as a sequence is important because repeated parameter
+     * names are meaningful in form data and must not be collapsed.
+     */
+    private static void encodeParameterString(final String source, final Charset charset, final Appendable output) throws IOException {
+        final List<String> names = new ArrayList<>();
+        final List<String> values = new ArrayList<>();
+        int start = 0;
+
+        while (start <= source.length()) {
+            int end = source.indexOf(QP_SEP_A, start);
+
+            if (end < 0) {
+                end = source.length();
+            }
+
+            final String entry = source.substring(start, end).trim();
+
+            if (!entry.isEmpty()) {
+                final int separatorIndex = entry.indexOf(NAME_VALUE_SEPARATOR);
+
+                if (separatorIndex < 0) {
+                    throw new IllegalArgumentException("Invalid map entry String: " + entry);
+                }
+
+                names.add(entry.substring(0, separatorIndex).trim());
+                values.add(entry.substring(separatorIndex + NAME_VALUE_SEPARATOR.length()).trim());
+            }
+
+            if (end == source.length()) {
+                break;
+            }
+
+            start = end + 1;
+        }
+
+        for (int i = 0, size = names.size(); i < size; i++) {
+            if (i > 0) {
+                output.append(QP_SEP_A);
+            }
+
+            encodeFormFields(names.get(i), charset, output);
+            output.append(NAME_VALUE_SEPARATOR);
+            encodeFormFields(values.get(i), charset, output);
         }
     }
 
@@ -1059,15 +1107,18 @@ public final class URLEncodedUtil {
      * @param <M> the type of the Map to return, must extend {@code Map<String, String>}.
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
-     * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be {@code null}.
+     * @param mapSupplier a supplier that provides an instance of the desired Map implementation;
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty. A token
      *         without {@code '='} is stored with a {@code null} value.
-     * @throws NullPointerException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see #decode(String, Charset)
      */
-    public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier) {
-        final M result = Objects.requireNonNull(Objects.requireNonNull(mapSupplier, "mapSupplier").get(), "mapSupplier returned null");
+    public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
+        final M result = N.checkArgNotNull(mapSupplier.get(), "mapSupplier result");
 
         if (Strings.isEmpty(urlQuery)) {
             return result;
@@ -1270,7 +1321,7 @@ public final class URLEncodedUtil {
      */
     @SuppressWarnings("rawtypes")
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         if (Map.class.isAssignableFrom(targetType)) {
             final Supplier<Map<String, String>> supplier = Suppliers.ofMap((Class) targetType);
@@ -1360,7 +1411,7 @@ public final class URLEncodedUtil {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type.
      */
     public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) throws IllegalArgumentException {
-        N.checkArgNotNull(targetType, "targetType");
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
         final Object result = beanInfo.createBeanResult();

@@ -248,8 +248,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream filter(final IntPredicate predicate) throws IllegalStateException {
+    public IntStream filter(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private boolean hasNext = false;
@@ -283,8 +285,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream takeWhile(final IntPredicate predicate) throws IllegalStateException {
+    public IntStream takeWhile(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private boolean hasMore = true;
@@ -318,8 +322,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream dropWhile(final IntPredicate predicate) throws IllegalStateException {
+    public IntStream dropWhile(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private boolean hasNext = false;
@@ -421,8 +427,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream map(final IntUnaryOperator mapper) throws IllegalStateException {
+    public IntStream map(final IntUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -433,7 +441,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public int nextInt() throws IllegalArgumentException {
+            public int nextInt() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -455,8 +463,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public CharStream mapToChar(final IntToCharFunction mapper) throws IllegalStateException {
+    public CharStream mapToChar(final IntToCharFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new CharIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -467,7 +477,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public char nextChar() throws IllegalArgumentException {
+            public char nextChar() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -489,8 +499,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public ByteStream mapToByte(final IntToByteFunction mapper) throws IllegalStateException {
+    public ByteStream mapToByte(final IntToByteFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ByteIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -501,7 +513,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public byte nextByte() throws IllegalArgumentException {
+            public byte nextByte() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -523,8 +535,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public ShortStream mapToShort(final IntToShortFunction mapper) throws IllegalStateException {
+    public ShortStream mapToShort(final IntToShortFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ShortIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -535,7 +549,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public short nextShort() throws IllegalArgumentException {
+            public short nextShort() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -557,8 +571,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public LongStream mapToLong(final IntToLongFunction mapper) throws IllegalStateException {
+    public LongStream mapToLong(final IntToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -569,7 +585,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public long nextLong() throws IllegalArgumentException {
+            public long nextLong() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -591,8 +607,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public FloatStream mapToFloat(final IntToFloatFunction mapper) throws IllegalStateException {
+    public FloatStream mapToFloat(final IntToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new FloatIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -603,7 +621,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public float nextFloat() throws IllegalArgumentException {
+            public float nextFloat() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -625,8 +643,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public DoubleStream mapToDouble(final IntToDoubleFunction mapper) throws IllegalStateException {
+    public DoubleStream mapToDouble(final IntToDoubleFunction mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -637,7 +657,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public double nextDouble() throws IllegalArgumentException {
+            public double nextDouble() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -659,8 +679,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <T> Stream<T> mapToObj(final IntFunction<? extends T> mapper) throws IllegalStateException {
+    public <T> Stream<T> mapToObj(final IntFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -671,7 +693,7 @@ class ArrayIntStream extends AbstractIntStream {
             }
 
             @Override
-            public T next() throws IllegalArgumentException {
+            public T next() {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -698,8 +720,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream flatMap(final IntFunction<? extends IntStream> mapper) throws IllegalStateException {
+    public IntStream flatMap(final IntFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
@@ -756,8 +780,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream flatmap(final IntFunction<? extends Collection<Integer>> mapper) throws IllegalStateException {
+    public IntStream flatmap(final IntFunction<? extends Collection<Integer>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -787,8 +813,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream flatMapArray(final IntFunction<int[]> mapper) throws IllegalStateException {
+    public IntStream flatMapArray(final IntFunction<int[]> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         if (isParallel()) {
             return super.flatMapArray(mapper);
@@ -828,8 +856,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public CharStream flatMapToChar(final IntFunction<? extends CharStream> mapper) throws IllegalStateException {
+    public CharStream flatMapToChar(final IntFunction<? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final CharIteratorEx iter = new CharIteratorEx() {
             private int cursor = fromIndex;
@@ -886,8 +916,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public ByteStream flatMapToByte(final IntFunction<? extends ByteStream> mapper) throws IllegalStateException {
+    public ByteStream flatMapToByte(final IntFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private int cursor = fromIndex;
@@ -944,8 +976,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public ShortStream flatMapToShort(final IntFunction<? extends ShortStream> mapper) throws IllegalStateException {
+    public ShortStream flatMapToShort(final IntFunction<? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private int cursor = fromIndex;
@@ -1002,8 +1036,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public LongStream flatMapToLong(final IntFunction<? extends LongStream> mapper) throws IllegalStateException {
+    public LongStream flatMapToLong(final IntFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final LongIteratorEx iter = new LongIteratorEx() {
             private int cursor = fromIndex;
@@ -1060,8 +1096,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public FloatStream flatMapToFloat(final IntFunction<? extends FloatStream> mapper) throws IllegalStateException {
+    public FloatStream flatMapToFloat(final IntFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private int cursor = fromIndex;
@@ -1118,8 +1156,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public DoubleStream flatMapToDouble(final IntFunction<? extends DoubleStream> mapper) throws IllegalStateException {
+    public DoubleStream flatMapToDouble(final IntFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private int cursor = fromIndex;
@@ -1176,8 +1216,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapToObj(final IntFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final IntFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
             private int cursor = fromIndex;
@@ -1234,8 +1276,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final IntFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final IntFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -1333,7 +1377,9 @@ class ArrayIntStream extends AbstractIntStream {
     @Override
     public IntStream top(final int n, final Comparator<? super Integer> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
+        checkArgNotNull(comparator, cs.comparator);
 
         if (n == 0) {
             return newStream(elements, fromIndex, fromIndex, isSorted());
@@ -1426,8 +1472,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream onEach(final IntConsumer action) throws IllegalStateException {
+    public IntStream onEach(final IntConsumer action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         return newStream(new IntIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
@@ -1464,8 +1512,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1535,8 +1585,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <C extends Collection<Integer>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException {
+    public <C extends Collection<Integer>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final C result = supplier.get();
@@ -1569,8 +1621,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public Multiset<Integer> toMultiset(final Supplier<? extends Multiset<Integer>> supplier) throws IllegalStateException {
+    public Multiset<Integer> toMultiset(final Supplier<? extends Multiset<Integer>> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         try {
             final Multiset<Integer> result = supplier.get();
@@ -1588,8 +1642,13 @@ class ArrayIntStream extends AbstractIntStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
             final Throwables.IntFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2 {
+            throws IllegalArgumentException, IllegalStateException, E, E2 {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(mergeFunction, cs.mergeFunction);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -1609,6 +1668,9 @@ class ArrayIntStream extends AbstractIntStream {
             final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
+        checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
             final M result = mapFactory.get();
@@ -1701,8 +1763,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public int reduce(final int identity, final IntBinaryOperator accumulator) throws IllegalStateException {
+    public int reduce(final int identity, final IntBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             int result = identity;
@@ -1718,8 +1782,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public OptionalInt reduce(final IntBinaryOperator accumulator) throws IllegalStateException {
+    public OptionalInt reduce(final IntBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(accumulator, cs.accumulator);
 
         try {
             if (fromIndex == toIndex) {
@@ -1740,8 +1806,12 @@ class ArrayIntStream extends AbstractIntStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
+        checkArgNotNull(accumulator, cs.accumulator);
+        checkArgNotNull(combiner, cs.combiner);
 
         try {
             final R result = supplier.get();
@@ -1867,8 +1937,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1884,8 +1956,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1901,8 +1975,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1918,8 +1994,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = fromIndex; i < toIndex; i++) {
@@ -1935,8 +2013,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws IllegalStateException, E {
+    public <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
         assertNotClosed();
+
+        checkArgNotNull(predicate, cs.predicate);
 
         try {
             for (int i = toIndex - 1; i >= fromIndex; i--) {
@@ -2131,8 +2211,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream appendIfEmpty(final Supplier<? extends IntStream> supplier) throws IllegalStateException {
+    public IntStream appendIfEmpty(final Supplier<? extends IntStream> supplier) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(supplier, cs.supplier);
 
         if (fromIndex == toIndex) {
             final Holder<IntStream> holder = new Holder<>();
@@ -2194,8 +2276,10 @@ class ArrayIntStream extends AbstractIntStream {
     }
 
     @Override
-    public IntStream ifEmpty(final Runnable action) throws IllegalStateException {
+    public IntStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
+
+        checkArgNotNull(action, cs.action);
 
         if (fromIndex == toIndex) {
             return newStream(new IntIteratorEx() { //NOSONAR
@@ -2251,7 +2335,7 @@ class ArrayIntStream extends AbstractIntStream {
         assertNotClosed();
 
         return new ParallelArrayIntStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
-                closeHandlers());
+                closeHandlersForNewStream());
     }
 
     @Override

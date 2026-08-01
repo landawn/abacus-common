@@ -286,12 +286,12 @@ public final class Throwables {
      *
      * @param cmd the runnable command to execute that may throw a checked exception
      * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
-     * @throws IllegalArgumentException if cmd is null
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see Try#run(Throwables.Runnable)
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             cmd.run();
@@ -328,14 +328,14 @@ public final class Throwables {
      *
      * @param cmd the runnable command to execute that may throw a checked exception
      * @param actionOnError the consumer that will handle any exception thrown by the command
-     * @throws IllegalArgumentException if cmd or actionOnError is null
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      * @see Try#run(Throwables.Runnable, java.util.function.Consumer)
      */
     @Beta
     public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             cmd.run();
@@ -371,12 +371,12 @@ public final class Throwables {
      * @param cmd the callable command to execute that may throw a checked exception
      * @return the result returned by the callable command
      * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
-     * @throws IllegalArgumentException if cmd is null
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
+        N.checkArgNotNull(cmd, cs.cmd);
 
         try {
             return cmd.call();
@@ -415,14 +415,14 @@ public final class Throwables {
      * @param cmd the callable command to execute that may throw a checked exception
      * @param actionOnError the function that will handle any exception thrown by the command and provide an alternative result
      * @return the result returned by the callable command if successful, or the result of the error handler if an exception occurs
-     * @throws IllegalArgumentException if cmd or actionOnError is null
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Function)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
             final java.util.function.Function<? super Throwable, ? extends R> actionOnError) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(actionOnError, "actionOnError");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
             return cmd.call();
@@ -453,14 +453,14 @@ public final class Throwables {
      * @param cmd the callable command to execute that may throw a checked exception
      * @param supplier the supplier that provides an alternative result if the command throws an exception
      * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs
-     * @throws IllegalArgumentException if cmd or supplier is null
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code supplier} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Supplier)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         try {
             return cmd.call();
@@ -498,14 +498,15 @@ public final class Throwables {
      * @param cmd the callable command to execute that may throw a checked exception
      * @param defaultValue the default value to return if the command throws an exception
      * @return the result returned by the callable command if successful, or the default value if an exception occurs
-     * @throws IllegalArgumentException if cmd is null
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #call(Throwables.Callable, java.util.function.Supplier)
      */
     @Beta
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final R defaultValue)
             throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+
         // Restrict direct fallback values to comparable result types.
-        N.checkArgNotNull(cmd, "cmd");
 
         try {
             return cmd.call();
@@ -550,15 +551,15 @@ public final class Throwables {
      * @param supplier the supplier that provides an alternative result if the predicate returns true
      * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs and the predicate returns true
      * @throws RuntimeException if the command throws an exception and the predicate returns false
-     * @throws IllegalArgumentException if cmd, predicate, or supplier is null
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate}, {@code supplier} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
             final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(predicate, "predicate");
-        N.checkArgNotNull(supplier, "supplier");
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.predicate);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         try {
             return cmd.call();
@@ -610,15 +611,16 @@ public final class Throwables {
      * @param defaultValue the default value to return if the predicate returns true
      * @return the result returned by the callable command if successful, or the default value if an exception occurs and the predicate returns true
      * @throws RuntimeException if the command throws an exception and the predicate returns false
-     * @throws IllegalArgumentException if cmd or predicate is null
+     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate} is {@code null}.
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) throws IllegalArgumentException {
+        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(predicate, cs.predicate);
+
         // Restrict direct fallback values to comparable result types.
-        N.checkArgNotNull(cmd, "cmd");
-        N.checkArgNotNull(predicate, "predicate");
 
         try {
             return cmd.call();
@@ -663,10 +665,12 @@ public final class Throwables {
     /**
      * An iterator that can throw checked exceptions during iteration.
      * This iterator provides hasNext(), next(), and other iteration methods that can throw exceptions of type E.
-     * It implements AutoCloseable to support try-with-resources. Like every iterator, it is
+     * It declares its own {@link #closeResource()} method and deliberately does not implement
+     * {@code AutoCloseable}, so it cannot be used in try-with-resources; close it explicitly
+     * (for example in a {@code finally} block) when it holds resources. Like every iterator, it is
      * stateful and consumption changes its cursor; it is neither immutable nor generally thread-safe.
      * Exhaustion and terminal operations do not close the iterator automatically. Callers must close
-     * resource-backed iterators, preferably with try-with-resources. Closing an iterator returned by
+     * resource-backed iterators. Closing an iterator returned by
      * {@link #filter(Throwables.Predicate)} or {@link #map(Throwables.Function)} closes its source.
      *
      * @param <T> the type of elements in the iterator
@@ -674,7 +678,7 @@ public final class Throwables {
      * @see ObjIterator
      */
     @SuppressWarnings({ "java:S6548" })
-    public abstract static class Iterator<T, E extends Throwable> implements AutoCloseable {
+    public abstract static class Iterator<T, E extends Throwable> {
 
         /**
          * Constructor for subclasses.
@@ -908,19 +912,22 @@ public final class Throwables {
          *
          * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, a positive
          * {@code advance(long)}, or {@code count()}. A non-positive advance remains a no-op and does not initialize it.
-         * The underlying iterator is only closed if it has been initialized when {@code close()} is called.
+         * The underlying iterator is only closed if it has been initialized when {@code closeResource()} is called.
          * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access.
          * Closing before initialization releases the supplier without invoking it; subsequent access
          * is rejected and can never acquire a resource after this wrapper has been closed.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * try (Iterator<String, IOException> iter = Iterator.defer(() ->
-         *         Iterator.ofLines(Throwables.call(() -> new FileReader("large-file.txt"))))) {
+         * Iterator<String, IOException> iter = Iterator.defer(() ->
+         *         Iterator.ofLines(Throwables.call(() -> new FileReader("large-file.txt"))));
+         * try {
          *     // The file is not opened until this first access.
          *     while (iter.hasNext()) {
          *         System.out.println(iter.next());
          *     }
+         * } finally {
+         *     iter.closeResource();
          * }
          * }</pre>
          *
@@ -929,9 +936,9 @@ public final class Throwables {
          * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed.
          * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()},
          *         a positive {@code advance(long)}, or {@code count()}
-         * @throws IllegalArgumentException if iteratorSupplier is null
          * @throws IllegalStateException from the returned iterator (not from this method) if it is accessed after
          *         being closed, or if {@code iteratorSupplier} returns {@code null} when it is first accessed
+         * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
                 throws IllegalArgumentException {
@@ -976,13 +983,13 @@ public final class Throwables {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     isClosed = true;
                     supplier = null;
 
                     if (iter != null) {
                         try {
-                            iter.close();
+                            iter.closeResource();
                         } finally {
                             iter = null;
                         }
@@ -1094,14 +1101,14 @@ public final class Throwables {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     closed = true;
                     Throwable failure = null;
 
                     for (final Throwables.Iterator<? extends T, ? extends E> source : sources) {
                         if (source != null) {
                             try {
-                                source.close();
+                                source.closeResource();
                             } catch (final Throwable e) {
                                 if (failure == null) {
                                     failure = e;
@@ -1128,18 +1135,22 @@ public final class Throwables {
          * Returns an iterator that reads lines from the specified Reader.
          * The iterator wraps the reader in a BufferedReader if it isn't one already.
          *
-         * <p><b>Resource Management:</b> This iterator implements AutoCloseable. When {@code close()} is called,
-         * it will close the underlying BufferedReader (and thus the original Reader). It is recommended to use
-         * this iterator in a try-with-resources statement to ensure proper resource cleanup. Because this
-         * iterator's {@code close()} method does not declare checked exceptions, a reader close failure is
-         * propagated as a runtime exception rather than silently discarded.
+         * <p><b>Resource Management:</b> When {@code closeResource()} is called, it will close the underlying
+         * BufferedReader (and thus the original Reader). Because this iterator does not implement
+         * {@code AutoCloseable}, close it explicitly (for example in a {@code finally} block) to ensure
+         * proper resource cleanup. Because this iterator's {@code closeResource()} method does not declare
+         * checked exceptions, a reader close failure is propagated as a runtime exception rather than
+         * silently discarded.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * try (Iterator<String, IOException> lines = Iterator.ofLines(new FileReader("file.txt"))) {
+         * Iterator<String, IOException> lines = Iterator.ofLines(new FileReader("file.txt"));
+         * try {
          *     while (lines.hasNext()) {
          *         System.out.println(lines.next());
          *     }
+         * } finally {
+         *     lines.closeResource();
          * }
          * }</pre>
          *
@@ -1187,7 +1198,7 @@ public final class Throwables {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     try {
                         br.close();
                     } catch (final IOException e) {
@@ -1294,34 +1305,33 @@ public final class Throwables {
             return result;
         }
 
-        /** Whether {@link #close()} has already been invoked. */
+        /** Whether {@link #closeResource()} has already been invoked. */
         private boolean isClosed = false;
 
         /**
          * Closes this iterator and releases any resources associated with it.
          * If the iterator is already closed, this method has no effect.
-         * This method calls closeResource() which can be overridden by subclasses
+         * This method calls closeResourceInternal() which can be overridden by subclasses
          * to perform specific cleanup operations.
          *
          * @throws RuntimeException if releasing an underlying resource fails with a checked exception
          */
-        @Override
-        public final void close() {
+        public final void closeResource() {
             if (isClosed) {
                 return;
             }
 
             isClosed = true;
-            closeResource();
+            closeResourceInternal();
         }
 
         /**
-         * Releases any resources held by this iterator. Called by {@link #close()} exactly once.
+         * Releases any resources held by this iterator. Called by {@link #closeResource()} exactly once.
          * Subclasses should override this method to perform specific cleanup, such as closing
          * underlying streams or readers. The default implementation does nothing.
          */
         @Internal
-        protected void closeResource() {
+        protected void closeResourceInternal() {
 
         }
 
@@ -1342,9 +1352,9 @@ public final class Throwables {
          * @param predicate the predicate to test each element
          * @return a new iterator containing only elements that satisfy the predicate; exceptions thrown
          *         by the predicate propagate from the returned iterator's {@code hasNext()}/{@code next()} calls
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) {
+        public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate, cs.predicate);
 
             return new Throwables.Iterator<>() {
@@ -1388,11 +1398,11 @@ public final class Throwables {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     closed = true;
 
                     try {
-                        iter.close();
+                        iter.closeResource();
                     } finally {
                         iter = null;
                         predicateRef = null;
@@ -1420,9 +1430,9 @@ public final class Throwables {
          * @param mapper the function to apply to each element
          * @return a new iterator with the mapping function applied to each element; exceptions thrown
          *         by the mapper propagate from the returned iterator's {@code next()} calls
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}
+         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) {
+        public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) throws IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
             return new Throwables.Iterator<>() {
@@ -1445,11 +1455,11 @@ public final class Throwables {
                 }
 
                 @Override
-                protected void closeResource() {
+                protected void closeResourceInternal() {
                     closed = true;
 
                     try {
-                        iter.close();
+                        iter.closeResource();
                     } finally {
                         iter = null;
                         mapperRef = null;
@@ -1614,12 +1624,12 @@ public final class Throwables {
          * }</pre>
          *
          * @param action the action to be performed for each element
-         * @throws IllegalArgumentException if {@code action} is {@code null}, including when no elements remain
          * @throws E if an exception occurs while iterating through the elements
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          * @see #foreachRemaining(Throwables.Consumer)
          */
-        public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E { // NOSONAR
-            N.checkArgNotNull(action, cs.action);
+        public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action); // NOSONAR
 
             while (hasNext()) {
                 action.accept(next());
@@ -1649,14 +1659,14 @@ public final class Throwables {
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws IllegalArgumentException if {@code action} is {@code null}, including when no elements remain
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          * @see #forEachRemaining(java.util.function.Consumer)
          * @see #foreachIndexed(Throwables.IntObjConsumer)
          */
-        public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2 { // NOSONAR
-            N.checkArgNotNull(action, cs.action);
+        public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2, IllegalArgumentException {
+            N.checkArgNotNull(action, cs.action); // NOSONAR
 
             while (hasNext()) {
                 action.accept(next());
@@ -1682,13 +1692,13 @@ public final class Throwables {
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element with its index
-         * @throws IllegalArgumentException if {@code action} is {@code null}, including when no elements remain
          * @throws E if an exception occurs while iterating through the elements
          * @throws E2 if the action throws an exception
          * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
          * @see #foreachRemaining(Throwables.Consumer)
          */
-        public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2 {
+        public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2, IllegalArgumentException {
             N.checkArgNotNull(action, cs.action);
 
             int idx = 0;
@@ -5315,9 +5325,9 @@ public final class Throwables {
          * @param <E> the type of exception that may be thrown
          * @param consumer the consumer to return
          * @return the same consumer instance
-         * @throws IllegalArgumentException if {@code consumer} is {@code null}
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
          */
-        static <T, E extends Throwable> IntObjConsumer<T, E> of(final IntObjConsumer<T, E> consumer) {
+        static <T, E extends Throwable> IntObjConsumer<T, E> of(final IntObjConsumer<T, E> consumer) throws IllegalArgumentException {
             N.checkArgNotNull(consumer, cs.consumer);
 
             return consumer;
@@ -5351,9 +5361,9 @@ public final class Throwables {
          * @param <E> the type of exception that may be thrown
          * @param func the function to return
          * @return the same function instance
-         * @throws IllegalArgumentException if {@code func} is {@code null}
+         * @throws IllegalArgumentException if {@code func} is {@code null}.
          */
-        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) {
+        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) throws IllegalArgumentException {
             N.checkArgNotNull(func, cs.func);
 
             return func;
@@ -5386,9 +5396,9 @@ public final class Throwables {
          * @param <E> the type of exception that may be thrown
          * @param predicate the predicate to return
          * @return the same predicate instance
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}
+         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        static <T, E extends Throwable> IntObjPredicate<T, E> of(final IntObjPredicate<T, E> predicate) {
+        static <T, E extends Throwable> IntObjPredicate<T, E> of(final IntObjPredicate<T, E> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate, cs.predicate);
 
             return predicate;
@@ -5672,9 +5682,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> BooleanNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> BooleanNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5706,9 +5716,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> CharNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> CharNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5740,9 +5750,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> ByteNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> ByteNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5773,9 +5783,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> ShortNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> ShortNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5807,9 +5817,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> IntNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> IntNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5841,9 +5851,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> LongNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> LongNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5875,9 +5885,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> FloatNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> FloatNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5909,9 +5919,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> DoubleNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> DoubleNFunction<V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -5945,9 +5955,9 @@ public final class Throwables {
          * @param <V> the type of output of the {@code after} function, and of the composed function
          * @param after the function to apply after this function is applied
          * @return a composed function that first applies this function and then applies the {@code after} function
-         * @throws IllegalArgumentException if {@code after} is {@code null}
+         * @throws IllegalArgumentException if {@code after} is {@code null}.
          */
-        default <V> NFunction<T, V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) {
+        default <V> NFunction<T, V, E> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
             N.checkArgNotNull(after, cs.after);
 
             return args -> after.apply(apply(args));
@@ -6872,14 +6882,18 @@ public final class Throwables {
         /** Cached value; published by the volatile write to {@link #initialized}. */
         private volatile T value = null; //NOSONAR
 
+        /** Guards against recursive access while the supplier is running. */
+        private boolean initializing = false;
+
+        /** Shared by all recursive accesses in one attempt, then cleared so failures remain retryable. */
+        private IllegalStateException recursiveFailure = null;
+
         /**
          * Creates an initializer backed by {@code supplier}.
          *
          * @param supplier the non-null supplier to invoke on first access
-         * @throws IllegalArgumentException if {@code supplier} is {@code null}
          */
         LazyInitializer(final Throwables.Supplier<T, E> supplier) {
-            N.checkArgNotNull(supplier, cs.supplier);
 
             this.supplier = supplier;
         }
@@ -6906,7 +6920,7 @@ public final class Throwables {
          * @param <E> the type of exception that may be thrown during initialization
          * @param supplier the supplier that will provide the value when first requested
          * @return a LazyInitializer that will use the provided supplier
-         * @throws IllegalArgumentException if supplier is null
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}.
          */
         public static <T, E extends Throwable> LazyInitializer<T, E> of(final Throwables.Supplier<T, E> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -6931,9 +6945,31 @@ public final class Throwables {
             if (!initialized) {
                 synchronized (this) {
                     if (!initialized) {
-                        value = supplier.get();
-                        supplier = null;
-                        initialized = true;
+                        if (initializing) {
+                            if (recursiveFailure == null) {
+                                recursiveFailure = new IllegalStateException("Recursive initialization of deferred value");
+                            }
+
+                            throw recursiveFailure;
+                        }
+
+                        initializing = true;
+
+                        try {
+                            value = supplier.get();
+
+                            // A supplier may catch the recursive-access exception. Do not publish a
+                            // value from an initialization attempt that already violated the invariant.
+                            if (recursiveFailure != null) {
+                                throw recursiveFailure;
+                            }
+
+                            supplier = null;
+                            initialized = true;
+                        } finally {
+                            initializing = false;
+                            recursiveFailure = null;
+                        }
                     }
                 }
             }

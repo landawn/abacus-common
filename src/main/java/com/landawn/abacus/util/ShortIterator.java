@@ -192,10 +192,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // The expensive computation is not performed until iter.hasNext() or iter.nextShort() is called
      * }</pre>
      *
-     * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed; must not be {@code null}
+     * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed
      * @return a lazily initialized {@code ShortIterator}
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -258,13 +258,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * randomShorts.limit(10).toList();
      * }</pre>
      *
-     * @param supplier the supplier function that generates {@code short} values; must not be {@code null}
+     * @param supplier the supplier function that generates {@code short} values
      * @return an infinite {@code ShortIterator}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #generate(BooleanSupplier, ShortSupplier)
      */
     public static ShortIterator generate(final ShortSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ShortIterator() {
             @Override
@@ -296,15 +296,15 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // Will generate: 0, 1, 2, 3, 4
      * }</pre>
      *
-     * @param hasNext a {@link BooleanSupplier} that determines if there are more elements; must not be {@code null}
-     * @param supplier the supplier function that generates {@code short} values; must not be {@code null}
+     * @param hasNext a {@link BooleanSupplier} that determines if there are more elements
+     * @param supplier the supplier function that generates {@code short} values
      * @return a conditional {@code ShortIterator}
-     * @throws IllegalArgumentException if {@code hasNext} or {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      * @see #generate(ShortSupplier)
      */
     public static ShortIterator generate(final BooleanSupplier hasNext, final ShortSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new ShortIterator() {
             private boolean hasNextCached = false;
@@ -480,12 +480,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * ShortIterator evens = iter.filter(x -> x % 2 == 0);   // will iterate over 2, 4
      * }</pre>
      *
-     * @param predicate the predicate to test each element; must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return a new {@code ShortIterator} containing only elements that satisfy the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public ShortIterator filter(final ShortPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final ShortIterator iter = this;
 
@@ -678,12 +678,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param action the action to perform on each element
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -698,12 +700,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each element
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextShort());
@@ -725,14 +727,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each (index, value) pair; must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each (index, value) pair
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 

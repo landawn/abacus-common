@@ -200,10 +200,10 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }
      * }</pre>
      *
-     * @param iteratorSupplier a Supplier that provides the CharIterator when needed, must not be {@code null}
+     * @param iteratorSupplier a Supplier that provides the CharIterator when needed
      * @return a {@code CharIterator} that is initialized on first use
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
      * @throws IllegalStateException if the supplier returns {@code null} when invoked
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
@@ -274,12 +274,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }
      * }</pre>
      *
-     * @param supplier the supplier function that generates char values, must not be {@code null}
+     * @param supplier the supplier function that generates char values
      * @return an infinite {@code CharIterator}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static CharIterator generate(final CharSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new CharIterator() {
             @Override
@@ -315,14 +315,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // Generates 'A', 'B', 'C'
      * }</pre>
      *
-     * @param hasNext the condition that determines if more elements are available, must not be {@code null}
-     * @param supplier the supplier function that generates char values, must not be {@code null}
+     * @param hasNext the condition that determines if more elements are available
+     * @param supplier the supplier function that generates char values
      * @return a conditional {@code CharIterator}
-     * @throws IllegalArgumentException if any parameter is {@code null}
+     * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
     public static CharIterator generate(final BooleanSupplier hasNext, final CharSupplier supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(hasNext);
-        N.checkArgNotNull(supplier);
+        N.checkArgNotNull(hasNext, cs.hasNext);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         return new CharIterator() {
             private boolean hasNextCached = false;
@@ -508,12 +508,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * // lowers will iterate over: 'a', 'c', 'e'
      * }</pre>
      *
-     * @param predicate the predicate to test each element, must not be {@code null}
+     * @param predicate the predicate to test each element
      * @return a new {@code CharIterator} containing only elements that match the predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public CharIterator filter(final CharPredicate predicate) throws IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.Predicate);
+        N.checkArgNotNull(predicate, cs.predicate);
 
         final CharIterator iter = this;
 
@@ -724,13 +724,15 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * iter.forEachRemaining(ch -> System.out.print(ch));   // Boxes each char — avoid this
      * }</pre>
      *
-     * @param action the action to perform on each element, must not be {@code null}
-     * @throws NullPointerException if {@code action} is {@code null}
+     * @param action the action to perform on each element
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @deprecated use {@link #foreachRemaining(Throwables.CharConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) {
+    public void forEachRemaining(final java.util.function.Consumer<? super Character> action) throws IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
+
         super.forEachRemaining(action);
     }
 
@@ -749,12 +751,12 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each element
      * @throws E if the action throws an exception during processing
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.CharConsumer<E> action) throws E {//NOSONAR
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachRemaining(final Throwables.CharConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
             action.accept(nextChar());
@@ -780,14 +782,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }</pre>
      *
      * @param <E> the type of exception the action may throw
-     * @param action the action to perform on each element and its index, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @param action the action to perform on each element and its index
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception during processing
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalArgumentException, E {
-        N.checkArgNotNull(action);
+    public <E extends Exception> void foreachIndexed(final Throwables.IntCharConsumer<E> action) throws E, IllegalArgumentException {
+        N.checkArgNotNull(action, cs.action);
 
         int idx = 0;
 
