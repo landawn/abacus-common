@@ -171,7 +171,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param predicate the non-interfering, stateless predicate to apply to each element
      * @return a new {@code CharStream} containing only matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public CharStream filter(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -220,7 +220,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param predicate the non-interfering, stateless predicate to apply to each element
      * @return a new {@code CharStream} of elements from the start while {@code predicate} is satisfied
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public CharStream takeWhile(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -269,7 +269,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param predicate the non-interfering, stateless predicate to apply to each element
      * @return a new {@code CharStream} with leading elements dropped while {@code predicate} holds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public CharStream dropWhile(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -326,7 +326,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@code CharStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream map(final CharUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
@@ -355,7 +355,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@code IntStream} of mapped int values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream mapToInt(final CharToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -385,7 +385,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@code Stream<T>} of mapped object values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> mapToObj(final CharFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -415,7 +415,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to a {@code CharStream}
      * @return a new {@code CharStream} formed by concatenating the mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream flatMap(final CharFunction<? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -483,7 +483,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to a collection of chars
      * @return a new {@code CharStream} formed by concatenating the mapped collections
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream flatmap(final CharFunction<? extends Collection<Character>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -524,7 +524,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to a {@code char[]}
      * @return a new {@code CharStream} formed by concatenating the mapped arrays
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -576,7 +576,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to an {@code IntStream}
      * @return a new {@code IntStream} formed by concatenating the mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatMapToInt(final CharFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -646,7 +646,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to a {@code Stream<T>}
      * @return a new {@code Stream<T>} formed by concatenating the mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatMapToObj(final CharFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -715,7 +715,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapper a non-interfering, stateless function mapping each element to a collection of objects
      * @return a new {@code Stream<T>} formed by concatenating the mapped collections
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -815,7 +815,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param maxSize the maximum number of elements the stream should contain; must be &gt;= 0
      * @return a new {@code CharStream} containing at most {@code maxSize} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxSize} is negative
+     * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
     @Override
     public CharStream limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
@@ -860,7 +860,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param n the number of leading elements to skip; must be &gt;= 0
      * @return a new {@code CharStream} with the first {@code n} elements skipped
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     @Override
     public CharStream skip(final long n) throws IllegalStateException, IllegalArgumentException {
@@ -941,7 +941,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param action a non-interfering action to perform on each element as it is pulled
      * @return a new {@code CharStream} that applies the action to each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public CharStream onEach(final CharConsumer action) throws IllegalArgumentException, IllegalStateException {
@@ -972,7 +972,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
@@ -1060,7 +1060,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param supplier a function that returns a new, empty collection to populate
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1102,7 +1102,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param supplier a function that returns a new, empty {@code Multiset} to populate
      * @return the {@code Multiset<Character>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1140,7 +1140,8 @@ class IteratorCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
+     *         {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
@@ -1180,9 +1181,9 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key
+     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key, or if {@code keyMapper} or
+     *         {@code mapFactory} is {@code null}.
      * @throws E if {@code keyMapper} throws
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
@@ -1236,7 +1237,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public char reduce(final char identity, final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1265,7 +1266,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalChar} containing the result, or empty if the stream has no elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public OptionalChar reduce(final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1305,7 +1306,8 @@ class IteratorCharStream extends AbstractCharStream {
      * @param combiner a function that combines two partial containers (used in parallel; ignored here)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
+     *         {@code null}.
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
@@ -1415,7 +1417,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param k the 1-based rank of the desired largest element (e.g. 1 = largest, 2 = second largest)
      * @return an {@code OptionalChar} containing the k-th largest element, or empty if there are fewer than {@code k} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code k} is not positive
+     * @throws IllegalArgumentException if {@code k} is not positive.
      */
     @Override
     public OptionalChar kthLargest(final int k) throws IllegalStateException, IllegalArgumentException {
@@ -1571,7 +1573,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @return {@code true} if any element matches, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1602,7 +1604,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @return {@code true} if all elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1633,7 +1635,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @return {@code true} if no elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1664,7 +1666,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @return an {@code OptionalChar} containing the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1697,7 +1699,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @return an {@code OptionalChar} containing the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1786,7 +1788,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param supplier a supplier of a substitute {@code CharStream} to use when this stream is empty
      * @return a stream of this stream's elements if non-empty, or of the elements of the stream produced by the supplier
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1860,7 +1862,7 @@ class IteratorCharStream extends AbstractCharStream {
      * @param action a {@code Runnable} to execute if the stream is empty
      * @return a {@code CharStream} that invokes {@code action} once on iteration if empty, then proceeds normally
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public CharStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {

@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -199,35 +200,35 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test createInteger()")
-    public void testCreateInteger() {
-        assertEquals(Integer.valueOf(123), StrUtil.createInteger("123").orElseThrow());
-        assertTrue(StrUtil.createInteger(null).isEmpty());
-        assertTrue(StrUtil.createInteger("abc").isEmpty());
+    @DisplayName("Test tryParseInteger()")
+    public void testTryParseInteger() {
+        assertEquals(Integer.valueOf(123), StrUtil.tryParseInteger("123").orElseThrow());
+        assertTrue(StrUtil.tryParseInteger(null).isEmpty());
+        assertTrue(StrUtil.tryParseInteger("abc").isEmpty());
     }
 
     @Test
-    @DisplayName("Test createLong()")
-    public void testCreateLong() {
-        assertEquals(Long.valueOf(123), StrUtil.createLong("123").orElseThrow());
-        assertTrue(StrUtil.createLong(null).isEmpty());
-        assertTrue(StrUtil.createLong("abc").isEmpty());
+    @DisplayName("Test tryParseLong()")
+    public void testTryParseLong() {
+        assertEquals(Long.valueOf(123), StrUtil.tryParseLong("123").orElseThrow());
+        assertTrue(StrUtil.tryParseLong(null).isEmpty());
+        assertTrue(StrUtil.tryParseLong("abc").isEmpty());
     }
 
     @Test
-    @DisplayName("Test createDouble()")
-    public void testCreateDouble() {
-        assertEquals(Double.valueOf(123.45), StrUtil.createDouble("123.45").orElseThrow());
-        assertTrue(StrUtil.createDouble(null).isEmpty());
-        assertTrue(StrUtil.createDouble("abc").isEmpty());
+    @DisplayName("Test tryParseDouble()")
+    public void testTryParseDouble() {
+        assertEquals(Double.valueOf(123.45), StrUtil.tryParseDouble("123.45").orElseThrow());
+        assertTrue(StrUtil.tryParseDouble(null).isEmpty());
+        assertTrue(StrUtil.tryParseDouble("abc").isEmpty());
     }
 
     @Test
-    @DisplayName("Test createFloat()")
-    public void testCreateFloat() {
-        assertEquals(Float.valueOf(123.45f), StrUtil.createFloat("123.45").orElseThrow());
-        assertTrue(StrUtil.createFloat(null).isEmpty());
-        assertTrue(StrUtil.createFloat("abc").isEmpty());
+    @DisplayName("Test tryParseFloat()")
+    public void testTryParseFloat() {
+        assertEquals(Float.valueOf(123.45f), StrUtil.tryParseFloat("123.45").orElseThrow());
+        assertTrue(StrUtil.tryParseFloat(null).isEmpty());
+        assertTrue(StrUtil.tryParseFloat("abc").isEmpty());
     }
 
     @Test
@@ -443,28 +444,28 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test createNumber()")
-    public void testCreateNumber() {
-        assertEquals(123, StrUtil.createNumber("123").orElseThrow());
-        assertEquals(123.45d, StrUtil.createNumber("123.45").orElseThrow());
-        assertEquals(123L, StrUtil.createNumber("123L").orElseThrow());
-        assertTrue(StrUtil.createNumber(null).isEmpty());
+    @DisplayName("Test tryParseNumber()")
+    public void testTryParseNumber() {
+        assertEquals(123, StrUtil.tryParseNumber("123").orElseThrow());
+        assertEquals(123.45d, StrUtil.tryParseNumber("123.45").orElseThrow());
+        assertEquals(123L, StrUtil.tryParseNumber("123L").orElseThrow());
+        assertTrue(StrUtil.tryParseNumber(null).isEmpty());
     }
 
     @Test
-    @DisplayName("Test createBigInteger()")
-    public void testCreateBigInteger() {
-        assertEquals(new BigInteger("123"), StrUtil.createBigInteger("123").orElseThrow());
-        assertTrue(StrUtil.createBigInteger(null).isEmpty());
-        assertTrue(StrUtil.createBigInteger("abc").isEmpty());
+    @DisplayName("Test tryParseBigInteger()")
+    public void testTryParseBigInteger() {
+        assertEquals(new BigInteger("123"), StrUtil.tryParseBigInteger("123").orElseThrow());
+        assertTrue(StrUtil.tryParseBigInteger(null).isEmpty());
+        assertTrue(StrUtil.tryParseBigInteger("abc").isEmpty());
     }
 
     @Test
-    @DisplayName("Test createBigDecimal()")
-    public void testCreateBigDecimal() {
-        assertEquals(new BigDecimal("123.45"), StrUtil.createBigDecimal("123.45").orElseThrow());
-        assertTrue(StrUtil.createBigDecimal(null).isEmpty());
-        assertTrue(StrUtil.createBigDecimal("abc").isEmpty());
+    @DisplayName("Test tryParseBigDecimal()")
+    public void testTryParseBigDecimal() {
+        assertEquals(new BigDecimal("123.45"), StrUtil.tryParseBigDecimal("123.45").orElseThrow());
+        assertTrue(StrUtil.tryParseBigDecimal(null).isEmpty());
+        assertTrue(StrUtil.tryParseBigDecimal("abc").isEmpty());
     }
 
     @Test
@@ -1779,23 +1780,31 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test getBytes() with default encoding")
+    @DisplayName("Test getBytes() with the platform-default charset")
     public void testGetBytes() {
-        assertArrayEquals("abc".getBytes(), Strings.getBytes("abc"));
+        final String source = "café世界";
+
+        assertArrayEquals(source.getBytes(Charset.defaultCharset()), Strings.getBytes(source));
+        assertArrayEquals(new byte[0], Strings.getBytes(""));
         assertNull(Strings.getBytes(null));
     }
 
     @Test
     @DisplayName("Test getBytes() with charset")
     public void testGetBytes_WithCharset() {
-        assertArrayEquals("abc".getBytes(StandardCharsets.UTF_8), Strings.getBytes("abc", StandardCharsets.UTF_8));
+        final String source = "café世界";
+
+        assertArrayEquals(source.getBytes(StandardCharsets.UTF_8), Strings.getBytes(source, StandardCharsets.UTF_8));
         assertNull(Strings.getBytes(null, StandardCharsets.UTF_8));
     }
 
     @Test
     @DisplayName("Test getBytesUtf8()")
     public void testGetBytesUtf8() {
-        assertArrayEquals("abc".getBytes(StandardCharsets.UTF_8), Strings.getBytesUtf8("abc"));
+        final String source = "café世界";
+
+        assertArrayEquals(source.getBytes(StandardCharsets.UTF_8), Strings.getBytesUtf8(source));
+        assertArrayEquals(new byte[0], Strings.getBytesUtf8(""));
         assertNull(Strings.getBytesUtf8(null));
     }
 
@@ -2373,122 +2382,109 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    public void test_capitalizeFully() {
-        String str = "APPLE ORange         Water";
-        assertEquals("APPLE ORange         Water", N.println(Strings.capitalizeFully(str)));
-
-        str = "aPPLE";
-        assertEquals("APPLE", N.println(Strings.capitalizeFully(str)));
-
-        str = "APPLE oRange    of     WaTer Of";
-        assertEquals("APPLE ORange    of     WaTer Of", N.println(Strings.capitalizeFully(str, " ", "of")));
+    public void testCapitalizeWords() {
+        assertEquals("APPLE ORange         Water", Strings.capitalizeWords("APPLE ORange         Water"));
+        assertEquals("APPLE", Strings.capitalizeWords("aPPLE"));
+        assertEquals("HELLO WORLD", Strings.capitalizeWords("hELLO wORLD"));
+        assertEquals("Hello  World", Strings.capitalizeWords("hello  world"));
+        assertNull(Strings.capitalizeWords(null));
+        assertEquals("", Strings.capitalizeWords(""));
     }
 
     @Test
-    @DisplayName("Test capitalizeFully() with excluded words")
-    public void testCapitalizeFully_WithExcludedWords() {
-        assertEquals("The Quick Brown Fox", Strings.capitalizeFully("the quick brown fox", " ", "the"));
-        assertEquals("Hello and Goodbye", Strings.capitalizeFully("hello and goodbye", " ", "and"));
+    public void testCapitalizeWordsWithSeparator() {
+        assertEquals("Abc-Def", Strings.capitalizeWords("abc-def", "-"));
+        assertEquals("ABC_DEF", Strings.capitalizeWords("ABC_DEF", "_"));
+        assertNull(Strings.capitalizeWords(null, "-"));
+        assertThrows(IllegalArgumentException.class, () -> Strings.capitalizeWords("abc", ""));
     }
 
     @Test
-    @DisplayName("Test capitalizeFully() with excluded words collection")
-    public void testCapitalizeFully_WithExcludedWordsCollection() {
+    public void testCapitalizeWordsWithExcludedWords() {
+        assertEquals("The Quick Brown Fox", Strings.capitalizeWords("the quick brown fox", " ", "the"));
+        assertEquals("Hello and Goodbye", Strings.capitalizeWords("hello and goodbye", " ", "and"));
+        assertEquals("APPLE ORange    of     WaTer Of", Strings.capitalizeWords("APPLE oRange    of     WaTer Of", " ", "of"));
+        assertEquals("The First Name of the Person", Strings.capitalizeWords("the first name of the person", " ", "the", "of"));
+        assertEquals("Hello World", Strings.capitalizeWords("hello world", " ", (String[]) null));
+        assertEquals("Hello World", Strings.capitalizeWords("hello world", " ", new String[0]));
+
         List<String> excludedWords = Arrays.asList("the", "and", "or");
-        assertEquals("The Quick Brown Fox", Strings.capitalizeFully("the quick brown fox", " ", excludedWords));
+        assertEquals("The Quick Brown Fox", Strings.capitalizeWords("the quick brown fox", " ", excludedWords));
+        assertNull(Strings.capitalizeWords(null, " ", excludedWords));
     }
 
     @Test
-    public void testCapitalizeFullyWithExclusions() {
-        assertEquals("The First Name of the Person", Strings.capitalizeFully("the first name of the person", " ", "the", "of"));
+    public void testCapitalizeWordsFully() {
+        assertEquals("Hello World", Strings.capitalizeWordsFully("hELLO wORLD"));
+        assertEquals("Hello World", Strings.capitalizeWordsFully("HELLO WORLD"));
+        assertEquals("Hello  World", Strings.capitalizeWordsFully("hELLO  wORLD"));
+        assertEquals("Hello-World", Strings.capitalizeWordsFully("hELLO-wORLD", "-"));
+        assertEquals("Hello_World", Strings.capitalizeWordsFully("HELLO_WORLD", "_"));
+        assertNull(Strings.capitalizeWordsFully(null));
+        assertEquals("", Strings.capitalizeWordsFully(""));
+        assertThrows(IllegalArgumentException.class, () -> Strings.capitalizeWordsFully("abc", ""));
     }
 
     @Test
-    @DisplayName("Test capitalizeFully()")
-    public void testCapitalizeFully() {
-        assertEquals("Abc Def", Strings.capitalizeFully("abc def"));
-        assertEquals("ABC DEF", Strings.capitalizeFully("ABC DEF"));
-        assertNull(Strings.capitalizeFully(null));
-        assertEquals("", Strings.capitalizeFully(""));
+    public void testCapitalizeWordsFullyWithExcludedWords() {
+        assertEquals("The Lord of the Rings", Strings.capitalizeWordsFully("tHE lORD oF tHE rINGS", " ", "OF", "THE"));
+        assertEquals("Of Mice and Men", Strings.capitalizeWordsFully("OF MICE AND MEN", " ", "of", "and"));
+        assertEquals("Hello World", Strings.capitalizeWordsFully("hELLO wORLD", " ", (String[]) null));
+
+        List<String> excludedWords = Arrays.asList("the", "of", "and");
+        assertEquals("The Lord of the Rings", Strings.capitalizeWordsFully("THE LORD OF THE RINGS", " ", excludedWords));
+        assertNull(Strings.capitalizeWordsFully(null, " ", excludedWords));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testCapitalizeFullyLegacyDelegates() {
+        assertEquals(Strings.capitalizeWords("hELLO wORLD"), Strings.capitalizeFully("hELLO wORLD"));
+        assertEquals(Strings.capitalizeWords("hELLO-wORLD", "-"), Strings.capitalizeFully("hELLO-wORLD", "-"));
+        assertEquals(Strings.capitalizeWords("the lord of the rings", " ", "of", "the"),
+                Strings.capitalizeFully("the lord of the rings", " ", "of", "the"));
+
+        List<String> excludedWords = Arrays.asList("the", "of", "and");
+        assertEquals(Strings.capitalizeWords("the lord of the rings", " ", excludedWords),
+                Strings.capitalizeFully("the lord of the rings", " ", excludedWords));
     }
 
     @Test
-    @DisplayName("Test capitalizeFully() with delimiter")
-    public void testCapitalizeFully_WithDelimiter() {
-        assertEquals("Abc-Def", Strings.capitalizeFully("abc-def", "-"));
-        assertEquals("ABC_DEF", Strings.capitalizeFully("ABC_DEF", "_"));
-        assertNull(Strings.capitalizeFully(null, "-"));
-    }
-
-    @Test
-    public void testCapitalizeFully_WithVarArgsExcludedWords() {
-        // null and empty passthrough
-        assertNull(Strings.capitalizeFully(null, " ", "the"));
-        assertEquals("", Strings.capitalizeFully("", " ", "the"));
-
-        // no excluded words - same as capitalizeFully(str, delimiter)
-        assertEquals("Hello World", Strings.capitalizeFully("hello world", " "));
-
-        // with excluded words
-        assertEquals("The Lord of the Rings", Strings.capitalizeFully("the lord of the rings", " ", "of", "the"));
-    }
-
-    @Test
-    public void testCapitalizeFully_WithCollectionExcludedWords() {
-        // null input
-        assertNull(Strings.capitalizeFully(null, " ", java.util.Collections.emptySet()));
-
-        // empty excluded words collection
-        assertEquals("Hello World", Strings.capitalizeFully("hello world", " ", java.util.Collections.emptySet()));
-
-        // with excluded words collection
-        java.util.Set<String> excluded = new java.util.HashSet<>(java.util.Arrays.asList("of", "the", "and"));
-        assertEquals("The Lord of the Rings", Strings.capitalizeFully("the lord of the rings", " ", excluded));
-    }
-
-    // capitalizeFully(str, delimiter, String... excludedWords) with empty excludedWords
-    @Test
-    public void testCapitalizeFully_StringVarArgs_EmptyExclusion() {
-        assertEquals("Hello World", Strings.capitalizeFully("hello world", " ", (String[]) null));
-        assertEquals("Hello World", Strings.capitalizeFully("hello world", " ", new String[0]));
-    }
-
-    @Test
-    @DisplayName("Test convertWords() with function")
+    @DisplayName("Test mapWords() with function")
     public void testConvertWords() {
-        assertEquals("HELLO WORLD", Strings.convertWords("hello world", String::toUpperCase));
-        assertEquals("abc def", Strings.convertWords("ABC DEF", String::toLowerCase));
-        assertNull(Strings.convertWords(null, String::toUpperCase));
+        assertEquals("HELLO WORLD", Strings.mapWords("hello world", String::toUpperCase));
+        assertEquals("abc def", Strings.mapWords("ABC DEF", String::toLowerCase));
+        assertNull(Strings.mapWords(null, String::toUpperCase));
     }
 
     @Test
-    @DisplayName("Test convertWords() with delimiter")
+    @DisplayName("Test mapWords() with delimiter")
     public void testConvertWords_WithDelimiter() {
-        assertEquals("HELLO-WORLD", Strings.convertWords("hello-world", "-", String::toUpperCase));
-        assertNull(Strings.convertWords(null, "-", String::toUpperCase));
+        assertEquals("HELLO-WORLD", Strings.mapWords("hello-world", "-", String::toUpperCase));
+        assertNull(Strings.mapWords(null, "-", String::toUpperCase));
     }
 
     @Test
-    @DisplayName("Test convertWords() with excluded words")
+    @DisplayName("Test mapWords() with excluded words")
     public void testConvertWords_WithExcludedWords() {
         List<String> excluded = Arrays.asList("the", "and");
-        assertEquals("HELLO the WORLD", Strings.convertWords("hello the world", " ", excluded, String::toUpperCase));
+        assertEquals("HELLO the WORLD", Strings.mapWords("hello the world", " ", excluded, String::toUpperCase));
     }
 
     @Test
     public void testConvertWordsEdgeCases() {
-        Assertions.assertEquals("HELLO", Strings.convertWords("hello", " ", null, String::toUpperCase));
+        Assertions.assertEquals("HELLO", Strings.mapWords("hello", " ", null, String::toUpperCase));
 
         Function<String, String> reverser = s -> new StringBuilder(s).reverse().toString();
-        Assertions.assertEquals("olleh dlrow", Strings.convertWords("hello world", " ", null, reverser));
+        Assertions.assertEquals("olleh dlrow", Strings.mapWords("hello world", " ", null, reverser));
 
         Set<String> allExcluded = new HashSet<>(Arrays.asList("hello", "world"));
-        Assertions.assertEquals("hello world", Strings.convertWords("hello world", " ", allExcluded, String::toUpperCase));
+        Assertions.assertEquals("hello world", Strings.mapWords("hello world", " ", allExcluded, String::toUpperCase));
     }
 
     @Test
     public void testConvertWords_WithDelimiterAndExcludedWords() {
-        String result = Strings.convertWords("hello world", " ", Arrays.asList("world"), s -> s.toUpperCase());
+        String result = Strings.mapWords("hello world", " ", Arrays.asList("world"), s -> s.toUpperCase());
         assertNotNull(result);
         assertTrue(result.contains("HELLO"));
         assertTrue(result.contains("world"));
@@ -2496,115 +2492,115 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testConvertWords_EdgeCases() {
-        assertNull(Strings.convertWords(null, String::toUpperCase));
-        assertEquals("", Strings.convertWords("", String::toUpperCase));
-        assertEquals("HELLO WORLD", Strings.convertWords("hello world", String::toUpperCase));
-        assertEquals("HELLO-WORLD", Strings.convertWords("hello-world", "-", String::toUpperCase));
+        assertNull(Strings.mapWords(null, String::toUpperCase));
+        assertEquals("", Strings.mapWords("", String::toUpperCase));
+        assertEquals("HELLO WORLD", Strings.mapWords("hello world", String::toUpperCase));
+        assertEquals("HELLO-WORLD", Strings.mapWords("hello-world", "-", String::toUpperCase));
     }
 
     @Test
     public void testConvertWords_WithExcludedWords_FullCoverage() {
         // with excluded words
         List<String> excluded = Arrays.asList("of", "the");
-        assertEquals("TOWER_of_LONDON_the_CITY", Strings.convertWords("tower_of_london_the_city", "_", excluded, String::toUpperCase));
+        assertEquals("TOWER_of_LONDON_the_CITY", Strings.mapWords("tower_of_london_the_city", "_", excluded, String::toUpperCase));
 
         // null/empty string
-        assertNull(Strings.convertWords(null, "_", excluded, String::toUpperCase));
-        assertEquals("", Strings.convertWords("", "_", excluded, String::toUpperCase));
+        assertNull(Strings.mapWords(null, "_", excluded, String::toUpperCase));
+        assertEquals("", Strings.mapWords("", "_", excluded, String::toUpperCase));
 
         // no excluded words
-        assertEquals("HELLO_WORLD", Strings.convertWords("hello_world", "_", null, String::toUpperCase));
+        assertEquals("HELLO_WORLD", Strings.mapWords("hello_world", "_", null, String::toUpperCase));
 
         // empty excluded words
-        assertEquals("HELLO_WORLD", Strings.convertWords("hello_world", "_", Collections.emptyList(), String::toUpperCase));
+        assertEquals("HELLO_WORLD", Strings.mapWords("hello_world", "_", Collections.emptyList(), String::toUpperCase));
     }
 
     @Test
-    @DisplayName("Test quoteEscaped() with default quote")
+    @DisplayName("Test escapeQuotes() with default quote")
     public void testQuoteEscaped() {
-        assertEquals("\\\"hello\\\"", Strings.quoteEscaped("\"hello\""));
-        assertEquals("abc", Strings.quoteEscaped("abc"));
-        assertNull(Strings.quoteEscaped(null));
+        assertEquals("\\\"hello\\\"", Strings.escapeQuotes("\"hello\""));
+        assertEquals("abc", Strings.escapeQuotes("abc"));
+        assertNull(Strings.escapeQuotes(null));
     }
 
     @Test
-    @DisplayName("Test quoteEscaped() with custom quote char")
+    @DisplayName("Test escapeQuotes() with custom quote char")
     public void testQuoteEscaped_WithQuoteChar() {
-        assertEquals("\\'hello\\'", Strings.quoteEscaped("'hello'", '\''));
-        assertEquals("abc", Strings.quoteEscaped("abc", '\''));
-        assertNull(Strings.quoteEscaped(null, '\''));
+        assertEquals("\\'hello\\'", Strings.escapeQuotes("'hello'", '\''));
+        assertEquals("abc", Strings.escapeQuotes("abc", '\''));
+        assertNull(Strings.escapeQuotes(null, '\''));
     }
 
     @Test
     public void testQuoteEscapedWithChar() {
-        assertEquals("ab\\\"c", Strings.quoteEscaped("ab\"c", '"'));
-        assertEquals("ab'c", Strings.quoteEscaped("ab'c", '"')); // ' not escaped
-        assertNull(Strings.quoteEscaped(null, '"'));
+        assertEquals("ab\\\"c", Strings.escapeQuotes("ab\"c", '"'));
+        assertEquals("ab'c", Strings.escapeQuotes("ab'c", '"')); // ' not escaped
+        assertNull(Strings.escapeQuotes(null, '"'));
     }
 
     @Test
     public void testQuoteEscaped_WithCustomChar() {
-        String result = Strings.quoteEscaped("hello 'world'", '\'');
+        String result = Strings.escapeQuotes("hello 'world'", '\'');
         assertNotNull(result);
     }
 
     @Test
     public void testQuoteEscaped_FullCoverage() {
         // null/empty
-        assertNull(Strings.quoteEscaped(null));
-        assertEquals("", Strings.quoteEscaped(""));
+        assertNull(Strings.escapeQuotes(null));
+        assertEquals("", Strings.escapeQuotes(""));
 
         // no quotes
-        assertEquals("Hello World", Strings.quoteEscaped("Hello World"));
+        assertEquals("Hello World", Strings.escapeQuotes("Hello World"));
 
         // single quote
-        assertEquals("It\\'s a test", Strings.quoteEscaped("It's a test"));
+        assertEquals("It\\'s a test", Strings.escapeQuotes("It's a test"));
 
         // double quote
-        assertEquals("She said \\\"Hi\\\"", Strings.quoteEscaped("She said \"Hi\""));
+        assertEquals("She said \\\"Hi\\\"", Strings.escapeQuotes("She said \"Hi\""));
 
         // already escaped (backslash before quote)
-        assertEquals("Already \\'escaped\\'", Strings.quoteEscaped("Already \\'escaped\\'"));
+        assertEquals("Already \\'escaped\\'", Strings.escapeQuotes("Already \\'escaped\\'"));
 
         // backslash at end of string (no next char to skip)
-        assertEquals("test\\\\", Strings.quoteEscaped("test\\\\"));
+        assertEquals("test\\\\", Strings.escapeQuotes("test\\\\"));
     }
 
     @Test
     public void testQuoteEscaped_WithQuoteChar_FullCoverage() {
         // null/empty
-        assertNull(Strings.quoteEscaped(null, '"'));
-        assertEquals("", Strings.quoteEscaped("", '"'));
+        assertNull(Strings.escapeQuotes(null, '"'));
+        assertEquals("", Strings.escapeQuotes("", '"'));
 
         // escape double quote
-        assertEquals("She said \\\"Hi\\\"", Strings.quoteEscaped("She said \"Hi\"", '"'));
+        assertEquals("She said \\\"Hi\\\"", Strings.escapeQuotes("She said \"Hi\"", '"'));
 
         // escape single quote
-        assertEquals("It\\'s ok", Strings.quoteEscaped("It's ok", '\''));
+        assertEquals("It\\'s ok", Strings.escapeQuotes("It's ok", '\''));
 
         // already escaped - backslash then quote
-        assertEquals("Already \\\"escaped\\\"", Strings.quoteEscaped("Already \\\"escaped\\\"", '"'));
+        assertEquals("Already \\\"escaped\\\"", Strings.escapeQuotes("Already \\\"escaped\\\"", '"'));
 
         // no matching quote
-        assertEquals("No quotes here", Strings.quoteEscaped("No quotes here", '"'));
+        assertEquals("No quotes here", Strings.escapeQuotes("No quotes here", '"'));
     }
 
     @Test
-    @DisplayName("Test unicodeEscaped()")
+    @DisplayName("Test toUnicodeEscape()")
     public void testUnicodeEscaped() {
-        assertEquals("\\u0041", Strings.unicodeEscaped('A'));
-        assertEquals("\\u0061", Strings.unicodeEscaped('a'));
-        assertEquals("\\u0031", Strings.unicodeEscaped('1'));
+        assertEquals("\\u0041", Strings.toUnicodeEscape('A'));
+        assertEquals("\\u0061", Strings.toUnicodeEscape('a'));
+        assertEquals("\\u0031", Strings.toUnicodeEscape('1'));
     }
 
     @Test
     public void testUnicodeEscaped_EdgeCases() {
-        assertEquals("\\u0041", Strings.unicodeEscaped('A'));
-        assertEquals("\\u0000", Strings.unicodeEscaped('\0'));
-        assertEquals("\\u000a", Strings.unicodeEscaped('\n'));
-        assertEquals("\\u0009", Strings.unicodeEscaped('\t'));
+        assertEquals("\\u0041", Strings.toUnicodeEscape('A'));
+        assertEquals("\\u0000", Strings.toUnicodeEscape('\0'));
+        assertEquals("\\u000a", Strings.toUnicodeEscape('\n'));
+        assertEquals("\\u0009", Strings.toUnicodeEscape('\t'));
         // Multi-byte chars
-        String escaped = Strings.unicodeEscaped('\u00E9'); // e with acute
+        String escaped = Strings.toUnicodeEscape('\u00E9'); // e with acute
         assertTrue(escaped.startsWith("\\u"));
     }
 
@@ -7642,11 +7638,11 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testPadEndByDisplayWidth() {
-        assertEquals("ab   ", Strings.padEndByDisplayWidth("ab", 5));
-        assertEquals("abcde", Strings.padEndByDisplayWidth("abcde", 3));
-        assertEquals("   ", Strings.padEndByDisplayWidth(null, 3));
+        assertEquals("ab   ", Strings.padEndToDisplayWidth("ab", 5));
+        assertEquals("abcde", Strings.padEndToDisplayWidth("abcde", 3));
+        assertEquals("   ", Strings.padEndToDisplayWidth(null, 3));
         // R-16: a negative minDisplayWidth is now rejected (was silently accepted before)
-        assertThrows(IllegalArgumentException.class, () -> Strings.padEndByDisplayWidth("ab", -1));
+        assertThrows(IllegalArgumentException.class, () -> Strings.padEndToDisplayWidth("ab", -1));
     }
 
     @Test
@@ -9245,26 +9241,26 @@ public class StringsTest extends AbstractTest {
     @Test
     @DisplayName("Test substringIndicesBetween()")
     public void testSubstringIndicesBetween() {
-        List<int[]> result = Strings.substringIndicesBetween("a:b:c", ':', ':');
+        List<IndexRange> result = Strings.substringIndicesBetween("a:b:c", ':', ':');
         assertEquals(1, result.size());
-        assertArrayEquals(new int[] { 2, 3 }, result.get(0));
+        assertEquals(new IndexRange(2, 3), result.get(0));
     }
 
     @Test
     public void testSubstringIndicesBetween_CharsWithRange() {
-        List<int[]> indices = substringIndicesBetween("3[a2[c]]2[a]", 0, 8, '[', ']');
+        List<IndexRange> indices = substringIndicesBetween("3[a2[c]]2[a]", 0, 8, '[', ']');
 
         assertEquals(1, indices.size());
-        assertArrayEquals(new int[] { 2, 6 }, indices.get(0));
+        assertEquals(new IndexRange(2, 6), indices.get(0));
     }
 
     @Test
     public void testSubstringIndicesBetween_StringsWithRange() {
-        List<int[]> indices = substringIndicesBetween("<tag>text1</tag><tag>text2</tag>", 0, 16, "<tag>", "</tag>");
+        List<IndexRange> indices = substringIndicesBetween("<tag>text1</tag><tag>text2</tag>", 0, 16, "<tag>", "</tag>");
 
         assertEquals("text1", substringsBetween("<tag>text1</tag><tag>text2</tag>", 0, 16, "<tag>", "</tag>").get(0));
         assertEquals(1, indices.size());
-        assertArrayEquals(new int[] { 5, 10 }, indices.get(0));
+        assertEquals(new IndexRange(5, 10), indices.get(0));
 
     }
 
@@ -9272,27 +9268,27 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween() {
 
         {
-            assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
-            assertEquals("[[5, 6], [2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
-            assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
+            assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
-            assertEquals("[[2, 5], [9, 10]]", N.stringOf(Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
-            assertEquals("[[1, 5]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
-            assertEquals("[[4, 5], [2, 6], [1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
-            assertEquals("[[1, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
+            assertEquals(List.of(new IndexRange(1, 5)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(2, 6), new IndexRange(1, 8)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(1, 8)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
-            assertEquals("[[1, 5], [7, 8]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL)));
-            assertEquals("[[4, 5], [7, 8], [2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS)));
-            assertEquals("[[2, 10]]", N.stringOf(Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY)));
+            assertEquals(List.of(new IndexRange(1, 5), new IndexRange(7, 8)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(7, 8), new IndexRange(2, 10)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(2, 10)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
     }
@@ -9302,27 +9298,27 @@ public class StringsTest extends AbstractTest {
         final String str = "3[a2[c]]2[a]";
 
         // SEQUENTIAL: maxCount simply limits sequential matches.
-        assertEquals("[[2, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 1)));
-        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 2)));
+        assertEquals(List.of(new IndexRange(2, 6)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 1));
+        assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 2));
 
         // ALL_LEVELS: matches are reported inner-first, so maxCount limits in that discovery order.
-        assertEquals("[[5, 6]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 1)));
-        assertEquals("[[5, 6], [2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 2)));
+        assertEquals(List.of(new IndexRange(5, 6)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 1));
+        assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 2));
 
         // OUTERMOST_ONLY: nested matches must never be returned, even when maxCount stops the scan early.
         // Before the fix, maxCount=1 returned [[5, 6]] ("c"), a nested match that the strategy promises to ignore.
-        assertEquals("[[2, 7]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1)));
-        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 2)));
-        assertEquals("[[2, 7], [10, 11]]", N.stringOf(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10)));
+        assertEquals(List.of(new IndexRange(2, 7)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
+        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 2));
+        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10));
 
         // Value-returning variant goes through the same code path.
         assertEquals(N.toList("a2[c]"), Strings.substringsBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
 
         // Unclosed outer delimiter: pending matches stay, but the result must still honor maxCount.
         final String unclosed = "[a[b]c[d]";
-        assertEquals("[[3, 4], [7, 8]]",
-                N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10)));
-        assertEquals("[[3, 4]]", N.stringOf(Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1)));
+        assertEquals(List.of(new IndexRange(3, 4), new IndexRange(7, 8)),
+                Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10));
+        assertEquals(List.of(new IndexRange(3, 4)), Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
 
         // maxCount == 0 returns an empty list.
         assertTrue(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 0).isEmpty());
@@ -9333,7 +9329,7 @@ public class StringsTest extends AbstractTest {
         N.println(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']'));
         N.println(Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
-        assertEquals("[[2, 6], [10, 11]]", N.stringOf(Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']')));
+        assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']'));
         assertEquals(N.toList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']'));
 
         N.println(Strings.toCamelCase("a_B_c_D"));
@@ -9342,10 +9338,10 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringIndicesBetween_Chars() {
-        List<int[]> indices = substringIndicesBetween("3[a2[c]]2[a]", '[', ']');
+        List<IndexRange> indices = substringIndicesBetween("3[a2[c]]2[a]", '[', ']');
         assertEquals(2, indices.size());
-        assertArrayEquals(new int[] { 2, 6 }, indices.get(0));
-        assertArrayEquals(new int[] { 10, 11 }, indices.get(1));
+        assertEquals(new IndexRange(2, 6), indices.get(0));
+        assertEquals(new IndexRange(10, 11), indices.get(1));
 
         assertTrue(substringIndicesBetween("abc", '[', ']').isEmpty());
         assertTrue(substringIndicesBetween(null, '[', ']').isEmpty());
@@ -9354,10 +9350,10 @@ public class StringsTest extends AbstractTest {
 
     @Test
     public void testSubstringIndicesBetween_Strings() {
-        List<int[]> indices = substringIndicesBetween("<tag>text1</tag>", "<tag>", "</tag>");
+        List<IndexRange> indices = substringIndicesBetween("<tag>text1</tag>", "<tag>", "</tag>");
 
         assertEquals(1, indices.size());
-        assertArrayEquals(new int[] { 5, 10 }, indices.get(0));
+        assertEquals(new IndexRange(5, 10), indices.get(0));
 
         assertTrue(substringIndicesBetween("abc", "<", ">").isEmpty());
         assertTrue(substringIndicesBetween(null, "<", ">").isEmpty());
@@ -11694,57 +11690,57 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    public void testStrUtilCreateInteger() {
-        assertTrue(StrUtil.createInteger("123").isPresent());
-        assertEquals(123, StrUtil.createInteger("123").getAsInt());
-        assertFalse(StrUtil.createInteger("abc").isPresent());
-        assertFalse(StrUtil.createInteger("").isPresent());
-        assertFalse(StrUtil.createInteger(null).isPresent());
-        assertFalse(StrUtil.createInteger("123.45").isPresent());
+    public void testStrUtilTryParseInteger() {
+        assertTrue(StrUtil.tryParseInteger("123").isPresent());
+        assertEquals(123, StrUtil.tryParseInteger("123").getAsInt());
+        assertFalse(StrUtil.tryParseInteger("abc").isPresent());
+        assertFalse(StrUtil.tryParseInteger("").isPresent());
+        assertFalse(StrUtil.tryParseInteger(null).isPresent());
+        assertFalse(StrUtil.tryParseInteger("123.45").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateLong() {
-        assertTrue(StrUtil.createLong("12345678900").isPresent());
-        assertEquals(12345678900L, StrUtil.createLong("12345678900").getAsLong());
-        assertFalse(StrUtil.createLong("abc").isPresent());
+    public void testStrUtilTryParseLong() {
+        assertTrue(StrUtil.tryParseLong("12345678900").isPresent());
+        assertEquals(12345678900L, StrUtil.tryParseLong("12345678900").getAsLong());
+        assertFalse(StrUtil.tryParseLong("abc").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateFloat() {
-        assertTrue(StrUtil.createFloat("123.45").isPresent());
-        assertEquals(123.45f, StrUtil.createFloat("123.45").get(), 0.001f);
-        assertFalse(StrUtil.createFloat("abc").isPresent());
+    public void testStrUtilTryParseFloat() {
+        assertTrue(StrUtil.tryParseFloat("123.45").isPresent());
+        assertEquals(123.45f, StrUtil.tryParseFloat("123.45").get(), 0.001f);
+        assertFalse(StrUtil.tryParseFloat("abc").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateDouble() {
-        assertTrue(StrUtil.createDouble("123.456789").isPresent());
-        assertEquals(123.456789, StrUtil.createDouble("123.456789").getAsDouble(), 0.000001);
-        assertFalse(StrUtil.createDouble("abc").isPresent());
+    public void testStrUtilTryParseDouble() {
+        assertTrue(StrUtil.tryParseDouble("123.456789").isPresent());
+        assertEquals(123.456789, StrUtil.tryParseDouble("123.456789").getAsDouble(), 0.000001);
+        assertFalse(StrUtil.tryParseDouble("abc").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateBigInteger() {
-        assertTrue(StrUtil.createBigInteger("12345678901234567890").isPresent());
-        assertEquals(new BigInteger("12345678901234567890"), StrUtil.createBigInteger("12345678901234567890").get());
-        assertFalse(StrUtil.createBigInteger("abc.def").isPresent());
+    public void testStrUtilTryParseBigInteger() {
+        assertTrue(StrUtil.tryParseBigInteger("12345678901234567890").isPresent());
+        assertEquals(new BigInteger("12345678901234567890"), StrUtil.tryParseBigInteger("12345678901234567890").get());
+        assertFalse(StrUtil.tryParseBigInteger("abc.def").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateBigDecimal() {
-        assertTrue(StrUtil.createBigDecimal("123.4567890123456789").isPresent());
-        assertEquals(new BigDecimal("123.4567890123456789"), StrUtil.createBigDecimal("123.4567890123456789").get());
-        assertFalse(StrUtil.createBigDecimal("abc efg").isPresent());
+    public void testStrUtilTryParseBigDecimal() {
+        assertTrue(StrUtil.tryParseBigDecimal("123.4567890123456789").isPresent());
+        assertEquals(new BigDecimal("123.4567890123456789"), StrUtil.tryParseBigDecimal("123.4567890123456789").get());
+        assertFalse(StrUtil.tryParseBigDecimal("abc efg").isPresent());
     }
 
     @Test
-    public void testStrUtilCreateNumber() {
-        assertTrue(StrUtil.createNumber("123").isPresent());
-        assertEquals(123, StrUtil.createNumber("123").get());
-        assertTrue(StrUtil.createNumber("123.45").isPresent());
-        assertEquals(123.45, StrUtil.createNumber("123.45").get());
-        assertFalse(StrUtil.createNumber("12L3").isPresent());
+    public void testStrUtilTryParseNumber() {
+        assertTrue(StrUtil.tryParseNumber("123").isPresent());
+        assertEquals(123, StrUtil.tryParseNumber("123").get());
+        assertTrue(StrUtil.tryParseNumber("123.45").isPresent());
+        assertEquals(123.45, StrUtil.tryParseNumber("123.45").get());
+        assertFalse(StrUtil.tryParseNumber("12L3").isPresent());
     }
 
     @Test
@@ -11833,43 +11829,43 @@ public class StringsTest extends AbstractTest {
     }
 
     @Test
-    public void testStrUtil_CreateNumber() {
-        assertEquals(123, StrUtil.createInteger("123").orElse(-1));
-        assertFalse(StrUtil.createInteger("abc").isPresent());
-        assertFalse(StrUtil.createInteger("").isPresent());
-        assertFalse(StrUtil.createInteger(null).isPresent());
+    public void testStrUtil_TryParseNumber() {
+        assertEquals(123, StrUtil.tryParseInteger("123").orElse(-1));
+        assertFalse(StrUtil.tryParseInteger("abc").isPresent());
+        assertFalse(StrUtil.tryParseInteger("").isPresent());
+        assertFalse(StrUtil.tryParseInteger(null).isPresent());
 
-        assertEquals(123L, StrUtil.createLong("123").orElse(-1L));
-        assertFalse(StrUtil.createLong("abc").isPresent());
-        assertFalse(StrUtil.createLong("").isPresent());
-        assertFalse(StrUtil.createLong(null).isPresent());
+        assertEquals(123L, StrUtil.tryParseLong("123").orElse(-1L));
+        assertFalse(StrUtil.tryParseLong("abc").isPresent());
+        assertFalse(StrUtil.tryParseLong("").isPresent());
+        assertFalse(StrUtil.tryParseLong(null).isPresent());
 
-        assertEquals(123.45f, StrUtil.createFloat("123.45").orElse(-1f), 0.001f);
-        assertFalse(StrUtil.createFloat("abc").isPresent());
-        assertFalse(StrUtil.createFloat("").isPresent());
-        assertFalse(StrUtil.createFloat(null).isPresent());
+        assertEquals(123.45f, StrUtil.tryParseFloat("123.45").orElse(-1f), 0.001f);
+        assertFalse(StrUtil.tryParseFloat("abc").isPresent());
+        assertFalse(StrUtil.tryParseFloat("").isPresent());
+        assertFalse(StrUtil.tryParseFloat(null).isPresent());
 
-        assertEquals(123.45, StrUtil.createDouble("123.45").orElse(-1.0), 0.001);
-        assertFalse(StrUtil.createDouble("abc").isPresent());
-        assertFalse(StrUtil.createDouble("").isPresent());
-        assertFalse(StrUtil.createDouble(null).isPresent());
+        assertEquals(123.45, StrUtil.tryParseDouble("123.45").orElse(-1.0), 0.001);
+        assertFalse(StrUtil.tryParseDouble("abc").isPresent());
+        assertFalse(StrUtil.tryParseDouble("").isPresent());
+        assertFalse(StrUtil.tryParseDouble(null).isPresent());
 
-        assertEquals(new BigInteger("123456789012345678901234567890"), StrUtil.createBigInteger("123456789012345678901234567890").orElse(null));
-        assertFalse(StrUtil.createBigInteger("abc").isPresent());
-        assertFalse(StrUtil.createBigInteger("").isPresent());
-        assertFalse(StrUtil.createBigInteger(null).isPresent());
+        assertEquals(new BigInteger("123456789012345678901234567890"), StrUtil.tryParseBigInteger("123456789012345678901234567890").orElse(null));
+        assertFalse(StrUtil.tryParseBigInteger("abc").isPresent());
+        assertFalse(StrUtil.tryParseBigInteger("").isPresent());
+        assertFalse(StrUtil.tryParseBigInteger(null).isPresent());
 
-        assertEquals(new BigDecimal("123.45678901234567890"), StrUtil.createBigDecimal("123.45678901234567890").orElse(null));
-        assertFalse(StrUtil.createBigDecimal("abc").isPresent());
-        assertFalse(StrUtil.createBigDecimal("").isPresent());
-        assertFalse(StrUtil.createBigDecimal(null).isPresent());
+        assertEquals(new BigDecimal("123.45678901234567890"), StrUtil.tryParseBigDecimal("123.45678901234567890").orElse(null));
+        assertFalse(StrUtil.tryParseBigDecimal("abc").isPresent());
+        assertFalse(StrUtil.tryParseBigDecimal("").isPresent());
+        assertFalse(StrUtil.tryParseBigDecimal(null).isPresent());
 
-        assertTrue(StrUtil.createNumber("123").isPresent());
-        assertTrue(StrUtil.createNumber("123.45").isPresent());
-        assertTrue(StrUtil.createNumber("123L").isPresent());
-        assertFalse(StrUtil.createNumber("abc").isPresent());
-        assertFalse(StrUtil.createNumber("").isPresent());
-        assertFalse(StrUtil.createNumber(null).isPresent());
+        assertTrue(StrUtil.tryParseNumber("123").isPresent());
+        assertTrue(StrUtil.tryParseNumber("123.45").isPresent());
+        assertTrue(StrUtil.tryParseNumber("123L").isPresent());
+        assertFalse(StrUtil.tryParseNumber("abc").isPresent());
+        assertFalse(StrUtil.tryParseNumber("").isPresent());
+        assertFalse(StrUtil.tryParseNumber(null).isPresent());
     }
 
     // ----------------------------------------------------------------------
@@ -12296,24 +12292,24 @@ public class StringsTest extends AbstractTest {
         assertEquals("abc".compareTo("abd"), Strings.compare("abc", "abd"));
     }
 
-    // ----- G-6: padStartByDisplayWidth(String, int) -----
+    // ----- G-6: padStartToDisplayWidth(String, int) -----
 
     @Test
     public void testPadStartByDisplayWidth() {
         // normal
-        assertEquals("   ab", Strings.padStartByDisplayWidth("ab", 5));
+        assertEquals("   ab", Strings.padStartToDisplayWidth("ab", 5));
         // wide CJK characters count as 2 each (display width 4 -> 1 space)
-        assertEquals(" 中文", Strings.padStartByDisplayWidth("中文", 5));
+        assertEquals(" 中文", Strings.padStartToDisplayWidth("中文", 5));
         // already wide enough
-        assertEquals("abcde", Strings.padStartByDisplayWidth("abcde", 3));
-        assertEquals("abc", Strings.padStartByDisplayWidth("abc", 3));
+        assertEquals("abcde", Strings.padStartToDisplayWidth("abcde", 3));
+        assertEquals("abc", Strings.padStartToDisplayWidth("abc", 3));
         // null treated as empty
-        assertEquals("   ", Strings.padStartByDisplayWidth(null, 3));
-        assertEquals("", Strings.padStartByDisplayWidth(null, 0));
+        assertEquals("   ", Strings.padStartToDisplayWidth(null, 3));
+        assertEquals("", Strings.padStartToDisplayWidth(null, 0));
         // empty input
-        assertEquals("  ", Strings.padStartByDisplayWidth("", 2));
+        assertEquals("  ", Strings.padStartToDisplayWidth("", 2));
         // negative width throws
-        assertThrows(IllegalArgumentException.class, () -> Strings.padStartByDisplayWidth("ab", -1));
+        assertThrows(IllegalArgumentException.class, () -> Strings.padStartToDisplayWidth("ab", -1));
     }
 
     // ----- G-10: countMatchesIgnoreCase(String, String) -----

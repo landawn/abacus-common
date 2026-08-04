@@ -42,10 +42,7 @@ public interface FloatToIntFunction extends Throwables.FloatToIntFunction<Runtim
     FloatToIntFunction DEFAULT = value -> (int) value;
 
     /**
-     * Applies this function to the given float argument.
-     *
-     * <p>The implementation should define how the float value is transformed into an int value.
-     * Common implementations include truncation, rounding, or custom mapping logic.</p>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

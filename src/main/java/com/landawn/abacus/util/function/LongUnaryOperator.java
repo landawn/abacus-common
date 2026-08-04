@@ -19,13 +19,9 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation on a single long-valued operand that produces a long-valued result.
- * This is the primitive type specialization of {@code UnaryOperator} for {@code long}.
+ * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code long}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(long)}.
- *
- * <p>The interface extends both {@code Throwables.LongUnaryOperator} with {@code RuntimeException}
- * and {@code java.util.function.LongUnaryOperator}, providing compatibility with the Java standard library
- * while adding function composition capabilities.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -46,17 +42,6 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
     /**
      * Applies this operator to the given operand.
      *
-     * <p>This method takes a long value as input and produces a long result.
-     * The implementation defines how the operand is transformed.
-     *
-     * <p>Common implementations include:
-     * <ul>
-     *   <li>Mathematical operations (increment, decrement, negation)</li>
-     *   <li>Bitwise operations (complement, shifts)</li>
-     *   <li>Scaling operations (multiply/divide by constant)</li>
-     *   <li>Custom transformations</li>
-     * </ul>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongUnaryOperator increment = x -> x + 1;
@@ -66,8 +51,8 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * long negated = negate.applyAsLong(10L);   // Returns -10L
      * }</pre>
      *
-     * @param operand the input operand
-     * @return the result of applying this operator
+     * @param operand the {@code long} operand
+     * @return the {@code long}-valued result of applying this operator to the operand
      */
     @Override
     long applyAsLong(long operand);
@@ -91,7 +76,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
     @Override
@@ -120,7 +105,7 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(java.util.function.LongUnaryOperator)
      */
     @Override

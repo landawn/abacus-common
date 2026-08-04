@@ -22,15 +22,13 @@ import com.landawn.abacus.util.cs;
  * Represents an operation on a single operand that produces a result of the same type as its operand.
  * This is a specialization of {@link Function} for the case where the operand and result are of the same type.
  *
- * <p>This interface extends Function, Throwables.UnaryOperator and the standard Java UnaryOperator,
- * providing compatibility with the abacus-common framework's error handling mechanisms and the standard
- * Java functional interfaces.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the operand and result of the operator
+ * @see Function
+ * @see java.util.function.UnaryOperator
  */
 @FunctionalInterface
 public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperator<T, RuntimeException>, java.util.function.UnaryOperator<T> { //NOSONAR
@@ -56,7 +54,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the before operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> compose(final java.util.function.UnaryOperator<T> before) throws IllegalArgumentException {
@@ -87,7 +85,7 @@ public interface UnaryOperator<T> extends Function<T, T>, Throwables.UnaryOperat
      *
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the after operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(java.util.function.UnaryOperator)
      */
     default UnaryOperator<T> andThen(final java.util.function.UnaryOperator<T> after) throws IllegalArgumentException {

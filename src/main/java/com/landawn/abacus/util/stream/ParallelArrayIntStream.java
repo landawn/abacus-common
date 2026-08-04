@@ -129,7 +129,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code IntStream} of matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public IntStream filter(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -158,7 +158,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code IntStream} of the elements selected by the parallel {@code takeWhile} operation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public IntStream takeWhile(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -187,7 +187,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code IntStream} of the elements selected by the parallel {@code dropWhile} operation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public IntStream dropWhile(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -212,7 +212,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code IntStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream map(final IntUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
@@ -238,7 +238,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code CharStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream mapToChar(final IntToCharFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -264,7 +264,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code ByteStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream mapToByte(final IntToByteFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -290,7 +290,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code ShortStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ShortStream mapToShort(final IntToShortFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -316,7 +316,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code LongStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public LongStream mapToLong(final IntToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -342,7 +342,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code FloatStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public FloatStream mapToFloat(final IntToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -368,7 +368,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code DoubleStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public DoubleStream mapToDouble(final IntToDoubleFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -395,7 +395,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code Stream} of mapped objects
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> mapToObj(final IntFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -420,7 +420,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns an {@code IntStream} for each element
      * @return a new parallel {@code IntStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatMap(final IntFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -449,7 +449,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<Integer>} for each element
      * @return a new parallel {@code IntStream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatmap(final IntFunction<? extends Collection<Integer>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -478,7 +478,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns an {@code int[]} for each element
      * @return a new parallel {@code IntStream} of the flattened array contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatMapArray(final IntFunction<int[]> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -507,7 +507,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code CharStream} for each element
      * @return a new parallel {@code CharStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public CharStream flatMapToChar(final IntFunction<? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -536,7 +536,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code ByteStream} for each element
      * @return a new parallel {@code ByteStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatMapToByte(final IntFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -565,7 +565,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code ShortStream} for each element
      * @return a new parallel {@code ShortStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ShortStream flatMapToShort(final IntFunction<? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -594,7 +594,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code LongStream} for each element
      * @return a new parallel {@code LongStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public LongStream flatMapToLong(final IntFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -623,7 +623,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code FloatStream} for each element
      * @return a new parallel {@code FloatStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public FloatStream flatMapToFloat(final IntFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -652,7 +652,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code DoubleStream} for each element
      * @return a new parallel {@code DoubleStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public DoubleStream flatMapToDouble(final IntFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -682,7 +682,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Stream<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatMapToObj(final IntFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -710,7 +710,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatmapToObj(final IntFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -738,7 +738,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param action a non-interfering action to perform on each element
      * @return a new parallel {@code IntStream} with the side-effecting action attached
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public IntStream onEach(final IntConsumer action) throws IllegalArgumentException, IllegalStateException {
@@ -769,7 +769,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
@@ -855,7 +855,8 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
+     *         {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
@@ -896,7 +897,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return a {@code Map} grouping elements by the classifier with values aggregated by the downstream collector
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.IntFunction<? extends K, E> keyMapper,
@@ -929,7 +930,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the parallel reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public int reduce(final int identity, final IntBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1021,7 +1022,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalInt} with the result, or empty if the stream contains no elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public OptionalInt reduce(final IntBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1127,7 +1128,8 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param combiner a non-interfering, stateless function that merges two containers (used in parallel execution)
      * @return the result of the parallel mutable reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
+     *         {@code null}.
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
@@ -1212,7 +1214,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1296,7 +1298,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return {@code true} if all elements match the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1380,7 +1382,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return {@code true} if no elements match the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1466,7 +1468,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return an {@code OptionalInt} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1567,7 +1569,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return an {@code OptionalInt} with any matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1666,7 +1668,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @return an {@code OptionalInt} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1765,7 +1767,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param zipFunction a function applied to corresponding elements of the two streams
      * @return a new parallel {@code IntStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public IntStream zipWith(final IntStream b, final IntBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
@@ -1794,7 +1796,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param zipFunction a function applied to corresponding elements of the three streams
      * @return a new parallel {@code IntStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public IntStream zipWith(final IntStream b, final IntStream c, final IntTernaryOperator zipFunction)
@@ -1824,7 +1826,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param zipFunction a function applied to corresponding elements (with padding as needed)
      * @return a new parallel {@code IntStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public IntStream zipWith(final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
@@ -1856,7 +1858,7 @@ final class ParallelArrayIntStream extends ArrayIntStream {
      * @param zipFunction a function applied to corresponding elements (with padding as needed)
      * @return a new parallel {@code IntStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public IntStream zipWith(final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB, final int valueForNoneC,

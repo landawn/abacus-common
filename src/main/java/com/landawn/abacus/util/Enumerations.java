@@ -431,7 +431,7 @@ public final class Enumerations {
      * @param e the Enumeration to convert; may be {@code null}
      * @param supplier the supplier to create the target collection; must not be {@code null} and must not supply a {@code null} collection
      * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} supplies a {@code null} collection
+     * @throws IllegalArgumentException if {@code supplier} supplies a {@code null} collection.
      * @see #toList(Enumeration)
      * @see #toSet(Enumeration)
      */

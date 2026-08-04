@@ -113,8 +113,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
-     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
+     *         or empty, or {@code props} is {@code null}.
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -159,8 +159,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
-     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
+     *         or empty, or {@code props} is {@code null}.
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
@@ -208,8 +208,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
-     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
+     *         or empty, or {@code props} is {@code null}.
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, or messaging errors
      * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
@@ -263,8 +263,8 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
-     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
+     *         or empty, or {@code props} is {@code null}.
      * @throws RuntimeException if sending the email fails due to invalid addresses, authentication failure,
      *                          connection issues, file access errors, or messaging errors
      * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
@@ -305,8 +305,8 @@ public final class EmailUtil {
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
      * @param props mail server properties; must not be {@code null}
      * @return the constructed message, ready to be passed to {@link Transport#send(Message)}
-     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is
-     *                                  {@code null} or empty, or {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
+     *         or empty, or {@code props} is {@code null}.
      * @throws MessagingException if an address is invalid or the message cannot be assembled
      */
     static MimeMessage createMessage(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,

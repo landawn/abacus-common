@@ -373,7 +373,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     public abstract byte nextByte();
 
     /**
-     * Returns a new iterator that skips the first n elements of this iterator.
+     * Returns a new {@code ByteIterator} that skips the first {@code n} elements of this iterator.
      *
      * <p>The skip operation is performed lazily - elements are not skipped until
      * the first call to {@link #hasNext()} or {@link #nextByte()} on the returned
@@ -392,7 +392,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code ByteIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public ByteIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -437,7 +437,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns a new iterator that limits the number of elements to at most the specified count.
+     * Returns a new {@code ByteIterator} that will iterate over at most {@code count} elements.
      *
      * <p>The returned iterator will produce at most {@code count} elements from this iterator.
      * If this iterator has fewer than {@code count} elements remaining, all remaining elements
@@ -453,7 +453,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @param count the maximum number of elements to iterate; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code ByteIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public ByteIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -485,7 +485,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     }
 
     /**
-     * Returns a new iterator that includes only elements matching the specified predicate.
+     * Returns a new {@code ByteIterator} containing only elements that satisfy the given predicate.
      *
      * <p>The returned iterator applies the predicate to each element of this iterator
      * and only returns elements for which the predicate returns {@code true}. Elements
@@ -553,7 +553,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * byte[] empty = ByteIterator.empty().toArray();   // returns empty.length == 0
+     * byte[] empty = ByteIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code byte} array containing all remaining elements; an empty array if there are none
@@ -576,7 +576,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * ByteList empty = ByteIterator.empty().toList();   // returns empty.size() == 0
+     * ByteList empty = ByteIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link ByteList} containing all remaining elements; an empty list if there are none
@@ -657,7 +657,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param startIndex the starting index value (must be non-negative)
      * @return an ObjIterator of IndexedByte elements with custom starting index
-     * @throws IllegalArgumentException if startIndex is negative
+     * @throws IllegalArgumentException if startIndex is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta

@@ -573,7 +573,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * SortedMap will be visible through the returned ImmutableSortedMap, which violates the
-     * immutability contract. Use {@link #copyOf(Map)} for a {@code true} immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Map)} for a truly independent immutable copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -669,9 +669,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      *         or {@code toKey} cannot be compared to keys currently in the map
      * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map
      *         does not permit {@code null} keys
-     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this
-     *         map itself has a restricted range, and {@code fromKey} or {@code toKey} lies outside
-     *         the bounds of the range
+     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this map itself has a
+     *         restricted range, and {@code fromKey} or {@code toKey} lies outside the bounds of the range.
      */
     @Override
     public ImmutableSortedMap<K, V> subMap(final K fromKey, final K toKey) {
@@ -696,8 +695,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws ClassCastException if {@code toKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
      * @throws NullPointerException if {@code toKey} is {@code null} and this map does not permit {@code null} keys
-     * @throws IllegalArgumentException if this map itself has a restricted range,
-     *         and {@code toKey} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code toKey} lies outside the
+     *         bounds of the range.
      */
     @Override
     public ImmutableSortedMap<K, V> headMap(final K toKey) {
@@ -722,8 +721,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws ClassCastException if {@code fromKey} is not compatible with
      *         this map's comparator (or, if the map has no comparator, using natural ordering)
      * @throws NullPointerException if {@code fromKey} is {@code null} and this map does not permit {@code null} keys
-     * @throws IllegalArgumentException if this map itself has a restricted range,
-     *         and {@code fromKey} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code fromKey} lies outside
+     *         the bounds of the range.
      */
     @Override
     public ImmutableSortedMap<K, V> tailMap(final K fromKey) {

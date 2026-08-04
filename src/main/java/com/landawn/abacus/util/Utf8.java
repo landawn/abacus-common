@@ -84,8 +84,8 @@ public final class Utf8 {
      * @param sequence the character sequence to measure
      * @return the number of bytes needed to encode the sequence in UTF-8
      * @throws NullPointerException if {@code sequence} is {@code null}
-     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired
-     *         surrogates), or if the UTF-8 encoded length overflows {@code int}
+     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired surrogates), or if the
+     *         UTF-8 encoded length overflows {@code int}.
      */
     public static int encodedLength(final CharSequence sequence) {
         // Warning to maintainers: this implementation is highly optimized.
@@ -126,7 +126,7 @@ public final class Utf8 {
      * @param start the index in {@code sequence} from which to begin counting
      * @return the extra byte count (on top of the char count) needed for the characters
      *         from {@code start} onwards
-     * @throws IllegalArgumentException if an unpaired surrogate is encountered
+     * @throws IllegalArgumentException if an unpaired surrogate is encountered.
      */
     private static int encodedLengthGeneral(final CharSequence sequence, final int start) {
         final int utf16Length = sequence.length();
@@ -207,7 +207,7 @@ public final class Utf8 {
      * @param len the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
      * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative, or
      *         {@code off + len} is greater than {@code bytes.length}
      */

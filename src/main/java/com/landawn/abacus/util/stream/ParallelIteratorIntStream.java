@@ -161,7 +161,7 @@ final class ParallelIteratorIntStream extends IteratorIntStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return the new stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public IntStream filter(final IntPredicate predicate) throws IllegalArgumentException, IllegalStateException {

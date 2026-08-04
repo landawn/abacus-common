@@ -106,7 +106,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
      *              This can be any subclass of {@code ReflectiveOperationException} including
      *              {@code ClassNotFoundException}, {@code NoSuchMethodException}, {@code IllegalAccessException}, etc.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedReflectiveOperationException(final ReflectiveOperationException cause) {
         super(cause);
@@ -136,7 +136,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      *                by the {@link #getMessage()} method.
      * @param cause the {@link ReflectiveOperationException} to wrap. Must not be {@code null}.
      *              This can be any subclass of {@code ReflectiveOperationException}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedReflectiveOperationException(final String message, final ReflectiveOperationException cause) {
         super(message, cause);

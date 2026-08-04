@@ -40,12 +40,6 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
     /**
      * Performs this operation on the given arguments.
      *
-     * <p>This method consumes an object of type T and a short value, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * updating the object's state based on the short value, working with small numeric
-     * ranges, or processing data where memory efficiency is important and values fit
-     * within the short range (-32,768 to 32,767).
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjShortConsumer<List<Short>> addToList = (list, value) -> list.add(value);
@@ -57,8 +51,8 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * appendShort.accept(sb, (short) 8080);
      * }</pre>
      *
-     * @param t the first input argument of type T
-     * @param value the second input argument, a primitive short value
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, short value);
@@ -81,7 +75,7 @@ public interface ObjShortConsumer<T> extends Throwables.ObjShortConsumer<T, Runt
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjShortConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjShortConsumer<T> andThen(final ObjShortConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

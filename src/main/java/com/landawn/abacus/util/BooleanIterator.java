@@ -373,7 +373,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code BooleanIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public BooleanIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -432,7 +432,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @param count the maximum number of elements to return; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code BooleanIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public BooleanIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -529,7 +529,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // array = [true, false, true]
      *
      * // Empty iterator returns empty array
-     * boolean[] empty = BooleanIterator.empty().toArray();   // returns empty.length == 0
+     * boolean[] empty = BooleanIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code boolean} array containing all remaining elements; an empty array if there are none
@@ -552,7 +552,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // list contains [true, false, true]
      *
      * // Empty iterator returns empty list
-     * BooleanList empty = BooleanIterator.empty().toList();   // returns empty.size() == 0
+     * BooleanList empty = BooleanIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link BooleanList} containing all remaining elements; an empty list if there are none
@@ -616,7 +616,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta

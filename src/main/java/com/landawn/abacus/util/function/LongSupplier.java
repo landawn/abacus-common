@@ -21,10 +21,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
  *
- * <p>This interface extends both {@link java.util.function.LongSupplier} and
- * {@link com.landawn.abacus.util.Throwables.LongSupplier}, providing compatibility with the standard Java
- * functional interfaces while also supporting the Throwables framework.
- *
  * <p>This is a functional interface whose functional method is {@link #getAsLong()}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>

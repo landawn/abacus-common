@@ -1336,7 +1336,7 @@ public final class IntFunctions {
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableArray} of that component type and length
      * @throws NullPointerException if {@code componentType} is {@code null}
-     * @throws IllegalArgumentException if {@code componentType} is primitive
+     * @throws IllegalArgumentException if {@code componentType} is primitive.
      */
     @Beta
     @SequentialOnly
@@ -1391,7 +1391,7 @@ public final class IntFunctions {
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Collection}
      *         using the selected implementation for {@code targetType}
      * @throws IllegalArgumentException if {@code targetType} is not a {@code Collection} class, is abstract with no
-     *         suitable constructor, or no appropriate factory can be found
+     *         suitable constructor, or no appropriate factory can be found.
      * @throws NullPointerException if {@code targetType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
@@ -1530,8 +1530,8 @@ public final class IntFunctions {
      * @param targetType the {@code Class} object representing the desired {@code Map} implementation, must not be {@code null}
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Map}
      *         using the selected implementation for {@code targetType}
-     * @throws IllegalArgumentException if {@code targetType} is not a {@code Map} class, is abstract with no
-     *         suitable constructor, or no appropriate factory can be found
+     * @throws IllegalArgumentException if {@code targetType} is not a {@code Map} class, is abstract with no suitable
+     *         constructor, or no appropriate factory can be found.
      * @throws NullPointerException if {@code targetType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
@@ -1641,7 +1641,8 @@ public final class IntFunctions {
      * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if {@code creator} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if {@code targetClass}
+     *         is not a {@code Collection} class, or if {@code targetClass} is a built-in class.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1679,7 +1680,8 @@ public final class IntFunctions {
      * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
      * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
-     * @throws IllegalArgumentException if {@code creator} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if {@code targetClass}
+     *         is not a {@code Map} class, or if {@code targetClass} is a built-in class.
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)

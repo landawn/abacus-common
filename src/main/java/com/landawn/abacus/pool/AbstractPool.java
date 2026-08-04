@@ -214,7 +214,8 @@ public abstract class AbstractPool implements Pool {
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the finite proportion of objects to remove during balancing, in the range [0, 1]; a value of 0 selects the default factor (0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
-     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if {@code balanceFactor} is non-finite or outside [0, 1]
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if
+     *         {@code balanceFactor} is non-finite or outside [0, 1].
      */
     protected AbstractPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize) {

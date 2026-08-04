@@ -351,7 +351,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public FloatList(final int initialCapacity) throws IllegalArgumentException {
@@ -528,7 +528,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param element the float value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new FloatList containing the repeated elements
-     * @throws IllegalArgumentException if len is negative
+     * @throws IllegalArgumentException if len is negative.
      */
     public static FloatList repeat(final float element, final int len) {
         return of(Array.repeat(element, len));
@@ -1541,7 +1541,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param c the FloatList to be checked for disjointness with this list. May be {@code null} or empty.
      * @return {@code true} if this list has no elements in common with the specified FloatList,
-     *         {@code false} if they share at least one element. Returns {@code true} if either list is {@code null} or empty.
+     *         {@code false} if they share at least one element. Returns {@code true} if either list is empty.
      */
     @Override
     public boolean disjoint(final FloatList c) {
@@ -1606,7 +1606,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param b the list to find common elements with this list. May be {@code null} or empty.
      * @return a new FloatList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #intersection(float[])
      * @see #difference(FloatList)
      * @see #symmetricDifference(FloatList)
@@ -2437,7 +2437,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * This method modifies the list in place.
      *
      * @param rnd the source of randomness to use to shuffle the list.
-     * @throws IllegalArgumentException if the specified random source is {@code null}
+     * @throws IllegalArgumentException if the specified random source is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2507,7 +2507,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param step the step size for selecting elements. Must not be zero
      * @return a new FloatList containing a copy of the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see N#copyOfRange(float[], int, int, int)
      */
     @Override
@@ -2532,7 +2532,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param chunkSize the desired size of each chunk (must be positive)
      * @return a List of FloatLists, each containing a chunk of elements from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if chunkSize is not positive
+     * @throws IllegalArgumentException if chunkSize is not positive.
      */
     @Override
     public List<FloatList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {

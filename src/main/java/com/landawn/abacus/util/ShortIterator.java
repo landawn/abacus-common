@@ -249,7 +249,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Creates an infinite ShortIterator that generates values using the provided supplier.
-     * The iterator will continuously return values from the supplier and never return {@code false} from hasNext().
+     * The iterator's {@code hasNext()} always returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -368,8 +368,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     public abstract short nextShort();
 
     /**
-     * Returns a new ShortIterator that skips the first n elements.
-     * If n is greater than the number of remaining elements, all elements are skipped.
+     * Returns a new {@code ShortIterator} that skips the first {@code n} elements.
+     * If {@code n} is greater than the number of remaining elements, all elements are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -380,7 +380,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code ShortIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #limit(long)
      */
     public ShortIterator skip(final long n) throws IllegalArgumentException {
@@ -426,8 +426,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Returns a new ShortIterator that limits the number of elements to iterate over.
-     * The returned iterator will iterate over at most {@code count} elements.
+     * Returns a new {@code ShortIterator} that will iterate over at most {@code count} elements.
+     * If {@code count} is 0, an empty iterator is returned. If {@code count} exceeds the number
+     * of remaining elements, all remaining elements are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -438,7 +439,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @param count the maximum number of elements to iterate; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code ShortIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      * @see #skip(long)
      */
     public ShortIterator limit(final long count) throws IllegalArgumentException {
@@ -535,7 +536,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * short[] empty = ShortIterator.empty().toArray();   // returns empty.length == 0
+     * short[] empty = ShortIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code short} array containing all remaining elements; an empty array if there are none
@@ -559,7 +560,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // list contains [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty list
-     * ShortList empty = ShortIterator.empty().toList();   // returns empty.size() == 0
+     * ShortList empty = ShortIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link ShortList} containing all remaining elements; an empty list if there are none
@@ -576,7 +577,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     }
 
     /**
-     * Creates a ShortStream from the remaining elements in this iterator.
+     * Converts this iterator to a {@code ShortStream}.
      * This provides access to stream operations like map, filter, reduce, etc.
      *
      * <p><b>Usage Examples:</b></p>
@@ -624,7 +625,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if the source has another element after the index reaches {@link Long#MAX_VALUE}
      * @see #indexed()
      */

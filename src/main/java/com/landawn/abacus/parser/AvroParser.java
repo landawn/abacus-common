@@ -130,8 +130,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the serialization configuration to use (must contain a schema unless {@code obj} is a
      *        {@code SpecificRecord} or a collection of {@code SpecificRecord}s)
      * @return the Base64 encoded string representation of the serialized object
-     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
-     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, or a
+     *         {@code SpecificRecord} collection contains nulls or more than one record class.
      */
     @Override
     public String serialize(final Object obj, final AvroSerConfig config) {
@@ -169,8 +169,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
-     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
-     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, or a
+     *         {@code SpecificRecord} collection contains nulls or more than one record class.
      * @throws UncheckedIOException if an I/O error occurs during file writing
      */
     @Override
@@ -227,8 +227,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to serialize (may be {@code null}; serializes nothing in that case)
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
-     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
-     *         or a {@code SpecificRecord} collection contains nulls or more than one record class
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, or a
+     *         {@code SpecificRecord} collection contains nulls or more than one record class.
      * @throws UncheckedIOException if an I/O error occurs during stream writing
      */
     @SuppressFBWarnings
@@ -305,8 +305,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *
      * @param obj the source object, or {@code null}
      * @param config the serialization configuration, or {@code null}
-     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported,
-     *         or a {@code SpecificRecord} collection is heterogeneous
+     * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, or a
+     *         {@code SpecificRecord} collection is heterogeneous.
      */
     private static void validateSerialization(final Object obj, final AvroSerConfig config) {
         if (obj == null || obj instanceof SpecificRecord) {
@@ -358,7 +358,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param obj the object to convert (may be a bean, map, collection, or GenericRecord)
      * @param schema the Avro schema defining the structure
      * @return GenericRecord representation of the object
-     * @throws IllegalArgumentException if the object type is not supported
+     * @throws IllegalArgumentException if the object type is not supported.
      */
     private GenericRecord toGenericRecord(final Object obj, final Schema schema) {
         if (obj instanceof GenericRecord genericrecord) {
@@ -417,6 +417,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
      */
     @Override
     public <T> T deserialize(String source, AvroDeserConfig config, Type<? extends T> targetType) {
@@ -446,6 +448,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
+     * @throws UncheckedIOException if an I/O error occurs during deserialization
      */
     @Override
     public <T> T deserialize(final String source, final AvroDeserConfig config, final Class<? extends T> targetClass) {
@@ -469,7 +473,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
@@ -502,7 +506,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
      * @throws UncheckedIOException if an I/O error occurs or the file doesn't exist
      */
     @Override
@@ -551,7 +555,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
@@ -683,7 +687,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types
+     * @throws IllegalArgumentException if schema is not specified for non-SpecificRecord types.
      * @throws UncheckedIOException if an I/O error occurs during stream reading
      */
     @Override
@@ -737,7 +741,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param source the GenericRecord to convert (must not be {@code null})
      * @param targetClass the target class to convert to
      * @return the converted object
-     * @throws IllegalArgumentException if the target type is not supported
+     * @throws IllegalArgumentException if the target type is not supported.
      */
     private <T> T fromGenericRecord(final GenericRecord source, final Class<? extends T> targetClass) {
         if (targetClass.isAssignableFrom(source.getClass())) {

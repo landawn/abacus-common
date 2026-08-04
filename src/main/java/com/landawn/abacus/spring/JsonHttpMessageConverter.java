@@ -165,7 +165,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *            Must not be {@code null}. Use {@link JsonDeserConfig} to customize deserialization behavior.
      *            Both configuration objects are retained by reference and should not be mutated while
      *            the converter is serving concurrent requests.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
      * @see JsonSerConfig
      * @see JsonDeserConfig
      * @see com.landawn.abacus.parser.Exclusion
@@ -228,7 +228,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If none are supplied,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
@@ -258,7 +258,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
@@ -319,7 +319,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *               Spring's framework and will be closed automatically after this method returns.
      * @return the deserialized object of the specified type
      * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading from the Reader
-     * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch
+     * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch.
      * @throws RuntimeException if JSON parsing fails due to malformed JSON or other parsing errors
      */
     @Override

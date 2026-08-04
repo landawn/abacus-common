@@ -20,11 +20,7 @@ import com.landawn.abacus.util.cs;
 /**
  * Represents an operation that accepts three input arguments and returns no result.
  * This is the three-arity specialization of {@link java.util.function.Consumer}.
- * Unlike most other functional interfaces, TriConsumer is expected to operate via side-effects.
- *
- * <p>This interface extends the Throwables.TriConsumer, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
+ * Unlike most other functional interfaces, {@code TriConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object)}.
  *
@@ -83,7 +79,7 @@ public interface TriConsumer<A, B, C> extends Throwables.TriConsumer<A, B, C, Ru
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code TriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default TriConsumer<A, B, C> andThen(final TriConsumer<? super A, ? super B, ? super C> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

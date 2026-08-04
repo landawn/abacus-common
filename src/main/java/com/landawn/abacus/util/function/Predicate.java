@@ -18,11 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * A functional interface that represents a predicate (boolean-valued function) of one argument.
- *
- * <p>This interface extends both {@link Throwables.Predicate} and {@link java.util.function.Predicate},
- * providing compatibility with the standard Java functional interfaces while adding exception
- * handling capabilities through the Throwables framework.
+ * Represents a predicate (boolean-valued function) of one argument.
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object)}.
  *
@@ -35,10 +31,6 @@ import com.landawn.abacus.util.cs;
 public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>, java.util.function.Predicate<T> { //NOSONAR
     /**
      * Evaluates this predicate on the given argument.
-     *
-     * <p>This method tests whether the input argument satisfies the condition
-     * represented by this predicate. It should return {@code true} if the input
-     * argument matches the predicate's criteria, {@code false} otherwise.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -57,10 +49,6 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     *
-     * <p>The returned predicate will return {@code true} when this predicate returns
-     * {@code false}, and vice versa. This is useful for inverting conditions without
-     * having to write a new predicate implementation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -99,7 +87,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default Predicate<T> and(final java.util.function.Predicate<? super T> other) throws IllegalArgumentException {
@@ -131,7 +119,7 @@ public interface Predicate<T> extends Throwables.Predicate<T, RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed {@code Predicate} that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default Predicate<T> or(final java.util.function.Predicate<? super T> other) throws IllegalArgumentException {

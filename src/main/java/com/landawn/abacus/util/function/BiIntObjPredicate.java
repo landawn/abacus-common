@@ -81,7 +81,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BiIntObjPredicate<T> and(final BiIntObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -106,7 +106,7 @@ public interface BiIntObjPredicate<T> extends Throwables.BiIntObjPredicate<T, Ru
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BiIntObjPredicate<T> or(final BiIntObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

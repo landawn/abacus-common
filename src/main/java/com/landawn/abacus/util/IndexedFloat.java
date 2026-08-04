@@ -15,21 +15,18 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable container that pairs a float value with its index position.
- * This class is useful for operations where both the floating-point value and its
- * original position need to be preserved, such as when sorting or filtering numeric
- * collections while maintaining knowledge of the original indices.
+ * Represents a primitive float value paired with an index position.
  *
  * <p>This class is a specialized version of {@code Indexed<Float>} for primitive float
- * values, providing better performance by avoiding boxing/unboxing overhead. It extends
- * {@link AbstractIndexed} and provides factory methods for creating instances with validated
- * non-negative indices.</p>
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
+ *
+ * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * IndexedFloat ifloat = IndexedFloat.of(3.14f, 2);
- * System.out.println(ifloat.value());   // prints 3.14
- * System.out.println(ifloat.index());   // prints 2
+ * IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 2);
+ * float value = indexedFloat.value();   // returns 3.14f
+ * int index = indexedFloat.index();     // returns 2
  * }</pre>
  *
  * @see Indexed
@@ -60,7 +57,7 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedFloat} instance with the specified value and index.
+     * Creates a new IndexedFloat instance with the specified value and index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -69,8 +66,8 @@ public final class IndexedFloat extends AbstractIndexed {
      *
      * @param value the float value to be associated with the index
      * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
-     * @return a new immutable {@code IndexedFloat} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @return a new immutable IndexedFloat instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedFloat of(final float value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -79,9 +76,9 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedFloat} instance with the specified value and long index.
-     * This method is useful when working with large arrays or collections where the index
-     * might exceed the range of an int.
+     * Creates a new IndexedFloat instance with the specified value and index.
+     *
+     * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -89,9 +86,9 @@ public final class IndexedFloat extends AbstractIndexed {
      * }</pre>
      *
      * @param value the float value to be associated with the index
-     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
-     * @return a new immutable {@code IndexedFloat} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedFloat instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedFloat of(final float value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -119,12 +116,11 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Returns a hash code value for this object. The hash code is computed
-     * using both the index and the value.
+     * Returns the hash code of this {@code IndexedFloat} instance.
      *
-     * <p>All bits of the index and the floating-point value contribute to the result.</p>
+     * <p>The hash code is computed from all bits of both the index and the value.</p>
      *
-     * @return a hash code value for this object
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -132,15 +128,24 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one.
-     * Two {@code IndexedFloat} objects are considered equal if they have
-     * the same index and the same value.
+     * Checks if this {@code IndexedFloat} instance is equal to another object.
      *
-     * <p>Float comparison is delegated to {@link N#equals(float, float)}.</p>
+     * <p>Two {@code IndexedFloat} instances are equal if they have the same index and value.
+     * Float comparison is delegated to {@link N#equals(float, float)}.</p>
      *
-     * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the {@code obj} argument;
-     *         {@code false} otherwise
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedFloat indexed1 = IndexedFloat.of(3.14f, 5);
+     * IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
+     * IndexedFloat indexed3 = IndexedFloat.of(2.71f, 5);
+     *
+     * indexed1.equals(indexed2);   // returns true
+     * indexed1.equals(indexed3);   // returns false
+     * }</pre>
+     *
+     * @param obj the object to compare with this {@code IndexedFloat} instance for equality
+     * @return {@code true} if the specified object is an {@code IndexedFloat} with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -148,14 +153,17 @@ public final class IndexedFloat extends AbstractIndexed {
     }
 
     /**
-     * Returns a string representation of this {@code IndexedFloat}.
-     * The string representation consists of the index in square brackets
-     * followed by an equals sign and the float value.
+     * Returns a string representation of this IndexedFloat instance.
      *
-     * <p>For example, an {@code IndexedFloat} with index 7 and value 3.14f
-     * would return the string {@code "[7]=3.14"}.</p>
+     * <p>The format is: {@code [index]=value}</p>
      *
-     * @return a string representation of this object
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedFloat indexed = IndexedFloat.of(3.14f, 7);
+     * System.out.println(indexed);   // prints [7]=3.14
+     * }</pre>
+     *
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

@@ -124,7 +124,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * @return a buffer containing the decoded bytes
      *         or {@code null} if {@code str} is {@code null},
      *         or an empty buffer if {@code str} is empty
-     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
+     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet.
      * @see #valueOf(Object)
      * @see #stringOf(ByteBuffer)
      */

@@ -2612,7 +2612,7 @@ public class NumbersTest extends TestBase {
         Assertions.assertFalse(Strings.isInteger("abc"));
     }
 
-    // Cover quickCheckForisCreatable with boundary cases
+    // Cover quickCheckForIsCreatable with boundary cases
     @Test
     public void testQuickCheckForisCreatable_Boundaries() {
         // Single character that is alphanumeric

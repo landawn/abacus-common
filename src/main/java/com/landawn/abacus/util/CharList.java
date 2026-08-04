@@ -369,7 +369,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public CharList(final int initialCapacity) throws IllegalArgumentException {
@@ -552,7 +552,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new CharList containing the range of values
-     * @throws IllegalArgumentException if {@code by} is zero
+     * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static CharList range(final char startInclusive, final char endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -595,7 +595,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new CharList containing the range of values
-     * @throws IllegalArgumentException if {@code by} is zero
+     * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static CharList rangeClosed(final char startInclusive, final char endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -616,7 +616,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param element the element to repeat
      * @param len the number of times to repeat the element
      * @return a new CharList containing the repeated element
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      */
     public static CharList repeat(final char element, final int len) {
         return of(Array.repeat(element, len));
@@ -662,7 +662,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param endExclusive the maximum value (exclusive)
      * @param len the length of the list to create
      * @return a new CharList containing random char values within the specified range
-     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}.
      * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final char startInclusive, final char endExclusive, final int len) {
@@ -696,8 +696,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *                   or of length {@code Integer.MAX_VALUE}
      * @param len the length of the list to create
      * @return a new CharList containing randomly selected chars from the candidates
-     * @throws IllegalArgumentException if {@code candidates} is {@code null}, empty,
-     *         or has exactly {@code Integer.MAX_VALUE} elements
+     * @throws IllegalArgumentException if {@code candidates} is {@code null}, empty, or has exactly
+     *         {@code Integer.MAX_VALUE} elements.
      * @throws NegativeArraySizeException if {@code len} is negative
      */
     public static CharList random(final char[] candidates, final int len) {
@@ -1797,7 +1797,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param b the list to find common elements with this list
      * @return a new CharList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #intersection(char[])
      * @see #difference(CharList)
      * @see #symmetricDifference(CharList)
@@ -2635,7 +2635,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param rnd the source of randomness to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2739,7 +2739,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param step the step size between selected elements
      * @return a new CharList containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if {@code step} is 0
+     * @throws IllegalArgumentException if {@code step} is 0.
      * @see N#copyOfRange(char[], int, int, int)
      */
     @Override
@@ -2773,7 +2773,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a List containing the sublists, each of type CharList
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code chunkSize <= 0}
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<CharList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {

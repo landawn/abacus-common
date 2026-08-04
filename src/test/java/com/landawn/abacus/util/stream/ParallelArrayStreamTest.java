@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
+import java.util.stream.Collector.Characteristics;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
@@ -84,7 +85,8 @@ public class ParallelArrayStreamTest extends TestBase {
     @BeforeEach
     public void setUp() {
         stream = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
-        stringStream = Stream.of(TEST_STRING_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
+        stringStream = Stream.of(TEST_STRING_ARRAY)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build());
         executor = Executors.newFixedThreadPool(256);
     }
 
@@ -137,9 +139,11 @@ public class ParallelArrayStreamTest extends TestBase {
         final IllegalStateException actionFailure = new IllegalStateException("action failure");
         final IllegalArgumentException closeFailure = new IllegalArgumentException("close failure");
         final AtomicBoolean completionCalled = new AtomicBoolean();
-        final Stream<Integer> testStream = Stream.of(1, 2).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).onClose(() -> {
-            throw closeFailure;
-        });
+        final Stream<Integer> testStream = Stream.of(1, 2)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .onClose(() -> {
+                    throw closeFailure;
+                });
 
         final IllegalStateException thrown = assertThrows(IllegalStateException.class,
                 () -> testStream.forEach((Throwables.Consumer<Integer, IllegalStateException>) value -> {
@@ -154,7 +158,9 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     public void testParallelToJdkStreamCloseHandlerRunsOnce() {
         final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> source = Stream.of(1, 2, 3, 4).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> source = Stream.of(1, 2, 3, 4)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .onClose(closeCount::incrementAndGet);
         final java.util.stream.Stream<Integer> jdkStream = source.toJdkStream();
 
         jdkStream.close();
@@ -260,7 +266,8 @@ public class ParallelArrayStreamTest extends TestBase {
         @ValueSource(ints = { 1, 2, 4, 8 })
         @DisplayName("should work with different thread counts")
         public void testDifferentThreadCounts(int threadCount) {
-            Stream<Integer> streamWithThreads = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threadCount).build());
+            Stream<Integer> streamWithThreads = Stream.of(TEST_INTEGER_ARRAY)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threadCount).build());
 
             List<Integer> result = streamWithThreads.limit(5).toList();
 
@@ -363,7 +370,8 @@ public class ParallelArrayStreamTest extends TestBase {
     public void testFilterPreservesEncounterOrderForArraySplitStrategy() {
         final Integer[] source = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
-        try (Stream<Integer> local = Stream.of(source).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build())) {
+        try (Stream<Integer> local = Stream.of(source)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build())) {
             List<Integer> result = local.filter(x -> {
                 if ((x & 1) == 0) {
                     N.sleep(2);
@@ -458,7 +466,8 @@ public class ParallelArrayStreamTest extends TestBase {
     public void testMapPreservesEncounterOrderForArraySplitStrategy() {
         final Integer[] source = new Integer[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
-        try (Stream<Integer> local = Stream.of(source).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build())) {
+        try (Stream<Integer> local = Stream.of(source)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build())) {
             List<Integer> result = local.map(x -> {
                 if ((x & 1) == 0) {
                     N.sleep(2);
@@ -573,7 +582,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToChar_IteratorSplitStrategy_Parallel() {
-        char[] result = Stream.of("a", "b", "c", "d", "e").parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).mapToChar(s -> s.charAt(0)).sorted().toArray();
+        char[] result = Stream.of("a", "b", "c", "d", "e")
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .mapToChar(s -> s.charAt(0))
+                .sorted()
+                .toArray();
         assertEquals(5, result.length);
         assertEquals('a', result[0]);
         assertEquals('e', result[4]);
@@ -604,7 +617,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToByte_IteratorSplitStrategy_Parallel() {
-        byte[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).mapToByte(Integer::byteValue).sorted().toArray();
+        byte[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .mapToByte(Integer::byteValue)
+                .sorted()
+                .toArray();
         assertEquals(5, result.length);
         assertEquals((byte) 1, result[0]);
     }
@@ -634,7 +651,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToShort_IteratorSplitStrategy_Parallel() {
-        short[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).mapToShort(Integer::shortValue).sorted().toArray();
+        short[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .mapToShort(Integer::shortValue)
+                .sorted()
+                .toArray();
         assertEquals(5, result.length);
         assertEquals((short) 1, result[0]);
     }
@@ -652,7 +673,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToInt_Parallel() {
-        int[] result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build()).mapToInt(i -> i * 2).sorted().toArray();
+        int[] result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())
+                .mapToInt(i -> i * 2)
+                .sorted()
+                .toArray();
 
         assertEquals(10, result.length);
         assertEquals(2, result[0]);
@@ -661,7 +686,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToInt_IteratorSplitStrategy_Parallel() {
-        int[] result = Stream.of("a", "bb", "ccc").parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).mapToInt(String::length).sorted().toArray();
+        int[] result = Stream.of("a", "bb", "ccc")
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .mapToInt(String::length)
+                .sorted()
+                .toArray();
         assertEquals(3, result.length);
         assertEquals(1, result[0]);
         assertEquals(3, result[2]);
@@ -730,7 +759,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testMapToFloat_IteratorSplitStrategy_Parallel() {
-        float[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).mapToFloat(Integer::floatValue).sorted().toArray();
+        float[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .mapToFloat(Integer::floatValue)
+                .sorted()
+                .toArray();
         assertEquals(5, result.length);
         assertEquals(1.0f, result[0], 0.001f);
     }
@@ -780,7 +813,11 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testFlatmapCollection_IteratorSplitStrategy() {
-        List<Integer> result = Stream.of(1, 2, 3, 4).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(2).build()).flatmap(x -> Arrays.asList(x, -x)).sorted().toList();
+        List<Integer> result = Stream.of(1, 2, 3, 4)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(2).build())
+                .flatmap(x -> Arrays.asList(x, -x))
+                .sorted()
+                .toList();
 
         assertEquals(Arrays.asList(-4, -3, -2, -1, 1, 2, 3, 4), result);
     }
@@ -1071,7 +1108,10 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     public void testOnEach_IteratorSplitStrategy() {
         AtomicInteger counter = new AtomicInteger(0);
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).onEach(x -> counter.incrementAndGet()).toList();
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .onEach(x -> counter.incrementAndGet())
+                .toList();
         assertEquals(5, result.size());
         assertEquals(5, counter.get());
     }
@@ -1141,7 +1181,9 @@ public class ParallelArrayStreamTest extends TestBase {
         {
             List<Integer> results = new ArrayList<>();
 
-            Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build()).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+            Stream.of(TEST_INTEGER_ARRAY)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build())
+                    .forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
             assertHaveSameElements(N.cycle(N.toList(TEST_INTEGER_ARRAY), 2), results);
 
@@ -1199,7 +1241,9 @@ public class ParallelArrayStreamTest extends TestBase {
         List<Integer> collected = java.util.Collections.synchronizedList(new ArrayList<>());
         AtomicBoolean completed = new AtomicBoolean(false);
 
-        Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build()).forEach(collected::add, () -> completed.set(true));
+        Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())
+                .forEach(collected::add, () -> completed.set(true));
 
         assertEquals(10, collected.size());
         assertTrue(completed.get());
@@ -1209,7 +1253,9 @@ public class ParallelArrayStreamTest extends TestBase {
     public void testForEach_WithOnComplete_IteratorSplitStrategy() {
         AtomicInteger sum = new AtomicInteger(0);
         AtomicBoolean completed = new AtomicBoolean(false);
-        Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).forEach(sum::addAndGet, () -> completed.set(true));
+        Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build())
+                .forEach(sum::addAndGet, () -> completed.set(true));
         assertEquals(15, sum.get());
         assertTrue(completed.get());
     }
@@ -1251,21 +1297,30 @@ public class ParallelArrayStreamTest extends TestBase {
         {
             List<String> results = new ArrayList<>();
 
-            Stream.of(TEST_INTEGER_ARRAY).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build()).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            Stream.of(TEST_INTEGER_ARRAY)
+                    .limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build())
+                    .forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
         }
         {
             List<String> results = new ArrayList<>();
 
-            Stream.of(TEST_INTEGER_ARRAY).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build()).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            Stream.of(TEST_INTEGER_ARRAY)
+                    .limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build())
+                    .forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
         }
         {
             List<String> results = new ArrayList<>();
 
-            Stream.of(TEST_INTEGER_ARRAY).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build()).forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            Stream.of(TEST_INTEGER_ARRAY)
+                    .limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build())
+                    .forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
         }
@@ -1377,13 +1432,15 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     @DisplayName("groupTo() and flatGroupTo() should merge repeated keys with ITERATOR splitStrategy")
     public void testIteratorSplitStrategyGroupToAndFlatGroupTo_RepeatedKeys() {
-        Stream<String> groupedStream = Stream.of("ant", "ape", "bat", "bee", "apple").parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<String> groupedStream = Stream.of("ant", "ape", "bat", "bee", "apple")
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         Map<String, List<Integer>> grouped = groupedStream.groupTo(s -> s.substring(0, 1), String::length, Collectors.toList(), HashMap::new);
 
         assertHaveSameElements(Arrays.asList(3, 3, 5), grouped.get("a"));
         assertHaveSameElements(Arrays.asList(3, 3), grouped.get("b"));
 
-        Stream<String> flatGroupedStream = Stream.of("ant", "ape", "bat", "bee", "apple").parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<String> flatGroupedStream = Stream.of("ant", "ape", "bat", "bee", "apple")
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         Map<Character, List<String>> flatGrouped = flatGroupedStream.flatGroupTo(s -> Arrays.asList(s.charAt(0), Character.toUpperCase(s.charAt(0))),
                 (key, value) -> key + ":" + value, Collectors.toList(), HashMap::new);
 
@@ -1457,10 +1514,13 @@ public class ParallelArrayStreamTest extends TestBase {
     // Covers delayed-match ordering for iterator-based reduce/find terminal operations.
     @Test
     public void testIteratorSplitStrategyReduceAndFindOperations_DelayedMatchOrdering() {
-        Stream<Integer> reducingStream = Stream.of(21, 2, 4, 7, 6, 11, 8, 13).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<Integer> reducingStream = Stream.of(21, 2, 4, 7, 6, 11, 8, 13)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         assertEquals(Integer.valueOf(72), reducingStream.reduce(0, Integer::sum, Integer::sum));
 
-        Optional<Integer> reduced = Stream.of(21, 2, 4).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build()).reduce(Integer::sum);
+        Optional<Integer> reduced = Stream.of(21, 2, 4)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build())
+                .reduce(Integer::sum);
         assertTrue(reduced.isPresent());
         assertEquals(Integer.valueOf(27), reduced.get());
 
@@ -1486,17 +1546,19 @@ public class ParallelArrayStreamTest extends TestBase {
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21 || anyMatch.get() == 7 || anyMatch.get() == 11 || anyMatch.get() == 13);
 
-        Optional<Integer> lastMatch = Stream.of(21, 2, 4, 7, 6, 11, 8, 13).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build()).findLast(i -> {
-            if (i == 13) {
-                try {
-                    Thread.sleep(10L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        Optional<Integer> lastMatch = Stream.of(21, 2, 4, 7, 6, 11, 8, 13)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build())
+                .findLast(i -> {
+                    if (i == 13) {
+                        try {
+                            Thread.sleep(10L);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
 
-            return i > 5 && (i & 1) == 1;
-        });
+                    return i > 5 && (i & 1) == 1;
+                });
         assertTrue(lastMatch.isPresent());
         assertEquals(Integer.valueOf(13), lastMatch.get());
     }
@@ -1562,7 +1624,8 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     @DisplayName("min() should return empty for empty stream")
     public void testMinEmpty() {
-        Stream<Integer> emptyStream = Stream.of(new Integer[0]).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).executor(executor).build());
+        Stream<Integer> emptyStream = Stream.of(new Integer[0])
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).executor(executor).build());
 
         Optional<Integer> result = emptyStream.min(Integer::compareTo);
 
@@ -1583,7 +1646,8 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     @DisplayName("max() should return empty for empty stream")
     public void testMaxEmpty() {
-        Stream<Integer> emptyStream = Stream.of(new Integer[0]).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).executor(executor).build());
+        Stream<Integer> emptyStream = Stream.of(new Integer[0])
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).executor(executor).build());
 
         Optional<Integer> result = emptyStream.max(Integer::compareTo);
 
@@ -1594,7 +1658,8 @@ public class ParallelArrayStreamTest extends TestBase {
     @DisplayName("maxAll() should find all maximum elements")
     public void testMaxAll() {
         Integer[] arrayWithMaxDuplicates = { 1, 3, 5, 5, 2, 5, 4 };
-        Stream<Integer> streamWithMaxDuplicates = Stream.of(arrayWithMaxDuplicates).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build());
+        Stream<Integer> streamWithMaxDuplicates = Stream.of(arrayWithMaxDuplicates)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build());
 
         List<Integer> result = streamWithMaxDuplicates.maxAll(Integer::compareTo);
 
@@ -1624,13 +1689,16 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testAnyMatchAllMatchNoneMatch_IteratorSplitStrategy() {
-        Stream<Integer> s1 = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<Integer> s1 = Stream.of(TEST_INTEGER_ARRAY)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         assertTrue(s1.anyMatch(x -> x > 9));
 
-        Stream<Integer> s2 = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<Integer> s2 = Stream.of(TEST_INTEGER_ARRAY)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         assertFalse(s2.allMatch(x -> x % 2 == 0));
 
-        Stream<Integer> s3 = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        Stream<Integer> s3 = Stream.of(TEST_INTEGER_ARRAY)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
         assertTrue(s3.noneMatch(x -> x > 100));
     }
 
@@ -1720,7 +1788,9 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testHasMatchCountBetween_SequentialFallback() {
-        boolean result = Stream.of(1, 2, 3).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build()).hasMatchCountBetween(1, 2, i -> i > 1);
+        boolean result = Stream.of(1, 2, 3)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())
+                .hasMatchCountBetween(1, 2, i -> i > 1);
         assertTrue(result); // 2 matches (2,3), between 1 and 2
     }
 
@@ -2022,7 +2092,10 @@ public class ParallelArrayStreamTest extends TestBase {
         List<Integer> b = Arrays.asList(10, 20, 30);
         List<Integer> c = Arrays.asList(100, 200);
 
-        List<Integer> result = Stream.of(a).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build()).zipWith(b, c, 0, 0, 0, (x, y, z) -> x + y + z).toList();
+        List<Integer> result = Stream.of(a)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())
+                .zipWith(b, c, 0, 0, 0, (x, y, z) -> x + y + z)
+                .toList();
 
         assertEquals(5, result.size());
         // First element: 1+10+100=111
@@ -2063,7 +2136,8 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testSequential_ReturnsNonParallelStream() {
-        Stream<Integer> parallelStream = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build());
+        Stream<Integer> parallelStream = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build());
         assertTrue(parallelStream.isParallel());
 
         Stream<Integer> seqStream = parallelStream.sequential();
@@ -2107,7 +2181,10 @@ public class ParallelArrayStreamTest extends TestBase {
     @Test
     @DisplayName("should handle subrange of array")
     public void testSubrange() {
-        Stream<Integer> subStream = Stream.of(TEST_INTEGER_ARRAY).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build()).skip(2).limit(3);
+        Stream<Integer> subStream = Stream.of(TEST_INTEGER_ARRAY)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build())
+                .skip(2)
+                .limit(3);
 
         List<Integer> result = subStream.toList();
 
@@ -2442,14 +2519,38 @@ public class ParallelArrayStreamTest extends TestBase {
         }, (left, right) -> {
             left.addAll(right);
             return left;
-        }, Collector.Characteristics.CONCURRENT);
+        }, Characteristics.CONCURRENT);
 
-        try (Stream<Integer> local = Stream.rangeClosed(1, 100).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())) {
+        try (Stream<Integer> local = Stream.rangeClosed(1, 100)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build())) {
             final List<Integer> result = local.collect(concurrentOrderedCollector);
 
             assertTrue(supplierCount.get() > 1);
             assertHaveSameElements(Stream.rangeClosed(1, 100).toList(), result);
         }
+    }
+
+    @Test
+    public void testConcurrentOrderedCollectorUsesIndependentContainers_2() {
+        final AtomicInteger supplierCount = new AtomicInteger();
+        final Collector<Integer, ?, List<Integer>> concurrentOrderedCollector = Collector.of(() -> {
+            supplierCount.incrementAndGet();
+            return Collections.synchronizedList(new ArrayList<Integer>());
+        }, (list, value) -> {
+            if (value <= 50) {
+                N.sleep(1);
+            }
+
+            list.add(value);
+        }, (left, right) -> {
+            left.addAll(right);
+            return left;
+        }, Collector.Characteristics.CONCURRENT);
+
+        final List<Integer> result = Stream.rangeClosed(1, 100).toJdkStream().parallel().collect(concurrentOrderedCollector);
+
+        assertTrue(supplierCount.get() > 1);
+        assertHaveSameElements(Stream.rangeClosed(1, 100).toList(), result);
     }
 
     @Test
@@ -2782,8 +2883,8 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Test
     public void testCancelUncompletedThreadsIsPreserved() {
-        try (ParallelArrayStream<Integer> source = new ParallelArrayStream<>(new Integer[] { 1, 2, 3 }, 0, 3, false, null, testMaxThreadNum, SplitStrategy.ARRAY,
-                null, true, new ArrayList<>())) {
+        try (ParallelArrayStream<Integer> source = new ParallelArrayStream<>(new Integer[] { 1, 2, 3 }, 0, 3, false, null, testMaxThreadNum,
+                SplitStrategy.ARRAY, null, true, new ArrayList<>())) {
             assertTrue(source.cancelUncompletedThreads());
 
             try (Stream<Integer> mapped = source.map(Fn.identity())) {

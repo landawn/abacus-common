@@ -22,11 +22,12 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for HBaseColumn objects.
- * HBaseColumn represents a value with an associated version/timestamp, commonly used in HBase data modeling.
- * This class provides serialization and deserialization capabilities for HBaseColumn instances.
+ * Type handler for {@link HBaseColumn} objects.
+ * An {@code HBaseColumn} represents a value with an associated version/timestamp, commonly used in HBase data modeling.
+ * This class provides serialization and deserialization for {@code HBaseColumn} instances.
  *
- * @param <T> the type of value stored in the HBaseColumn
+ * @param <T> the type of value stored in the {@code HBaseColumn}
+ * @see HBaseColumn
  */
 @SuppressWarnings("java:S2160")
 public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
@@ -48,7 +49,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
 
     private static final String ESCAPED_VALUE_PREFIX = ENCODING_PREFIX + "V";
 
-    /** The type name constant for HBaseColumn type identification. */
+    /** The type name constant for HBaseColumn type identification, equal to {@code "HBaseColumn"}. */
     public static final String HBASE_COLUMN = "HBaseColumn";
 
     private final String declaringName;
@@ -192,7 +193,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @param str the string to parse in {@code "version:value"} format; may be {@code null} or empty
      * @return the deserialized column value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the string has no {@code ':'} separator
+     * @throws IllegalArgumentException if the string has no {@code ':'} separator.
      * @throws NumberFormatException if the version prefix before the first {@code ':'} is not a valid {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(HBaseColumn)

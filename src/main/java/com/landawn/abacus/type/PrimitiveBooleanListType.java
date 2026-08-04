@@ -110,7 +110,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a BooleanList created from the parsed values, or {@code null} if input is {@code null} or blank
+     * @return a BooleanList created from the parsed values, or {@code null} if input is {@code null} or empty
      * @see #valueOf(Object)
      * @see #stringOf(BooleanList)
      */

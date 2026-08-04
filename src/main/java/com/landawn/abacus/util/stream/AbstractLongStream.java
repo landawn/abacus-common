@@ -1046,7 +1046,11 @@ abstract class AbstractLongStream extends LongStream {
      * @return a new LongStream backed by the transformed array
      */
     private LongStream lazyLoad(final UnaryOperator<long[]> op, final boolean sorted) {
-        return LongStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(LongIterator.defer(() -> {
+            final long[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? LongIterator.empty() : LongIterator.of(a);
+        }), sorted);
     }
 
     @Override

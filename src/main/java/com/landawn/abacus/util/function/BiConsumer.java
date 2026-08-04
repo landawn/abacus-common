@@ -39,8 +39,7 @@ import com.landawn.abacus.util.cs;
 public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeException>, java.util.function.BiConsumer<T, U> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
-     * This method is expected to operate via side-effects, modifying the state of the arguments
-     * or external state.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -75,7 +74,7 @@ public interface BiConsumer<T, U> extends Throwables.BiConsumer<T, U, RuntimeExc
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code BiConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default BiConsumer<T, U> andThen(final java.util.function.BiConsumer<? super T, ? super U> after) throws IllegalArgumentException {

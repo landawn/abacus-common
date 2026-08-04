@@ -22,35 +22,41 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface BytePredicate extends Throwables.BytePredicate<RuntimeException> { //NOSONAR
     /**
-     * A predicate that always evaluates to {@code true}, regardless of the input byte value.
+     * A predicate that always returns {@code true} regardless of the input value.
      */
     BytePredicate ALWAYS_TRUE = value -> true;
     /**
-     * A predicate that always evaluates to {@code false}, regardless of the input byte value.
+     * A predicate that always returns {@code false} regardless of the input value.
      */
     BytePredicate ALWAYS_FALSE = value -> false;
     /**
-     * A predicate that tests if the byte value is equal to zero.
+     * A predicate that tests if a byte value is zero.
+     * Returns {@code true} if and only if the input value is 0.
      */
     BytePredicate IS_ZERO = value -> value == 0;
     /**
-     * A predicate that tests if the byte value is not equal to zero.
+     * A predicate that tests if a byte value is not zero.
+     * Returns {@code true} if and only if the input value is not 0.
      */
     BytePredicate NOT_ZERO = value -> value != 0;
     /**
-     * A predicate that tests if the byte value is positive (greater than zero).
+     * A predicate that tests if a byte value is positive.
+     * Returns {@code true} if and only if the input value is greater than 0.
      */
     BytePredicate IS_POSITIVE = value -> value > 0;
     /**
-     * A predicate that tests if the byte value is not positive (less than or equal to zero).
+     * A predicate that tests if a byte value is not positive.
+     * Returns {@code true} if and only if the input value is less than or equal to 0.
      */
     BytePredicate NOT_POSITIVE = value -> value <= 0;
     /**
-     * A predicate that tests if the byte value is negative (less than zero).
+     * A predicate that tests if a byte value is negative.
+     * Returns {@code true} if and only if the input value is less than 0.
      */
     BytePredicate IS_NEGATIVE = value -> value < 0;
     /**
-     * A predicate that tests if the byte value is not negative (greater than or equal to zero).
+     * A predicate that tests if a byte value is not negative.
+     * Returns {@code true} if and only if the input value is greater than or equal to 0.
      */
     BytePredicate NOT_NEGATIVE = value -> value >= 0;
 
@@ -70,8 +76,8 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
     boolean test(byte value);
 
     /**
-     * Returns the specified BytePredicate instance.
-     * This method is useful for type inference or when you need to explicitly cast a lambda expression.
+     * Returns the specified predicate instance.
+     * This method is useful for type inference in lambda expressions and method references.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -80,8 +86,8 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * }</pre>
      *
      * @param predicate the predicate to return
-     * @return the same predicate instance
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static BytePredicate of(final BytePredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
@@ -109,7 +115,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -120,7 +126,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BytePredicate and(final BytePredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -132,7 +138,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,7 +149,7 @@ public interface BytePredicate extends Throwables.BytePredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BytePredicate or(final BytePredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

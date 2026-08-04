@@ -108,8 +108,8 @@ public abstract class TypeReference<T> {
      * TypeReference<List<String>> ref = new TypeReference<List<String>>() {};
      * }</pre>
      *
-     * @throws IllegalArgumentException if a raw superclass loses the type information, the captured
-     *         type still contains an unresolved type variable, or the hierarchy is unsupported
+     * @throws IllegalArgumentException if a raw superclass loses the type information, the captured type still
+     *         contains an unresolved type variable, or the hierarchy is unsupported.
      * @throws IllegalStateException if the type cannot be resolved by TypeFactory
      */
     protected TypeReference() {
@@ -573,8 +573,8 @@ public abstract class TypeReference<T> {
          * TypeToken<List<String>> token = new TypeToken<List<String>>() {};
          * }</pre>
          *
-         * @throws IllegalArgumentException if a raw superclass loses the type information, the captured
-         *         type still contains an unresolved type variable, or the hierarchy is unsupported
+         * @throws IllegalArgumentException if a raw superclass loses the type information, the captured type still
+         *         contains an unresolved type variable, or the hierarchy is unsupported.
          * @throws IllegalStateException if the type cannot be resolved by TypeFactory
          * @see TypeReference#TypeReference()
          */

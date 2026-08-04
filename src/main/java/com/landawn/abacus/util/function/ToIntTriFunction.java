@@ -19,10 +19,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that accepts three arguments and produces an int-valued result.
  * This is the int-producing primitive specialization for a three-argument function.
  *
- * <p>This interface extends the Throwables.ToIntTriFunction, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(Object, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>

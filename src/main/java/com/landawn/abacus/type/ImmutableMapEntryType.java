@@ -34,12 +34,13 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for immutable Map.Entry objects.
- * This class provides serialization and deserialization capabilities for SimpleImmutableEntry instances,
- * which represent immutable key-value pairs. The entries are serialized as single-entry JSON objects.
+ * Type handler for immutable {@link java.util.Map.Entry} objects.
+ * This class provides serialization and deserialization for {@link AbstractMap.SimpleImmutableEntry}
+ * instances (immutable key-value pairs). Entries are serialized as single-entry JSON objects.
  *
  * @param <K> the key type
  * @param <V> the value type
+ * @see AbstractMap.SimpleImmutableEntry
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.SimpleImmutableEntry<K, V>> {
@@ -152,7 +153,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return a new immutable map entry, or {@code null} if the input is {@code null}, empty, or {@code "{}"}
-     * @throws IllegalArgumentException if the JSON object contains more than one entry
+     * @throws IllegalArgumentException if the JSON object contains more than one entry.
      * @see #valueOf(Object)
      * @see #stringOf(AbstractMap.SimpleImmutableEntry)
      */

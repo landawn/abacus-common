@@ -164,11 +164,11 @@ public class StreamTest extends AbstractTest {
         assertEquals(3, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).peek(it -> counter.increment()).transformB(s -> s.toList().stream());
+        Stream.range(0, 3).peek(it -> counter.increment()).transformViaJdkStream(s -> s.toList().stream());
         assertEquals(3, counter.value());
 
         counter.setValue(0);
-        Stream.range(0, 3).peek(it -> counter.increment()).transformB(s -> s.toList().stream(), true);
+        Stream.range(0, 3).peek(it -> counter.increment()).transformViaJdkStream(s -> s.toList().stream(), true);
         assertEquals(0, counter.value());
     }
 
@@ -176,8 +176,8 @@ public class StreamTest extends AbstractTest {
     public void test_transform() {
         assertDoesNotThrow(() -> {
             Stream.range(0, 3).transform(s -> s.mapToInt(ToIntFunction.UNBOX)).println();
-            Stream.range(0, 3).transformB(s -> s.limit(3)).println();
-            IntStream.range(0, 3).transformB(s -> s.limit(3)).println();
+            Stream.range(0, 3).transformViaJdkStream(s -> s.limit(3)).println();
+            IntStream.range(0, 3).transformViaJdkStream(s -> s.limit(3)).println();
             IntStream.range(0, 3).transform(s -> s.mapToObj(it -> it)).println();
         });
     }

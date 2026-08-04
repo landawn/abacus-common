@@ -260,7 +260,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     //-----------------------------------------------------------------------
 
     /**
-     * Checks whether the float value is the special NaN (Not a Number) value.
+     * Checks whether the float value is the special NaN (Not-a-Number) value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -437,7 +437,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
     }
 
     /**
-     * Returns the current value and then adds the specified delta.
+     * Returns the current value and then adds the specified delta to it.
      *
      * <p>This method is useful when you need to know the value before modification,
      * commonly used in delta calculations or state tracking.</p>

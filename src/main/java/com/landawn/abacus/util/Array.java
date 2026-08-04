@@ -295,7 +295,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param <T> the type of the array.
      * @param componentType the Class object representing the component type of the new array.
      * @param length the length of the new array.
-     * @return a new array of the specified component type and length.
+     * @return a new array of the specified component type and length; a shared, cached empty array may be returned when {@code length} is 0.
      * @throws NegativeArraySizeException if the specified length is negative.
      * @throws IllegalArgumentException if {@code componentType} is {@code null}.
      */
@@ -1319,7 +1319,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endExclusive the upper bound (exclusive) of the long array.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
-     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow detected).
+     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow
+     *         detected).
      */
     public static long[] range(long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
@@ -1477,7 +1478,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param endExclusive the upper bound (exclusive) of the integer array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent integer.
      * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
-     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
+     *         (overflow detected).
      */
     public static int[] range(int startInclusive, final int endExclusive, final int by) {
         if (by == 0) {
@@ -1509,7 +1511,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to, but not including, the <i>endExclusive</i> long integer.
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1522,7 +1523,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param endExclusive the upper bound (exclusive) of the long array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent long integer.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
-     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
+     *         (overflow detected).
      */
     public static long[] range(long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
@@ -1722,7 +1724,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param startInclusive the first long integer (inclusive) in the long array.
      * @param endInclusive the upper bound (inclusive) of the long array.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
-     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow detected).
+     * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow
+     *         detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
@@ -1892,7 +1895,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param endInclusive the upper bound (inclusive) of the integer array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent integer.
      * @return an integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
-     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
+     *         (overflow detected).
      */
     public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
         if (by == 0) {
@@ -1927,7 +1931,6 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
      * If start equals end, a single-element array containing that value is returned regardless of the step value.
-     * This method handles potential overflow scenarios using BigInteger for large ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1940,7 +1943,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param endInclusive the upper bound (inclusive) of the long array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent long integer.
      * @return a long array containing long integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
-     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE (overflow detected).
+     * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
+     *         (overflow detected).
      */
     public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
@@ -6618,7 +6622,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6671,7 +6676,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6724,7 +6730,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6776,7 +6783,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6828,7 +6836,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6880,7 +6889,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6932,7 +6942,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -6984,7 +6995,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
@@ -7042,7 +7054,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param a the two-dimensional array to be transposed. May be {@code null}.
      * @return the transposed two-dimensional array, whose component type is the component type of {@code a},
      *         or {@code null} if the input array is {@code null}.
-     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null} sub-array or sub-arrays of differing lengths).
+     * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
+     *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta

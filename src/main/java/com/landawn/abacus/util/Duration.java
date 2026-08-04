@@ -405,7 +405,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * }
      * }</pre>
      *
-     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
+     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.</p>
      *
      * @param start the start date, must not be {@code null}.
      * @param end the end date, must not be {@code null}.
@@ -460,7 +460,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * }
      * }</pre>
      *
-     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.
+     * <p><b>Time Zone:</b> Operates on UTC millisecond timestamps, unaffected by time zones.</p>
      *
      * @param start the start calendar, must not be {@code null}.
      * @param end the end calendar, must not be {@code null}.

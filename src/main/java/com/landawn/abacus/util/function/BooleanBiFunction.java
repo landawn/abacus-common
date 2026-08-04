@@ -19,7 +19,7 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts two {@code boolean}-valued arguments and produces a result.
- * This is the primitive type specialization of {@link BiFunction} for {@code boolean}.
+ * This is the primitive type specialization of {@link java.util.function.BiFunction} for {@code boolean}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(boolean, boolean)}.
  *
@@ -42,8 +42,8 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * String result = formatter.apply(true, false);   // Returns "AND: false, OR: true"
      * }</pre>
      *
-     * @param a the first function argument (boolean value)
-     * @param b the second function argument (boolean value)
+     * @param a the first function argument
+     * @param b the second function argument
      * @return the function result
      */
     @Override
@@ -63,7 +63,7 @@ public interface BooleanBiFunction<R> extends Throwables.BooleanBiFunction<R, Ru
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> BooleanBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

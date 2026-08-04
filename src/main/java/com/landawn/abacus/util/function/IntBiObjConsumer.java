@@ -72,7 +72,7 @@ public interface IntBiObjConsumer<T, U> extends Throwables.IntBiObjConsumer<T, U
      * @param after the operation to perform after this operation.
      * @return a composed {@code IntBiObjConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default IntBiObjConsumer<T, U> andThen(final IntBiObjConsumer<? super T, ? super U> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * Represents a function that accepts one argument and produces a result.
  * This is a functional interface whose functional method is {@link #apply(Object)}.
  *
- * <p>This interface extends both {@link Throwables.Function} and {@link java.util.function.Function},
- * providing compatibility with Java's standard functional interfaces while adding support for
- * the Throwables framework.</p>
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the function
@@ -37,9 +33,6 @@ import com.landawn.abacus.util.cs;
 public interface Function<T, R> extends Throwables.Function<T, R, RuntimeException>, java.util.function.Function<T, R> { //NOSONAR
     /**
      * Returns a function that always returns its input argument unchanged.
-     *
-     * <p>This method delegates to {@link Fn#identity()} to provide a consistent
-     * implementation across the framework.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -73,7 +66,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param before the function to apply before this function is applied
      * @return a composed {@code Function} that first applies the {@code before}
      *         function and then applies this function
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.Function)
      */
     @Override
@@ -102,7 +95,7 @@ public interface Function<T, R> extends Throwables.Function<T, R, RuntimeExcepti
      * @param after the function to apply after this function is applied
      * @return a composed {@code Function} that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(java.util.function.Function)
      */
     @Override

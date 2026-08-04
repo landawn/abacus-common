@@ -562,7 +562,7 @@ public final class HttpHeaders {
      * @param name the header name
      * @param value the header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return a new {@code HttpHeaders} instance containing the specified header
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      */
     public static HttpHeaders of(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
@@ -584,7 +584,7 @@ public final class HttpHeaders {
      * @param name2 the second header name
      * @param value2 the second header value
      * @return a new {@code HttpHeaders} instance containing the specified headers
-     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}.
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         N.checkArgNotNull(name1, cs.name1);
@@ -610,7 +610,7 @@ public final class HttpHeaders {
      * @param name3 the third header name
      * @param value3 the third header value
      * @return a new {@code HttpHeaders} instance containing the specified headers
-     * @throws IllegalArgumentException if {@code name1}, {@code name2}, or {@code name3} is {@code null}
+     * @throws IllegalArgumentException if {@code name1}, {@code name2}, or {@code name3} is {@code null}.
      */
     public static HttpHeaders of(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
             throws IllegalArgumentException {
@@ -645,7 +645,7 @@ public final class HttpHeaders {
      *
      * @param headers the map of header names to values
      * @return a new {@code HttpHeaders} instance backed by the provided map
-     * @throws IllegalArgumentException if {@code headers} is {@code null}
+     * @throws IllegalArgumentException if {@code headers} is {@code null}.
      */
     public static HttpHeaders wrap(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -669,7 +669,7 @@ public final class HttpHeaders {
      *
      * @param headers the map of header names to values to copy
      * @return a new {@code HttpHeaders} instance with a copy of the headers
-     * @throws IllegalArgumentException if {@code headers} is {@code null}
+     * @throws IllegalArgumentException if {@code headers} is {@code null}.
      */
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -1078,7 +1078,7 @@ public final class HttpHeaders {
      * @param name The header name
      * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      */
     public HttpHeaders set(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
@@ -1108,7 +1108,7 @@ public final class HttpHeaders {
      * @param name The header name
      * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      */
     public HttpHeaders setIfAbsent(final String name, final Object value) throws IllegalArgumentException {
         N.checkArgNotNull(name, cs.name);
@@ -1135,7 +1135,7 @@ public final class HttpHeaders {
      * @param m The map of header names to values; must not be {@code null}
      * @return This HttpHeaders instance for method chaining
      * @throws NullPointerException if {@code m} is {@code null}
-     * @throws IllegalArgumentException if any key in {@code m} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code m} is {@code null}.
      */
     public HttpHeaders setAll(final Map<String, ?> m) {
         for (final Map.Entry<String, ?> entry : m.entrySet()) {
@@ -1272,7 +1272,7 @@ public final class HttpHeaders {
      *
      * @param action The action to be performed for each header.
      * @throws java.util.ConcurrentModificationException if a header is added or removed while iterating
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final BiConsumer<? super String, ? super Object> action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);

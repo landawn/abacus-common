@@ -95,7 +95,7 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * @return a {@code MutableChar} containing the parsed character,
      *         or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
-     * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535]
+     * @throws IllegalArgumentException if the string represents an integer outside the valid char range [0, 65535].
      * @see #valueOf(Object)
      * @see #stringOf(MutableChar)
      */

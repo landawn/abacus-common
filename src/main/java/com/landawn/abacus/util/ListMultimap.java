@@ -608,7 +608,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0)).isEmpty();   // returns true
      *
      * // null keyExtractor throws
-     * ListMultimap.fromCollection(words, null);                                       // throws NullPointerException
+     * ListMultimap.fromCollection(words, null);                                       // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -655,7 +655,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * ListMultimap.fromCollection((List<String>) null, s -> s.charAt(0), String::length).isEmpty();   // returns true
      *
      * // null valueExtractor throws
-     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);                                     // throws NullPointerException
+     * ListMultimap.fromCollection(words, s -> s.charAt(0), null);                                     // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the elements in the collection
@@ -858,7 +858,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <E> the type of the elements in the list
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if {@code map} is {@code null}, or if any value in the map is {@code null} or an empty list
+     * @throws IllegalArgumentException if {@code map} is {@code null}, or if any value in the map is {@code null} or
+     *         an empty list.
      * @see #wrap(Map, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -911,8 +912,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
      * @param valueSupplier the supplier that creates a new list for each newly added key; must not be {@code null}
      * @return a new instance of ListMultimap backed by the provided map
-     * @throws IllegalArgumentException if {@code map} or {@code valueSupplier} is {@code null},
-     *         or if any value in the map is {@code null} or an empty list
+     * @throws IllegalArgumentException if {@code map} or {@code valueSupplier} is {@code null}, or if any value in
+     *         the map is {@code null} or an empty list.
      * @see #wrap(Map)
      */
     @Beta

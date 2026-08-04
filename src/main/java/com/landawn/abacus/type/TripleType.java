@@ -172,7 +172,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param str the string to parse
      * @return a Triple object containing the parsed values, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed value is not an array containing exactly three elements
+     * @throws IllegalArgumentException if the parsed value is not an array containing exactly three elements.
      * @see #valueOf(Object)
      * @see #stringOf(Triple)
      */

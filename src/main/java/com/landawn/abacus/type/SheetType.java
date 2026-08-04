@@ -44,11 +44,12 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * Constructs a SheetType with the specified type names for row keys, column keys, and values.
      * This constructor initializes a parameterized Sheet type handler for a specific combination
      * of row key, column key, and element types.
+     * This constructor is package-private and intended to be called only by the TypeFactory.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a SheetType for Sheet<String, String, Integer>
-     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * // Obtained via TypeFactory
+     * Type<Sheet<String, String, Integer>> type = TypeFactory.getType("Sheet<String, String, Integer>");
      * }</pre>
      *
      * @param rowKeyTypeName the type name for row keys
@@ -71,7 +72,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * Type<Sheet<String, String, Integer>> type = TypeFactory.getType("Sheet<String, String, Integer>");
      * String declName = type.declaringName();
      * // Returns: "Sheet<String, String, Integer>"
      * }</pre>
@@ -88,7 +89,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * Type<Sheet<String, String, Object>> type = TypeFactory.getType("Sheet<String, String, Object>");
      * Class<Sheet<String, String, Object>> clazz = type.javaType();
      * // clazz represents Sheet.class
      * }</pre>
@@ -106,7 +107,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, Integer, Double> type = new SheetType<>("String", "Integer", "Double");
+     * Type<Sheet<String, Integer, Double>> type = TypeFactory.getType("Sheet<String, Integer, Double>");
      * List<Type<?>> paramTypes = type.parameterTypes();
      * // paramTypes.get(0) is Type for String (row keys)
      * // paramTypes.get(1) is Type for Integer (column keys)
@@ -126,7 +127,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * Type<Sheet<String, String, Object>> type = TypeFactory.getType("Sheet<String, String, Object>");
      * boolean isParameterized = type.isParameterizedType();
      * // isParameterized is true
      * }</pre>
@@ -145,7 +146,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Object> type = new SheetType<>("String", "String", "Object");
+     * Type<Sheet<String, String, Object>> type = TypeFactory.getType("Sheet<String, String, Object>");
      * boolean serializable = type.isSerializable();
      * // serializable is false
      * }</pre>
@@ -180,7 +181,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * Type<Sheet<String, String, Integer>> type = TypeFactory.getType("Sheet<String, String, Integer>");
      * Sheet<String, String, Integer> sheet = Sheet.rows(List.of("row1"), List.of("col1", "col2"),
      *         new Integer[][] {{100, 200}});
      * String json = type.stringOf(sheet);
@@ -212,7 +213,7 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * SheetType<String, String, Integer> type = new SheetType<>("String", "String", "Integer");
+     * Type<Sheet<String, String, Integer>> type = TypeFactory.getType("Sheet<String, String, Integer>");
      * String json = "{\"rowKeySet\": [\"row1\"], \"columnKeySet\": [\"col1\", \"col2\"], \"columns\": {\"col1\": [100], \"col2\": [200]}}";
      * Sheet<String, String, Integer> sheet = type.valueOf(json);
      * // sheet contains the parsed structure

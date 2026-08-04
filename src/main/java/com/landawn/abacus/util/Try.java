@@ -212,8 +212,8 @@ public final class Try<T extends AutoCloseable> {
      * @param targetResource the resource to be managed by the Try instance.
      * @param finalAction the action to be executed after the resource is closed.
      * @return a new Try instance managing the specified target resource and final action.
-     * @throws IllegalArgumentException if the targetResource is {@code null}.
-     * @throws IllegalArgumentException if {@code finalAction} is {@code null}.
+     * @throws IllegalArgumentException if the targetResource is {@code null}, or if {@code finalAction} is
+     *         {@code null}.
      */
     public static <T extends AutoCloseable> Try<T> with(final T targetResource, final Runnable finalAction) throws IllegalArgumentException {
         N.checkArgNotNull(targetResource, cs.targetResource);

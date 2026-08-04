@@ -79,8 +79,8 @@ public class CharSummaryStatistics implements CharConsumer {
      * @param max the maximum {@code char} value
      * @param sum the sum of the numeric UTF-16 code-unit values of all recorded chars
      * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
-     *         {@link Character#MAX_VALUE}, {@link Character#MIN_VALUE}, and zero for min, max, and sum;
-     *         or if a non-empty state has {@code min} greater than {@code max}
+     *         {@link Character#MAX_VALUE}, {@link Character#MIN_VALUE}, and zero for min, max, and sum; or if a
+     *         non-empty state has {@code min} greater than {@code max}.
      */
     public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
         if (count < 0) {

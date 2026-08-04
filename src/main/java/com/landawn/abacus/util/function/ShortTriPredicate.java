@@ -18,8 +18,8 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a predicate (boolean-valued function) of three short-valued arguments.
- * This is the three-arity specialization of {@link java.util.function.Predicate} for short values.
+ * Represents a predicate (boolean-valued function) of three {@code short}-valued arguments.
+ * This is the three-arity specialization of {@link ShortPredicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(short, short, short)}.
  *
@@ -100,7 +100,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ShortTriPredicate and(final ShortTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -126,7 +126,7 @@ public interface ShortTriPredicate extends Throwables.ShortTriPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ShortTriPredicate or(final ShortTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

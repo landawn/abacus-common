@@ -153,7 +153,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param str the string to convert
      * @return an OptionalChar containing the parsed character value, or empty if the input is empty or null
      * @throws NumberFormatException if the string has more than one character and cannot be parsed as an integer
-     * @throws IllegalArgumentException if the string represents an integer outside the valid {@code char} range [0, 65535]
+     * @throws IllegalArgumentException if the string represents an integer outside the valid {@code char} range [0, 65535].
      * @see #valueOf(Object)
      * @see #stringOf(OptionalChar)
      */

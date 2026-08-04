@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts three char-valued arguments and returns no result.
+ * Represents an operation that accepts three {@code char}-valued arguments and returns no result.
  * This is the three-arity specialization of {@link CharConsumer}.
  * Unlike most other functional interfaces, {@code CharTriConsumer} is expected to operate via side-effects.
  *
@@ -67,7 +67,7 @@ public interface CharTriConsumer extends Throwables.CharTriConsumer<RuntimeExcep
      * @param after the operation to perform after this operation.
      * @return a composed {@code CharTriConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default CharTriConsumer andThen(final CharTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

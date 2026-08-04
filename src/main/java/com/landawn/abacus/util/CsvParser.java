@@ -490,7 +490,7 @@ public class CsvParser {
      *
      * @param nextLine the CSV line to be parsed; may be {@code null} (no values are written to {@code output})
      * @param output the pre-allocated array to receive parsed field values; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the line contains an unterminated quoted field
      * @throws ArrayIndexOutOfBoundsException if {@code output} is too small to hold all parsed fields
      */
@@ -663,7 +663,7 @@ public class CsvParser {
      * @param nextLine the current line
      * @param inQuotes {@code true} if the current context is quoted
      * @param i the current index in the line
-     * @return {@code true} if the following character is a quote, {@code false} otherwise
+     * @return {@code true} if the current context is quoted and the following character is a quote, {@code false} otherwise
      */
     private boolean isNextCharacterEscapedQuote(final String nextLine, final boolean inQuotes, final int i) {
         return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.
@@ -674,15 +674,15 @@ public class CsvParser {
     /**
      * Checks to see if the character after the current index in a String is an
      * escapable character.
-     * Meaning the next character is either a quotation character or the escape
-     * char if it's inside quotes.
+     * Meaning, when inside quotes, the next character is either a quotation character
+     * or the escape character.
      *
      * <p>Precondition: the current character is an escape.</p>
      *
      * @param nextLine the current line
      * @param inQuotes {@code true} if the current context is quoted
      * @param i the current index in the line
-     * @return {@code true} if the following character is escapable, {@code false} otherwise
+     * @return {@code true} if the current context is quoted and the following character is escapable, {@code false} otherwise
      */
     private boolean isNextCharacterEscapable(final String nextLine, final boolean inQuotes, final int i) {
         return inQuotes // we are in quotes; therefore, there can be escaped quotes in here.

@@ -2650,7 +2650,8 @@ public class ContinuableFutureTest extends AbstractTest {
     public void testThenDelay_isDone() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.completed("test").thenDelay(100, TimeUnit.MILLISECONDS);
 
-        assertTrue(future.isDone());
+        // The delay stage is incomplete until the post-completion delay elapses, even if upstream is done.
+        assertFalse(future.isDone());
         Thread.sleep(150);
         assertTrue(future.isDone());
         assertEquals("test", future.get());

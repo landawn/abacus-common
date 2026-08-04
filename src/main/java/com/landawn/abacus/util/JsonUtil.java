@@ -36,7 +36,7 @@ import com.landawn.abacus.type.Type;
  * JSON representations using the org.json library.
  *
  * <p>Supports conversion of {@link Map} and JavaBean objects to {@link JSONObject}, and of
- * collections, arrays (both primitive and object), and {@link Collection} instances to
+ * arrays (both primitive and object) and {@link Collection} instances to
  * {@link JSONArray}. The corresponding {@code unwrap} methods reconstruct Java objects from
  * {@link JSONObject} and {@link JSONArray} inputs.
  *
@@ -402,7 +402,7 @@ public final class JsonUtil {
      * @param jsonObject the {@link JSONObject} to convert
      * @return a {@code Map<String, Object>} containing all key-value pairs from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code jsonObject} is {@code null}
+     * @throws IllegalArgumentException if {@code jsonObject} is {@code null}.
      * @see #unwrap(JSONObject, Class)
      * @see #unwrap(JSONObject, Type)
      */
@@ -432,7 +432,8 @@ public final class JsonUtil {
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a {@link Map} or bean type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
+     *         {@link Map} or bean type.
      */
     public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -475,7 +476,8 @@ public final class JsonUtil {
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONObject}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a {@link Map} or bean type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
+     *         {@link Map} or bean type.
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
@@ -580,7 +582,7 @@ public final class JsonUtil {
      * @param jsonArray the {@link JSONArray} to convert
      * @return a {@link java.util.List} containing all elements from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code jsonArray} is {@code null}
+     * @throws IllegalArgumentException if {@code jsonArray} is {@code null}.
      * @see #toList(JSONArray, Class)
      */
     @SuppressWarnings("unchecked")
@@ -609,7 +611,8 @@ public final class JsonUtil {
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a collection or array type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
+     *         collection or array type.
      */
     public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
         N.checkArgNotNull(targetType, cs.targetType);
@@ -652,7 +655,8 @@ public final class JsonUtil {
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONArray}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not an array or collection type
+     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not an array
+     *         or collection type.
      */
     @SuppressWarnings("unchecked")
     public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
@@ -763,7 +767,7 @@ public final class JsonUtil {
      * @param elementClass the class of elements in the list
      * @return a {@link java.util.List} containing elements converted to {@code elementClass}
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}
+     * @throws IllegalArgumentException if either argument is {@code null}.
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
         N.checkArgNotNull(elementClass, cs.elementClass);
@@ -791,7 +795,7 @@ public final class JsonUtil {
      * @param elementType the {@link Type} of each element
      * @return a {@link java.util.List} containing elements converted to the specified type
      * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}
+     * @throws IllegalArgumentException if either argument is {@code null}.
      */
     public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
         N.checkArgNotNull(jsonArray, cs.jsonArray);

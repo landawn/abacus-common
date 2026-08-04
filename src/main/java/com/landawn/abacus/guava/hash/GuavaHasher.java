@@ -272,7 +272,7 @@ final class GuavaHasher implements Hasher {
      * @param off the start offset in the array
      * @param len the number of characters to add
      * @return this hasher instance
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative, or if {@code off + len > chars.length}
      */
     @Override
@@ -327,7 +327,7 @@ final class GuavaHasher implements Hasher {
      * @param instance the object instance to add
      * @param funnel the funnel that translates the object into bytes
      * @return this hasher instance
-     * @throws IllegalArgumentException if {@code funnel} is {@code null}
+     * @throws IllegalArgumentException if {@code funnel} is {@code null}.
      */
     @Override
     public <T> Hasher put(final T instance, final Funnel<? super T> funnel) throws IllegalArgumentException {

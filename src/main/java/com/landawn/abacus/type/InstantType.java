@@ -31,9 +31,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for java.time.Instant.
- * This class provides serialization, deserialization, and database access capabilities for Instant instances.
- * Instant represents a point on the time-line in UTC timezone. The default string format is ISO-8601 timestamp.
+ * Type handler for {@link java.time.Instant} values.
+ * This class provides serialization, deserialization, and database access for {@code Instant} instances.
+ * An {@code Instant} represents a point on the time-line in UTC; the default string form is an ISO-8601 timestamp.
+ *
+ * @see AbstractTemporalType
+ * @see java.time.Instant
  */
 public class InstantType extends AbstractTemporalType<Instant> {
 
@@ -41,8 +44,8 @@ public class InstantType extends AbstractTemporalType<Instant> {
     public static final String INSTANT = Instant.class.getSimpleName();
 
     /**
-     * Package-private constructor for InstantType.
-     * This constructor is called by the TypeFactory to create Instant type instances.
+     * Package-private constructor for {@code InstantType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     InstantType() {
         super(INSTANT);
@@ -82,7 +85,9 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * Converts an arbitrary object to an {@link Instant} instance.
      * Supported conversions:
      * <ul>
+     *   <li>{@link Instant}: returned unchanged</li>
      *   <li>{@link Number}: treated as milliseconds since the epoch</li>
+     *   <li>{@link java.util.Date} and {@link java.util.Calendar}: converted from their epoch-millisecond value</li>
      *   <li>{@code null}: returns {@code null}</li>
      *   <li>Any other type: converted to its string representation, then parsed via {@link #valueOf(String)}</li>
      * </ul>
@@ -92,11 +97,19 @@ public class InstantType extends AbstractTemporalType<Instant> {
      */
     @Override
     public Instant valueOf(final Object obj) {
-        if (obj instanceof Number) {
+        if (obj == null) {
+            return null;
+        } else if (obj instanceof Instant instant) {
+            return instant;
+        } else if (obj instanceof Number) {
             return Instant.ofEpochMilli(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date date) {
+            return Instant.ofEpochMilli(date.getTime());
+        } else if (obj instanceof java.util.Calendar cal) {
+            return Instant.ofEpochMilli(cal.getTimeInMillis());
         }
 
-        return obj == null ? null : valueOf(N.stringOf(obj));
+        return valueOf(N.stringOf(obj));
     }
 
     /**

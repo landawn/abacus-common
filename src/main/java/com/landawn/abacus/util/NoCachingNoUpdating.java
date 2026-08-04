@@ -49,11 +49,10 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * elements are not cloned.</p>
  *
  * <p><b>Callback contract:</b> A {@code null} collection supplier, or a {@code null} function or
- * consumer passed to {@code apply}/{@code accept}, causes {@link NullPointerException} even for
- * empty inputs; a supplier that returns {@code null} causes {@link IllegalArgumentException}.
- * A {@code null} {@code foreach} action throws {@link NullPointerException} only when an element
- * is delivered to it, so for an empty input the call is a no-op. Functions passed to {@code apply}
- * may themselves return {@code null}; that result is returned unchanged.</p>
+ * consumer passed to {@code apply}/{@code accept}/{@code foreach}, causes
+ * {@link IllegalArgumentException} even for empty inputs; a supplier that returns {@code null}
+ * also causes {@link IllegalArgumentException}. Functions passed to {@code apply} may themselves
+ * return {@code null}; that result is returned unchanged.</p>
  *
  * <p><b>Numeric contract:</b> Numeric {@code sum()} and {@code average()} methods return zero for an
  * empty array, while {@code min()} and {@code max()} reject an empty array. Integral sums returning
@@ -145,7 +144,7 @@ public interface NoCachingNoUpdating {
          * The array must not be {@code null}.
          *
          * @param a the array to wrap
-         * @throws IllegalArgumentException if the array is {@code null}
+         * @throws IllegalArgumentException if the array is {@code null}.
          */
         protected DisposableArray(final T[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -165,7 +164,7 @@ public interface NoCachingNoUpdating {
          * @param componentType the class of the array elements
          * @param len the length of the array; must be non-negative
          * @return a new DisposableArray instance backed by a freshly allocated array
-         * @throws IllegalArgumentException if {@code componentType} is {@code null} or {@code len} is negative
+         * @throws IllegalArgumentException if {@code componentType} is {@code null} or {@code len} is negative.
          */
         public static <T> DisposableArray<T> create(final Class<T> componentType, final int len) {
             if (len < 0) {
@@ -190,7 +189,7 @@ public interface NoCachingNoUpdating {
          * @param <T> the type of elements in the array
          * @param a the array to wrap; must not be {@code null}
          * @return a new DisposableArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static <T> DisposableArray<T> wrap(final T[] a) {
             return new DisposableArray<>(a);
@@ -251,7 +250,7 @@ public interface NoCachingNoUpdating {
          *               otherwise a new array of the same runtime type is allocated
          * @return an array containing the elements; the supplied {@code target} if it was large
          *         enough and is not the wrapped backing array, otherwise a newly allocated array
-         * @throws IllegalArgumentException if {@code target} is {@code null}
+         * @throws IllegalArgumentException if {@code target} is {@code null}.
          */
         @SuppressWarnings("unchecked")
         public <A> A[] toArray(A[] target) throws IllegalArgumentException {
@@ -351,7 +350,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -556,6 +555,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableObjArray wrapping the specified Object array.
          *
          * @param a the Object array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableObjArray(final Object[] a) {
             super(a);
@@ -574,7 +574,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableObjArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableObjArray create(final int len) {
             if (len < 0) {
@@ -619,7 +619,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the Object array to wrap; must not be {@code null}
          * @return a new DisposableObjArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableObjArray wrap(final Object[] a) {
             return new DisposableObjArray(a);
@@ -652,6 +652,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableBooleanArray wrapping the specified boolean array.
          *
          * @param a the boolean array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableBooleanArray(final boolean[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -672,7 +673,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableBooleanArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableBooleanArray create(final int len) {
             if (len < 0) {
@@ -695,7 +696,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the boolean array to wrap; must not be {@code null}
          * @return a new DisposableBooleanArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableBooleanArray wrap(final boolean[] a) {
             return new DisposableBooleanArray(a);
@@ -811,7 +812,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Boolean>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -995,6 +996,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableCharArray wrapping the specified char array.
          *
          * @param a the char array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableCharArray(final char[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -1015,7 +1017,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableCharArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableCharArray create(final int len) {
             if (len < 0) {
@@ -1038,7 +1040,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the char array to wrap; must not be {@code null}
          * @return a new DisposableCharArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableCharArray wrap(final char[] a) {
             return new DisposableCharArray(a);
@@ -1155,7 +1157,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Character>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -1221,7 +1223,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public char min() {
             return N.min(a);
@@ -1240,7 +1242,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public char max() {
             return N.max(a);
@@ -1416,6 +1418,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableByteArray wrapping the specified byte array.
          *
          * @param a the byte array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableByteArray(final byte[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -1436,7 +1439,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableByteArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableByteArray create(final int len) {
             if (len < 0) {
@@ -1459,7 +1462,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the byte array to wrap; must not be {@code null}
          * @return a new DisposableByteArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableByteArray wrap(final byte[] a) {
             return new DisposableByteArray(a);
@@ -1575,7 +1578,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Byte>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -1636,7 +1639,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public byte min() {
             return N.min(a);
@@ -1654,7 +1657,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public byte max() {
             return N.max(a);
@@ -1830,6 +1833,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableShortArray wrapping the specified short array.
          *
          * @param a the short array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableShortArray(final short[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -1850,7 +1854,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableShortArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableShortArray create(final int len) {
             if (len < 0) {
@@ -1873,7 +1877,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the short array to wrap; must not be {@code null}
          * @return a new DisposableShortArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableShortArray wrap(final short[] a) {
             return new DisposableShortArray(a);
@@ -1989,7 +1993,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Short>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -2050,7 +2054,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public short min() {
             return N.min(a);
@@ -2068,7 +2072,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public short max() {
             return N.max(a);
@@ -2245,6 +2249,7 @@ public interface NoCachingNoUpdating {
          * Constructs a DisposableIntArray wrapping the specified int array.
          *
          * @param a the int array to wrap; must not be {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         protected DisposableIntArray(final int[] a) {
             N.checkArgNotNull(a, cs.a);
@@ -2265,7 +2270,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableIntArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableIntArray create(final int len) {
             if (len < 0) {
@@ -2288,7 +2293,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the int array to wrap; must not be {@code null}
          * @return a new DisposableIntArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableIntArray wrap(final int[] a) {
             return new DisposableIntArray(a);
@@ -2404,7 +2409,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Integer>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -2465,7 +2470,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public int min() {
             return N.min(a);
@@ -2483,7 +2488,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public int max() {
             return N.max(a);
@@ -2679,7 +2684,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableLongArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableLongArray create(final int len) {
             if (len < 0) {
@@ -2702,7 +2707,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the long array to wrap; must not be {@code null}
          * @return a new DisposableLongArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableLongArray wrap(final long[] a) {
             return new DisposableLongArray(a);
@@ -2818,7 +2823,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Long>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -2879,7 +2884,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public long min() {
             return N.min(a);
@@ -2897,7 +2902,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public long max() {
             return N.max(a);
@@ -3093,7 +3098,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableFloatArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableFloatArray create(final int len) {
             if (len < 0) {
@@ -3116,7 +3121,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the float array to wrap; must not be {@code null}
          * @return a new DisposableFloatArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableFloatArray wrap(final float[] a) {
             return new DisposableFloatArray(a);
@@ -3232,7 +3237,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Float>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -3292,7 +3297,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public float min() {
             return N.min(a);
@@ -3310,7 +3315,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public float max() {
             return N.max(a);
@@ -3507,7 +3512,7 @@ public interface NoCachingNoUpdating {
          *
          * @param len the length of the array; must be non-negative
          * @return a new DisposableDoubleArray instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static DisposableDoubleArray create(final int len) {
             if (len < 0) {
@@ -3530,7 +3535,7 @@ public interface NoCachingNoUpdating {
          *
          * @param a the double array to wrap; must not be {@code null}
          * @return a new DisposableDoubleArray wrapping the given array
-         * @throws IllegalArgumentException if {@code a} is {@code null}
+         * @throws IllegalArgumentException if {@code a} is {@code null}.
          */
         public static DisposableDoubleArray wrap(final double[] a) {
             return new DisposableDoubleArray(a);
@@ -3646,7 +3651,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing the boxed array elements
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<Double>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -3706,7 +3711,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the minimum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public double min() {
             return N.min(a);
@@ -3724,7 +3729,7 @@ public interface NoCachingNoUpdating {
          * }</pre>
          *
          * @return the maximum value
-         * @throws IllegalArgumentException if the array is empty
+         * @throws IllegalArgumentException if the array is empty.
          */
         public double max() {
             return N.max(a);
@@ -3924,7 +3929,7 @@ public interface NoCachingNoUpdating {
          * @param <T> the type of elements in the deque
          * @param len the initial capacity of the deque; must be non-negative
          * @return a new DisposableDeque instance
-         * @throws IllegalArgumentException if {@code len} is negative
+         * @throws IllegalArgumentException if {@code len} is negative.
          */
         public static <T> DisposableDeque<T> create(final int len) {
             if (len < 0) {
@@ -3949,7 +3954,7 @@ public interface NoCachingNoUpdating {
          * @param <T> the type of elements in the deque
          * @param deque the deque to wrap; must not be {@code null}
          * @return a new DisposableDeque wrapping the given deque
-         * @throws IllegalArgumentException if {@code deque} is {@code null}
+         * @throws IllegalArgumentException if {@code deque} is {@code null}.
          */
         public static <T> DisposableDeque<T> wrap(final Deque<T> deque) {
             return new DisposableDeque<>(deque);
@@ -4088,7 +4093,7 @@ public interface NoCachingNoUpdating {
          * @param <C> the type of the collection to create
          * @param supplier a function that creates a new collection instance with the specified capacity
          * @return a new collection containing all elements from the deque
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} returns {@code null}.
          */
         public <C extends Collection<T>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -4217,7 +4222,7 @@ public interface NoCachingNoUpdating {
     /**
      * A wrapper class for Map.Entry that enforces no-caching and no-updating semantics.
      * This class provides a read-only view of a Map.Entry. The entry itself should never
-     * be cached, and setValue() is not supported.
+     * be cached, and {@code setValue()} is not supported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4258,7 +4263,7 @@ public interface NoCachingNoUpdating {
          * @param <V> the type of the value
          * @param entry the Map.Entry to wrap
          * @return a new DisposableEntry wrapping the given entry
-         * @throws IllegalArgumentException if the entry is {@code null}
+         * @throws IllegalArgumentException if the entry is {@code null}.
          */
         public static <K, V> DisposableEntry<K, V> wrap(final Map.Entry<K, V> entry) throws IllegalArgumentException {
             N.checkArgNotNull(entry, cs.entry);
@@ -4496,7 +4501,7 @@ public interface NoCachingNoUpdating {
          * @param <R> the type of the right element
          * @param p the Pair to wrap
          * @return a new DisposablePair wrapping the given pair
-         * @throws IllegalArgumentException if the pair is {@code null}
+         * @throws IllegalArgumentException if the pair is {@code null}.
          */
         public static <L, R> DisposablePair<L, R> wrap(final Pair<L, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.pair);
@@ -4675,7 +4680,7 @@ public interface NoCachingNoUpdating {
          * @param <R> the type of the right element
          * @param p the Triple to wrap
          * @return a new DisposableTriple wrapping the given triple
-         * @throws IllegalArgumentException if the triple is {@code null}
+         * @throws IllegalArgumentException if the triple is {@code null}.
          */
         public static <L, M, R> DisposableTriple<L, M, R> wrap(final Triple<L, M, R> p) throws IllegalArgumentException {
             N.checkArgNotNull(p, cs.triple);

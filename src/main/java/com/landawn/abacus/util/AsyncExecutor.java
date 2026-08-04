@@ -135,9 +135,9 @@ public class AsyncExecutor {
      * @param maxThreadPoolSize the maximum number of threads to allow in the pool; if less than {@code coreThreadPoolSize}, it is raised to {@code coreThreadPoolSize}
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
      * @param unit the time unit for the keepAliveTime argument
-     * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is negative,
-     *         if {@code coreThreadPoolSize} and {@code maxThreadPoolSize} are both zero,
-     *         if {@code keepAliveTime} is negative, or if {@code unit} is {@code null}.
+     * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is
+     *         negative, if {@code coreThreadPoolSize} and {@code maxThreadPoolSize} are both zero, if
+     *         {@code keepAliveTime} is negative, or if {@code unit} is {@code null}.
      */
     public AsyncExecutor(final int coreThreadPoolSize, final int maxThreadPoolSize, final long keepAliveTime, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -175,7 +175,7 @@ public class AsyncExecutor {
      * }</pre>
      *
      * @param executor the Executor to be used for executing tasks
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public AsyncExecutor(final Executor executor) {
         this(getCorePoolSize(checkExecutor(executor)), getMaximumPoolSize(executor), getKeepAliveTime(executor), TimeUnit.MILLISECONDS);
@@ -239,6 +239,8 @@ public class AsyncExecutor {
      * <p>The final action is guaranteed to execute regardless of whether the command
      * completes successfully or throws an exception, similar to a try-finally block.
      * This is useful for cleanup operations such as releasing resources or updating state.</p>
+     * If both actions fail, the command's failure remains primary and the final-action failure is
+     * attached to it as a suppressed exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -260,11 +262,23 @@ public class AsyncExecutor {
         N.checkArgNotNull(finallyAction, cs.finallyAction);
 
         return execute(new FutureTask<>(() -> {
+            Throwable primary = null;
             try {
                 command.run();
                 return null;
+            } catch (final Exception | Error e) {
+                primary = e;
+                throw e;
             } finally {
-                finallyAction.run();
+                try {
+                    finallyAction.run();
+                } catch (final RuntimeException | Error cleanupEx) {
+                    if (primary != null && primary != cleanupEx) {
+                        primary.addSuppressed(cleanupEx);
+                    } else if (primary == null) {
+                        throw cleanupEx;
+                    }
+                }
             }
         }));
     }
@@ -345,6 +359,8 @@ public class AsyncExecutor {
      * <p>The final action is guaranteed to execute regardless of whether the command
      * completes successfully or throws an exception, similar to a try-finally block.
      * This is useful for cleanup operations such as releasing resources or logging completion.</p>
+     * If both actions fail, the command's failure remains primary and the final-action failure is
+     * attached to it as a suppressed exception.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -366,10 +382,22 @@ public class AsyncExecutor {
         N.checkArgNotNull(finallyAction, cs.finallyAction);
 
         return execute(new FutureTask<>(() -> {
+            Throwable primary = null;
             try {
                 return command.call();
+            } catch (final Exception | Error e) {
+                primary = e;
+                throw e;
             } finally {
-                finallyAction.run();
+                try {
+                    finallyAction.run();
+                } catch (final RuntimeException | Error cleanupEx) {
+                    if (primary != null && primary != cleanupEx) {
+                        primary.addSuppressed(cleanupEx);
+                    } else if (primary == null) {
+                        throw cleanupEx;
+                    }
+                }
             }
         }));
     }
@@ -638,8 +666,8 @@ public class AsyncExecutor {
      *                           does not wait for termination
      * @param timeUnit the time unit of the {@code terminationTimeout} argument; must not be
      *                 {@code null} when {@code terminationTimeout} is greater than 0
-     * @throws IllegalArgumentException if {@code terminationTimeout} is greater than 0 and
-     *                                  {@code timeUnit} is {@code null}
+     * @throws IllegalArgumentException if {@code terminationTimeout} is greater than 0 and {@code timeUnit} is
+     *         {@code null}.
      */
     public synchronized void shutdownAndAwait(final long terminationTimeout, final TimeUnit timeUnit) {
         if (terminationTimeout > 0) {

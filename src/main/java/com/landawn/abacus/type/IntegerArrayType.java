@@ -27,7 +27,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and output operations for {@code Integer[]} arrays.
  *
  * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
- * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).
+ * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).</p>
  *
  * @see ObjectArrayType
  */
@@ -45,7 +45,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * Converts an {@code Integer[]} to its canonical string representation.
      * The output is a bracket-enclosed, comma-separated list; {@code null} elements appear as {@code null}.
      *
-     * <p>Examples:
+     * <p>Examples:</p>
      * <ul>
      *   <li>{@code [1, null, 3, 42]} for {@code new Integer[]{1, null, 3, 42}}</li>
      *   <li>{@code []} for an empty array</li>
@@ -79,7 +79,7 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
      * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
      * The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
-     * <p>Special cases:
+     * <p>Special cases:</p>
      * <ul>
      *   <li>{@code null}, blank, or empty string returns {@code null}</li>
      *   <li>{@code "[]"} returns an empty array</li>

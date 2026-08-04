@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a predicate (boolean-valued function) of three char-valued arguments.
+ * Represents a predicate (boolean-valued function) of three {@code char}-valued arguments.
  * This is the three-arity specialization of {@link CharPredicate}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(char, char, char)}.
@@ -99,7 +99,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharTriPredicate and(final CharTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -126,7 +126,7 @@ public interface CharTriPredicate extends Throwables.CharTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharTriPredicate or(final CharTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

@@ -82,7 +82,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>{@link Tuple2}:</b> Two-element tuple, similar to {@link Pair} but with numbered access</li>
  *   <li><b>{@link Tuple3}:</b> Three-element tuple, similar to {@link Triple} but with numbered access</li>
  *   <li><b>{@link Tuple4} - {@link Tuple7}:</b> Standard multi-element tuples for common use cases</li>
- *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples whose factory methods are deprecated, consider using custom classes</li>
+ *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples whose factory methods are deprecated; consider using custom classes</li>
  * </ul>
  *
  * <p><b>Generic Type Parameter:</b>
@@ -343,7 +343,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
     /**
      * Checks if this tuple contains the specified value.
      *
-     * <p>The comparison is performed using object equality (via N.equals() which handles {@code null} values).
+     * <p>The comparison is performed using object equality (via {@code N.equals()}, which handles {@code null} values).
      * The method checks each element in order and returns {@code true} as soon as a match is found.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -425,9 +425,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed for each element.
+     * @throws E if the consumer throws an exception.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @throws ClassCastException if the consumer cannot accept the runtime type of an element
-     * @throws E if the consumer throws an exception.
      */
     public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
 
@@ -835,7 +835,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <TP> the type of tuple to create.
      * @param a the array of objects to convert to a tuple, may be {@code null} or empty.
-     * @return a tuple containing the array elements in order, or Tuple0.EMPTY if array is {@code null} or empty.
+     * @return a tuple containing the array elements in order, or {@code Tuple0.EMPTY} if the array is {@code null} or empty.
      * @throws IllegalArgumentException if the array contains more than 9 elements.
      */
     @Beta
@@ -912,7 +912,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <TP> the type of tuple to create.
      * @param c the collection of objects to convert to a tuple, may be {@code null} or empty.
-     * @return a tuple containing the collection elements in iteration order, or Tuple0.EMPTY if collection is {@code null} or empty.
+     * @return a tuple containing the collection elements in iteration order, or {@code Tuple0.EMPTY} if the collection is {@code null} or empty.
      * @throws IllegalArgumentException if the collection contains more than 9 elements.
      */
     @Beta
@@ -1257,6 +1257,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         private static final Tuple0 EMPTY = new Tuple0();
 
+        /**
+         * Default constructor for serialization frameworks.
+         * Creates an empty tuple.
+         */
         Tuple0() {
         }
 
@@ -1414,7 +1418,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Compares this empty tuple with another object for value equality.
-         * All {@code Tuple0} instances are equal because neither instance contains an element that can differ.
+         * All {@code Tuple0} instances are equal because they contain no elements that could differ.
          *
          * @param obj the object to compare with.
          * @return {@code true} if {@code obj} is also a {@code Tuple0}; otherwise {@code false}.
@@ -2358,7 +2362,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Converts this Tuple3 to a Triple with the same elements.
-         * Triple is another representation of a three-element container.
+         *
+         * <p>Triple is another representation of a three-element container.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2375,8 +2380,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple3 with the elements in reversed order.
-         * The first element becomes the third, the third element becomes the first,
-         * and the second element remains in the middle position.
+         *
+         * <p>The first element becomes the third, the third element becomes the first,
+         * and the second element remains in the middle position.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2414,7 +2420,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Performs the given tri-consumer action on the three elements of this tuple.
-         * The elements are passed to the tri-consumer as separate arguments.
+         *
+         * <p>The elements are passed to the tri-consumer as separate arguments.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2437,7 +2444,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Applies the given tri-function to the three elements of this tuple and returns the result.
-         * The elements are passed to the tri-function as separate arguments.
+         *
+         * <p>The elements are passed to the tri-function as separate arguments.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2667,8 +2675,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple4 with the elements in reversed order.
-         * The first element becomes the fourth, the fourth element becomes the first,
-         * the second element becomes the third, and the third element becomes the second.
+         *
+         * <p>The first element becomes the fourth, the fourth element becomes the first,
+         * the second element becomes the third, and the third element becomes the second.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2892,9 +2901,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple5 with the elements in reversed order.
-         * The first element becomes the fifth, the fifth element becomes the first,
+         *
+         * <p>The first element becomes the fifth, the fifth element becomes the first,
          * the second element becomes the fourth, the fourth element becomes the second,
-         * and the third element remains in the middle position.
+         * and the third element remains in the middle position.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3126,8 +3136,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple6 with the elements in reversed order.
-         * Elements are rearranged so the first becomes the sixth,
-         * the second becomes the fifth, and so on.
+         *
+         * <p>Elements are rearranged so the first becomes the sixth,
+         * the second becomes the fifth, and so on.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3369,8 +3380,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple7 with the elements in reversed order.
-         * The ordering is completely reversed: first becomes seventh,
-         * second becomes sixth, and so on.
+         *
+         * <p>The ordering is completely reversed: first becomes seventh,
+         * second becomes sixth, and so on.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3622,7 +3634,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
 
         /**
          * Creates a new Tuple8 with the elements in reversed order.
-         * All elements are reversed: first becomes eighth, second becomes seventh, etc.
+         *
+         * <p>All elements are reversed: first becomes eighth, second becomes seventh, etc.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3888,7 +3901,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         /**
          * Checks if this tuple contains the specified value.
          *
-         * <p>The comparison uses N.equals() which handles {@code null} values correctly.
+         * <p>The comparison uses {@code N.equals()}, which handles {@code null} values correctly.
          * The method checks each element in order (_1 through _9) and returns true
          * as soon as a matching element is found.</p>
          *
@@ -3990,9 +4003,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
         }
 
         /**
-         * Returns a new Tuple9 with all elements in reverse order.
+         * Creates a new Tuple9 with the elements in reversed order.
          *
-         * <p>Creates a new tuple where the first element becomes the last, the second becomes
+         * <p>The first element becomes the last, the second becomes
          * the second-to-last, and so on. The original tuple remains unchanged.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -4006,7 +4019,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * // reversed = ((byte)10, (short)5, 3.14f, 100L, 'X', true, 2.0, 1, "A")
          * }</pre>
          *
-         * @return a new Tuple9 with elements in reverse order.
+         * @return a new Tuple9 with elements in reversed order.
          */
         public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
@@ -4065,7 +4078,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p>The hash code is computed using all 9 elements. The calculation uses a standard
          * polynomial hash formula with prime number 31, and handles {@code null} values correctly
-         * through N.hashCode().</p>
+         * through {@code N.hashCode()}.</p>
          *
          * <p>The hash code is consistent with equals(): two tuples that are equal according
          * to equals() will have the same hash code.</p>
@@ -4103,7 +4116,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Compares this tuple to the specified object for equality.
          *
          * <p>Two Tuple9 instances are considered equal if and only if all 9 corresponding
-         * elements are equal according to N.equals() (which handles {@code null} values correctly).
+         * elements are equal according to {@code N.equals()} (which handles {@code null} values correctly).
          * The comparison is type-safe: the object must be exactly a Tuple9 instance.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -4147,7 +4160,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p>The string representation consists of the 9 elements enclosed in parentheses
          * and separated by commas and spaces. Each element is converted to string using
-         * N.toString() which handles {@code null} values by returning "null".</p>
+         * {@code N.toString()}, which handles {@code null} values by returning "null".</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

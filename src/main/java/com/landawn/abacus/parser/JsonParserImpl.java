@@ -272,7 +272,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON array string to parse; may be {@code null} or empty (in which case no action is taken)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the pre-allocated array to populate with parsed values; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
@@ -319,7 +319,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON array string to parse; may be {@code null} or empty (in which case no action is taken)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the collection to populate with parsed elements; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or not an array
      * @throws UnsupportedOperationException if the collection is unmodifiable
@@ -366,7 +366,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param source the JSON object string to parse; may be {@code null} or empty (in which case no action is taken)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the map to populate with parsed key-value pairs; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid or not an object
      * @throws UnsupportedOperationException if the map is unmodifiable
@@ -2709,7 +2709,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the bean class to create
      * @param targetType the bean type to create
-     * @return the deserialized bean of type {@code T}
+     * @return the deserialized bean of type {@code T}, or {@code null} if the JSON text is empty
      * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or an unmatched property is encountered
      *         while {@code ignoreUnmatchedProperty} is disabled
@@ -3797,7 +3797,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
      * @param targetType the target type to create
-     * @return the deserialized map entity of type {@code T}
+     * @return the deserialized map entity of type {@code T}, or {@code null} if the JSON text is empty
      * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
      */
@@ -3875,7 +3875,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
      * @param targetType the target type to create
-     * @return the deserialized entity id of type {@code T}
+     * @return the deserialized entity id of type {@code T}, or {@code null} if the JSON text is empty
      * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
      */
@@ -3955,7 +3955,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
      * @param targetType the target type to create
-     * @return the deserialized dataset of type {@code T}
+     * @return the deserialized dataset of type {@code T}, or {@code null} if the JSON text is empty
      * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or not a valid dataset structure
      */
@@ -4432,7 +4432,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param isFirstCall whether this is the top-level (root) read call
      * @param targetClass the target class to create
      * @param targetType the target type to create
-     * @return the deserialized sheet of type {@code T}
+     * @return the deserialized sheet of type {@code T}, or {@code null} if the JSON text is empty
      * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or not a valid sheet structure
      */
@@ -4943,7 +4943,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws IllegalArgumentException if the element type is not supported for streaming.
      * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during parsing
      * @throws ParsingException if the JSON structure is invalid
@@ -4999,7 +4999,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws IllegalArgumentException if the element type is not supported for streaming.
      * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during file reading or parsing
      * @throws ParsingException if the JSON structure is invalid
@@ -5048,7 +5048,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming
+     * @throws IllegalArgumentException if the element type is not supported for streaming.
      * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during stream reading or parsing
      * @throws ParsingException if the JSON structure is invalid
@@ -5089,7 +5089,8 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for streaming
+     * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for
+     *         streaming.
      * @throws UnsupportedOperationException if the root of the JSON is not an array
      * @throws UncheckedIOException if an I/O error occurs during reading or parsing
      * @throws ParsingException if the JSON structure is invalid
@@ -5239,7 +5240,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @param elementType the element type requested by the caller
      * @throws IllegalArgumentException if {@code elementType} is {@code null} or is not a
-     *         Bean/Map/MapEntity/Collection/object-array/Dataset/Sheet/EntityId type
+     *         Bean/Map/MapEntity/Collection/object-array/Dataset/Sheet/EntityId type.
      */
     private void checkStreamSupportedType(final Type<?> elementType) {
         N.checkArgNotNull(elementType, cs.elementType);

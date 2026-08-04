@@ -423,7 +423,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
      * underlying List will be reflected in the returned ImmutableList, which
-     * violates the immutability contract. For a {@code true} immutable copy, use
+     * violates the immutability contract. For a truly independent immutable copy, use
      * {@link #copyOf(Collection)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -982,6 +982,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * The runtime type of the returned array is that of the specified array.
          * If the list fits in the specified array, it is returned therein; otherwise
          * a new array of the same runtime type is allocated.
+         * If the specified array has room to spare, the element immediately following
+         * the end of this list is set to {@code null}.
          *
          * @param <T> the component type of the array to contain the collection
          * @param a the array into which the elements are stored, if large enough; otherwise
@@ -1098,7 +1100,6 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Creates a new Builder for constructing an ImmutableList.
      * The builder allows adding elements one by one and then creating an immutable list.
      * This is useful when the number of elements is not known at compile time.
-     * The builder uses an ArrayList internally for efficient element addition.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

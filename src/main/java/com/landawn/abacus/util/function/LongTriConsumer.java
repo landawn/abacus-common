@@ -24,9 +24,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(long, long, long)}.
  *
- * <p>The interface extends {@code Throwables.LongTriConsumer} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriConsumer printSum = (a, b, c) -> System.out.println("Sum: " + (a + b + c));
@@ -48,17 +45,7 @@ import com.landawn.abacus.util.cs;
 public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
-     *
-     * <p>This method processes three long values, typically producing side effects
-     * such as writing to output, modifying state, or storing values.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Logging or printing three related values</li>
-     *   <li>Storing coordinates (x, y, z) in three-dimensional space</li>
-     *   <li>Updating multiple related fields in an object</li>
-     *   <li>Performing batch operations with three parameters</li>
-     * </ul>
+     * This method is expected to operate via side-effects.
      *
      * @param a the first {@code long} input argument
      * @param b the second {@code long} input argument
@@ -94,7 +81,7 @@ public interface LongTriConsumer extends Throwables.LongTriConsumer<RuntimeExcep
      * @param after the operation to perform after this operation.
      * @return a composed {@code LongTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default LongTriConsumer andThen(final LongTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

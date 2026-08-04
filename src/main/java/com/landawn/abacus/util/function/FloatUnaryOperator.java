@@ -31,11 +31,7 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given float operand.
-     *
-     * <p>The implementation should define how the float value is transformed.
-     * Common implementations include mathematical operations like negation,
-     * absolute value, or other unary transformations.</p>
+     * Applies this operator to the given operand.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -69,7 +65,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(FloatUnaryOperator)
      */
     default FloatUnaryOperator compose(final FloatUnaryOperator before) throws IllegalArgumentException {
@@ -95,7 +91,7 @@ public interface FloatUnaryOperator extends Throwables.FloatUnaryOperator<Runtim
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(FloatUnaryOperator)
      */
     default FloatUnaryOperator andThen(final FloatUnaryOperator after) throws IllegalArgumentException {

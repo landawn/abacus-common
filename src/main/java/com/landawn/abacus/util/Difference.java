@@ -1555,7 +1555,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *   <li>There are no entries/properties with different values (differentValues is empty)</li>
          * </ul>
          *
-         * <p>This is a stricter equality check than the parent class's {@link #areEqual()} method,
+         * <p>This is a stricter equality check than the parent class's {@link Difference#areEqual()} method,
          * as it also considers whether any entries/properties have different values.
          *
          * <p><b>Usage Examples:</b>
@@ -2555,8 +2555,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean1 the first bean to compare. May be {@code null}, in which case all properties of {@code bean2} are reported as right-only.
          * @param bean2 the second bean to compare. May be {@code null}, in which case all properties of {@code bean1} are reported as left-only.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
-         *         (e.g., a primitive wrapper, array, {@link Collection}, or {@link Map})
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class (e.g., a
+         *         primitive wrapper, array, {@link Collection}, or {@link Map}).
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2613,7 +2613,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean2 the second bean to compare. May be {@code null}, in which case properties from {@code bean1} are reported as left-only.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @return a {@code BeanDifference} object containing the comparison results for the specified properties
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object)
          * @see Maps#difference(Map, Map)
@@ -2674,8 +2674,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean2 the second bean to compare. May be {@code null}.
          * @param valueEquivalence the predicate to determine if two property values are equivalent.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
+         *         {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2746,8 +2746,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param valueEquivalence the predicate to determine if values are equivalent for a given property;
          *                         receives {@code (propertyName, value1, value2)}.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
+         *         {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2817,8 +2817,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @param valueEquivalence the predicate to determine if values are equivalent for a given property.
          * @return a {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
+         *         {@code valueEquivalence} is {@code null}.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -3042,9 +3042,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param b the second collection of beans to compare. Can be {@code null} or empty.
          * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
+         *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) throws IllegalArgumentException {
@@ -3096,9 +3096,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
+         *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
@@ -3155,9 +3155,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor1 the function to extract identifiers from beans in the first collection.
          * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
+         *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
@@ -3225,9 +3225,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor1 the function to extract identifiers from beans in the first collection.
          * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
-         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean instance
+         * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
+         *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,

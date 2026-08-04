@@ -99,7 +99,7 @@ public class UncheckedSQLException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link SQLException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedSQLException(final SQLException cause) {
         super(cause);
@@ -125,7 +125,7 @@ public class UncheckedSQLException extends UncheckedException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the {@link SQLException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedSQLException(final String message, final SQLException cause) {
         super(message, cause);

@@ -103,7 +103,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *   <li><b>Thread Count:</b> Each run creates and shuts down its own fixed-size executor</li>
  *   <li><b>Suspension Control:</b> {@code suspend()}/{@code resume()} for debugging and conditional execution</li>
  *   <li><b>Output Customization:</b> Multiple output formats and custom result processors</li>
- *   <li><b>Memory Optimization:</b> Configurable result collection strategies for large-scale testing</li>
+ *   <li><b>Memory Guidance:</b> Logs a warning when a run would retain a very large number of timing samples</li>
  *   <li><b>Error Handling:</b> Profiled-invocation failures are captured; setup and teardown failures are logged</li>
  * </ul>
  *
@@ -197,7 +197,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * @see java.util.concurrent.Callable
  * @see java.lang.Runnable
  * @see com.landawn.abacus.logging.Logger
- * @see <a href="https://openjdk.java.net/projects/code-tools/jmh/">JMH (Java Microbenchmark Harness)</a>
+ * @see <a href="https://openjdk.org/projects/code-tools/jmh/">JMH (Java Microbenchmark Harness)</a>
  * @see <a href="https://medium.com/@AlexanderObregon/introduction-to-java-microbenchmarking-with-jmh-java-microbenchmark-harness-55af74b2fd38">Introduction to Java Microbenchmarking with JMH</a>
  */
 @SuppressWarnings({ "java:S1244", "java:S1943" })
@@ -566,7 +566,7 @@ public final class Profiler {
 
     /**
      * Runs a performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
-     * The performance test will be repeatedly executed times specified by {@code roundNum}.
+     * The performance test is repeated the number of times specified by {@code roundNum}.
      *
      * @param instance the instance on which to invoke the method, may be {@code null} for static methods
      * @param method the method to be profiled
@@ -591,7 +591,7 @@ public final class Profiler {
 
     /**
      * Runs a performance test for the specified {@code method} with the specified {@code threadNum} and {@code loopNum} for each thread.
-     * The performance test will be repeatedly executed times specified by {@code roundNum}.
+     * The performance test is repeated the number of times specified by {@code roundNum}.
      *
      * @param instance it can be {@code null} if the specified {@code method} is a static method
      * @param methodName the name of the method being profiled
@@ -1529,7 +1529,7 @@ public final class Profiler {
          * Returns the list of all {@link MethodStatistics} recorded in this loop iteration.
          * Lazily initializes the list if it has not been set.
          *
-         * @return a {@code non-null} (possibly empty) list of method statistics in this loop
+         * @return a non-{@code null} (possibly empty) list of method statistics in this loop
          */
         public List<MethodStatistics> getMethodStatisticsList() {
             if (methodStatisticsList == null) {
@@ -1774,7 +1774,7 @@ public final class Profiler {
          * @param startTimeInNano the overall start time in nanoseconds (from {@link System#nanoTime()})
          * @param endTimeInNano the overall end time in nanoseconds (from {@link System#nanoTime()})
          * @param threadNum the positive number of threads used in the test
-         * @throws IllegalArgumentException if {@code threadNum} is not positive
+         * @throws IllegalArgumentException if {@code threadNum} is not positive.
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum) {
@@ -1802,7 +1802,7 @@ public final class Profiler {
          * @param endTimeInNano the overall end time in nanoseconds (from {@link System#nanoTime()})
          * @param threadNum the positive number of threads used in the test
          * @param loopStatisticsList the list of loop statistics from all threads; {@code null} is treated as empty
-         * @throws IllegalArgumentException if {@code threadNum} is not positive
+         * @throws IllegalArgumentException if {@code threadNum} is not positive.
          */
         public MultiLoopsStatistics(final long startTimeInMillis, final long endTimeInMillis, final long startTimeInNano, final long endTimeInNano,
                 final int threadNum, final List<LoopStatistics> loopStatisticsList) {
@@ -1905,7 +1905,7 @@ public final class Profiler {
          * }</pre>
          *
          * @param loopStatistics the loop statistics to add; must not be {@code null}
-         * @throws IllegalArgumentException if {@code loopStatistics} is {@code null}
+         * @throws IllegalArgumentException if {@code loopStatistics} is {@code null}.
          */
         public void addLoopStatistics(final LoopStatistics loopStatistics) {
             getLoopStatisticsList().add(N.checkArgNotNull(loopStatistics, cs.loopStatistics));

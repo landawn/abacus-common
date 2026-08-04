@@ -82,7 +82,7 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      *                  (e.g., {@code ArrayList.class}, {@code HashSet.class})
      * @return the new collection populated with the array elements
      *         or {@code null} if {@code array} is {@code null}
-     * @throws IllegalArgumentException if {@code collClass} cannot be instantiated
+     * @throws IllegalArgumentException if {@code collClass} cannot be instantiated.
      */
     @Override
     public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {

@@ -1297,7 +1297,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param len the number of characters to parse
      * @return the parsed integer value
      * @throws NumberFormatException if the characters cannot be parsed as an integer
-     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
      * @see Integer#parseInt(String)
      */
     protected static int parseInt(final char[] cbuf, final int offset, int len) throws NumberFormatException {
@@ -1367,7 +1367,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param len the number of characters to parse
      * @return the parsed long value
      * @throws NumberFormatException if the characters cannot be parsed as a long
-     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
      * @see Long#parseLong(String)
      */
     protected static long parseLong(final char[] cbuf, final int offset, int len) throws NumberFormatException {

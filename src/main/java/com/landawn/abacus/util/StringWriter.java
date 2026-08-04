@@ -94,7 +94,7 @@ public final class StringWriter extends AppendableWriter {
      * }</pre>
      *
      * @param sb the StringBuilder to use as the internal buffer; must not be {@code null}
-     * @throws IllegalArgumentException if {@code sb} is {@code null}
+     * @throws IllegalArgumentException if {@code sb} is {@code null}.
      * @see #stringBuilder()
      */
     public StringWriter(final StringBuilder sb) {

@@ -59,7 +59,7 @@ import java.io.Serial;
  *
  * @see UncheckedException
  * @see InterruptedException
- * @see Thread#currentThread()
+ * @see Thread#interrupt()
  */
 public class UncheckedInterruptedException extends UncheckedException {
 
@@ -86,7 +86,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedInterruptedException(final InterruptedException cause) {
         super(cause);
@@ -115,7 +115,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedInterruptedException(final String message, final InterruptedException cause) {
         super(message, cause);

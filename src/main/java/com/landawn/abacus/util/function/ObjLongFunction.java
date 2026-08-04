@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * and a long-valued argument, and produces a result. This is a specialization of BiFunction
  * for the case where the second argument is a primitive long.
  *
- * <p>This interface is typically used for operations that need to compute a value based on
- * an object and a long integer, such as timestamp-based calculations, ID lookups,
- * size/offset operations, or transformations that involve large numeric parameters.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, long)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -39,9 +35,6 @@ import com.landawn.abacus.util.cs;
 public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR
     /**
      * Applies this function to the given arguments.
-     *
-     * <p>This method takes an object of type T and a long value as input and
-     * produces a result of type R.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -68,10 +61,6 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * either function throws an exception, it is relayed to the caller of the
      * composed function.
      *
-     * <p>This method enables function composition, allowing you to chain multiple
-     * transformations together. The output of this function becomes the input to
-     * the {@code after} function.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjLongFunction<TimeZone, Calendar> createCalendar = (timezone, millis) -> {
@@ -97,7 +86,7 @@ public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, 
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> ObjLongFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

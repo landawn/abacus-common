@@ -39,8 +39,8 @@ class JsonStreamReader extends JsonStringReader {
      * @param reader the character stream source
      * @param rbuf the read buffer for streaming input
      * @param cbuf the character buffer for token processing
-     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null},
-     *         or if {@code rbuf} is empty
+     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, or if {@code rbuf} is
+     *         empty.
      */
     JsonStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {
         super(checkReadBuffer(rbuf), 0, 0, checkTokenBuffer(cbuf), checkReader(reader));
@@ -54,8 +54,8 @@ class JsonStreamReader extends JsonStringReader {
      * @param beginIndex the starting index in the read buffer
      * @param toIndex the ending index in the read buffer
      * @param cbuf the character buffer for token processing
-     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null},
-     *         if {@code rbuf} is empty, or if the specified range is invalid
+     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, if {@code rbuf} is empty,
+     *         or if the specified range is invalid.
      */
     JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int toIndex, final char[] cbuf) {
         super(checkReadBuffer(rbuf), beginIndex, toIndex, checkTokenBuffer(cbuf), checkReader(reader));
@@ -107,8 +107,8 @@ class JsonStreamReader extends JsonStringReader {
      * @param cbuf the character buffer for token processing (recommended size: 8192 or larger;
      *        an empty buffer is supported and grows on demand)
      * @return a {@code JsonReader} instance configured for streaming JSON parsing
-     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null},
-     *         or if {@code rbuf} is empty
+     * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, or if {@code rbuf} is
+     *         empty.
      */
     public static JsonReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
 

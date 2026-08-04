@@ -227,7 +227,7 @@ public final class cs { // NOSONAR
     public static final String maxSize = "maxSize";
     public static final String maxThreadNum = "maxThreadNum";
     public static final String maxThreadPoolSize = "maxThreadPoolSize";
-    public static final String maxWaitForAddingElementToQuery = "maxWaitForAddingElementToQuery";
+    public static final String maxWaitForAddingElementToQueue = "maxWaitForAddingElementToQueue";
     public static final String maxWaitForNextInMillis = "maxWaitForNextInMillis";
     public static final String maxWaitIntervalInMillis = "maxWaitIntervalInMillis";
     public static final String maxWidth = "maxWidth";

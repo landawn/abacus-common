@@ -80,8 +80,8 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * @param max the maximum {@code short} value
      * @param sum the sum of all values as a {@code long}
      * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
-     *         {@link Short#MAX_VALUE}, {@link Short#MIN_VALUE}, and zero for its min, max, and sum;
-     *         or if a non-empty state has {@code min} greater than {@code max}
+     *         {@link Short#MAX_VALUE}, {@link Short#MIN_VALUE}, and zero for its min, max, and sum; or if a
+     *         non-empty state has {@code min} greater than {@code max}.
      */
     public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
         if (count < 0) {

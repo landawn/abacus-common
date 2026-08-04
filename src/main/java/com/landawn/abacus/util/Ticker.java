@@ -31,7 +31,7 @@ package com.landawn.abacus.util;
  * // Using the system ticker
  * Ticker ticker = Ticker.systemTicker();
  * long start = ticker.read();
- * String normalized = "  measured work  ".trim();
+ * // perform measured work
  * long elapsed = ticker.read() - start;
  *
  * // Custom ticker for testing

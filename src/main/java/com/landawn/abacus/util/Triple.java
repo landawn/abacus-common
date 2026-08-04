@@ -812,7 +812,7 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the consumer function to apply to each element; must accept
-     *                 a common supertype of L, M, and R;
+     *                 a common supertype of L, M, and R.
      * @throws ClassCastException if the consumer's accepted type is not a common supertype of
      *         the runtime types of all three elements
      * @throws E if the consumer throws an exception.

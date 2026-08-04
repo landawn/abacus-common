@@ -77,7 +77,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the identity hash set
-     * @throws IllegalArgumentException if the initial capacity is negative
+     * @throws IllegalArgumentException if the initial capacity is negative.
      */
     public IdentityHashSet(final int initialCapacity) {
         map = N.newIdentityHashMap(initialCapacity);

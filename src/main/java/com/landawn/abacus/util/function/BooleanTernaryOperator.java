@@ -17,7 +17,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Throwables.TernaryOperator;
 
 /**
- * Represents an operation on three {@code boolean} operands that produces a {@code boolean} result.
+ * Represents an operation upon three {@code boolean} operands and producing a {@code boolean} result.
  * This is the primitive type specialization of {@link TernaryOperator} for {@code boolean}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(boolean, boolean, boolean)}.
@@ -38,10 +38,10 @@ public interface BooleanTernaryOperator extends Throwables.BooleanTernaryOperato
      * boolean result = majorityVote.applyAsBoolean(true, true, false);   // Returns true
      * }</pre>
      *
-     * @param a the first operand ({@code boolean} value)
-     * @param b the second operand ({@code boolean} value)
-     * @param c the third operand ({@code boolean} value)
-     * @return the operator result ({@code boolean} value)
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     boolean applyAsBoolean(boolean a, boolean b, boolean c);

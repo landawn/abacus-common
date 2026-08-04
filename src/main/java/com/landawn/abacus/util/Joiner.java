@@ -315,8 +315,8 @@ public final class Joiner implements Closeable {
      * @param keyValueDelimiter the delimiter inserted between keys and values in key-value pairs; must not be {@code null}
      * @param prefix the string prepended to the result; must not be {@code null}
      * @param suffix the string appended to the result; must not be {@code null}
-     * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueDelimiter},
-     *         or {@code suffix} is {@code null}
+     * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueDelimiter}, or
+     *         {@code suffix} is {@code null}.
      */
     Joiner(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
         N.checkArgNotNull(prefix, "The prefix must not be null");
@@ -735,6 +735,7 @@ public final class Joiner implements Closeable {
      * @param start the start index (inclusive)
      * @param end the end index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IndexOutOfBoundsException if {@code element} is not {@code null} and {@code start} or {@code end} is out of range
      * @see Appendable#append(CharSequence, int, int)
      */
     public Joiner append(final CharSequence element, final int start, final int end) {
@@ -2288,7 +2289,7 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an Object value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The value is converted to string using toString method and formatted according to nullText settings.
+     * The value is converted to string using its {@code toString()} method and formatted according to nullText settings.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2611,7 +2612,7 @@ public final class Joiner implements Closeable {
      * @param bean the bean object whose properties to append; may be {@code null}
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
-     *         (i.e., does not have proper getter/setter methods)
+     *         (i.e., does not have proper getter/setter methods).
      * @see #appendBean(Object, Collection)
      * @see #appendBean(Object, boolean, Set)
      */
@@ -2662,7 +2663,8 @@ public final class Joiner implements Closeable {
      * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are
      *            appended (an intentional "null = nothing" carve-out — see the note above)
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean (i.e., doesn't have proper getter/setter methods)
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
+     *         (i.e., doesn't have proper getter/setter methods).
      * @see #appendBean(Object)
      * @see #appendBean(Object, boolean, Set)
      */
@@ -2735,8 +2737,8 @@ public final class Joiner implements Closeable {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values are skipped
      * @param ignoredPropNames set of property names to exclude from appending; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
-     *         with getter/setter methods
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean with
+     *         getter/setter methods.
      * @see #appendBean(Object)
      * @see #appendBean(Object, Collection)
      */
@@ -2811,9 +2813,8 @@ public final class Joiner implements Closeable {
      * @param bean the bean object whose properties to append; may be {@code null}
      * @param filter the bi-predicate to test property names and values; only properties that pass are appended
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
-     *         with getter/setter methods
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
+     * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean with
+     *         getter/setter methods, or if {@code filter} is {@code null}.
      * @see #appendBean(Object)
      */
     public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
@@ -2872,7 +2873,7 @@ public final class Joiner implements Closeable {
      * @param str the string to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -2901,7 +2902,7 @@ public final class Joiner implements Closeable {
      * @param obj the object to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public Joiner repeat(final Object obj, final int n) {
         N.checkArgNotNegative(n, cs.n);
@@ -2929,7 +2930,7 @@ public final class Joiner implements Closeable {
      *
      * @param other the Joiner to merge content from
      * @return this Joiner instance for method chaining
-     * @throws IllegalArgumentException if the specified Joiner {@code other} is {@code null}
+     * @throws IllegalArgumentException if the specified Joiner {@code other} is {@code null}.
      */
     public Joiner merge(final Joiner other) throws IllegalArgumentException {
         N.checkArgNotNull(other);
@@ -3134,7 +3135,6 @@ public final class Joiner implements Closeable {
      *     System.out.println(j.toString());
      * }
      * }</pre>
-     *
      */
     @Override
     public synchronized void close() {

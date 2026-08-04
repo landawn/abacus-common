@@ -20,10 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation upon two operands of the same type, producing a result of the same type as the operands.
  * This is a specialization of {@link BiFunction} for the case where the operands and the result are all of the same type.
  *
- * <p>This interface extends {@link BiFunction}, {@link Throwables.BinaryOperator}, and
- * {@link java.util.function.BinaryOperator}, providing compatibility with the abacus-common framework's
- * error handling mechanisms and the standard Java functional interfaces.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -37,15 +33,6 @@ import com.landawn.abacus.util.Throwables;
 public interface BinaryOperator<T> extends BiFunction<T, T, T>, Throwables.BinaryOperator<T, RuntimeException>, java.util.function.BinaryOperator<T> { //NOSONAR
     /**
      * Applies this operator to the given operands.
-     *
-     * <p>This method is inherited from {@link BiFunction} and performs an operation on two operands
-     * of type {@code T}, producing a result of the same type {@code T}. Common use cases include:
-     * <ul>
-     *   <li>Mathematical operations (addition, multiplication, min, max)</li>
-     *   <li>String concatenation or merging</li>
-     *   <li>Combining or merging objects of the same type</li>
-     *   <li>Reduction operations in stream processing</li>
-     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

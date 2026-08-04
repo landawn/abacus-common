@@ -68,8 +68,8 @@ public final class WSSecurityUtil {
     private static final String HASH_ALGORITHM = "SHA-1";
 
     /**
-     * A cached pseudo-random number generator NB. On some JVMs, caching this random number generator is required to
-     * overcome punitive overhead.
+     * A cached pseudo-random number generator. N.B.: on some JVMs, caching this random number generator is
+     * required to overcome punitive overhead.
      */
     private static final SecureRandom random = new SecureRandom();
 
@@ -98,7 +98,7 @@ public final class WSSecurityUtil {
      * @param length the length of the nonce to be generated in bytes, must be non-negative
      *               and not exceed {@code 1024}
      * @return a byte array containing cryptographically secure random bytes of the specified length
-     * @throws IllegalArgumentException if {@code length} is negative or exceeds {@code 1024}
+     * @throws IllegalArgumentException if {@code length} is negative or exceeds {@code 1024}.
      * @throws RuntimeException if an error occurs during the nonce generation
      */
     public static byte[] generateNonce(final int length) {
@@ -141,7 +141,7 @@ public final class WSSecurityUtil {
      *
      * @param inputBytes the bytes to be digested, must not be null
      * @return a byte array containing the SHA-1 hash of the input bytes (always 20 bytes)
-     * @throws IllegalArgumentException if inputBytes is null
+     * @throws IllegalArgumentException if inputBytes is null.
      * @throws RuntimeException if an unexpected error occurs during the digest operation
      * @see #generateDigest(byte[], String)
      */
@@ -183,8 +183,8 @@ public final class WSSecurityUtil {
      * @param inputBytes the bytes to be digested, must not be {@code null}
      * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
      * @return a byte array containing the hash of the input bytes
-     * @throws IllegalArgumentException if {@code inputBytes} or {@code algorithm} is {@code null},
-     *         or if the algorithm is not available
+     * @throws IllegalArgumentException if {@code inputBytes} or {@code algorithm} is {@code null}, or if the
+     *         algorithm is not available.
      */
     public static byte[] generateDigest(final byte[] inputBytes, final String algorithm) {
         if (inputBytes == null) {
@@ -254,7 +254,7 @@ public final class WSSecurityUtil {
      *                ISO 8601 format, must not be null
      * @param password the password byte array to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is null
+     * @throws IllegalArgumentException if any parameter is null.
      * @throws RuntimeException if an unexpected error occurs during the digest operation
      * @see #computePasswordDigest(byte[], byte[], byte[], String)
      * @see #computePasswordDigest(String, String, String)
@@ -308,7 +308,7 @@ public final class WSSecurityUtil {
      * @param password the password byte array to be digested, must not be {@code null}
      * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
      * @return a Base64-encoded string of the hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available
+     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available.
      * @see #computePasswordDigest(byte[], byte[], byte[])
      * @see #generateDigest(byte[], String)
      */
@@ -373,7 +373,7 @@ public final class WSSecurityUtil {
      *                format, must not be null
      * @param password the password string to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is null
+     * @throws IllegalArgumentException if any parameter is null.
      * @throws RuntimeException if an unexpected error occurs during the digest operation
      * @see #computePasswordDigest(String, String, String, String)
      * @see #computePasswordDigest(byte[], byte[], byte[])
@@ -428,7 +428,7 @@ public final class WSSecurityUtil {
      * @param password the password string to be digested, must not be {@code null}
      * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
      * @return a Base64-encoded string of the hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available
+     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available.
      * @see #computePasswordDigest(byte[], byte[], byte[], String)
      * @see #computePasswordDigest(String, String, String)
      * @see #generateNonce(int)

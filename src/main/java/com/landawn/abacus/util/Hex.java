@@ -40,7 +40,7 @@ package com.landawn.abacus.util;
  *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Codec under the Apache License 2.0.
- * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.</p>
+ * Methods from that library may have been modified for consistency, performance optimization, and null-safety enhancement.</p>
  */
 public final class Hex {
 
@@ -195,7 +195,8 @@ public final class Hex {
      *
      * @param data a string containing hexadecimal digits (0-9, A-F, a-f).
      * @return a byte array containing the binary data decoded from the hexadecimal string.
-     * @throws IllegalArgumentException if data is {@code null}, the string has an odd number of characters, or contains non-hexadecimal characters.
+     * @throws IllegalArgumentException if data is {@code null}, the string has an odd number of characters, or
+     *         contains non-hexadecimal characters.
      * @see #decode(char[])
      */
     public static byte[] decode(final String data) throws IllegalArgumentException {
@@ -229,7 +230,8 @@ public final class Hex {
      * @param data an array of characters containing hexadecimal digits.
      * @return a byte array containing the binary data decoded from the hexadecimal characters;
      *         exactly half the length of {@code data}.
-     * @throws IllegalArgumentException if {@code data} is {@code null}, the array has an odd number of elements, or contains non-hexadecimal characters.
+     * @throws IllegalArgumentException if {@code data} is {@code null}, the array has an odd number of elements, or
+     *         contains non-hexadecimal characters.
      * @see #decode(String)
      * @see #encode(byte[])
      */

@@ -142,7 +142,7 @@ final class ReflectASM<T> {
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class; must not be {@code null}
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if the class with the given name cannot be located
+     * @throws IllegalArgumentException if the class with the given name cannot be located.
      * @throws NullPointerException if {@code clsName} is {@code null}
      * @see ClassUtil#forName(String)
      */
@@ -173,7 +173,7 @@ final class ReflectASM<T> {
      * @param <T> the type of the class
      * @param cls the {@code Class} object representing the type; must not be {@code null}
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     public static <T> ReflectASM<T> on(final Class<T> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
@@ -209,7 +209,7 @@ final class ReflectASM<T> {
      * @param <T> the type of the target object
      * @param instance the object instance to perform reflection on; must not be {@code null}
      * @return a ReflectASM instance for the specified object
-     * @throws IllegalArgumentException if {@code instance} is {@code null}
+     * @throws IllegalArgumentException if {@code instance} is {@code null}.
      */
     public static <T> ReflectASM<T> on(final T instance) throws IllegalArgumentException {
         N.checkArgNotNull(instance, cs.instance);

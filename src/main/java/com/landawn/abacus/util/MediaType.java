@@ -165,9 +165,6 @@ public enum MediaType {
      * when deserializing data, reading from databases, or working with external systems
      * that use numeric codes.</p>
      *
-     * <p>The method performs a fast lookup using a switch statement, ensuring optimal
-     * performance even when called frequently.</p>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Reading from database
@@ -180,8 +177,8 @@ public enum MediaType {
      *
      * @param intValue the numeric value of the media type (must be between 0 and 5 inclusive)
      * @return the MediaType enum constant corresponding to the specified value
-     * @throws IllegalArgumentException if the intValue does not correspond to any MediaType
-     *         (i.e., if intValue is not in the range 0-5)
+     * @throws IllegalArgumentException if the intValue does not correspond to any MediaType (i.e., if intValue is not
+     *         in the range 0-5).
      * @see #intValue()
      */
     public static MediaType of(final int intValue) {

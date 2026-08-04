@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts a variable number of byte-valued arguments and returns no result.
+ * Represents an operation that accepts a variable number of {@code byte}-valued arguments and returns no result.
  * This is the N-arity specialization of {@link ByteConsumer}.
  * Unlike most other functional interfaces, {@code ByteNConsumer} is expected to operate via side-effects.
  *
@@ -31,8 +31,8 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface ByteNConsumer {
     /**
-     * Performs this operation on the given byte array arguments.
-     * The array can be of any length, including zero.
+     * Performs this operation on the given arguments.
+     * The behavior of this operation is generally expected to be side-effecting.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -43,7 +43,8 @@ public interface ByteNConsumer {
      * logger.accept((byte) 1, (byte) 2, (byte) 3);   // Prints: 1 2 3
      * }</pre>
      *
-     * @param args the byte array input arguments. Can be empty but not {@code null}.
+     * @param args the input arguments as a variable-length array of {@code byte} values.
+     *             May be empty but must not be {@code null}.
      */
     void accept(byte... args);
 
@@ -70,7 +71,7 @@ public interface ByteNConsumer {
      * @param after the operation to perform after this operation.
      * @return a composed {@code ByteNConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ByteNConsumer andThen(final ByteNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

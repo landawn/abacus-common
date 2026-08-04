@@ -3966,33 +3966,33 @@ public class EntryStreamTest extends TestBase {
     }
 
     @Test
-    public void testTransformB_Deferred() {
-        List<Entry<String, Integer>> result = EntryStream.of(testMap).<String, Integer> transformB(s -> s.filter(e -> e.getValue() > 2), true).toList();
+    public void testTransformViaStream_Deferred() {
+        List<Entry<String, Integer>> result = EntryStream.of(testMap).<String, Integer> transformViaStream(s -> s.filter(e -> e.getValue() > 2), true).toList();
         assertEquals(3, result.size());
     }
 
     @Test
-    public void testTransformB() {
+    public void testTransformViaJdkStream() {
         final Map<String, Integer> map = N.asMap("a", 1, "b", 2);
-        final List<String> result = EntryStream.of(map).entries().transformB(s -> s.map(Map.Entry::getKey)).toList();
+        final List<String> result = EntryStream.of(map).entries().transformViaJdkStream(s -> s.map(Map.Entry::getKey)).toList();
 
         assertTrue(result.containsAll(Arrays.asList("a", "b")));
     }
 
     @Test
-    public void testTransformBDeferred() {
+    public void testTransformViaStreamDeferred() {
         EntryStream<String, Integer> stream = EntryStream.of(testMap);
         EntryStream<String, String> transformed = stream
-                .<String, String> transformB(s -> s.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), String.valueOf(e.getValue()))), true);
+                .<String, String> transformViaStream(s -> s.map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), String.valueOf(e.getValue()))), true);
 
         Map<String, String> result = transformed.toMap();
         assertEquals(testMap.size(), result.size());
     }
 
     @Test
-    public void testTransformB_NoDeferred() {
+    public void testTransformViaStream_NoDeferred() {
         List<Map.Entry<String, Integer>> result = EntryStream.of("a", 1, "b", 2, "c", 3)
-                .<String, Integer> transformB(s -> s.filter(e -> e.getValue() > 1))
+                .<String, Integer> transformViaStream(s -> s.filter(e -> e.getValue() > 1))
                 .toList();
         assertEquals(2, result.size());
     }

@@ -342,7 +342,7 @@ public final class Objectory {
      *
      * @param size the desired size of the array
      * @return an {@code Object[]} of the specified size
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      */
     public static Object[] createObjectArray(final int size) {
         if (size < 0) {
@@ -417,7 +417,7 @@ public final class Objectory {
      *
      * @param capacity the minimum desired capacity of the buffer
      * @return a {@code char[]} buffer at least {@code capacity} long
-     * @throws IllegalArgumentException if {@code capacity} is negative
+     * @throws IllegalArgumentException if {@code capacity} is negative.
      */
     public static char[] createCharArrayBuffer(final int capacity) throws IllegalArgumentException {
         N.checkArgNotNegative(capacity, cs.capacity);
@@ -485,7 +485,7 @@ public final class Objectory {
      *
      * @param capacity the minimum desired capacity of the buffer
      * @return a {@code byte[]} buffer at least {@code capacity} long
-     * @throws IllegalArgumentException if {@code capacity} is negative
+     * @throws IllegalArgumentException if {@code capacity} is negative.
      */
     public static byte[] createByteArrayBuffer(final int capacity) throws IllegalArgumentException {
         N.checkArgNotNegative(capacity, cs.capacity);
@@ -559,7 +559,7 @@ public final class Objectory {
      * @return an empty {@code StringBuilder}; freshly allocated with capacity
      *         {@code initCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
-     * @throws IllegalArgumentException if {@code initCapacity} is negative
+     * @throws IllegalArgumentException if {@code initCapacity} is negative.
      */
     public static StringBuilder createStringBuilder(final int initCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initCapacity, cs.initCapacity);
@@ -626,7 +626,7 @@ public final class Objectory {
      * @return an empty {@code ByteArrayOutputStream}; freshly allocated with capacity
      *         {@code initCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
-     * @throws IllegalArgumentException if {@code initCapacity} is negative
+     * @throws IllegalArgumentException if {@code initCapacity} is negative.
      */
     public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initCapacity, cs.initCapacity);

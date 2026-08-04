@@ -1035,7 +1035,11 @@ abstract class AbstractDoubleStream extends DoubleStream {
      * @return a new DoubleStream backed by the transformed array
      */
     private DoubleStream lazyLoad(final UnaryOperator<double[]> op, final boolean sorted) {
-        return DoubleStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(DoubleIterator.defer(() -> {
+            final double[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? DoubleIterator.empty() : DoubleIterator.of(a);
+        }), sorted);
     }
 
     @Override

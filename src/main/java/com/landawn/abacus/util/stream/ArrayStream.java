@@ -190,7 +190,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param predicate the predicate to apply to each element
      * @return a new stream containing only the elements that match the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
@@ -240,7 +240,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param predicate the predicate to apply to each element to decide whether to include it
      * @return a new stream containing the longest prefix of elements matching the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
@@ -289,7 +289,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param predicate the predicate applied to leading elements to decide how many to skip
      * @return a new stream that drops the longest prefix of elements matching the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
@@ -351,7 +351,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param step the step size between returned elements; must be positive
      * @return a new stream containing every {@code step}-th element
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code step} is not positive
+     * @throws IllegalArgumentException if {@code step} is not positive.
      */
     @Override
     public Stream<T> step(final long step) throws IllegalStateException, IllegalArgumentException {
@@ -430,7 +430,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param mapper the function to apply to each element
      * @return a new stream consisting of mapped elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -2195,7 +2195,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                 non-negative
      * @return a stream of two sub-streams split at {@code position}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code position} is negative
+     * @throws IllegalArgumentException if {@code position} is negative.
      */
     @Override
     public Stream<Stream<T>> splitAt(final int position) throws IllegalStateException, IllegalArgumentException {
@@ -2370,7 +2370,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                non-negative
      * @return a stream containing at most {@code maxSize} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxSize} is negative
+     * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
     @Override
     public Stream<T> limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
@@ -2394,7 +2394,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param n the number of leading elements to skip; must be non-negative
      * @return a stream consisting of the remaining elements after skipping {@code n}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     @Override
     public Stream<T> skip(final long n) throws IllegalStateException, IllegalArgumentException {
@@ -2520,7 +2520,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param action the action to perform on each element
      * @return a new stream that passes each element through {@code action} before yielding it
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public Stream<T> onEach(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
@@ -2750,7 +2750,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                  provided length
      * @return an array containing all elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code generator} is {@code null}
+     * @throws IllegalArgumentException if {@code generator} is {@code null}.
      */
     @Override
     public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalArgumentException, IllegalStateException {
@@ -3002,7 +3002,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -3038,7 +3038,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param accumulator a function combining the running result with the next element
      * @return the result of folding all elements left-to-right, starting from {@code identity}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public <U> U foldLeft(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -3070,7 +3070,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -3109,7 +3109,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                    (applied right-to-left)
      * @return the result of folding all elements right-to-left, starting from {@code identity}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public <U> U foldRight(final U identity, final BiFunction<? super U, ? super T, U> accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -3135,13 +3135,13 @@ class ArrayStream<T> extends AbstractStream<T> {
      * returning an Optional with the result or an empty Optional if the stream is empty.
      * This method delegates to {@link #foldLeft(BinaryOperator)}.
      *
-     * <p>This is a terminal operation.
+     * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @param accumulator the associative function used to reduce elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalArgumentException {
@@ -3157,7 +3157,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * accumulator function, and combiner. In sequential mode the combiner is not used.
      * This method delegates to {@link #foldLeft(Object, BiFunction)}.
      *
-     * <p>This is a terminal operation.
+     * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @param <U> the type of the accumulated result
      * @param identity the identity value for the accumulation function
@@ -3165,7 +3165,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param combiner a function to combine two partial results (unused in sequential mode)
      * @return the result of accumulating all elements with {@code accumulator}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} or {@code combiner} is {@code null}.
      */
     @Override
     public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner)
@@ -3191,7 +3191,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param combiner a function that merges two result containers (unused in sequential mode)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
+     *         {@code null}.
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
@@ -3255,7 +3256,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param n the maximum number of trailing elements to include; must be non-negative
      * @return a new stream containing at most the last {@code n} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #skipLast(int)
      */
     @Override
@@ -3280,7 +3281,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param n the number of trailing elements to skip; must be non-negative
      * @return a new stream without the last {@code n} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #takeLast(int)
      */
     @Override
@@ -3299,13 +3300,13 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Returns an Optional containing the minimum element of this stream according to the given
      * comparator, or an empty Optional if the stream is empty.
      *
-     * <p>This is a terminal operation. When the stream is sorted according to the given comparator,
-     * the first element is returned directly in O(1) time.
+     * <p>This is a terminal operation. The stream is closed after this call. When the stream is sorted according to
+     * the given comparator, the first element is returned directly in O(1) time.
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @Override
     public Optional<T> min(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
@@ -3330,13 +3331,13 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Returns an Optional containing the maximum element of this stream according to the given
      * comparator, or an empty Optional if the stream is empty.
      *
-     * <p>This is a terminal operation. When the stream is sorted according to the given comparator,
-     * the last element is returned directly in O(1) time.
+     * <p>This is a terminal operation. The stream is closed after this call. When the stream is sorted according to
+     * the given comparator, the last element is returned directly in O(1) time.
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @Override
     public Optional<T> max(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
@@ -3463,7 +3464,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @return {@code true} if at least one element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate)
@@ -3497,7 +3498,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate)
@@ -3531,7 +3532,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *         {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate)
@@ -3589,7 +3590,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @return an Optional containing the first matching element, or an empty Optional if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
@@ -3623,7 +3624,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @return an Optional containing the last matching element, or an empty Optional if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws a checked exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
@@ -3697,7 +3698,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param rounds the number of full cycles to produce; must be non-negative
      * @return a new stream cycling this stream's elements {@code rounds} times
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code rounds} is negative
+     * @throws IllegalArgumentException if {@code rounds} is negative.
      * @see #cycled()
      */
     @Override

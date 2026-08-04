@@ -139,7 +139,7 @@ public enum ServiceStatus {
      *
      * @param code the integer value to convert to a {@code ServiceStatus}
      * @return the {@code ServiceStatus} corresponding to the given integer value; never {@code null}
-     * @throws IllegalArgumentException if no {@code ServiceStatus} exists for the given integer value
+     * @throws IllegalArgumentException if no {@code ServiceStatus} exists for the given integer value.
      * @see #code()
      */
     public static ServiceStatus fromCode(final int code) {

@@ -1314,7 +1314,7 @@ public final class TypeFactory {
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param cls the Class object for which to retrieve the Type
      * @return the Type object corresponding to the specified class (never {@code null})
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      * @see #getType(String)
      * @see #getType(java.lang.reflect.Type)
      */
@@ -1368,7 +1368,8 @@ public final class TypeFactory {
      * @param <T> the Java type represented by the requested {@code Type} object
      * @param javaType the java.lang.reflect.Type to convert, can be a Class or ParameterizedType
      * @return the corresponding Type object (never {@code null})
-     * @throws IllegalArgumentException if {@code javaType} is {@code null}, or if the type name format is structurally invalid
+     * @throws IllegalArgumentException if {@code javaType} is {@code null}, or if the type name format is
+     *         structurally invalid.
      * @see #getType(Class)
      * @see #getType(String)
      */
@@ -1454,7 +1455,8 @@ public final class TypeFactory {
      * @param typeName the name of the type to retrieve, with optional type parameters; must not be {@code null} or empty
      * @return the Type object corresponding to the type name (never {@code null}; an
      *         {@link com.landawn.abacus.type.ObjectType ObjectType} is returned for unresolvable names)
-     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if the type name format is structurally invalid (e.g., a mismatched type-parameter count)
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if the type name format is
+     *         structurally invalid (e.g., a mismatched type-parameter count).
      * @see #getType(Class)
      * @see #registerType(String, Type)
      */
@@ -1501,7 +1503,8 @@ public final class TypeFactory {
      * @param targetClass the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is
+     *         {@code null}.
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
@@ -1549,7 +1552,8 @@ public final class TypeFactory {
      * @param cls the class for which to register the custom type
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is {@code null}
+     * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is
+     *         {@code null}.
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
      */
@@ -1601,7 +1605,9 @@ public final class TypeFactory {
      * @param <T> the Java type handled by the custom type registration
      * @param cls the class for which to register the type
      * @param type the Type implementation to register for the class
-     * @throws IllegalArgumentException if {@code cls} or {@code type} is {@code null}, if a type is already registered for the class, or if a type with the same name (as returned by {@link Type#name()}) already exists
+     * @throws IllegalArgumentException if {@code cls} or {@code type} is {@code null}, if a type is already
+     *         registered for the class, or if a type with the same name (as returned by {@link Type#name()}) already
+     *         exists.
      * @see #registerType(String, Type)
      * @see #getType(Class)
      */
@@ -1651,8 +1657,8 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String, receives the object and a JsonParser
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
-     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass}, {@code toStringFunc}, or
-     *                                  {@code fromStringFunc} is {@code null}
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass},
+     *         {@code toStringFunc}, or {@code fromStringFunc} is {@code null}.
      * @see #registerType(String, Class, Function, Function)
      * @see #registerType(String, Type)
      */
@@ -1708,8 +1714,8 @@ public final class TypeFactory {
      * @param targetClass the class that this type handles
      * @param toStringFunc the function to convert an object of type T to a String
      * @param fromStringFunc the function to convert a String to an object of type T
-     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass}, {@code toStringFunc}, or
-     *                                  {@code fromStringFunc} is {@code null}
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty, or if {@code targetClass},
+     *         {@code toStringFunc}, or {@code fromStringFunc} is {@code null}.
      * @see #registerType(String, Class, BiFunction, BiFunction)
      * @see #registerType(String, Type)
      */
@@ -1762,7 +1768,8 @@ public final class TypeFactory {
      *
      * @param typeName the name to register the type under
      * @param type the Type implementation to register
-     * @throws IllegalArgumentException if typeName or type is {@code null}, if a type with the given name already exists, or if a type with the same name (as returned by {@link Type#name()}) already exists
+     * @throws IllegalArgumentException if typeName or type is {@code null}, if a type with the given name already
+     *         exists, or if a type with the same name (as returned by {@link Type#name()}) already exists.
      * @see #registerType(Type)
      * @see #getType(String)
      */
@@ -1812,7 +1819,7 @@ public final class TypeFactory {
      * }</pre>
      *
      * @param type the Type implementation to register
-     * @throws IllegalArgumentException if type is {@code null} or if a type with the same name already exists
+     * @throws IllegalArgumentException if type is {@code null} or if a type with the same name already exists.
      * @see #registerType(String, Type)
      * @see Type#name()
      */

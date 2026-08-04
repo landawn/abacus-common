@@ -23,10 +23,6 @@ import com.landawn.abacus.util.cs;
  * A functional interface that represents a function that accepts four arguments and
  * produces a result. This is the four-arity specialization of {@link java.util.function.Function}.
  *
- * <p>This interface generalizes the standard Java functional function interfaces to support
- * functions with four parameters, which is useful for more complex transformations that
- * require multiple inputs to compute a result.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -44,9 +40,6 @@ import com.landawn.abacus.util.cs;
 public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, B, C, D, R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
-     *
-     * <p>This method takes four arguments of types A, B, C, and D as input and
-     * produces a result of type R.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -78,10 +71,6 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * either function throws an exception, it is relayed to the caller of the
      * composed function.
      *
-     * <p>This method enables function composition, allowing you to chain multiple
-     * transformations together. The output of this function becomes the input to
-     * the {@code after} function.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadFunction<Integer, Integer, Integer, Integer, Integer> sum4 =
@@ -110,7 +99,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> QuadFunction<A, B, C, D, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
@@ -130,7 +119,7 @@ public interface QuadFunction<A, B, C, D, R> extends Throwables.QuadFunction<A, 
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.QuadFunction}
-     * @return this function viewed as a {@code Throwables.QuadFunction} by unchecked cast
+     * @return a {@code Throwables.QuadFunction} view of this function
      */
     default <E extends Throwable> Throwables.QuadFunction<A, B, C, D, R, E> toThrowable() {
         return (Throwables.QuadFunction<A, B, C, D, R, E>) this;

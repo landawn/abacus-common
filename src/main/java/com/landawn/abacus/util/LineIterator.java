@@ -32,8 +32,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * {@code LineIterator} holds a reference to an open {@code Reader}.
  * When you have finished with the iterator, you should close the reader
  * to free internal resources. This can be done by closing the reader directly,
- * or by calling the {@link #close()} or {@link IOUtil#closeQuietly(AutoCloseable)}
- * method on the iterator.
+ * by calling {@link #close()} on the iterator, or by passing the iterator to
+ * {@link IOUtil#closeQuietly(AutoCloseable)}.
  * The iterator is stateful and is not safe for concurrent traversal without external synchronization.
  *
  * <p>The recommended usage pattern is:</p>
@@ -80,7 +80,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }</pre>
      *
      * @param reader the {@code Reader} to read from, must not be null
-     * @throws IllegalArgumentException if the reader is null
+     * @throws IllegalArgumentException if the reader is null.
      */
     public LineIterator(final Reader reader) throws IllegalArgumentException {
         N.checkArgNotNull(reader, cs.reader);
@@ -116,7 +116,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws IllegalArgumentException if {@code file} is {@code null}
+     * @throws IllegalArgumentException if {@code file} is {@code null}.
      * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File, Charset)
      */
@@ -146,7 +146,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param file the file to open for input; must not be {@code null}
      * @param encoding the character encoding to use; must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws IllegalArgumentException if {@code file} or {@code encoding} is {@code null}
+     * @throws IllegalArgumentException if {@code file} or {@code encoding} is {@code null}.
      * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File)
      */
@@ -192,7 +192,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * @param input the {@code InputStream} to read from, must not be null
      * @return an Iterator of the lines in the input stream, never null
-     * @throws IllegalArgumentException if {@code input} is {@code null}
+     * @throws IllegalArgumentException if {@code input} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
      * @see #of(InputStream, Charset)
      */
@@ -219,7 +219,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param input the {@code InputStream} to read from; must not be {@code null}
      * @param encoding the character encoding to use; must not be {@code null}
      * @return an Iterator of the lines in the input stream, never {@code null}
-     * @throws IllegalArgumentException if {@code input} or {@code encoding} is {@code null}
+     * @throws IllegalArgumentException if {@code input} or {@code encoding} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
      * @see #of(InputStream)
      */
@@ -248,7 +248,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * @param reader the {@code Reader} to read from, must not be null
      * @return an Iterator of the lines in the reader, never null
-     * @throws IllegalArgumentException if the reader is null
+     * @throws IllegalArgumentException if the reader is null.
      * @see #LineIterator(Reader)
      */
     public static LineIterator of(final Reader reader) {

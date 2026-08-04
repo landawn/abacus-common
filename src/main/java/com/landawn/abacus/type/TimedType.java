@@ -135,7 +135,7 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      *
      * @param str the string to parse
      * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or does not contain exactly two elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or does not contain exactly two elements.
      * @see #valueOf(Object)
      * @see #stringOf(Timed)
      */

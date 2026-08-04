@@ -691,9 +691,9 @@ public final class IOUtil {
     public static final String LINE_SEPARATOR_UNIX = "\n";
 
     /**
-     * The Windows line separator string ("\r\n").
+     * The Windows line separator string ({@code "\r\n"}).
      * @see System#lineSeparator()
-     * @deprecated use {@link #LINE_SEPARATOR_UNIX} instead. It's recommended to use <i>\n</i> as the line separator in all platforms(?).
+     * @deprecated use {@link #LINE_SEPARATOR_UNIX} instead. It's recommended to use <i>\n</i> as the line separator on all platforms.
      * It will make things easier when files are shared between different OS platforms. Windows can handle <i>\n</i> correctly.
      */
     @Deprecated
@@ -964,8 +964,9 @@ public final class IOUtil {
     public static byte[] charsToBytes(final char[] chars, final int offset, final int charCount, Charset charset) throws IllegalArgumentException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(charCount, cs.count);
+        N.checkFromIndexSize(offset, charCount, N.len(chars));
 
-        if (charCount == 0 && N.len(chars) >= offset) {
+        if (charCount == 0) {
             return N.EMPTY_BYTE_ARRAY;
         }
 
@@ -1037,8 +1038,9 @@ public final class IOUtil {
     public static char[] bytesToChars(final byte[] bytes, final int offset, final int byteCount, Charset charset) throws IllegalArgumentException {
         N.checkArgNotNegative(offset, cs.offset);
         N.checkArgNotNegative(byteCount, cs.count);
+        N.checkFromIndexSize(offset, byteCount, N.len(bytes));
 
-        if (byteCount == 0 && N.len(bytes) >= offset) {
+        if (byteCount == 0) {
             return N.EMPTY_CHAR_ARRAY;
         }
 
@@ -3114,7 +3116,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read data from, must not be {@code null}.
-     * @param charset the charset to be used to open the specified file for reading.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param buf the char array buffer where the data is to be stored, must not be {@code null}.
      * @return the total number of chars read into the buffer, or -1 if there is no more data because the end of the file has been reached.
      * @throws IOException if an I/O error occurs.
@@ -3168,7 +3170,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param source the file to read data from, must not be {@code null}.
-     * @param charset the charset to be used to open the specified file for reading.
+     * @param charset the character set to use for decoding, if {@code null} the default charset (UTF-8) is used.
      * @param buf the char array buffer where the data is to be stored, must not be {@code null}.
      * @param off the start offset in the array at which the data is written.
      * @param len the maximum number of chars to read.
@@ -3726,7 +3728,6 @@ public final class IOUtil {
     /**
      * Writes the string representation of an object to a Writer.
      * The string representation of the object is obtained by calling {@code N.toString(obj)}.
-     * Note: This method also protects write(boolean/char/byte/../double, Writer) from NullPointerException.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4326,6 +4327,7 @@ public final class IOUtil {
      * @param flush  if {@code true}, the output writer will be flushed after writing.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code count} exceed the length of {@code chars}.
      */
     public static void write(final char[] chars, final int offset, final int count, final Writer output, final boolean flush)
             throws IllegalArgumentException, IOException {
@@ -4455,6 +4457,7 @@ public final class IOUtil {
      * @param output the OutputStream where the byte array is to be written.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code count} exceed the length of {@code bytes}.
      */
     public static void write(final byte[] bytes, final int offset, final int count, final OutputStream output) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -4509,6 +4512,7 @@ public final class IOUtil {
      * @param flush  if {@code true}, the output stream is flushed after writing the byte array.
      * @throws IOException if an I/O error occurs.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} and {@code count} exceed the length of {@code bytes}.
      */
     public static void write(final byte[] bytes, final int offset, final int count, final OutputStream output, final boolean flush)
             throws IllegalArgumentException, IOException {
@@ -4565,7 +4569,8 @@ public final class IOUtil {
      *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code output} are the same file.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and
+     *         {@code output} are the same file.
      */
     public static long write(final File source, final long offset, final long count, final File output) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -4733,7 +4738,8 @@ public final class IOUtil {
      *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of bytes written.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or
+     *         {@code count} is negative.
      */
     public static long write(final InputStream source, final long offset, final long count, final File output) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -4840,7 +4846,8 @@ public final class IOUtil {
      * @param output the output stream to write to.
      * @param flush  if {@code true}, the output stream is flushed after the write operation.
      * @return the total number of bytes written to the output stream.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or {@code output} is {@code null}.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or
+     *         {@code output} is {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public static long write(final InputStream source, final long offset, final long count, final OutputStream output, final boolean flush)
@@ -4984,7 +4991,8 @@ public final class IOUtil {
      *      If the file exists, it will be overwritten. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters written.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}, or if {@code offset} or
+     *         {@code count} is negative.
      */
     public static long write(final Reader source, final long offset, final long count, final Charset charset, final File output)
             throws IllegalArgumentException, IOException {
@@ -5085,11 +5093,12 @@ public final class IOUtil {
      *
      * @param source the Reader to read from.
      * @param offset the position in the Reader to start reading from.
-     * @param count  the number of characters to read from the Reader and write to the Writer.
+     * @param count  the maximum number of characters to read from the Reader and write to the Writer.
      * @param output the Writer to write to.
      * @param flush  if {@code true}, the output Writer is flushed after writing.
      * @return the total number of characters written to the Writer.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or {@code output} is {@code null}.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} or
+     *         {@code output} is {@code null}.
      * @throws IOException              if an I/O error occurs.
      */
     public static long write(final Reader source, final long offset, final long count, final Writer output, final boolean flush)
@@ -5412,7 +5421,8 @@ public final class IOUtil {
      *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and {@code targetFile} denote the same file.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code source} and
+     *         {@code targetFile} denote the same file.
      */
     public static long append(final File source, final long offset, final long count, final File targetFile) throws IllegalArgumentException, IOException {
         N.checkArgNotNegative(offset, cs.offset);
@@ -5490,7 +5500,8 @@ public final class IOUtil {
      *      If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the number of bytes appended to the target file.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset}
+     *         or {@code count} is negative.
      */
     public static long append(final InputStream source, final long offset, final long count, final File targetFile)
             throws IllegalArgumentException, IOException {
@@ -5561,7 +5572,7 @@ public final class IOUtil {
     /**
      * Appends the content of the Reader to the target file.
      * The content to be appended is read from the Reader starting from the specified offset in characters and up to the specified count.
-     * This file is opened to write with the default charset.
+     * The target file is opened in append mode using the default charset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5606,7 +5617,8 @@ public final class IOUtil {
      *                   If the file exists, the content will be appended to it. If the file's parent directory doesn't exist, it will be created.
      * @return the total number of characters appended.
      * @throws IOException if an I/O error occurs.
-     * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code source} or {@code targetFile} is {@code null}, or if {@code offset}
+     *         or {@code count} is negative.
      */
     public static long append(final Reader source, final long offset, final long count, final Charset charset, final File targetFile)
             throws IllegalArgumentException, IOException {
@@ -5682,7 +5694,7 @@ public final class IOUtil {
     /**
      * Appends the string representation of each object in the provided iterable as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
-     * This file is opened to write with the default charset.
+     * The file is opened in append mode using the default charset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5711,7 +5723,7 @@ public final class IOUtil {
     /**
      * Appends the string representation of each object in the provided iterable as a new line to the target file.
      * The string representation is obtained by invoking the {@code N.toString(Object)} method.
-     * This file is opened to write with the provided charset.
+     * The file is opened in append mode using the provided charset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5951,7 +5963,7 @@ public final class IOUtil {
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
-     * Fully maps a file in to memory as per
+     * Fully maps a file into memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)}
      * using the requested {@link MapMode}.
      *
@@ -5992,7 +6004,7 @@ public final class IOUtil {
     /**
      * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
-     * Maps a file in to memory as per
+     * Maps a file into memory as per
      * {@link FileChannel#map(java.nio.channels.FileChannel.MapMode, long, long)} using the requested {@link MapMode}.
      *
      * <p>The file is mapped from {@code offset} for {@code count} bytes.
@@ -7433,7 +7445,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param closeable the AutoCloseable object to be closed. It can be {@code null}.
-     * @throws RuntimeException if an I/O error occurs during the close operation.
+     * @throws RuntimeException if an exception occurs during the close operation.
      * @see #closeQuietly(AutoCloseable)
      */
     public static void close(final AutoCloseable closeable) {
@@ -7496,7 +7508,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param closeables the AutoCloseable objects to be closed. It may contain {@code null} elements.
-     * @throws RuntimeException if an I/O error occurs during any of the close operations.
+     * @throws RuntimeException if an exception occurs during any of the close operations.
      */
     public static void closeAll(final AutoCloseable... closeables) {
         if (N.isEmpty(closeables)) {
@@ -7524,7 +7536,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param closeables the Iterable of AutoCloseable objects to be closed. It may contain {@code null} elements.
-     * @throws RuntimeException if an I/O error occurs during any of the close operations.
+     * @throws RuntimeException if an exception occurs during any of the close operations.
      */
     public static void closeAll(final Iterable<? extends AutoCloseable> closeables) {
         if (N.isEmptyCollection(closeables)) {
@@ -7589,7 +7601,7 @@ public final class IOUtil {
 
     /**
      * Closes all provided AutoCloseable objects quietly.
-     * Any exceptions that occur during the closing operation are ignored.
+     * Any exceptions that occur during the closing operation are logged but not rethrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7611,7 +7623,7 @@ public final class IOUtil {
 
     /**
      * Closes all provided AutoCloseable objects quietly.
-     * Any exceptions that occur during the closing operation are ignored.
+     * Any exceptions that occur during the closing operation are logged but not rethrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7651,7 +7663,8 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be copied. It must not be {@code null}.
      * @param destDir the destination directory where the source file or directory will be copied to. It must not be {@code null}.
-     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the
+     *         destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir) throws IOException {
@@ -7678,7 +7691,8 @@ public final class IOUtil {
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the destination directory is inside or the same as the source directory.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or exists but is not a directory, or if the
+     *         destination directory is inside or the same as the source directory.
      * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws IOException {
@@ -7709,7 +7723,7 @@ public final class IOUtil {
      * @param srcFile          the source file or directory to be copied. It must not be {@code null}.
      * @param destDir          the destination directory where the source file or directory will be copied to. It must not be {@code null}.
      * @param preserveFileDate if {@code true}, the last modified date of the file will be preserved in the copied file.
-     * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. if the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied. A rejected subdirectory is still descended into, so that its own matching entries are copied.
+     * @param filter           a BiPredicate that takes the source directory and the file being evaluated as arguments and returns a boolean. If the predicate returns {@code true}, the file is copied; if it returns {@code false}, the file is not copied. A rejected subdirectory is still descended into, so that its own matching entries are copied.
      * @throws IOException if an I/O error occurs.
      * @throws E if the filter throws an exception.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
@@ -7949,7 +7963,7 @@ public final class IOUtil {
      * Copies the contents of a directory to another directory.
      * <p>
      * This method copies all files and subdirectories from the source directory to the destination directory.
-     * if the destination directory does not exist, it is created.
+     * If the destination directory does not exist, it is created.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -7961,7 +7975,8 @@ public final class IOUtil {
      *
      * @param srcDir  the source directory to copy from, must not be {@code null}.
      * @param destDir the destination directory to copy to, must not be {@code null}.
-     * @throws IllegalArgumentException if {@code srcDir} exists but is not a directory, or if {@code destDir} is {@code null} or exists but is not a directory.
+     * @throws IllegalArgumentException if {@code srcDir} exists but is not a directory, or if {@code destDir} is
+     *         {@code null} or exists but is not a directory.
      * @throws IOException if an I/O error occurs, or if the source directory is {@code null} or does not exist.
      */
     public static void copyDirectory(final File srcDir, final File destDir) throws IOException {
@@ -7983,13 +7998,13 @@ public final class IOUtil {
      * Copies a file to a new location preserving the file date.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. if the destination file exists, then this method
+     * holding the destination file is created if it does not exist. If the destination file exists, then this method
      * overwrites it. A symbolic link is resolved before copying, so the new file is not a link.
      * </p>
      * <p>
      * <strong>Note:</strong> This method tries to preserve the file's last modified date/times using
      * {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is not guaranteed that the
-     * operation will succeed. if the modification operation fails, it falls back to
+     * operation will succeed. If the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
@@ -8003,7 +8018,8 @@ public final class IOUtil {
      * @param srcFile an existing file to copy, must not be {@code null}.
      * @param destFile the new file, must not be {@code null}.
      * @throws FileNotFoundException if the source does not exist or is not readable.
-     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile}
+     *         denote the same file.
      * @throws IOException if source or destination is invalid, or if an error occurs during copying.
      * @see #copyToDirectory(File, File)
      * @see #copyFile(File, File, boolean)
@@ -8016,13 +8032,13 @@ public final class IOUtil {
      * Copies an existing file to a new file location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. if the destination file exists, then this method
+     * holding the destination file is created if it does not exist. If the destination file exists, then this method
      * overwrites it. A symbolic link is resolved before copying so the new file is not a link.
      * </p>
      * <p>
      * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
      * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
-     * not guaranteed that the operation will succeed. if the modification operation fails, it falls back to
+     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
@@ -8037,7 +8053,8 @@ public final class IOUtil {
      * @param destFile the new file, must not be {@code null}.
      * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
      * @throws FileNotFoundException if the source does not exist or is not readable.
-     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile}
+     *         denote the same file.
      * @throws IOException if source or destination is invalid, if an error occurs during copying, if setting the
      *         last-modified time didn't succeed, or if the output file length differs from the input after copying.
      * @see #copyFile(File, File, boolean, CopyOption...)
@@ -8050,7 +8067,7 @@ public final class IOUtil {
      * Copies a file to a new location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. if the destination file exists, you can overwrite
+     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
      * it if you use {@link StandardCopyOption#REPLACE_EXISTING}.
      * </p>
      *
@@ -8065,7 +8082,8 @@ public final class IOUtil {
      * @param destFile the new file, must not be {@code null}.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
      * @throws FileNotFoundException if the source does not exist or is not readable.
-     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile} denote the same file.
+     * @throws IllegalArgumentException if {@code srcFile} is not a file, or if {@code srcFile} and {@code destFile}
+     *         denote the same file.
      * @throws IOException if an I/O error occurs.
      * @see #copyFile(File, File, boolean, CopyOption...)
      * @see StandardCopyOption
@@ -8078,7 +8096,7 @@ public final class IOUtil {
      * Copies the contents of a file to a new location.
      * <p>
      * This method copies the contents of the specified source file to the specified destination file. The directory
-     * holding the destination file is created if it does not exist. if the destination file exists, you can overwrite
+     * holding the destination file is created if it does not exist. If the destination file exists, you can overwrite
      * it with {@link StandardCopyOption#REPLACE_EXISTING}.
      * </p>
      *
@@ -8090,7 +8108,7 @@ public final class IOUtil {
      * <p>
      * <strong>Note:</strong> Setting {@code preserveFileDate} to {@code true} tries to preserve the file's last
      * modified date/times using {@link BasicFileAttributeView#setTimes(FileTime, FileTime, FileTime)}. However, it is
-     * not guaranteed that the operation will succeed. if the modification operation fails, it falls back to
+     * not guaranteed that the operation will succeed. If the modification operation fails, it falls back to
      * {@link File#setLastModified(long)}, and if that fails, the method throws IOException.
      * </p>
      *
@@ -8106,7 +8124,8 @@ public final class IOUtil {
      * @param preserveFileDate {@code true} if the file date of the copy should be the same as the original.
      * @param copyOptions options specifying how the copy should be done, for example {@link StandardCopyOption}.
      * @throws FileNotFoundException if the source does not exist or is not readable.
-     * @throws IllegalArgumentException if {@code srcFile} or an existing {@code destFile} is not a file, or if they denote the same file.
+     * @throws IllegalArgumentException if {@code srcFile} or an existing {@code destFile} is not a file, or if they
+     *         denote the same file.
      * @throws IOException if an I/O error occurs, if setting the last-modified time didn't succeed, or if the destination is not writable.
      * @see #copyToDirectory(File, File, boolean)
      */
@@ -8306,7 +8325,8 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be moved.
      * @param destDir the destination directory where the file or directory will be moved to.
-     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a
+     *         directory.
      * @throws IOException if an I/O error occurs during the move operation, such as if the destination cannot be created or written to.
      * @deprecated the second argument is a destination <i>directory</i>, not a destination file (unlike
      *             {@link #copyFile(File, File)}), which the name {@code move} does not convey.
@@ -8320,12 +8340,13 @@ public final class IOUtil {
 
     /**
      * Moves a file from the source file to the target directory.
-     * if the destination directory does not exist, it will be created.
+     * If the destination directory does not exist, it will be created.
      *
      * @param srcFile the source file to be moved.
      * @param destDir the target directory where the file will be moved to.
      * @param options optional arguments that specify how the move should be done.
-     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a
+     *         directory.
      * @throws IOException if an I/O error occurs, including failure to create the destination directory.
      * @deprecated the second argument is a destination <i>directory</i>, not a destination file, which the
      *             name {@code move} does not convey. Use {@link #moveToDirectory(File, File, CopyOption...)} instead.
@@ -8354,7 +8375,8 @@ public final class IOUtil {
      *
      * @param srcFile the source file or directory to be moved.
      * @param destDir the destination directory where the file or directory will be moved to.
-     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a
+     *         directory.
      * @throws IOException if an I/O error occurs during the move operation, such as if the destination cannot be created or written to.
      * @see #moveToDirectory(File, File, CopyOption...)
      * @see #copyToDirectory(File, File)
@@ -8381,7 +8403,8 @@ public final class IOUtil {
      * @param srcFile the source file to be moved.
      * @param destDir the target directory where the file will be moved to.
      * @param options optional arguments that specify how the move should be done.
-     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a directory.
+     * @throws IllegalArgumentException if the source file does not exist, or if {@code destDir} exists but is not a
+     *         directory.
      * @throws IOException if an I/O error occurs, including failure to create the destination directory.
      * @see #moveToDirectory(File, File)
      * @see #copyToDirectory(File, File, boolean)
@@ -8484,7 +8507,7 @@ public final class IOUtil {
     /**
      * Deletes the specified file if it exists by calling {@link File#delete()}.
      * <p>
-     * This method attempts to delete the specified file or directory. if the file is {@code null}
+     * This method attempts to delete the specified file or directory. If the file is {@code null}
      * or does not exist, the method returns {@code false} without attempting deletion.
      * For directories, this method only deletes empty directories - it will not delete
      * directories that contain files or subdirectories.
@@ -8523,9 +8546,9 @@ public final class IOUtil {
     /**
      * Deletes the specified file and all its subfiles/directories recursively if it's a directory.
      * <p>
-     * This method performs a recursive deletion operation. if the specified file is a directory,
+     * This method performs a recursive deletion operation. If the specified file is a directory,
      * it will delete all files and subdirectories within it before deleting the directory itself.
-     * if the file is a regular file, it will simply delete the file. if the file does not exist
+     * If the file is a regular file, it will simply delete the file. If the file does not exist
      * or is {@code null}, the method returns {@code false} without performing any operations.
      * <p>
      * This operation is irreversible and will permanently remove all specified files and directories.
@@ -9089,9 +9112,9 @@ public final class IOUtil {
     }
 
     /**
-     * Returns the size of the specified file or directory. if the provided
+     * Returns the size of the specified file or directory. If the provided
      * {@link File} is a regular file, then the file's length is returned.
-     * if the argument is a directory, then the size of the directory is
+     * If the argument is a directory, then the size of the directory is
      * calculated recursively. If a directory or subdirectory is security
      * restricted, its size will not be included.
      * <p>
@@ -9108,7 +9131,7 @@ public final class IOUtil {
      * }</pre>
      *
      * @param file the regular file or directory to return the size of (must not be {@code null}).
-     * @return the length of the file, or recursive size of the directory, provided (in bytes).
+     * @return the length of the file, or recursive size of the directory (in bytes).
      * @throws FileNotFoundException if the file is {@code null} or the file does not exist.
      * @see #sizeOfAsBigInteger(File)
      */
@@ -9540,7 +9563,8 @@ public final class IOUtil {
      *
      * @param srcZipFile the source ZIP file to be unzipped. This must be a valid ZIP file.
      * @param targetDir  the directory to which the contents of the ZIP file will be extracted. It is created if it does not exist.
-     * @throws IllegalArgumentException if {@code srcZipFile} is a directory, or if {@code targetDir} is {@code null} or is an existing file.
+     * @throws IllegalArgumentException if {@code srcZipFile} is a directory, or if {@code targetDir} is {@code null}
+     *         or is an existing file.
      * @throws IOException if {@code srcZipFile} does not exist, a ZIP entry is absolute, would be extracted outside
      *         {@code targetDir}, would overwrite the source archive, or another I/O error occurs during extraction.
      */
@@ -9646,7 +9670,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be approximately equal in size</li>
      *   <li><strong>Last part:</strong> Contains any remaining bytes, which may be smaller than the other parts</li>
-     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -9696,7 +9720,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be approximately equal in size</li>
      *   <li><strong>Last part:</strong> Contains any remaining bytes, which may be smaller than the other parts</li>
-     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -9715,7 +9739,8 @@ public final class IOUtil {
      * @param file the source file to split; must exist and be readable.
      * @param countOfParts the number of parts to split the file into; must be greater than 0.
      * @param destDir the directory where the split parts will be saved; it is created if it does not exist and must be writable.
-     * @throws IllegalArgumentException if {@code file} is {@code null}, {@code countOfParts} is less than 1, or {@code destDir} is {@code null} or is an existing file.
+     * @throws IllegalArgumentException if {@code file} is {@code null}, {@code countOfParts} is less than 1, or
+     *         {@code destDir} is {@code null} or is an existing file.
      * @throws FileNotFoundException if the source file does not exist or is not readable.
      * @throws IOException if the destination directory cannot be created or written to, or another I/O error occurs.
      * @see #split(File, int)
@@ -9799,7 +9824,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
      *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -9848,7 +9873,7 @@ public final class IOUtil {
      * <ul>
      *   <li><strong>Regular parts:</strong> Each part (except the last) will be exactly {@code sizeOfPart} bytes</li>
      *   <li><strong>Last part:</strong> Contains the remaining bytes, which may be smaller than {@code sizeOfPart}</li>
-     *   <li><strong>Empty files:</strong> if the source file is empty, one empty part file is created</li>
+     *   <li><strong>Empty files:</strong> If the source file is empty, one empty part file is created</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -9867,7 +9892,8 @@ public final class IOUtil {
      * @param file the source file to split; must exist and be readable.
      * @param sizeOfPart the maximum size in bytes for each part (except possibly the last part); must be positive.
      * @param destDir the destination directory where split parts will be saved; it is created if it does not exist and must be writable.
-     * @throws IllegalArgumentException if {@code destDir} is {@code null} or is an existing file, or if {@code sizeOfPart} is not positive.
+     * @throws IllegalArgumentException if {@code destDir} is {@code null} or is an existing file, or if
+     *         {@code sizeOfPart} is not positive.
      * @throws FileNotFoundException if {@code file} is {@code null}, does not exist, or is not readable.
      * @throws IOException if the destination directory cannot be created or written to, or another I/O error occurs.
      * @see #splitBySize(File, long)
@@ -10089,7 +10115,8 @@ public final class IOUtil {
      * @param sourceFiles an array of files to be merged. Each must be an existing, readable file.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
      * @return the number of bytes written to the destination file.
-     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as
+     *         {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final File[] sourceFiles, final File destFile) throws UncheckedIOException {
@@ -10112,7 +10139,8 @@ public final class IOUtil {
      * @param sourceFiles a collection of files to be merged. Each must be an existing, readable file.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
      * @return the number of bytes written to the destination file.
-     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as
+     *         {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final File destFile) throws UncheckedIOException {
@@ -10143,7 +10171,8 @@ public final class IOUtil {
      * @param delimiter   a byte array that will be inserted between each file during the merge; {@code null} or empty inserts nothing.
      * @param destFile    the destination file where the merged content will be written. It is created if it does not exist, and overwritten if it does.
      * @return the number of bytes written to the destination file, including the delimiters.
-     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as {@code destFile}.
+     * @throws IllegalArgumentException if any source file is a directory, or denotes the same file as
+     *         {@code destFile}.
      * @throws UncheckedIOException if any source file does not exist or is not readable, or if an I/O error occurs during the process.
      */
     public static long merge(final Collection<File> sourceFiles, final byte[] delimiter, final File destFile) throws UncheckedIOException {
@@ -10271,9 +10300,9 @@ public final class IOUtil {
      * }</pre>
      *
      * @param <E>         the type of the exception that may be thrown by the filter.
-     * @param parentPath  the parent directory where the listing will start. if it is {@code null} or does not exist, an empty list is returned.
+     * @param parentPath  the parent directory where the listing will start. If it is {@code null} or does not exist, an empty list is returned.
      * @param recursively if {@code true}, files in all subdirectories of the parent directory will be listed. Symbolic links to directories are never descended into.
-     * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. if the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed. A rejected subdirectory is still descended into when {@code recursively} is {@code true}.
+     * @param filter      a BiPredicate that takes the parent directory and a file as arguments and returns a boolean. If the predicate returns {@code true}, the file is listed; if it returns {@code false}, the file is not listed. A rejected subdirectory is still descended into when {@code recursively} is {@code true}.
      * @return a new, modifiable list of the matching files in the specified directory and possibly its subdirectories.
      * @throws E if the filter throws an exception.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
@@ -10527,8 +10556,8 @@ public final class IOUtil {
      *
      * @param urls the collection of URLs to be converted, must not be {@code null}.
      * @return a list of File objects corresponding to the input URLs; an empty list if {@code urls} is empty.
-     * @throws IllegalArgumentException if {@code urls} is {@code null}.
-     * @throws IllegalArgumentException if any URL in the collection is {@code null} or is not a file URL.
+     * @throws IllegalArgumentException if {@code urls} is {@code null}, or if any URL in the collection is
+     *         {@code null} or is not a file URL.
      */
     public static List<File> toFiles(final Collection<URL> urls) throws IllegalArgumentException {
         N.checkArgNotNull(urls, cs.urls);
@@ -10679,12 +10708,12 @@ public final class IOUtil {
      * @param file1 the first file.
      * @param file2 the second file.
      * @return {@code true} if the contents of the files are equal or they both don't exist, {@code false} otherwise.
-     * @throws IllegalArgumentException when an input is not a file.
+     * @throws IllegalArgumentException if an input is not a file.
      * @throws IOException if an I/O error occurs.
      */
     public static boolean contentEquals(final File file1, final File file2) throws IOException {
         // A directory is not a file: reject it up-front (even when both arguments are the same directory
-        // reference), consistent with the documented "@throws IllegalArgumentException when an input is not a file".
+        // reference), consistent with the documented "@throws IllegalArgumentException if an input is not a file".
         if (file1 != null && file1.isDirectory()) {
             throw new IllegalArgumentException("'" + file1.getAbsolutePath() + "' is not a file");
         } else if (file2 != null && file2.isDirectory()) {
@@ -10754,14 +10783,14 @@ public final class IOUtil {
      *                    May be {@code null} or empty, in which case the default charset (UTF-8) is used.
      * @return {@code true} if the content of the files are equal or neither exists,
      *         {@code false} otherwise.
-     * @throws IllegalArgumentException when an input is not a file.
+     * @throws IllegalArgumentException if an input is not a file.
      * @throws IOException in case of an I/O error.
      * @throws UnsupportedCharsetException if the named charset is unavailable (unchecked exception).
      * @see IOUtil#contentEqualsIgnoreEOL(Reader, Reader)
      */
     public static boolean contentEqualsIgnoreEOL(final File file1, final File file2, final String charsetName) throws IOException {
         // A directory is not a file: reject it up-front (even when both arguments are the same directory
-        // reference), consistent with the documented "@throws IllegalArgumentException when an input is not a file".
+        // reference), consistent with the documented "@throws IllegalArgumentException if an input is not a file".
         if (file1 != null && file1.isDirectory()) {
             throw new IllegalArgumentException("'" + file1.getAbsolutePath() + "' is not a file");
         } else if (file2 != null && file2.isDirectory()) {
@@ -11267,7 +11296,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11294,7 +11323,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11330,7 +11359,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11359,7 +11388,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11397,7 +11426,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11482,7 +11511,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11714,7 +11743,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11744,7 +11773,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11783,7 +11812,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11816,7 +11845,7 @@ public final class IOUtil {
     }
 
     /**
-     * Parses the given collection of file line by line using the provided lineAction.
+     * Parses the given collection of files line by line using the provided lineAction.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

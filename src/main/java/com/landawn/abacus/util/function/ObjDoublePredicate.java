@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * object-valued argument and a double-valued argument. This is a specialization of
  * BiPredicate for the case where the second argument is a primitive double.
  *
- * <p>This interface is typically used for testing conditions that involve both an object
- * and a double value, such as threshold checks, range validations, or filtering operations
- * based on numeric criteria.
- *
  * <p>This is a functional interface whose functional method is {@link #test(Object, double)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -38,10 +34,6 @@ import com.landawn.abacus.util.cs;
 public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, RuntimeException> { // NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
-     *
-     * <p>This method tests whether the given object and double value satisfy the
-     * condition represented by this predicate. It should return {@code true} if
-     * the input arguments match the predicate's criteria, {@code false} otherwise.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -59,10 +51,6 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     *
-     * <p>The returned predicate will return {@code true} when this predicate returns
-     * {@code false}, and vice versa. This is useful for inverting conditions without
-     * having to write a new predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -102,7 +90,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjDoublePredicate<T> and(final ObjDoublePredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -134,7 +122,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjDoublePredicate<T> or(final ObjDoublePredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

@@ -127,7 +127,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default DoubleBiPredicate and(final DoubleBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -152,7 +152,7 @@ public interface DoubleBiPredicate extends Throwables.DoubleBiPredicate<RuntimeE
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default DoubleBiPredicate or(final DoubleBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

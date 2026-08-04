@@ -27,12 +27,13 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for ImmutableMap objects with generic key and value types.
- * This class handles serialization and deserialization of ImmutableMap instances.
+ * Type handler for {@link ImmutableMap} objects with generic key and value types.
+ * This class handles serialization and deserialization of {@code ImmutableMap} instances.
  *
  * @param <K> the key type
  * @param <V> the value type
- * @param <T> the specific ImmutableMap implementation type
+ * @param <T> the specific {@code ImmutableMap} implementation type
+ * @see ImmutableMap
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends AbstractType<T> {

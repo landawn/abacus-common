@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a predicate (boolean-valued function) of one {@code int}-valued argument.
  * This is the {@code int}-consuming primitive type specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface extends both {@link java.util.function.IntPredicate} and
- * {@link Throwables.IntPredicate}, providing compatibility with the standard Java functional
- * interfaces while also supporting the Throwables framework.
- *
  * <p>This is a functional interface whose functional method is {@link #test(int)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -127,7 +123,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and
      *         the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default IntPredicate and(final java.util.function.IntPredicate other) throws IllegalArgumentException {
@@ -157,7 +153,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and
      *         the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default IntPredicate or(final java.util.function.IntPredicate other) throws IllegalArgumentException {
@@ -178,7 +174,7 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      *
      * @param predicate the predicate to return
      * @return the specified predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static IntPredicate of(final IntPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);

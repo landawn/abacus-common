@@ -123,7 +123,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -285,7 +285,7 @@ public final class PrimitiveIntArrayType extends AbstractPrimitiveArrayType<int[
      *
      * @param writer the CharacterWriter to write to
      * @param x the int array to write
-     * @param config the serialization configuration (currently unused for primitive arrays)
+     * @param config the serialization configuration (currently unused for int arrays)
      * @throws IOException if an I/O error occurs during the write operation
      */
     @Override

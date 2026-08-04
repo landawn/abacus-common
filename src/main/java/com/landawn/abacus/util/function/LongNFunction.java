@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * arguments and produces a result. This is the N-arity specialization of
  * {@link java.util.function.Function} for {@code long} values.
  *
- * <p>This interface extends {@link Throwables.LongNFunction} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This interface is particularly useful when you need to compute a result
  * from an arbitrary number of long values, without knowing the exact count
  * at compile time.
@@ -109,7 +105,7 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      *
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default <V> LongNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {

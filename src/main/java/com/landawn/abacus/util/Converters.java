@@ -60,7 +60,8 @@ final class Converters {
      * @param srcClass the source class that the converter can convert from. This must not be a built-in class.
      * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class.
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
-     * @throws IllegalArgumentException if {@code srcClass} is {@code null} or is a built-in class, or {@code converter} is {@code null}
+     * @throws IllegalArgumentException if {@code srcClass} is {@code null} or is a built-in class, or
+     *         {@code converter} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static boolean register(@NotNull final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {

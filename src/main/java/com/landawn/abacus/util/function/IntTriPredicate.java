@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a predicate (boolean-valued function) of three {@code int}-valued
  * arguments. This is the three-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface extends {@link Throwables.IntTriPredicate} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #test(int, int, int)}.
  *
@@ -116,7 +112,7 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      *
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default IntTriPredicate and(final IntTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -146,7 +142,7 @@ public interface IntTriPredicate extends Throwables.IntTriPredicate<RuntimeExcep
      *
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default IntTriPredicate or(final IntTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

@@ -109,7 +109,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param key the key with which the specified value is to be associated, must not be {@code null}
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @return {@code true} if the value was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or value is null.
      * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E value);
@@ -142,7 +142,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param value the value to be associated with the specified key, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or value is null.
      * @throws IllegalStateException if the pool has been closed
      */
     boolean put(K key, E value, boolean autoDestroyOnFailedToPut);
@@ -177,7 +177,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed
      *         (or the value was already/became expired, or memory constraints rejected it)
-     * @throws IllegalArgumentException if the key, value, or unit is null
+     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -200,7 +200,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
      * @return {@code true} if the value was successfully added, {@code false} if the timeout elapsed or put failed
-     * @throws IllegalArgumentException if the key, value, or unit is null
+     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -264,7 +264,7 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * @return the element associated with the key, or {@code null} if the timeout elapsed before a
      *         valid mapping was available
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
+     * @throws IllegalArgumentException if the unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull

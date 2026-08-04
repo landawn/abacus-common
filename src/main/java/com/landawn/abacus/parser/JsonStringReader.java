@@ -155,7 +155,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
      * @param reader the underlying reader (may be {@code null})
-     * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid
+     * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid.
      */
     JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) {
         if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex || beginIndex > strValue.length || toIndex > strValue.length) {

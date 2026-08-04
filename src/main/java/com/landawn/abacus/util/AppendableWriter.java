@@ -60,7 +60,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * }</pre>
      *
      * @param appendable the {@code Appendable} to wrap; must not be {@code null}
-     * @throws IllegalArgumentException if {@code appendable} is {@code null}
+     * @throws IllegalArgumentException if {@code appendable} is {@code null}.
      */
     public AppendableWriter(final Appendable appendable) throws IllegalArgumentException {
         N.checkArgNotNull(appendable, cs.appendable);

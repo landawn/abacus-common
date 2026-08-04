@@ -96,9 +96,9 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * @param min the minimum value, may be {@code null} if no values were recorded
      * @param max the maximum value, may be {@code null} if no values were recorded
      * @param sum the sum of values; if {@code null}, it is treated as {@link BigDecimal#ZERO}
-     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state has non-null
-     *         min/max values or a nonzero sum; or if a non-empty state has a null min/max value or
-     *         {@code min} compares greater than {@code max}
+     * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state has non-null min/max
+     *         values or a nonzero sum; or if a non-empty state has a null min/max value or {@code min} compares
+     *         greater than {@code max}.
      */
     public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
         if (count < 0) {
@@ -135,7 +135,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * }</pre>
      *
      * @param value the input value to be recorded, must not be {@code null}
-     * @throws IllegalArgumentException if {@code value} is {@code null}
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     @Override
     public void accept(final BigDecimal value) throws IllegalArgumentException {

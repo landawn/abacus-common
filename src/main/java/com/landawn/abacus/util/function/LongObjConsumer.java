@@ -27,10 +27,6 @@ import com.landawn.abacus.util.cs;
  * comes first, followed by the object argument of type {@code T}. This is the reverse of
  * {@link java.util.function.ObjLongConsumer}, which takes the object first.
  *
- * <p>This interface extends {@link Throwables.LongObjConsumer} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long, Object)}.
  *
@@ -102,7 +98,7 @@ public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, Runtim
      * @param after the operation to perform after this operation.
      * @return a composed {@code LongObjConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default LongObjConsumer<T> andThen(final LongObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

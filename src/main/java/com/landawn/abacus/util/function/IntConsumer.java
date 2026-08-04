@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * This is the primitive type specialization of {@link java.util.function.Consumer} for {@code int}.
  * Unlike most other functional interfaces, {@code IntConsumer} is expected to operate via side-effects.
  *
- * <p>This interface extends both {@link java.util.function.IntConsumer} and
- * {@link Throwables.IntConsumer}, providing compatibility with the standard Java functional
- * interfaces while also supporting the Throwables framework.
- *
  * <p>This is a functional interface whose functional method is {@link #accept(int)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -69,7 +65,7 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code IntConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default IntConsumer andThen(final java.util.function.IntConsumer after) throws IllegalArgumentException {

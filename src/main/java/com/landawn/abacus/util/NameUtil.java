@@ -81,8 +81,9 @@ public final class NameUtil {
      * }
      * }</pre>
      *
-     * @param str the string to check for presence in the cache
+     * @param str the string to check for presence in the cache; may be {@code null}
      * @return {@code true} if the string is in the cached name pool, {@code false} otherwise
+     *         (including when {@code str} is {@code null})
      */
     public static boolean isCachedName(final String str) {
         return cachedNamePool.containsKey(str);

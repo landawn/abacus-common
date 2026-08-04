@@ -17,7 +17,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts a variable number of char-valued arguments and returns no result.
+ * Represents an operation that accepts a variable number of {@code char}-valued arguments and returns no result.
  * This is the N-arity specialization of {@link CharConsumer}.
  * Unlike most other functional interfaces, {@code CharNConsumer} is expected to operate via side-effects.
  *
@@ -31,9 +31,8 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface CharNConsumer {
     /**
-     * Performs this operation on the given char array arguments.
-     * The array can be of any length, including zero.
-     * This method is expected to operate via side-effects.
+     * Performs this operation on the given arguments.
+     * The behavior of this operation is generally expected to be side-effecting.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -80,7 +79,7 @@ public interface CharNConsumer {
      * @param after the operation to perform after this operation.
      * @return a composed {@code CharNConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default CharNConsumer andThen(final CharNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

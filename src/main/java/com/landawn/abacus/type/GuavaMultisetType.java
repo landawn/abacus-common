@@ -34,13 +34,14 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Google Guava Multiset implementations.
- * This class provides serialization and deserialization capabilities for various Guava Multiset types
- * including HashMultiset, LinkedHashMultiset, and TreeMultiset.
- * Multisets are serialized as {@code Map<E, Integer>} structures where the value represents the count of each element.
+ * Type handler for Google Guava {@link Multiset} implementations.
+ * This class provides serialization and deserialization for Guava multiset types
+ * including {@link HashMultiset}, {@link LinkedHashMultiset}, and {@link TreeMultiset}.
+ * Multisets are serialized as {@code Map<E, Integer>} structures where the value is the element count.
  *
  * @param <E> the element type of the multiset
  * @param <T> the multiset type (must extend {@code Multiset<E>})
+ * @see Multiset
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T> {
@@ -252,7 +253,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param size the expected number of distinct elements
      * @return a new multiset instance
-     * @throws IllegalArgumentException if no suitable constructor or factory method is found
+     * @throws IllegalArgumentException if no suitable constructor or factory method is found.
      */
     protected T newInstance(int size) {
         if (TreeMultiset.class.isAssignableFrom(typeClass)

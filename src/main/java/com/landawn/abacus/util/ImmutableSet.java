@@ -436,7 +436,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
      * underlying Set will be reflected in the returned ImmutableSet, which
-     * violates the immutability contract. For a {@code true} immutable copy, use
+     * violates the immutability contract. For a truly independent immutable copy, use
      * {@link #copyOf(Collection)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -564,7 +564,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         /**
          * Adds a single element to the set being built.
          * If the element is already present in the set (as determined by equals()),
-         * it is not added again. Null elements are permitted.
+         * it is not added again. Null elements are permitted if the backing set supports them.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

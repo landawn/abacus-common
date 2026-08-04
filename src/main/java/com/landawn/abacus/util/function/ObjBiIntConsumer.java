@@ -24,9 +24,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, int, int)}.
  *
- * <p>The interface extends {@code Throwables.ObjBiIntConsumer} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntConsumer<String> printSubstring = (str, start, end) ->
@@ -52,17 +49,6 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
     /**
      * Performs this operation on the given arguments.
      *
-     * <p>This method processes an object of type T and two int values, typically producing
-     * side effects such as modifying the object, writing to output, or storing values.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Processing array or list elements with two indices (start/end, row/column)</li>
-     *   <li>Setting properties with two numeric parameters</li>
-     *   <li>Logging objects with two associated numeric values</li>
-     *   <li>Matrix operations where the object is the matrix and ints are coordinates</li>
-     * </ul>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntConsumer<StringBuilder> appendRange = (sb, start, end) ->
@@ -85,9 +71,6 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * <p>This method is useful for chaining multiple operations that need to process
-     * the same object and two int values in sequence.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjBiIntConsumer<StringBuilder> appendRange = (sb, start, end) ->
@@ -104,7 +87,7 @@ public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, Runt
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjBiIntConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjBiIntConsumer<T> andThen(final ObjBiIntConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

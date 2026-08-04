@@ -56,7 +56,7 @@ public final class BrotliInputStream extends InputStream {
      * }</pre>
      *
      * @param source the input stream containing Brotli-compressed data
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null}.
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source) throws IOException {
@@ -80,7 +80,8 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param source the input stream containing Brotli-compressed data
      * @param byteReadBufferSize the size of the internal buffer for reading, in bytes
-     * @throws IllegalArgumentException if {@code byteReadBufferSize} is not positive, or if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code byteReadBufferSize} is not positive, or if {@code source} is
+     *         {@code null}.
      * @throws IOException if an I/O error occurs while initializing the decompressor
      */
     public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IOException {
@@ -170,7 +171,7 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param n the number of bytes to be skipped
      * @return the actual number of bytes skipped
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      * @throws IOException if an I/O error occurs during the skip operation
      */
     @Override

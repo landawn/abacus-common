@@ -507,7 +507,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * @param n the number of characters to skip
      * @return the number of characters actually skipped
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if {@code n} is negative
      * @throws IOException if an I/O error occurs
      */
     @Override

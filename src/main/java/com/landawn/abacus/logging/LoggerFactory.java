@@ -126,7 +126,7 @@ public final class LoggerFactory {
      *
      * @param name the name of the logger; must not be {@code null}
      * @return a Logger instance for the specified name
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     @SuppressWarnings("fallthrough")

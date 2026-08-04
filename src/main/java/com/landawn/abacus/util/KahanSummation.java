@@ -150,7 +150,7 @@ public final class KahanSummation { // NOSONAR
      *
      * @param countA the number of values represented by {@code sumA}
      * @param sumA the pre-computed sum of those values
-     * @throws IllegalArgumentException if {@code countA} is negative
+     * @throws IllegalArgumentException if {@code countA} is negative.
      */
     public void combine(final long countA, final double sumA) throws IllegalArgumentException {
         N.checkArgNotNegative(countA, "countA");

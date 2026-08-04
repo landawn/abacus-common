@@ -97,7 +97,7 @@ public enum YesNo {
      *
      * @param intValue the integer value to convert (must be 0 or 1)
      * @return NO for 0, YES for 1
-     * @throws IllegalArgumentException if the integer value is not 0 or 1
+     * @throws IllegalArgumentException if the integer value is not 0 or 1.
      */
     public static YesNo of(final int intValue) {
         switch (intValue) {

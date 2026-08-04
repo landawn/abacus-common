@@ -48,16 +48,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
     ByteFunction<Byte> BOX = value -> value;
 
     /**
-     * Applies this function to the given byte-valued argument and produces a result.
-     *
-     * <p>This method transforms a {@code byte} value into a result of type {@code R}.
-     * Common use cases include:
-     * <ul>
-     *   <li>Converting byte values to other numeric types or strings</li>
-     *   <li>Creating objects from byte values (e.g., status codes to enum values)</li>
-     *   <li>Interpreting byte data in binary protocols or file formats</li>
-     *   <li>Mapping byte values to lookup tables or configuration objects</li>
-     * </ul>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -92,7 +83,7 @@ public interface ByteFunction<R> extends Throwables.ByteFunction<R, RuntimeExcep
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> ByteFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

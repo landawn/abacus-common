@@ -18,8 +18,8 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a predicate (boolean-valued function) of two short-valued arguments.
- * This is the two-arity specialization of {@link java.util.function.Predicate} for {@code short} values.
+ * Represents a predicate (boolean-valued function) of two {@code short}-valued arguments.
+ * This is the primitive type specialization of {@link java.util.function.BiPredicate} for {@code short}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(short, short)}.
  *
@@ -33,67 +33,50 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeException> { //NOSONAR
     /**
-     * A predicate that always returns {@code true} regardless of the input values.
+     * A predicate that always returns {@code true} regardless of the input arguments.
      */
     ShortBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
-     * A predicate that always returns {@code false} regardless of the input values.
+     * A predicate that always returns {@code false} regardless of the input arguments.
      */
     ShortBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
-     * A predicate that tests if two short values are equal.
-     * Returns {@code true} if and only if the first argument equals the second argument.
+     * A predicate that returns {@code true} if both arguments are equal.
      */
     ShortBiPredicate EQUAL = (a, b) -> a == b;
     /**
-     * A predicate that tests if two short values are not equal.
-     * Returns {@code true} if and only if the first argument does not equal the second argument.
+     * A predicate that returns {@code true} if the arguments are not equal.
      */
     ShortBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
-     * A predicate that tests if the first short value is greater than the second.
-     * Returns {@code true} if and only if the first argument is strictly greater than the second argument.
+     * A predicate that returns {@code true} if the first argument is greater than the second.
      */
     ShortBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
-     * A predicate that tests if the first short value is greater than or equal to the second.
-     * Returns {@code true} if and only if the first argument is greater than or equal to the second argument.
+     * A predicate that returns {@code true} if the first argument is greater than or equal to the second.
      */
     ShortBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
-     * A predicate that tests if the first short value is less than the second.
-     * Returns {@code true} if and only if the first argument is strictly less than the second argument.
+     * A predicate that returns {@code true} if the first argument is less than the second.
      */
     ShortBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
-     * A predicate that tests if the first short value is less than or equal to the second.
-     * Returns {@code true} if and only if the first argument is less than or equal to the second argument.
+     * A predicate that returns {@code true} if the first argument is less than or equal to the second.
      */
     ShortBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
      * Evaluates this predicate on the given arguments.
      *
-     * <p>This method tests whether the two input short values satisfy the condition
-     * represented by this predicate. It returns {@code true} if the arguments match
-     * the predicate's criteria, {@code false} otherwise.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBiPredicate equals = ShortBiPredicate.EQUAL;
-     * boolean result1 = equals.test((short) 5, (short) 5);   // returns true
-     * boolean result2 = equals.test((short) 3, (short) 7);   // returns false
-     *
-     * ShortBiPredicate lessThan = ShortBiPredicate.LESS_THAN;
-     * boolean result3 = lessThan.test((short) 3, (short) 7);   // returns true
-     *
-     * ShortBiPredicate inRange = (value, max) -> value >= 0 && value <= max;
-     * boolean result4 = inRange.test((short) 50, (short) 100);   // returns true
+     * ShortBiPredicate sumGreaterThan10 = (a, b) -> (a + b) > 10;
+     * boolean result = sumGreaterThan10.test((short) 5, (short) 7);   // Returns true
      * }</pre>
      *
      * @param a the first input argument
      * @param b the second input argument
-     * @return {@code true} if the input arguments match the predicate, {@code false} otherwise
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(short a, short b);
@@ -101,18 +84,10 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
     /**
      * Returns a predicate that represents the logical negation of this predicate.
      *
-     * <p>The returned predicate will return {@code true} when this predicate returns
-     * {@code false}, and vice versa. This is useful for inverting comparison logic
-     * without rewriting the condition.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBiPredicate equals = ShortBiPredicate.EQUAL;
-     * ShortBiPredicate notEquals = equals.negate();
-     *
-     * boolean result1 = equals.test((short) 5, (short) 5);      // returns true
-     * boolean result2 = notEquals.test((short) 5, (short) 5);   // returns false
-     * boolean result3 = notEquals.test((short) 3, (short) 7);   // returns true
+     * ShortBiPredicate equal = (a, b) -> a == b;
+     * ShortBiPredicate notEqual = equal.negate();
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate
@@ -142,7 +117,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ShortBiPredicate and(final ShortBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -171,7 +146,7 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ShortBiPredicate or(final ShortBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

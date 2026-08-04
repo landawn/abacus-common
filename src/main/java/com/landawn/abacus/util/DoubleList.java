@@ -191,7 +191,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage; first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code DoubleList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -367,8 +367,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
-     * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
+     * @throws OutOfMemoryError if the requested array cannot be allocated
      */
     public DoubleList(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -539,7 +539,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param element the double value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new DoubleList containing <i>len</i> copies of the specified element
-     * @throws IllegalArgumentException if len is negative
+     * @throws IllegalArgumentException if len is negative.
      */
     public static DoubleList repeat(final double element, final int len) {
         return of(Array.repeat(element, len));
@@ -1631,7 +1631,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param b the list to find common elements with this list
      * @return a new DoubleList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #intersection(double[])
      * @see #difference(DoubleList)
      * @see #symmetricDifference(DoubleList)
@@ -2367,9 +2367,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Sorts the elements of this list into descending order.
      *
      * <p>This method first sorts the list in ascending order using {@link #sort()},
-     * then reverses the entire list to achieve descending order. This approach
-     * maintains stability for equal elements. NaN values will appear at the
-     * beginning of the list after reverse sorting.</p>
+     * then reverses the entire list to achieve descending order. NaN values will
+     * appear at the beginning of the list after reverse sorting.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
@@ -2534,7 +2533,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
      *
      * @param rnd the source of randomness to use to shuffle the list.
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2617,7 +2616,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *             Must not be zero.
      * @return a new {@code DoubleList} containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if {@code step} is zero
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(double[], int, int, int)
      */
     @Override
@@ -2650,7 +2649,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a list of {@code DoubleList} instances, each containing a chunk of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code chunkSize <= 0}
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {

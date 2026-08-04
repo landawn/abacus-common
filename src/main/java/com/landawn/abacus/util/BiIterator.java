@@ -96,7 +96,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         /**
-        * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
         */
         @Override
         public void forEachRemaining(final BiConsumer action) throws IllegalArgumentException {
@@ -1027,7 +1027,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param leftSupplier a function that provides the first output collection; always called with a size hint of {@code 0}
      * @param rightSupplier a function that provides the second output collection; always called with a size hint of {@code 0}
      * @return a {@code Pair} containing the two output collections
-     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier}
+     *         is {@code null}.
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
             final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
@@ -1062,7 +1063,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param leftSupplier a function that provides the first output collection
      * @param rightSupplier a function that provides the second output collection
      * @return a {@code Pair} containing the two output collections
-     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code rightSupplier}
+     *         is {@code null}.
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> iter,
             final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
@@ -1118,7 +1120,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * }</pre>
      *
      * @param action the action to be performed for each pair of elements, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public abstract void forEachRemaining(final BiConsumer<? super A, ? super B> action);
 
@@ -1136,7 +1138,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining pair of elements, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E; // NOSONAR
@@ -1154,7 +1156,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param n the number of pairs to skip from the beginning, must be non-negative
      * @return a new BiIterator that begins after skipping {@code n} pairs, or this iterator if {@code n} is 0
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public BiIterator<A, B> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1267,7 +1269,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param count the maximum number of pairs to include, must be non-negative
      * @return a new BiIterator limited to {@code count} pairs, or an empty iterator if {@code count} is 0
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public BiIterator<A, B> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -1497,7 +1499,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <R> the type of elements in the resulting iterator
      * @param mapper the function to apply to each pair of elements, must not be {@code null}
      * @return an ObjIterator containing the results of applying the mapper to each pair
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     public abstract <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper);
 
@@ -1558,7 +1560,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a supplier invoked twice to create the left and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Pair} whose left list contains all first components and whose right list contains all second components
-     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}.
      * @see #unzipToSets(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */
@@ -1597,8 +1599,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param leftSupplier a supplier that provides the collection for first components; must not return {@code null}
      * @param rightSupplier a supplier that provides the collection for second components; must not return {@code null}
      * @return a {@code Pair} whose left collection contains all first components and whose right collection contains all second components
-     * @throws IllegalArgumentException if either supplier returns {@code null}
-     * @throws IllegalArgumentException if any of {@code leftSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if either supplier returns {@code null}, or if any of {@code leftSupplier},
+     *         {@code rightSupplier} is {@code null}.
      * @see #unzipToLists(Supplier)
      * @see #unzipToSets(Supplier)
      */
@@ -1632,7 +1634,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a supplier invoked twice to create the left and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Pair} whose left set contains the distinct first components and whose right set contains the distinct second components
-     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}.
      * @see #unzipToLists(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */

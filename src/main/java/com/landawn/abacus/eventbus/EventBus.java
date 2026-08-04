@@ -268,7 +268,7 @@ public class EventBus {
      * @param identifier the unique identifier for this {@code EventBus} instance
      * @param executor the executor to use for asynchronous event delivery; must not be {@code null}
      * @return a new {@code EventBus} instance with the given identifier and executor
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public static EventBus create(final String identifier, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -302,7 +302,7 @@ public class EventBus {
      *
      * @param eventType the event type to search for
      * @return a snapshot list of subscribers registered for the specified event type
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public List<Object> subscribers(final Class<?> eventType) {
         return subscribers(null, eventType);
@@ -320,7 +320,7 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} or empty for subscribers without an event ID
      * @param eventType the event type to search for
      * @return a snapshot list of subscribers registered for the specified event type and ID
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public List<Object> subscribers(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, cs.eventType);
@@ -402,7 +402,7 @@ public class EventBus {
      *
      * @param eventType the event class to test for (must not be {@code null})
      * @return {@code true} if at least one registered subscriber accepts {@code eventType}
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      * @see #countOfSubscribers()
      */
     public boolean hasSubscribers(final Class<?> eventType) throws IllegalArgumentException {
@@ -447,8 +447,8 @@ public class EventBus {
      *
      * @param subscriber the subscriber to register
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or if no subscriber methods are found
+     *         in the subscriber class.
      * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
@@ -469,8 +469,8 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if no subscriber methods are found in the subscriber class
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or if no subscriber methods are found
+     *         in the subscriber class.
      * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
@@ -493,8 +493,8 @@ public class EventBus {
      * @param subscriber the subscriber to register
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or if the thread mode is not supported
+     *         or no subscriber methods are found in the subscriber class.
      * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber (an event ID is required for lambda subscribers)
      */
@@ -531,8 +531,8 @@ public class EventBus {
      * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers; {@code null} for no filtering otherwise
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}
-     * @throws IllegalArgumentException if the thread mode is not supported or no subscriber methods are found in the subscriber class
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or if the thread mode is not supported
+     *         or no subscriber methods are found in the subscriber class.
      * @throws RuntimeException if a {@code @Subscribe} method is {@code static} or does not declare exactly one parameter
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
@@ -753,7 +753,7 @@ public class EventBus {
      * @param subscriber the {@code Subscriber} implementation to register
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or no subscriber methods are found
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or no subscriber methods are found.
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Subscriber<?> subscriber, final String eventId) throws IllegalArgumentException {
@@ -778,7 +778,8 @@ public class EventBus {
      * @param eventId the event ID to filter events; must be non-empty when the subscriber is identified as a lambda subscriber
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or the thread mode is not supported or no subscriber methods are found
+     * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or the thread mode is not supported or
+     *         no subscriber methods are found.
      * @throws IllegalStateException if the subscriber is identified as a lambda subscriber and {@code eventId} is empty or {@code null}
      */
     public EventBus register(final Subscriber<?> subscriber, final String eventId, final ThreadMode threadMode) throws IllegalArgumentException {
@@ -865,7 +866,7 @@ public class EventBus {
      *
      * @param event the event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}.
      */
     public EventBus post(final Object event) {
         return post((String) null, event);
@@ -888,7 +889,7 @@ public class EventBus {
      * @param eventId the event ID for filtering subscribers, or {@code null} (or empty) to deliver to subscribers without a specific event ID
      * @param event the event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}.
      */
     public EventBus post(final String eventId, final Object event) throws IllegalArgumentException {
         N.checkArgNotNull(event, cs.event);
@@ -977,7 +978,7 @@ public class EventBus {
      *
      * @param event the sticky event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}.
      */
     public EventBus postSticky(final Object event) {
         return postSticky(null, event);
@@ -999,7 +1000,7 @@ public class EventBus {
      * @param eventId the event ID to associate with the sticky event, or {@code null} (or empty) to retain it without a specific event ID
      * @param event the sticky event to post
      * @return this {@code EventBus} instance for method chaining
-     * @throws IllegalArgumentException if {@code event} is {@code null}
+     * @throws IllegalArgumentException if {@code event} is {@code null}.
      */
     public EventBus postSticky(final String eventId, final Object event) throws IllegalArgumentException {
         N.checkArgNotNull(event, cs.event);
@@ -1088,7 +1089,7 @@ public class EventBus {
      *
      * @param eventType the class type of sticky events to remove
      * @return {@code true} if one or more events were removed, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public boolean removeStickyEvents(final Class<?> eventType) {
         return removeStickyEvents(null, eventType);
@@ -1107,7 +1108,7 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type of sticky events to remove
      * @return {@code true} if one or more events were removed, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public boolean removeStickyEvents(final String eventId, final Class<?> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, cs.eventType);
@@ -1179,7 +1180,7 @@ public class EventBus {
      * @param <T> the event type
      * @param eventType the class type to search for
      * @return a list of sticky events that can be assigned to the specified type
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public <T> List<T> stickyEvents(final Class<T> eventType) {
         return stickyEvents(null, eventType);
@@ -1198,7 +1199,7 @@ public class EventBus {
      * @param eventId the event ID to match, or {@code null} for events without ID
      * @param eventType the class type to search for
      * @return a list of sticky events matching both the type and event ID
-     * @throws IllegalArgumentException if {@code eventType} is {@code null}
+     * @throws IllegalArgumentException if {@code eventType} is {@code null}.
      */
     public <T> List<T> stickyEvents(final String eventId, final Class<T> eventType) throws IllegalArgumentException {
         N.checkArgNotNull(eventType, cs.eventType);
@@ -1249,7 +1250,7 @@ public class EventBus {
      * @param identifier the subscriber identifier containing delivery configuration including thread mode,
      *                   subscriber instance, and method to invoke
      * @param event the event object to dispatch to the subscriber
-     * @throws IllegalArgumentException if the thread mode is not one of the supported values
+     * @throws IllegalArgumentException if the thread mode is not one of the supported values.
      */
     protected void dispatch(final SubIdentifier identifier, final Object event) {
         switch (identifier.threadMode) {

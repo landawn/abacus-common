@@ -536,7 +536,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param maxSize the maximum number of elements to include; must be non-negative
      * @return a new stream with at most {@code maxSize} elements, starting after skipping {@code offset} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative.
      */
     @Override
     public S limit(final long offset, final long maxSize) throws IllegalArgumentException, IllegalStateException {
@@ -564,7 +564,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return an Optional containing the element at {@code position}, or an empty Optional
      *         if the stream has fewer elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code position} is negative
+     * @throws IllegalArgumentException if {@code position} is negative.
      */
     @Override
     public OT elementAt(final long position) throws IllegalStateException, IllegalArgumentException {
@@ -638,7 +638,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Drains this stream into an array for use by an intermediate operation that needs the whole
-     * content materialized (sorting, reversing, shuffling, ...).
+     * content materialized (sorting, reversing, shuffling, ...). The stream is closed after this call.
      *
      * @return a new array holding the remaining elements in encounter order
      */
@@ -705,7 +705,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return a stream with the same elements, with an empty-check guard that throws when
      *         a terminal operation is invoked on an empty stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}
+     * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
     @Override
     public S throwIfEmpty(final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
@@ -736,7 +736,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      *         or an empty Optional if the stream is empty or the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the function throws a checked exception
-     * @throws IllegalArgumentException if {@code func} is {@code null}
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super S, ? extends R, E> func)
@@ -774,7 +774,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      *         {@link OrElse#FALSE} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws a checked exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super S, E> action)
@@ -867,7 +867,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      *                     must be non-negative. A value of {@code 0} uses the default thread count.
      * @return a parallel stream equivalent to this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative.
      */
     @Override
     public S parallel(final int maxThreadNum) {
@@ -885,7 +885,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param executor the executor to use for parallel task submission
      * @return a parallel stream equivalent to this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Override
     public S parallel(final Executor executor) throws IllegalArgumentException {
@@ -905,8 +905,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param executor the executor to use for parallel task submission
      * @return a parallel stream equivalent to this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code executor} is {@code null}.
      */
     @Override
     public S parallel(final int maxThreadNum, final Executor executor) throws IllegalArgumentException {
@@ -929,7 +928,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param ps the parallel settings to apply; must not be {@code null}
      * @return a parallel stream configured according to {@code ps}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code ps} is {@code null} or contains invalid settings
+     * @throws IllegalArgumentException if {@code ps} is {@code null} or contains invalid settings.
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -1010,7 +1009,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param ops the stream operations to apply
      * @return a sequential stream that is the result of applying {@code ops} in parallel
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code ops} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -1037,8 +1036,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return a sequential stream that is the result of applying {@code ops} with the specified
      *         parallelism
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
-     * @throws IllegalArgumentException if {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code ops} is {@code null}.
      */
     @SuppressWarnings({ "rawtypes" })
     @Override
@@ -1071,8 +1069,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return a sequential stream that is the result of applying {@code ops} with the specified
      *         parallelism and executor
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxThreadNum} is negative
-     * @throws IllegalArgumentException if {@code executor} or {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code executor} or {@code ops} is
+     *         {@code null}.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -1103,7 +1101,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param ops the stream operations to apply
      * @return a parallel stream that is the result of applying {@code ops} sequentially
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code ops} is {@code null}
+     * @throws IllegalArgumentException if {@code ops} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -1131,7 +1129,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param transfer a function that converts this stream to the target stream type
      * @return the result of applying {@code transfer} to this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code transfer} is {@code null}
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -1281,7 +1279,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param closeHandler the handler to execute when this stream is closed; must not be {@code null}
      * @return this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code closeHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code closeHandler} is {@code null}.
      */
     @Override
     public S onClose(final Runnable closeHandler) throws IllegalStateException, IllegalArgumentException {
@@ -1709,7 +1707,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return mergeCloseHandlers(this::close, closeHandlers);
     }
 
-    private Deque<LocalRunnable> closeHandlersForNewStream(final Deque<LocalRunnable> handlers) {
+    /**
+     * Like {@link #closeHandlersForNewStream()}, but appends {@code this::close} to an already-built
+     * handler chain (for example parallel flatMap's mapped-iterator cleanup). Package-private so
+     * parallel stream implementations can share the same parent-link contract as sequential flatMap.
+     */
+    Deque<LocalRunnable> closeHandlersForNewStream(final Deque<LocalRunnable> handlers) {
         // Explicit newStream overloads are used when an intermediate operation needs to add its own
         // resource handler (for example, flatMap's current mapped stream). Those handlers used to be
         // passed straight through, so closing the child ran shared handlers but never closed the parent
@@ -3090,7 +3093,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
          *
          * @param closeHandler the close handler to wrap
          * @return a one-time runnable wrapper for the close handler
-         * @throws IllegalArgumentException if {@code closeHandler} is {@code null}
+         * @throws IllegalArgumentException if {@code closeHandler} is {@code null}.
          */
         static LocalRunnable wrap(final Runnable closeHandler) throws IllegalArgumentException {
             N.checkArgNotNull(closeHandler, cs.closeHandler);

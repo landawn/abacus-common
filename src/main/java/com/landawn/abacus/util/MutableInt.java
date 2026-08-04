@@ -346,7 +346,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
     }
 
     /**
-     * Returns the current value and then adds the specified delta.
+     * Returns the current value and then adds the specified delta to it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

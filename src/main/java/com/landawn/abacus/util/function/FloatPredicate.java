@@ -124,7 +124,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      *
      * @param predicate the predicate to return
      * @return the specified predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static FloatPredicate of(final FloatPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
@@ -154,7 +154,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * predicate, if this predicate is {@code false}, then the {@code other}
      * predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -167,7 +167,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatPredicate and(final FloatPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -181,7 +181,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * predicate, if this predicate is {@code true}, then the {@code other}
      * predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -194,7 +194,7 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatPredicate or(final FloatPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

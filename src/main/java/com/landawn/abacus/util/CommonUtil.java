@@ -716,7 +716,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) - must be non-negative and ≤ toIndex
      * @param toIndex the ending index (exclusive) - must be ≥ fromIndex and ≤ length
      * @param length the size of the array/collection/string - must be non-negative
-     * @throws IllegalArgumentException if {@code length} is negative
+     * @throws IllegalArgumentException if {@code length} is negative.
      * @throws IndexOutOfBoundsException if any of the following conditions are true:
      *         <ul>
      *           <li>{@code fromIndex < 0}</li>
@@ -760,7 +760,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) - must be non-negative
      * @param size the number of elements in the range - must be non-negative
      * @param length the size of the array/collection/string - must be non-negative
-     * @throws IllegalArgumentException if {@code size} or {@code length} is negative
+     * @throws IllegalArgumentException if {@code size} or {@code length} is negative.
      * @throws IndexOutOfBoundsException if either of the following conditions are {@code true} (and {@code size}/{@code length} are non-negative):
      *         <ul>
      *           <li>{@code fromIndex < 0}</li>
@@ -795,7 +795,7 @@ sealed class CommonUtil permits N {
      * @param index a user-supplied index identifying an element of an array, list or string
      * @param size the size of that array, list or string
      * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @see #checkElementIndex(int, int)
      * @deprecated Use {@link #checkElementIndex(int, int)} instead, which this method delegates to. (Do not use
@@ -833,7 +833,7 @@ sealed class CommonUtil permits N {
      * @param index a user-supplied index identifying an element of an array, list or string - must be non-negative and less than {@code size}
      * @param size the size of that array, list or string - must be non-negative
      * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @see #checkPositionIndex(int, int)
      * @see #checkFromToIndex(int, int, int)
@@ -867,7 +867,7 @@ sealed class CommonUtil permits N {
      * @param size the size of that array, list or string - must be non-negative
      * @param desc the text to use to describe this index in an error message
      * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
      * @see #checkElementIndex(int, int)
      * @see #checkPositionIndex(int, int, String)
@@ -927,7 +927,7 @@ sealed class CommonUtil permits N {
      * @param index a user-supplied index identifying a position in an array, list or string - must be non-negative and not greater than {@code size}
      * @param size the size of that array, list or string - must be non-negative
      * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
      * @see #checkElementIndex(int, int)
      * @see #checkFromToIndex(int, int, int)
@@ -968,7 +968,7 @@ sealed class CommonUtil permits N {
      * @param size the size of that array, list or string - must be non-negative
      * @param desc the text to use to describe this index in an error message
      * @return the value of {@code index}
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
      * @see #checkPositionIndex(int, int)
      * @see #checkElementIndex(int, int, String)
@@ -1016,7 +1016,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the argument
      * @param obj the argument to check
      * @return the {@code non-null} argument
-     * @throws IllegalArgumentException if the argument is null
+     * @throws IllegalArgumentException if the argument is null.
      * @see #requireNonNull(Object)
      */
     public static <T> T checkArgNotNull(final T obj) throws IllegalArgumentException {
@@ -1046,7 +1046,7 @@ sealed class CommonUtil permits N {
      * @param obj the argument to check
      * @param argNameOrErrorMsg the name of the argument, or the full error message. If it is a short token (no space, or {@code <= 9} characters), it is treated as the argument name and rendered as {@code "'<name>' cannot be null"}; otherwise it is used verbatim as the error message.
      * @return the {@code non-null} argument
-     * @throws IllegalArgumentException if the argument is null
+     * @throws IllegalArgumentException if the argument is null.
      * @see #requireNonNull(Object, String)
      */
     public static <T> T checkArgNotNull(final T obj, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1087,7 +1087,7 @@ sealed class CommonUtil permits N {
      * @param arg the argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotBlank(CharSequence, String)
      * @see Strings#isEmpty(CharSequence)
      */
@@ -1114,7 +1114,7 @@ sealed class CommonUtil permits N {
      * @param arg the boolean array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} boolean array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1141,7 +1141,7 @@ sealed class CommonUtil permits N {
      * @param arg the char array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} char array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1168,7 +1168,7 @@ sealed class CommonUtil permits N {
      * @param arg the byte array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} byte array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1195,7 +1195,7 @@ sealed class CommonUtil permits N {
      * @param arg the short array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} short array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1222,7 +1222,7 @@ sealed class CommonUtil permits N {
      * @param arg the int array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} int array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1249,7 +1249,7 @@ sealed class CommonUtil permits N {
      * @param arg the long array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} long array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1276,7 +1276,7 @@ sealed class CommonUtil permits N {
      * @param arg the float array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} float array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1303,7 +1303,7 @@ sealed class CommonUtil permits N {
      * @param arg the double array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} double array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Object[], String)
      * @see #checkArgNotEmpty(Collection, String)
      */
@@ -1331,7 +1331,7 @@ sealed class CommonUtil permits N {
      * @param arg the Object array argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Object array argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      * @see #checkArgNotEmpty(Map, String)
      */
@@ -1364,7 +1364,7 @@ sealed class CommonUtil permits N {
      * @param arg the collection argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} collection argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see Collection#isEmpty()
      */
     public static <T extends Collection<?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1399,7 +1399,7 @@ sealed class CommonUtil permits N {
      * @param arg the Iterator argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Iterator argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      */
     @Beta
@@ -1431,7 +1431,7 @@ sealed class CommonUtil permits N {
      * @param arg the Map argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Map argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      * @see Map#isEmpty()
      */
@@ -1463,7 +1463,7 @@ sealed class CommonUtil permits N {
      * @param arg the PrimitiveList argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} PrimitiveList argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      */
     public static <T extends PrimitiveList<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1494,7 +1494,7 @@ sealed class CommonUtil permits N {
      * @param arg the Multiset argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Multiset argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      */
     public static <T> Multiset<T> checkArgNotEmpty(final Multiset<T> arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1525,7 +1525,7 @@ sealed class CommonUtil permits N {
      * @param arg the Multimap argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Multimap argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Map, String)
      */
     public static <T extends Multimap<?, ?, ?>> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1556,7 +1556,7 @@ sealed class CommonUtil permits N {
      * @param arg the Dataset argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null} and {@code non-empty} Dataset argument
-     * @throws IllegalArgumentException if the argument is {@code null} or empty
+     * @throws IllegalArgumentException if the argument is {@code null} or empty.
      * @see #checkArgNotEmpty(Collection, String)
      */
     public static <T extends Dataset> T checkArgNotEmpty(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1596,7 +1596,7 @@ sealed class CommonUtil permits N {
      * @param arg the argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-null}, {@code non-empty}, and {@code non-blank} argument
-     * @throws IllegalArgumentException if the argument is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if the argument is {@code null}, empty, or blank.
      */
     public static <T extends CharSequence> T checkArgNotBlank(final T arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (Strings.isBlank(arg)) {
@@ -1624,7 +1624,7 @@ sealed class CommonUtil permits N {
      * @param arg the byte argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} byte argument
-     * @throws IllegalArgumentException if the specified arg is negative
+     * @throws IllegalArgumentException if the specified arg is negative.
      * @see #checkArgPositive(byte, String)
      */
     public static byte checkArgNotNegative(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1653,7 +1653,7 @@ sealed class CommonUtil permits N {
      * @param arg the short argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} short argument
-     * @throws IllegalArgumentException if the specified arg is negative
+     * @throws IllegalArgumentException if the specified arg is negative.
      * @see #checkArgPositive(short, String)
      */
     public static short checkArgNotNegative(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1682,7 +1682,7 @@ sealed class CommonUtil permits N {
      * @param arg the int argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} int argument
-     * @throws IllegalArgumentException if the specified arg is negative
+     * @throws IllegalArgumentException if the specified arg is negative.
      * @see #checkArgPositive(int, String)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -1712,7 +1712,7 @@ sealed class CommonUtil permits N {
      * @param arg the long argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} long argument
-     * @throws IllegalArgumentException if the specified arg is negative
+     * @throws IllegalArgumentException if the specified arg is negative.
      * @see #checkArgPositive(long, String)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -1745,7 +1745,7 @@ sealed class CommonUtil permits N {
      * @param arg the float argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} float argument
-     * @throws IllegalArgumentException if the specified arg is negative or {@code NaN}
+     * @throws IllegalArgumentException if the specified arg is negative or {@code NaN}.
      * @see #checkArgPositive(float, String)
      */
     public static float checkArgNotNegative(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1777,7 +1777,7 @@ sealed class CommonUtil permits N {
      * @param arg the double argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code non-negative} double argument
-     * @throws IllegalArgumentException if the specified arg is negative or {@code NaN}
+     * @throws IllegalArgumentException if the specified arg is negative or {@code NaN}.
      * @see #checkArgPositive(double, String)
      */
     public static double checkArgNotNegative(final double arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1806,7 +1806,7 @@ sealed class CommonUtil permits N {
      * @param arg the byte argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} byte argument
-     * @throws IllegalArgumentException if the specified arg is not positive
+     * @throws IllegalArgumentException if the specified arg is not positive.
      * @see #checkArgNotNegative(byte, String)
      */
     public static byte checkArgPositive(final byte arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1835,7 +1835,7 @@ sealed class CommonUtil permits N {
      * @param arg the short argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} short argument
-     * @throws IllegalArgumentException if the specified arg is not positive
+     * @throws IllegalArgumentException if the specified arg is not positive.
      * @see #checkArgNotNegative(short, String)
      */
     public static short checkArgPositive(final short arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1864,7 +1864,7 @@ sealed class CommonUtil permits N {
      * @param arg the int argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} int argument
-     * @throws IllegalArgumentException if the specified arg is not positive
+     * @throws IllegalArgumentException if the specified arg is not positive.
      * @see #checkArgNotNegative(int, String)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -1894,7 +1894,7 @@ sealed class CommonUtil permits N {
      * @param arg the long argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} long argument
-     * @throws IllegalArgumentException if the specified arg is not positive
+     * @throws IllegalArgumentException if the specified arg is not positive.
      * @see #checkArgNotNegative(long, String)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -1927,7 +1927,7 @@ sealed class CommonUtil permits N {
      * @param arg the float argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} float argument
-     * @throws IllegalArgumentException if the specified arg is not positive or is {@code NaN}
+     * @throws IllegalArgumentException if the specified arg is not positive or is {@code NaN}.
      * @see #checkArgNotNegative(float, String)
      */
     public static float checkArgPositive(final float arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
@@ -1959,7 +1959,7 @@ sealed class CommonUtil permits N {
      * @param arg the double argument to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
      * @return the {@code positive} double argument
-     * @throws IllegalArgumentException if the specified arg is not positive or is {@code NaN}
+     * @throws IllegalArgumentException if the specified arg is not positive or is {@code NaN}.
      * @see #checkArgNotNegative(double, String)
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -1990,7 +1990,7 @@ sealed class CommonUtil permits N {
      * <p>Note: unlike {@code checkArgNotNull}/{@code checkArgNotEmpty} and the other {@code checkArg*} validators, this method returns {@code void} rather than the validated argument, so it cannot be used inline.
      *
      * @param a the array to check
-     * @throws IllegalArgumentException if a {@code null} element is found in the array
+     * @throws IllegalArgumentException if a {@code null} element is found in the array.
      */
     public static void checkElementNotNull(final Object[] a) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -2020,7 +2020,7 @@ sealed class CommonUtil permits N {
      *
      * @param a the array to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if a {@code null} element is found in the array
+     * @throws IllegalArgumentException if a {@code null} element is found in the array.
      */
     public static void checkElementNotNull(final Object[] a, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(a)) {
@@ -2053,7 +2053,7 @@ sealed class CommonUtil permits N {
      * <p>Note: unlike {@code checkArgNotNull}/{@code checkArgNotEmpty} and the other {@code checkArg*} validators, this method returns {@code void} rather than the validated argument, so it cannot be used inline.
      *
      * @param c the collection to check
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}.
      */
     public static void checkElementNotNull(final Collection<?> c) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -2083,7 +2083,7 @@ sealed class CommonUtil permits N {
      *
      * @param c the collection to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} element found in {@code c}
+     * @throws IllegalArgumentException if {@code null} element found in {@code c}.
      */
     public static void checkElementNotNull(final Collection<?> c, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(c)) {
@@ -2118,7 +2118,7 @@ sealed class CommonUtil permits N {
      * <p>Note: unlike {@code checkArgNotNull}/{@code checkArgNotEmpty} and the other {@code checkArg*} validators, this method returns {@code void} rather than the validated argument, so it cannot be used inline.
      *
      * @param m the map to check
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}.
      */
     public static void checkKeyNotNull(final Map<?, ?> m) throws IllegalArgumentException {
         if (isEmpty(m)) {
@@ -2150,7 +2150,7 @@ sealed class CommonUtil permits N {
      *
      * @param m the map to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} key found in {@code m}
+     * @throws IllegalArgumentException if {@code null} key found in {@code m}.
      */
     public static void checkKeyNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(m)) {
@@ -2185,7 +2185,7 @@ sealed class CommonUtil permits N {
      * <p>Note: unlike {@code checkArgNotNull}/{@code checkArgNotEmpty} and the other {@code checkArg*} validators, this method returns {@code void} rather than the validated argument, so it cannot be used inline.
      *
      * @param m the map to check
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}.
      */
     public static void checkValueNotNull(final Map<?, ?> m) throws IllegalArgumentException {
         if (isEmpty(m)) {
@@ -2217,7 +2217,7 @@ sealed class CommonUtil permits N {
      *
      * @param m the map to check
      * @param argNameOrErrorMsg the name of the argument or an error message to be used in the exception
-     * @throws IllegalArgumentException if {@code null} value found in {@code m}
+     * @throws IllegalArgumentException if {@code null} value found in {@code m}.
      */
     public static void checkValueNotNull(final Map<?, ?> m, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (isEmpty(m)) {
@@ -2245,7 +2245,7 @@ sealed class CommonUtil permits N {
      * }</pre>
      *
      * @param expression a boolean expression
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression) throws IllegalArgumentException {
         if (!expression) {
@@ -2265,7 +2265,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessage the error message to be used in the exception, converted to a string via {@link String#valueOf(Object)}
      *        and used verbatim (the argument-name heuristic of the {@code checkArg*} validators is not applied)
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final Object errorMessage) throws IllegalArgumentException {
         if (!expression) {
@@ -2285,7 +2285,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param errorMessageArgs the arguments to be substituted into the message template. Arguments are converted to strings using {@code N.toString(Object)} (arrays and Collections are rendered element-wise; any other object - including an Iterable that is not a Collection, or an Iterator - is rendered via its own {@code toString()} and is not iterated/consumed).
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object... errorMessageArgs)
             throws IllegalArgumentException {
@@ -2306,7 +2306,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char p) throws IllegalArgumentException {
         if (!expression) {
@@ -2326,7 +2326,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int p) throws IllegalArgumentException {
         if (!expression) {
@@ -2346,7 +2346,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long p) throws IllegalArgumentException {
         if (!expression) {
@@ -2366,7 +2366,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double p) throws IllegalArgumentException {
         if (!expression) {
@@ -2386,7 +2386,7 @@ sealed class CommonUtil permits N {
      * @param expression a boolean expression
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param p the parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object p) throws IllegalArgumentException {
         if (!expression) {
@@ -2409,7 +2409,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final char arg2)
             throws IllegalArgumentException {
@@ -2433,7 +2433,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final int arg2)
             throws IllegalArgumentException {
@@ -2457,7 +2457,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final long arg2)
             throws IllegalArgumentException {
@@ -2481,7 +2481,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final double arg2)
             throws IllegalArgumentException {
@@ -2505,7 +2505,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final char arg1, final Object arg2)
             throws IllegalArgumentException {
@@ -2529,7 +2529,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final char arg2)
             throws IllegalArgumentException {
@@ -2553,7 +2553,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final int arg2)
             throws IllegalArgumentException {
@@ -2577,7 +2577,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final long arg2)
             throws IllegalArgumentException {
@@ -2601,7 +2601,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final double arg2)
             throws IllegalArgumentException {
@@ -2625,7 +2625,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final int arg1, final Object arg2)
             throws IllegalArgumentException {
@@ -2649,7 +2649,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final char arg2)
             throws IllegalArgumentException {
@@ -2673,7 +2673,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final int arg2)
             throws IllegalArgumentException {
@@ -2697,7 +2697,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final long arg2)
             throws IllegalArgumentException {
@@ -2721,7 +2721,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final double arg2)
             throws IllegalArgumentException {
@@ -2745,7 +2745,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final long arg1, final Object arg2)
             throws IllegalArgumentException {
@@ -2769,7 +2769,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final char arg2)
             throws IllegalArgumentException {
@@ -2793,7 +2793,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final int arg2)
             throws IllegalArgumentException {
@@ -2817,7 +2817,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final long arg2)
             throws IllegalArgumentException {
@@ -2841,7 +2841,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final double arg2)
             throws IllegalArgumentException {
@@ -2865,7 +2865,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final double arg1, final Object arg2)
             throws IllegalArgumentException {
@@ -2889,7 +2889,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final char arg2)
             throws IllegalArgumentException {
@@ -2913,7 +2913,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final int arg2)
             throws IllegalArgumentException {
@@ -2937,7 +2937,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final long arg2)
             throws IllegalArgumentException {
@@ -2961,7 +2961,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final double arg2)
             throws IllegalArgumentException {
@@ -2986,7 +2986,7 @@ sealed class CommonUtil permits N {
      * @param errorMessageTemplate a template for the exception message should the check fail. The message is formed by replacing each <i>{}</i> or <i>%s</i> placeholder in the template with an argument.
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2)
             throws IllegalArgumentException {
@@ -3012,7 +3012,7 @@ sealed class CommonUtil permits N {
      * @param arg1 the parameter to be used in the exception message
      * @param arg2 the second parameter to be used in the exception message
      * @param arg3 the third parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3)
             throws IllegalArgumentException {
@@ -3039,7 +3039,7 @@ sealed class CommonUtil permits N {
      * @param arg2 the second parameter to be used in the exception message
      * @param arg3 the third parameter to be used in the exception message
      * @param arg4 the fourth parameter to be used in the exception message
-     * @throws IllegalArgumentException if {@code expression} is false
+     * @throws IllegalArgumentException if {@code expression} is false.
      */
     public static void checkArgument(final boolean expression, final String errorMessageTemplate, final Object arg1, final Object arg2, final Object arg3,
             final Object arg4) throws IllegalArgumentException {
@@ -3062,8 +3062,8 @@ sealed class CommonUtil permits N {
      *
      * @param expression a boolean expression
      * @param errorMessageSupplier a supplier of the exception message to use if the check fails; will not be invoked if the check passes; must not be {@code null}
-     * @throws IllegalArgumentException if {@code expression} is false
-     * @throws IllegalArgumentException if {@code errorMessageSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code expression} is false, or if {@code errorMessageSupplier} is
+     *         {@code null}.
      */
     public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(errorMessageSupplier, cs.errorMessageSupplier);
@@ -4150,7 +4150,7 @@ sealed class CommonUtil permits N {
      * A class is considered a bean class if at least one property getter/setter method is found in it.
      *
      * @param cls the class to check
-     * @throws IllegalArgumentException if {@code cls} is not a bean class
+     * @throws IllegalArgumentException if {@code cls} is not a bean class.
      * @see Beans#isBeanClass(Class)
      */
     static void checkBeanClass(final Class<?> cls) {
@@ -4235,7 +4235,7 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * requireNonNull(null, () -> "Object cannot be null");   // throws NullPointerException
+     * N.requireNonNull(null, () -> "Object cannot be null");   // throws NullPointerException
      * }</pre>
      *
      * <p><b>When to use:</b> Use this method for internal state or invariant checks, not for validating public
@@ -4397,8 +4397,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.equals(1.0f, 1.0f);        // returns true
-     * N.equals(1.0f, Float.NaN);   // returns false
+     * N.equals(1.0f, 1.0f);           // returns true
+     * N.equals(Float.NaN, Float.NaN); // returns true (unlike ==)
+     * N.equals(1.0f, Float.NaN);      // returns false
+     * N.equals(0.0f, -0.0f);          // returns false (unlike ==)
      * }</pre>
      *
      * @param a the first float value
@@ -4418,8 +4420,10 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.equals(1.0d, 1.0d);         // returns true
-     * N.equals(1.0d, Double.NaN);   // returns false
+     * N.equals(1.0d, 1.0d);             // returns true
+     * N.equals(Double.NaN, Double.NaN); // returns true (unlike ==)
+     * N.equals(1.0d, Double.NaN);       // returns false
+     * N.equals(0.0d, -0.0d);            // returns false (unlike ==)
      * }</pre>
      *
      * @param a the first double value
@@ -4553,7 +4557,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(boolean[], boolean[])
      */
@@ -4612,7 +4616,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(char[], char[])
      */
@@ -4671,7 +4675,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(byte[], byte[])
      */
@@ -4730,7 +4734,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(short[], short[])
      */
@@ -4789,7 +4793,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(int[], int[])
      */
@@ -4848,7 +4852,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(long[], long[])
      */
@@ -4907,7 +4911,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(float[], float[])
      */
@@ -4946,8 +4950,8 @@ sealed class CommonUtil permits N {
      * @param delta the maximum difference allowed for equality; must not be negative or NaN
      * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise.
      *         Two {@code null} or empty arrays are considered equal.
-     * @throws IllegalArgumentException if {@code delta} is negative or NaN (thrown only when elements are
-     *         actually compared, i.e., both arrays are non-empty with equal lengths)
+     * @throws IllegalArgumentException if {@code delta} is negative or NaN (thrown only when elements are actually
+     *         compared, i.e., both arrays are non-empty with equal lengths).
      */
     public static boolean equals(final float[] a, final float[] b, final float delta) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
@@ -4987,7 +4991,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param delta the maximum difference allowed for equality; must not be negative or NaN
      * @return {@code true} if the specified range of elements in both arrays are equal within the specified delta, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative, or if {@code delta} is negative or NaN (the {@code delta} check is performed only when elements are actually compared)
+     * @throws IllegalArgumentException if the length is negative, or if {@code delta} is negative or NaN (the
+     *         {@code delta} check is performed only when elements are actually compared).
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len, final float delta)
@@ -5045,7 +5050,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(double[], double[])
      */
@@ -5084,8 +5089,8 @@ sealed class CommonUtil permits N {
      * @param delta the maximum difference allowed for equality; must not be negative or NaN
      * @return {@code true} if the arrays are equal within the specified delta, {@code false} otherwise.
      *         Two {@code null} or empty arrays are considered equal.
-     * @throws IllegalArgumentException if {@code delta} is negative or NaN (thrown only when elements are
-     *         actually compared, i.e., both arrays are non-empty with equal lengths)
+     * @throws IllegalArgumentException if {@code delta} is negative or NaN (thrown only when elements are actually
+     *         compared, i.e., both arrays are non-empty with equal lengths).
      */
     public static boolean equals(final double[] a, final double[] b, final double delta) {
         if (a == b || (isEmpty(a) && isEmpty(b))) {
@@ -5125,7 +5130,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param delta the maximum difference allowed for equality; must not be negative or NaN
      * @return {@code true} if the specified range of elements in both arrays are equal within the specified delta, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative, or if {@code delta} is negative or NaN (the {@code delta} check is performed only when elements are actually compared)
+     * @throws IllegalArgumentException if the length is negative, or if {@code delta} is negative or NaN (the
+     *         {@code delta} check is performed only when elements are actually compared).
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len, final double delta)
@@ -5201,7 +5207,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#equals(Object[], Object[])
      */
@@ -5335,7 +5341,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      * @see Arrays#deepEquals(Object[], Object[])
      */
@@ -5390,7 +5396,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array, inclusive
      * @param len the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations; {@code false} otherwise
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified range is out of bounds
      */
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int len)
@@ -5543,7 +5549,7 @@ sealed class CommonUtil permits N {
      * @param map2 the second map to compare, it can be {@code null}
      * @param keysToCompare the collection of keys to compare, it must not be {@code null}
      * @return {@code true} if the values associated with the specified keys in both maps are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if the {@code keysToCompare} is {@code null} or empty
+     * @throws IllegalArgumentException if the {@code keysToCompare} is {@code null} or empty.
      */
     public static <K> boolean equalsByKeys(final Map<? extends K, ?> map1, final Map<? extends K, ?> map2, final Collection<K> keysToCompare)
             throws IllegalArgumentException {
@@ -5592,8 +5598,9 @@ sealed class CommonUtil permits N {
      * @param bean2 the second bean to compare, must not be {@code null}
      * @param propNamesToCompare the collection of property names to compare, must not be {@code null} or empty
      * @return {@code true} if all the specified properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty, if either bean
-     *         is {@code null}, if either bean is not a valid bean class, or if a specified property is not found in either bean.
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty, if either bean is
+     *         {@code null}, if either bean is not a valid bean class, or if a specified property is not found in
+     *         either bean.
      * @see #equals(Object, Object)
      * @see Builder.EquivalenceBuilder
      */
@@ -5647,7 +5654,8 @@ sealed class CommonUtil permits N {
      * @param bean1 the first bean to compare, must not be {@code null}
      * @param bean2 the second bean to compare, must not be {@code null}
      * @return {@code true} if all the common properties of the beans are equal, {@code false} otherwise
-     * @throws IllegalArgumentException if either bean is {@code null}, if either bean is not a valid bean class, or if the two classes share no common properties.
+     * @throws IllegalArgumentException if either bean is {@code null}, if either bean is not a valid bean class, or
+     *         if the two classes share no common properties.
      * @see Builder.EquivalenceBuilder
      */
     public static boolean equalsByCommonProps(@NotNull final Object bean1, @NotNull final Object bean2) throws IllegalArgumentException {
@@ -7894,7 +7902,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Returns a string representation of the "deep contents" of the specified array. If the object is {@code null}, the specified default value is returned.
+     * Returns a string representation of the "deep contents" of the specified array. If the array is {@code null}, the specified default value is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8943,10 +8951,10 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Checks if it's not {@code null} or default. {@code null} is default value for all reference types, {@code false} is default value for primitive boolean, {@code 0} is the default value for primitive number type.
+     * Checks if the specified value is not {@code null} and not the default value of its type. {@code null} is the default value for all reference types, {@code false} is the default value for primitive boolean, {@code 0} is the default value for primitive number types.
      *
      * @param value the value to check
-     * @return {@code true}, if it's not {@code null} or default
+     * @return {@code true} if the value is not {@code null} and not the default value of its type
      * @deprecated DO NOT call the methods defined in this class. It's for internal use only.
      */
     @Deprecated
@@ -9833,7 +9841,7 @@ sealed class CommonUtil permits N {
 
     /**
      * Returns an immutable empty map if the specified Map is {@code null}, otherwise itself is returned.
-     * This method can be also used to get keySet, values, entrySet, etc. from a map
+     * This method can also be used to get keySet, values, entrySet, etc. from a map.
      * <p>{@code nullToEmpty(map).keySet()}</p>
      * <p>{@code nullToEmpty(map).values()}</p>
      * <p>{@code nullToEmpty(map).entrySet()}</p>
@@ -10823,8 +10831,8 @@ sealed class CommonUtil permits N {
      * @param obj the object to check, may be {@code null}
      * @param supplierForDefault the non-null supplier that provides the default value if {@code obj} is {@code null}
      * @return {@code obj} if it is not {@code null}, otherwise the value provided by {@code supplierForDefault}
-     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when the specified object is {@code null}.
-     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is {@code null} when
+     *         the specified object is {@code null}, or if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfNull(CharSequence, Supplier)
      */
     public static <T> T defaultIfNull(final T obj, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
@@ -10874,8 +10882,8 @@ sealed class CommonUtil permits N {
      * @param str the CharSequence to check, may be {@code null} or empty
      * @param supplierForDefault the supplier that provides the default value if {@code str} is empty
      * @return {@code str} if it is not empty, otherwise the value provided by {@code supplierForDefault}
-     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the specified {@code charSequence} is empty.
-     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is empty when the
+     *         specified {@code charSequence} is empty, or if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfEmpty(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfEmpty(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
@@ -10925,8 +10933,8 @@ sealed class CommonUtil permits N {
      * @param str the CharSequence to check, may be {@code null}
      * @param supplierForDefault the supplier to provide the default value if the string is blank
      * @return the string if not blank, or the value from the supplier if blank
-     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the specified {@code charSequence} is blank.
-     * @throws IllegalArgumentException if {@code supplierForDefault} is {@code null}.
+     * @throws IllegalArgumentException if default value provided by specified {@code Supplier} is blank when the
+     *         specified {@code charSequence} is blank, or if {@code supplierForDefault} is {@code null}.
      * @see Strings#defaultIfBlank(CharSequence, Supplier)
      */
     public static <T extends CharSequence> T defaultIfBlank(final T str, final Supplier<? extends T> supplierForDefault) throws IllegalArgumentException {
@@ -11311,9 +11319,9 @@ sealed class CommonUtil permits N {
      * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class;
      *                  must not be {@code null}
      * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call
-     * @throws IllegalArgumentException if {@code srcClass} or {@code converter} is {@code null}, or if {@code srcClass}
-     *         is a built-in class (primitive, primitive array, or package name starting with {@code "java."},
-     *         {@code "javax."}, or {@code "com.landawn.abacus."})
+     * @throws IllegalArgumentException if {@code srcClass} or {@code converter} is {@code null}, or if
+     *         {@code srcClass} is a built-in class (primitive, primitive array, or package name starting with
+     *         {@code "java."}, {@code "javax."}, or {@code "com.landawn.abacus."} ).
      * @see Converters#register(Class, BiFunction)
      */
     public static boolean registerConverter(@NotNull final Class<?> srcClass, final BiFunction<?, Class<?>, ?> converter) throws IllegalArgumentException {
@@ -12683,7 +12691,8 @@ sealed class CommonUtil permits N {
      * @return a new instance of the class that the constructor belongs to.
      * @throws InstantiationException if the class that declares the underlying constructor represents an abstract class.
      * @throws IllegalAccessException if this Constructor object enforces Java language access control and the underlying constructor is inaccessible.
-     * @throws IllegalArgumentException if the number of actual and formal parameters differ, or if an unwrapping conversion for primitive arguments fails.
+     * @throws IllegalArgumentException if the number of actual and formal parameters differ, or if an unwrapping
+     *         conversion for primitive arguments fails.
      * @throws InvocationTargetException if the underlying constructor throws an exception.
      */
     @SuppressWarnings({ "deprecation" })
@@ -12769,7 +12778,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of the object to be created
      * @param cls the class of the object to be created
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated
+     * @throws IllegalArgumentException if the class is abstract or cannot be instantiated.
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
      * @see Suppliers#ofMap(Class)
@@ -12938,7 +12947,7 @@ sealed class CommonUtil permits N {
      * // intArr is an int array of length 10
      * }</pre>
      *
-     * @param <T> the type of the array elements
+     * @param <T> the type of the array
      * @param componentType the class of the component type of the array
      * @param length the length of the new array
      * @return a new array of the specified component type and length
@@ -12961,11 +12970,12 @@ sealed class CommonUtil permits N {
      * // Creates a 2x3x4 three-dimensional String array
      * }</pre>
      *
-     * @param <T> the type of the array elements
+     * @param <T> the type of the array
      * @param componentType the class of the component type of the array
      * @param dimensions the dimensions of the new array
      * @return a new array of the specified component type and dimensions
-     * @throws IllegalArgumentException if the dimensions are invalid (e.g. the number of dimensions is 0 or greater than 255), or if the component type is {@code Void.TYPE}
+     * @throws IllegalArgumentException if the dimensions are invalid (e.g. the number of dimensions is 0 or greater
+     *         than 255), or if the component type is {@code Void.TYPE}.
      * @throws NegativeArraySizeException if any of the specified dimensions are negative
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
@@ -12980,7 +12990,7 @@ sealed class CommonUtil permits N {
      *
      * @param size the expected number of entries; must not be negative
      * @return {@code 0} if {@code size} is 0; otherwise the initial capacity to use
-     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IllegalArgumentException if {@code size} is negative.
      * @deprecated internal use only
      */
     @Deprecated
@@ -13336,7 +13346,7 @@ sealed class CommonUtil permits N {
      * @param <E> the type of elements in the set
      * @param map the backing map; must be empty at the time this method is invoked
      * @return a set backed by the specified map
-     * @throws IllegalArgumentException if the specified map is not empty
+     * @throws IllegalArgumentException if the specified map is not empty.
      * @see Collections#newSetFromMap(Map)
      */
     public static <E> Set<E> newSetFromMap(final Map<E, Boolean> map) {
@@ -13748,7 +13758,7 @@ sealed class CommonUtil permits N {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.newTreeMap(Comparator.naturalOrder());   // returns empty TreeMap
-     * N.newTreeMap((Comparator<String>) null);   // returns TreeMap using natural ordering
+     * N.newTreeMap((Comparator<String>) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param <C> the type compared by the comparator (a supertype of {@code K})
@@ -13815,7 +13825,7 @@ sealed class CommonUtil permits N {
      * @param <V> the type of mapped values
      * @param expectedSize the expected number of entries to be added to the map
      * @return a new instance of an IdentityHashMap sized for the specified expected number of entries
-     * @throws IllegalArgumentException if {@code expectedSize} is negative
+     * @throws IllegalArgumentException if {@code expectedSize} is negative.
      */
     public static <K, V> IdentityHashMap<K, V> newIdentityHashMap(final int expectedSize) { //NOSONAR
         return new IdentityHashMap<>(expectedSize);
@@ -13875,7 +13885,7 @@ sealed class CommonUtil permits N {
      * @param <V> the type of mapped values
      * @param expectedSize the expected number of entries to be added to the map
      * @return a new instance of a ConcurrentHashMap sized for the specified expected number of entries
-     * @throws IllegalArgumentException if {@code expectedSize} is negative
+     * @throws IllegalArgumentException if {@code expectedSize} is negative.
      */
     public static <K, V> ConcurrentHashMap<K, V> newConcurrentHashMap(final int expectedSize) { //NOSONAR
         return new ConcurrentHashMap<>(expectedSize);
@@ -14597,7 +14607,7 @@ sealed class CommonUtil permits N {
      * // ds.size() returns 0
      * }</pre>
      *
-     * @return  a new empty Dataset.
+     * @return a new empty Dataset.
      * @see Dataset#empty()
      */
     public static Dataset newEmptyDataset() {
@@ -14691,7 +14701,8 @@ sealed class CommonUtil permits N {
      *
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
      * @return a new Dataset with the specified rows.
-     * @throws IllegalArgumentException if the first element of {@code rows} is {@code null} (so no column names can be derived), or if the rows are not Maps or bean instances.
+     * @throws IllegalArgumentException if the first element of {@code rows} is {@code null} (so no column names can
+     *         be derived), or if the rows are not Maps or bean instances.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -14718,7 +14729,8 @@ sealed class CommonUtil permits N {
      * @param rows a collection of objects representing the data in the Dataset. Each object is a row which can be: Map/Bean.
      * @param properties a map of properties for the Dataset. Each key is a property name and each value is the property value.
      * @return a new Dataset with the specified rows and properties.
-     * @throws IllegalArgumentException if the first element of {@code rows} is {@code null} (so no column names can be derived), or if the rows are not Maps or bean instances.
+     * @throws IllegalArgumentException if the first element of {@code rows} is {@code null} (so no column names can
+     *         be derived), or if the rows are not Maps or bean instances.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -14923,7 +14935,8 @@ sealed class CommonUtil permits N {
      * @param columnNames a collection of strings representing the names of the columns in the Dataset.
      * @param rows a two-dimensional array of objects representing the data in the Dataset. Each subarray is a row.
      * @return a new Dataset with the specified column names and rows.
-     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the subarrays in <i>rows</i>.
+     * @throws IllegalArgumentException if the length of <i>columnNames</i> is zero or not equal to the length of the
+     *         subarrays in <i>rows</i>.
      * @see Dataset#rows(Collection, Object[][])
      * @see Dataset#rows(Collection, Collection)
      * @see Dataset#columns(Collection, Object[][])
@@ -14977,7 +14990,8 @@ sealed class CommonUtil permits N {
      * @param m the Map to convert into a Dataset. Can be {@code null} or empty.
      * @return a new Dataset with two columns: one for keys and one for values from the Map.
      *         Returns an empty Dataset if {@code m} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code keyColumnName} or {@code valueColumnName} is {@code null} or empty, or if the two column names are equal.
+     * @throws IllegalArgumentException if {@code keyColumnName} or {@code valueColumnName} is {@code null} or empty,
+     *         or if the two column names are equal.
      * @see #newDataset(Map)
      * @see #newDataset(String, Collection)
      * @see Dataset#columns(Collection, Collection)
@@ -15190,7 +15204,8 @@ sealed class CommonUtil permits N {
      *                            If set to {@code true}, all Datasets in the collection must have the same columns.
      *                            If set to {@code false}, the Datasets in the collection can have different columns.
      * @return a new Dataset which is the result of merging all the Datasets in the provided collection; an empty Dataset if {@code dss} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code requiresSameColumns} is {@code true} and the {@code Datasets} in {@code dss} don't have the same column names.
+     * @throws IllegalArgumentException if {@code requiresSameColumns} is {@code true} and the {@code Datasets} in
+     *         {@code dss} don't have the same column names.
      */
     public static Dataset merge(final Collection<? extends Dataset> dss, final boolean requiresSameColumns) throws IllegalArgumentException {
         if (isEmpty(dss)) {
@@ -15486,7 +15501,7 @@ sealed class CommonUtil permits N {
      * @param c the collection to be converted into an array.
      * @param a the array into which the elements of the collection are to be stored, if it is big enough; otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return the array containing the elements of the collection. If the provided array was large enough to hold the collection's elements, it is the same as the provided array.
-     * @throws IllegalArgumentException if the specified {@code array} is {@code null}.
+     * @throws IllegalArgumentException if the specified array {@code a} is {@code null}.
      */
     public static <A> A[] toArray(final Collection<? extends A> c, @NotNull final A[] a) throws IllegalArgumentException {
         checkArgNotNull(a);
@@ -19079,7 +19094,8 @@ sealed class CommonUtil permits N {
      * @param valueExtractor a function that extracts values from the elements of the Iterable
      * @param mapSupplier a function that provides a new instance of the desired Map type; its {@code int} argument is an initial-capacity hint (the size of {@code c} when known, otherwise {@code 0}). This is an {@code IntFunction} (rather than a plain {@code Supplier}) so the implementation can pre-size the map; the corresponding {@code Iterator} overloads take a {@code Supplier} because an Iterator has no known size.
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier}
+     *         is {@code null}.
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterable<? extends T> c, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -19123,7 +19139,8 @@ sealed class CommonUtil permits N {
      * @param mergeFunction a function to merge values when duplicate keys are encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type; its {@code int} argument is an initial-capacity hint (the size of {@code c} when known, otherwise {@code 0}). This is an {@code IntFunction} (rather than a plain {@code Supplier}) so the implementation can pre-size the map; the corresponding {@code Iterator} overloads take a {@code Supplier} because an Iterator has no known size.
      * @return a Map containing the elements of the Iterable, with keys and values extracted by the keyExtractor and valueExtractor functions
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mergeFunction}, {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor},
+     *         {@code mergeFunction}, {@code mapSupplier} is {@code null}.
      * @see Fn#throwingMerger()
      * @see Fn#replacingMerger()
      * @see Fn#ignoringMerger()
@@ -19264,7 +19281,8 @@ sealed class CommonUtil permits N {
      * @param mapSupplier a function that provides a new instance of the desired Map type.
      * @return a Map of the specified type containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions.
      *         Returns an empty Map of the specified type if {@code iter} is {@code null}.
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mapSupplier}
+     *         is {@code null}.
      */
     public static <T, K, V, M extends Map<K, V>> M toMap(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyExtractor,
             final Function<? super T, ? extends V> valueExtractor, final Supplier<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -19313,7 +19331,8 @@ sealed class CommonUtil permits N {
      * @param mergeFunction a function that merges values if the same key is encountered
      * @param mapSupplier a function that provides a new instance of the desired Map type
      * @return a Map containing the elements of the Iterator, with keys and values extracted by the keyExtractor and valueExtractor functions
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor}, {@code mergeFunction}, {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor},
+     *         {@code mergeFunction}, {@code mapSupplier} is {@code null}.
      * @see Fn#throwingMerger()
      * @see Fn#replacingMerger()
      * @see Fn#ignoringMerger()
@@ -19462,7 +19481,8 @@ sealed class CommonUtil permits N {
      * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
      * @param keyValuePairs additional keys and values in alternating order: key, value, key, value...
      * @return a new modifiable {@code HashMap} containing the specified entries
-     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value elements
+     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value
+     *         elements.
      */
     @Beta
     public static <K, V> Map<K, V> toMap(final K k1, final V v1, final Object... keyValuePairs) {
@@ -19597,7 +19617,8 @@ sealed class CommonUtil permits N {
      * @param v1 the value to be associated with {@code k1}. Can be {@code null}.
      * @param keyValuePairs additional keys and values in alternating order: key, value, key, value...
      * @return a new modifiable {@code LinkedHashMap} containing the specified entries
-     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value elements
+     * @throws IllegalArgumentException if {@code keyValuePairs} does not contain a valid sequence of key-value
+     *         elements.
      */
     @Beta
     public static <K, V> Map<K, V> toLinkedHashMap(final K k1, final V v1, final Object... keyValuePairs) {
@@ -21360,7 +21381,7 @@ sealed class CommonUtil permits N {
      * <p><b>Lexicographic Comparison:</b> Arrays are compared element by element from index 0.
      * The first differing element determines the result. If all compared elements are equal,
      * the shorter array is considered less than the longer array. Null or empty arrays are
-     * considered less than non-empty arrays.
+     * considered less than non-empty arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21409,7 +21430,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int len)
@@ -21489,7 +21510,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int len)
@@ -21569,7 +21590,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int len)
@@ -21639,7 +21660,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) of the second subarray
      * @param len the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see Arrays#compareUnsigned(byte[], int, int, byte[], int, int)
      * @see Byte#compareUnsigned(byte, byte)
@@ -21711,7 +21732,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int len)
@@ -21781,7 +21802,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) of the second subarray
      * @param len the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see Arrays#compareUnsigned(short[], int, int, short[], int, int)
      * @see Short#compareUnsigned(short, short)
@@ -21853,7 +21874,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int len)
@@ -21923,7 +21944,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) of the second subarray
      * @param len the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see Arrays#compareUnsigned(int[], int, int, int[], int, int)
      * @see Integer#compareUnsigned(int, int)
@@ -21995,7 +22016,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int len)
@@ -22065,7 +22086,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) of the second subarray
      * @param len the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see Arrays#compareUnsigned(long[], int, int, long[], int, int)
      * @see Long#compareUnsigned(long, long)
@@ -22141,7 +22162,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int len)
@@ -22227,7 +22248,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int len)
@@ -22294,7 +22315,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len)
@@ -22359,9 +22380,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param cmp the comparator used to compare elements; must not be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -22401,7 +22421,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second collection
      * @param len the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the specified ranges are out of bounds
      */
     public static <T> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB, final int len)
@@ -22469,9 +22489,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param cmp the comparator to compare collection elements
      * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
-     * @throws IllegalArgumentException if the specified length is negative
+     * @throws IllegalArgumentException if the specified length is negative, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if the specified indices are out of range
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -22641,8 +22660,9 @@ sealed class CommonUtil permits N {
      * @param bean2 the second bean to compare, must not be {@code null}
      * @param propNamesToCompare the collection of property names to compare in order, must not be {@code null} or empty
      * @return a negative integer, zero, or a positive integer as the first bean is less than, equal to, or greater than the second bean
-     * @throws IllegalArgumentException if {@code bean1} or {@code bean2} is {@code null}, if {@code propNamesToCompare}
-     *         is {@code null} or empty, if either bean is not a valid bean class, or if a specified property is not found in either bean.
+     * @throws IllegalArgumentException if {@code bean1} or {@code bean2} is {@code null}, if
+     *         {@code propNamesToCompare} is {@code null} or empty, if either bean is not a valid bean class, or if a
+     *         specified property is not found in either bean.
      * @throws ClassCastException if a compared property value does not implement {@link Comparable}.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
@@ -23309,7 +23329,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable from which to retrieve the element
      * @param index the position of the element to retrieve
      * @return the element at the specified position in the iterable
-     * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative
+     * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative.
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable
      * @see #getOnlyElement(Iterable)
      */
@@ -23345,7 +23365,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable from which to retrieve the element
      * @param index the position of the element to retrieve
      * @return the element at the specified position in the iterable
-     * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative
+     * @throws IllegalArgumentException if the iterable is {@code null} or the index is negative.
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterable
      */
     public static <T> T getElement(@NotNull final Iterable<? extends T> c, final long index) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23383,7 +23403,7 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to retrieve the element from; must not be {@code null}
      * @param index the index of the element to retrieve. Must be a non-negative integer.
      * @return the element at the specified index in the Iterator
-     * @throws IllegalArgumentException if the Iterator is {@code null} or the index is negative
+     * @throws IllegalArgumentException if the Iterator is {@code null} or the index is negative.
      * @throws IndexOutOfBoundsException if the index is bigger than the maximum index of the specified Iterator
      * @see Iterators#elementAt(Iterator, long)
      */
@@ -23618,7 +23638,7 @@ sealed class CommonUtil permits N {
      * @param a the array to get the elements from
      * @param n the number of elements to retrieve from the array
      * @return a list containing the first <i>n</i> elements from the array
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     public static <T> List<T> firstElements(final T[] a, final int n) throws IllegalArgumentException {
         checkArgument(n >= 0, "'n' cannot be negative:" + n);
@@ -23647,7 +23667,7 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to get the elements from
      * @param n the number of elements to retrieve from the Iterable
      * @return a list containing the first <i>n</i> elements from the Iterable
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     @Beta
     public static <T> List<T> firstElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
@@ -23698,7 +23718,7 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to get the elements from
      * @param n the number of elements to retrieve from the Iterator
      * @return a list containing the first <i>n</i> elements from the Iterator
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     @Beta
     public static <T> List<T> firstElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
@@ -23738,7 +23758,7 @@ sealed class CommonUtil permits N {
      * @param a the array to get the elements from
      * @param n the number of elements to retrieve from the end of the array
      * @return a list containing the last <i>n</i> elements from the array
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     public static <T> List<T> lastElements(final T[] a, final int n) throws IllegalArgumentException {
         checkArgument(n >= 0, "'n' cannot be negative:" + n);
@@ -23767,7 +23787,7 @@ sealed class CommonUtil permits N {
      * @param c the Iterable to get the elements from
      * @param n the number of elements to retrieve from the end of the Iterable
      * @return a list containing the last <i>n</i> elements from the Iterable
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     @Beta
     public static <T> List<T> lastElements(final Iterable<? extends T> c, final int n) throws IllegalArgumentException {
@@ -23818,7 +23838,7 @@ sealed class CommonUtil permits N {
      * @param iter the Iterator to get the elements from
      * @param n the number of elements to retrieve from the Iterator
      * @return a list containing the last <i>n</i> elements from the Iterator
-     * @throws IllegalArgumentException if <i>n</i> is negative
+     * @throws IllegalArgumentException if <i>n</i> is negative.
      */
     @Beta
     public static <T> List<T> lastElements(final Iterator<? extends T> iter, final int n) throws IllegalArgumentException {
@@ -24002,7 +24022,7 @@ sealed class CommonUtil permits N {
      * @param a the array to search through
      * @param defaultValue the value to return if no {@code non-null} element is found or if the array is empty/null; must not be null
      * @return the first {@code non-null} element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is null
+     * @throws IllegalArgumentException if {@code defaultValue} is null.
      */
     public static <T> T firstNonNullOrDefault(final T[] a, T defaultValue) throws IllegalArgumentException {
         checkArgNotNull(defaultValue, cs.defaultValue);
@@ -24037,7 +24057,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable to check.
      * @param defaultValue the default value to return if no {@code non-null} element is found; must not be {@code null}.
      * @return the first {@code non-null} element of the given iterable, or {@code defaultValue} if no {@code non-null} element is found.
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #firstNonNullOrDefault(Iterator, Object)
      * @see #firstNonNull(Iterable)
      * @see Nulls#firstNonNull(Iterable)
@@ -24071,7 +24091,7 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to check.
      * @param defaultValue the default value to return if no {@code non-null} element is found; must not be {@code null}.
      * @return the first {@code non-null} element of the given iterator, or {@code defaultValue} if no {@code non-null} element is found.
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #firstNonNullOrDefault(Iterable, Object)
      * @see #firstNonNull(Iterator)
      * @see Nulls#firstNonNull(Iterator)
@@ -24268,7 +24288,7 @@ sealed class CommonUtil permits N {
      * @param a the array to search through
      * @param defaultValue the value to return if no {@code non-null} element is found or if the array is empty/null; must not be null
      * @return the last {@code non-null} element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is null
+     * @throws IllegalArgumentException if {@code defaultValue} is null.
      * @see Nulls#lastNonNull(Object[])
      */
     public static <T> T lastNonNullOrDefault(final T[] a, T defaultValue) throws IllegalArgumentException {
@@ -24298,7 +24318,7 @@ sealed class CommonUtil permits N {
      * @param c the iterable to check.
      * @param defaultValue the default value to return if no {@code non-null} element is found; must not be {@code null}.
      * @return the last {@code non-null} element of the given iterable, or {@code defaultValue} if no {@code non-null} element is found.
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #lastNonNullOrDefault(Iterator, Object)
      * @see #lastNonNull(Iterable)
      * @see Nulls#lastNonNull(Iterable)
@@ -24327,7 +24347,7 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to check.
      * @param defaultValue the default value to return if no {@code non-null} element is found; must not be {@code null}.
      * @return the last {@code non-null} element of the given iterator, or {@code defaultValue} if no {@code non-null} element is found.
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #lastNonNullOrDefault(Iterable, Object)
      * @see #lastNonNull(Iterator)
      * @see Nulls#lastNonNull(Iterator)
@@ -24597,7 +24617,7 @@ sealed class CommonUtil permits N {
      * @param css the array of CharSequence elements to search through
      * @param defaultValue the value to return if no non-empty element is found or if the array is empty/null; must not be empty
      * @return the first non-empty element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null} or empty.
      */
     public static <T extends CharSequence> T firstNonEmptyOrDefault(final T[] css, T defaultValue) throws IllegalArgumentException {
         checkArgNotEmpty(defaultValue, cs.defaultValue);
@@ -24628,7 +24648,7 @@ sealed class CommonUtil permits N {
      * @param css the iterable of CharSequence elements to search through
      * @param defaultValue the value to return if no non-empty element is found or if the iterable is empty/null; must not be empty
      * @return the first non-empty element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null} or empty.
      */
     public static <T extends CharSequence> T firstNonEmptyOrDefault(final Iterable<? extends T> css, T defaultValue) throws IllegalArgumentException {
         checkArgNotEmpty(defaultValue, cs.defaultValue);
@@ -24768,7 +24788,7 @@ sealed class CommonUtil permits N {
      * @param css the array of CharSequence elements to search through
      * @param defaultValue the value to return if no non-blank element is found or if the array is empty/null; must not be blank
      * @return the first non-blank element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}, empty, or blank.
      */
     public static <T extends CharSequence> T firstNonBlankOrDefault(final T[] css, T defaultValue) throws IllegalArgumentException {
         checkArgNotBlank(defaultValue, cs.defaultValue);
@@ -24799,7 +24819,7 @@ sealed class CommonUtil permits N {
      * @param css the iterable of CharSequence elements to search through
      * @param defaultValue the value to return if no non-blank element is found or if the iterable is empty/null; must not be blank
      * @return the first non-blank element, or {@code defaultValue} if none exists
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}, empty, or blank.
      */
     public static <T extends CharSequence> T firstNonBlankOrDefault(final Iterable<? extends T> css, T defaultValue) throws IllegalArgumentException {
         checkArgNotBlank(defaultValue, cs.defaultValue);
@@ -26146,7 +26166,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index (inclusive) in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if the specified indices or length result in out of bounds access
      * @see Arrays#mismatch(boolean[], int, int, boolean[], int, int)
      */
@@ -26231,7 +26251,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(char[], int, int, char[], int, int)
      */
@@ -26316,7 +26336,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(byte[], int, int, byte[], int, int)
      */
@@ -26401,7 +26421,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(short[], int, int, short[], int, int)
      */
@@ -26486,7 +26506,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(int[], int, int, int[], int, int)
      */
@@ -26571,7 +26591,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(long[], int, int, long[], int, int)
      */
@@ -26656,7 +26676,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(float[], int, int, float[], int, int)
      */
@@ -26741,7 +26761,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(double[], int, int, double[], int, int)
      */
@@ -26808,7 +26828,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second array
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
@@ -26884,8 +26904,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param keyExtractor the function used to extract comparison keys from array elements
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the arrays are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative or {@code keyExtractor} is {@code null}.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
     public static <T> int mismatch(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int len,
@@ -26928,7 +26948,7 @@ sealed class CommonUtil permits N {
      * @param fromIndexB the starting index in the second collection
      * @param len the number of elements to compare
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the collections are identical in the specified range
-     * @throws IllegalArgumentException if the length is negative
+     * @throws IllegalArgumentException if the length is negative.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
@@ -27008,8 +27028,8 @@ sealed class CommonUtil permits N {
      * @param len the number of elements to compare
      * @param keyExtractor the function used to extract comparison keys from collection elements
      * @return the relative index of the first mismatch from {@code fromIndexA}, or -1 if the collections are identical in the specified range
+     * @throws IllegalArgumentException if the length is negative or {@code keyExtractor} is {@code null}.
      * @throws IndexOutOfBoundsException if the starting indices or length are out of bounds
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see Arrays#mismatch(Object[], int, int, Object[], int, int)
      */
     public static <T> int mismatch(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int len,
@@ -30385,7 +30405,7 @@ sealed class CommonUtil permits N {
      * @param <T> the type of elements in the list
      * @param list the list to be filled
      * @param val the value to fill the list with
-     * @throws IllegalArgumentException if the specified list is null
+     * @throws IllegalArgumentException if the specified list is null.
      * @see #fill(List, int, int, Object)
      * @see #padLeft(List, int, Object)
      * @see #padRight(List, int, Object)
@@ -30424,7 +30444,7 @@ sealed class CommonUtil permits N {
      * @param fromIndex the starting index (inclusive) to begin filling
      * @param toIndex the ending index (exclusive) to stop filling
      * @param val the value to fill the list with
-     * @throws IllegalArgumentException if the specified list is null
+     * @throws IllegalArgumentException if the specified list is null.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative or greater than {@code toIndex}
      * @see #fill(List, Object)
      * @see #padLeft(List, int, Object)
@@ -30490,7 +30510,7 @@ sealed class CommonUtil permits N {
      * @param minSize the minimum size the list should have after this operation
      * @param objToAdd the object to add to the list if it is smaller than the specified minimum size
      * @return {@code true} if the list was modified as a result of this operation, {@code false} otherwise
-     * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative
+     * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative.
      * @see #padRight(List, int, Object)
      * @see Strings#padStart(String, int)
      * @see Strings#padStart(String, int, char)
@@ -30537,7 +30557,7 @@ sealed class CommonUtil permits N {
      * @param minSize the minimum size the list should have after padding
      * @param objToAdd the object to be added to the list
      * @return {@code true} if the list was modified, {@code false} otherwise
-     * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative
+     * @throws IllegalArgumentException if the list is {@code null} or the minimum size is negative.
      * @see #padLeft(List, int, Object)
      * @see #fill(List, Object)
      * @see #fill(List, int, int, Object)
@@ -30577,7 +30597,7 @@ sealed class CommonUtil permits N {
      * @param value the value to be repeated
      * @param n the number of times to repeat the value
      * @return a list containing the repeated values
-     * @throws IllegalArgumentException if the specified number of repetitions is negative
+     * @throws IllegalArgumentException if the specified number of repetitions is negative.
      * @see Array#repeat(Object, int, Class)
      * @see Iterators#repeat(Object, int)
      * @see Collections#nCopies(int, Object)
@@ -30603,7 +30623,7 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be repeated; may be {@code null} or empty
      * @param n the number of times to repeat the elements; must not be negative
      * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
-     * @throws IllegalArgumentException if the specified number of repetitions is negative
+     * @throws IllegalArgumentException if the specified number of repetitions is negative.
      * @see Iterators#repeatElements(Iterable, long)
      */
     public static <T> List<T> repeatElements(final Collection<? extends T> c, final int n) throws IllegalArgumentException {
@@ -30625,7 +30645,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats each element in the specified Collection <i>n</i> times one by one till reach the specified size.
+     * Repeats each element of the specified collection one by one until the specified size is reached.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30637,7 +30657,8 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be repeated
      * @param size the target size of the resulting list
      * @return a list containing the repeated elements; an empty list if {@code size} is {@code 0}
-     * @throws IllegalArgumentException if the specified size is negative, or if {@code size > 0} and the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the specified size is negative, or if {@code size > 0} and the collection
+     *         is {@code null} or empty.
      * @see Iterators#repeatElementsToSize(Collection, long)
      */
     public static <T> List<T> repeatElementsToSize(final Collection<T> c, final int size) throws IllegalArgumentException {
@@ -30679,7 +30700,7 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be repeated; may be {@code null} or empty
      * @param n the number of times to repeat the elements; must not be negative
      * @return a list containing the repeated elements; an empty list if {@code n == 0} or the collection is {@code null} or empty
-     * @throws IllegalArgumentException if the specified number of repetitions is negative
+     * @throws IllegalArgumentException if the specified number of repetitions is negative.
      * @see Iterators#cycle(Iterable, long)
      */
     public static <T> List<T> cycle(final Collection<T> c, final int n) throws IllegalArgumentException {
@@ -30699,7 +30720,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Repeats the entire specified Collection cyclically till reach the specified size.
+     * Repeats the entire specified collection cyclically until the specified size is reached.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30711,7 +30732,8 @@ sealed class CommonUtil permits N {
      * @param c the collection whose elements are to be repeated
      * @param size the target size of the resulting list
      * @return a list containing the repeated elements; an empty list if {@code size == 0}
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty while {@code size > 0}, or if the specified size is negative
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty while {@code size > 0},
+     *         or if the specified size is negative.
      * @see Iterators#cycleToSize(Collection, long)
      */
     public static <T> List<T> cycleToSize(final Collection<? extends T> c, final int size) throws IllegalArgumentException {
@@ -31181,7 +31203,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new boolean array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(boolean[], int)
      */
     public static boolean[] copyOf(final boolean[] original, final int newLength) throws IllegalArgumentException {
@@ -31215,7 +31237,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new char array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(char[], int)
      */
     public static char[] copyOf(final char[] original, final int newLength) throws IllegalArgumentException {
@@ -31249,7 +31271,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new byte array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(byte[], int)
      */
     public static byte[] copyOf(final byte[] original, final int newLength) throws IllegalArgumentException {
@@ -31283,7 +31305,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new short array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(short[], int)
      */
     public static short[] copyOf(final short[] original, final int newLength) throws IllegalArgumentException {
@@ -31317,7 +31339,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new int array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(int[], int)
      */
     public static int[] copyOf(final int[] original, final int newLength) throws IllegalArgumentException {
@@ -31351,7 +31373,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new long array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(long[], int)
      */
     public static long[] copyOf(final long[] original, final int newLength) throws IllegalArgumentException {
@@ -31385,7 +31407,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new float array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(float[], int)
      */
     public static float[] copyOf(final float[] original, final int newLength) throws IllegalArgumentException {
@@ -31419,7 +31441,7 @@ sealed class CommonUtil permits N {
      * @param original the array to be copied
      * @param newLength the length of the copy to be returned
      * @return a new double array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(double[], int)
      */
     public static double[] copyOf(final double[] original, final int newLength) throws IllegalArgumentException {
@@ -31455,7 +31477,7 @@ sealed class CommonUtil permits N {
      * @param newLength the length of the copy to be returned
      * @return a new array containing a copy of the original array
      * @throws NullPointerException if {@code original} is {@code null}
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(Object[], int)
      * @see #copyOf(Object[], int, Class)
      */
@@ -31485,7 +31507,7 @@ sealed class CommonUtil permits N {
      * @param newLength the length of the copy to be returned
      * @param newType the class of the copy to be returned
      * @return a new array containing a copy of the original array
-     * @throws IllegalArgumentException if the specified new length is negative
+     * @throws IllegalArgumentException if the specified new length is negative.
      * @see Arrays#copyOf(Object[], int, Class)
      */
     public static <T> T[] copyOf(final Object[] original, final int newLength, final Class<? extends T[]> newType) throws IllegalArgumentException {
@@ -31548,7 +31570,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new boolean array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static boolean[] copyOfRange(final boolean[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -31624,7 +31646,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new char array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static char[] copyOfRange(final char[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -31700,7 +31722,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new byte array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static byte[] copyOfRange(final byte[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -31776,7 +31798,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new short array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static short[] copyOfRange(final short[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -31854,7 +31876,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new int array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]}
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      */
     public static int[] copyOfRange(final int[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex), original.length);
@@ -31929,7 +31951,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new long array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static long[] copyOfRange(final long[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -32005,7 +32027,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new float array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static float[] copyOfRange(final float[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -32081,7 +32103,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new double array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static double[] copyOfRange(final double[] original, int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
@@ -32157,7 +32179,7 @@ sealed class CommonUtil permits N {
      * @return a new array containing the specified range from the original array
      * @throws NullPointerException if {@code original} is {@code null}
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final T[] original, final int fromIndex, final int toIndex, final int step) {
@@ -32212,7 +32234,7 @@ sealed class CommonUtil permits N {
      * @param newType the class of the new array
      * @return a new array containing the specified range from the original array
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, original.length]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     public static <T> T[] copyOfRange(final Object[] original, int fromIndex, final int toIndex, final int step, final Class<? extends T[]> newType)
@@ -32285,7 +32307,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between elements to be copied
      * @return a new list containing the specified range from the original list
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, c.size()]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -32376,7 +32398,7 @@ sealed class CommonUtil permits N {
      * @param step the interval between characters to be copied
      * @return the specified substring
      * @throws IndexOutOfBoundsException if the resolved range end points fall outside {@code [0, str.length()]} (note that for a negative {@code step}, {@code fromIndex} may legally be greater than {@code toIndex})
-     * @throws IllegalArgumentException  if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see #copyOfRange(int[], int, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -35378,7 +35400,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
+     * Sorts the specified array according to the natural ordering (where {@code null} is smallest) using multiple threads.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -35405,7 +35427,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is minimum) using multiple threads.
+     * Sorts the specified range of the specified array according to the natural ordering (where {@code null} is smallest) using multiple threads.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -35592,7 +35614,7 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * Sorts the specified range of the list according to the order induced by the specified comparator using multiple threads.
+     * Sorts the specified range of the specified list according to the order induced by the specified comparator using multiple threads.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -37184,8 +37206,9 @@ sealed class CommonUtil permits N {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.binarySearch(list, 0, list.size(), 5);    // returns index of 5
-     * N.binarySearch(list, 0, list.size(), 99);   // returns -(insertionPoint)-1
+     * List<Integer> list = Arrays.asList(1, 3, 5, 7, 9);
+     * N.binarySearch(list, 0, list.size(), 5);    // returns 2
+     * N.binarySearch(list, 0, list.size(), 99);   // returns -(insertion point) - 1
      * }</pre>
      *
      * @param <T> the type of the elements in the list
@@ -37665,13 +37688,13 @@ sealed class CommonUtil permits N {
      * N.indexOf(new float[]{1.0f,2.0f}, 3.0f, 0, 0.01f);        // returns -1
      * }</pre>
      *
-     * @param a the array to search through for the object, may be {@code null}
+     * @param a the array to be searched, may be {@code null}
      * @param valueToFind the value to search for
      * @param fromIndex the index to start searching at
      * @param tolerance tolerance of the search; must be non-negative and not NaN
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static int indexOf(final float[] a, final float valueToFind, final int fromIndex, final float tolerance) {
         checkArgNotNegative(tolerance, "tolerance");
@@ -37763,13 +37786,13 @@ sealed class CommonUtil permits N {
      * N.indexOf(new double[]{1.0,2.0}, 3.0, 0, 0.01);       // returns -1
      * }</pre>
      *
-     * @param a the array to search through for the object, may be {@code null}
+     * @param a the array to be searched, may be {@code null}
      * @param valueToFind the value to search for
      * @param fromIndex the index to start searching at
      * @param tolerance tolerance of the search; must be non-negative and not NaN
      * @return the index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static int indexOf(final double[] a, final double valueToFind, final int fromIndex, final double tolerance) {
         checkArgNotNegative(tolerance, "tolerance");
@@ -37926,7 +37949,8 @@ sealed class CommonUtil permits N {
      *
      * @param iter the iterator to be searched.
      * @param valueToFind the value to find in the iterator.
-     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @return the index of the first occurrence of the specified value in the iterator,
+     *         or -1 if the iterator is {@code null} or the value is not found.
      * @throws ArithmeticException if the found {@code index} overflows an int.
      * @see Iterators#indexOf(Iterator, Object)
      * @see Iterables#indexOf(Collection, Object)
@@ -37946,7 +37970,8 @@ sealed class CommonUtil permits N {
      * @param iter the iterator to be searched.
      * @param valueToFind the value to find in the iterator.
      * @param fromIndex the index to start the search from.
-     * @return the index of the first occurrence of the specified value in the iterator, or -1 if the value is not found.
+     * @return the index of the first occurrence of the specified value in the iterator,
+     *         or -1 if the iterator is {@code null} or the value is not found.
      * @throws ArithmeticException if the found {@code index} overflows an int.
      * @see Iterators#indexOf(Iterator, Object, long)
      * @see Iterables#indexOf(Collection, Object)
@@ -38453,13 +38478,13 @@ sealed class CommonUtil permits N {
      * N.lastIndexOf(new float[]{1.0f,2.0f}, 3.0f, 1, 0.01f);        // returns -1
      * }</pre>
      *
-     * @param a the array to traverse for looking for the object, may be {@code null}
+     * @param a the array to be searched, may be {@code null}
      * @param valueToFind the value to search for
      * @param startIndexFromBack the start index to traverse backwards from
      * @param tolerance search for value within plus/minus this amount; must be non-negative and not NaN
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static int lastIndexOf(final float[] a, final float valueToFind, final int startIndexFromBack, final float tolerance) {
         checkArgNotNegative(tolerance, "tolerance");
@@ -38553,13 +38578,13 @@ sealed class CommonUtil permits N {
      * N.lastIndexOf(new double[]{1.0,2.0}, 3.0, 1, 0.01);       // returns -1
      * }</pre>
      *
-     * @param a the array to traverse for looking for the object, may be {@code null}
+     * @param a the array to be searched, may be {@code null}
      * @param valueToFind the value to search for
      * @param startIndexFromBack the start index to traverse backwards from
      * @param tolerance search for value within plus/minus this amount; must be non-negative and not NaN
      * @return the last index of the value within the array,
      *  {@link #INDEX_NOT_FOUND} ({@code -1}) if not found or {@code null} array input
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static int lastIndexOf(final double[] a, final double valueToFind, final int startIndexFromBack, final double tolerance) {
         checkArgNotNegative(tolerance, "tolerance");

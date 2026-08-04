@@ -19,10 +19,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents a supplier of {@code int}-valued results. This is the {@code int}-producing
  * primitive specialization of {@link java.util.function.Supplier}.
  *
- * <p>This interface extends both {@link java.util.function.IntSupplier} and
- * {@link Throwables.IntSupplier}, providing compatibility with the standard Java functional
- * interfaces while also supporting the Throwables framework.
- *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
  *
  * <p>This is a functional interface whose functional method is {@link #getAsInt()}.

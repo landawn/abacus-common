@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -1763,6 +1764,63 @@ public class FuturesTest extends TestBase {
         assertTrue(thrown.get() instanceof InterruptedException, "expected InterruptedException but got: " + thrown.get());
 
         never.complete("unblock");
+    }
+
+    @Test
+    public void testAllOf_isCancelledImpliesIsDone() throws Exception {
+        // Future contract: isCancelled() must imply isDone(). Cancelling only one child while another
+        // is still running must not report isCancelled()==true with isDone()==false.
+        final CompletableFuture<String> first = new CompletableFuture<>();
+        final CompletableFuture<String> second = new CompletableFuture<>();
+        final ContinuableFuture<List<String>> all = Futures.allOf(first, second);
+
+        first.cancel(true);
+        assertFalse(all.isCancelled(), "composite must not report cancelled while a sibling is still running");
+        assertFalse(all.isDone());
+
+        second.complete("ok");
+        assertTrue(all.isDone());
+        assertTrue(all.isCancelled(), "once all constituents are done and one was cancelled, composite is cancelled");
+    }
+
+    @Test
+    public void testCompose_partialCancellationCanStillSucceed() throws Exception {
+        final CompletableFuture<String> cancelled = new CompletableFuture<>();
+        final CompletableFuture<String> completed = CompletableFuture.completedFuture("ok");
+        cancelled.cancel(true);
+
+        final ContinuableFuture<String> composed = Futures.compose(Arrays.asList(cancelled, completed), futures -> futures.get(1).get());
+
+        assertTrue(composed.isDone());
+        assertFalse(composed.isCancelled(), "a compose function may ignore a cancelled constituent");
+        assertEquals("ok", composed.get());
+    }
+
+    @Test
+    public void testCompose_externalCancellationOfAllInputsCanStillSucceed() throws Exception {
+        final CompletableFuture<String> first = new CompletableFuture<>();
+        final CompletableFuture<String> second = new CompletableFuture<>();
+        first.cancel(true);
+        second.cancel(true);
+
+        final ContinuableFuture<String> composed = Futures.compose(Arrays.asList(first, second), futures -> "fallback");
+
+        assertTrue(composed.isDone());
+        assertFalse(composed.isCancelled(), "input cancellation does not cancel a compose function that can provide a fallback");
+        assertEquals("fallback", composed.get());
+    }
+
+    @Test
+    public void testCompose_successfulCancelCancelsComposite() throws Exception {
+        final CompletableFuture<String> first = new CompletableFuture<>();
+        final CompletableFuture<String> second = new CompletableFuture<>();
+        final ContinuableFuture<String> composed = Futures.compose(Arrays.asList(first, second), futures -> "ignored");
+
+        assertTrue(composed.cancel(true));
+        assertTrue(composed.isCancelled());
+        assertTrue(composed.isDone());
+        assertThrows(CancellationException.class, composed::get);
+        assertThrows(CancellationException.class, () -> composed.get(1, TimeUnit.SECONDS));
     }
 
 }

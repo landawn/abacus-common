@@ -23,9 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, int, int)}.
  *
- * <p>The interface extends {@code Throwables.ObjBiIntFunction} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntFunction<String, String> substring = (str, start, end) ->
@@ -54,22 +51,10 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
     /**
      * Applies this function to the given arguments.
      *
-     * <p>This method takes an object of type T and two int values as input,
-     * then processes them to produce a result of type R.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Extracting subranges from collections or strings</li>
-     *   <li>Accessing elements in two-dimensional data structures using coordinates</li>
-     *   <li>Performing calculations that require an object and two numeric parameters</li>
-     *   <li>Creating new objects based on an existing object and two indices</li>
-     *   <li>Implementing lookup operations with two numeric keys</li>
-     * </ul>
-     *
      * @param t the object argument
-     * @param i the first int argument (often used as start index, row, or x-coordinate)
-     * @param j the second int argument (often used as end index, column, or y-coordinate)
-     * @return the function result of type R
+     * @param i the first int argument
+     * @param j the second int argument
+     * @return the function result
      */
     @Override
     R apply(T t, int i, int j);
@@ -80,9 +65,6 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      *
      * <p>If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
-     *
-     * <p>This method allows for function composition, enabling the chaining of
-     * operations where the output of this function becomes the input of the next.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -100,7 +82,7 @@ public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> ObjBiIntFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

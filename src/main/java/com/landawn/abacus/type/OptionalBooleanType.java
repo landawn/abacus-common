@@ -284,7 +284,8 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     /**
      * Appends the string representation of an {@link OptionalBoolean} to an Appendable.
-     * Writes "true", "false", or "null" depending on the value.
+     * Writes "true" or "false" for a present value, or the literal "null" if {@code x} is
+     * {@code null} or empty.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML

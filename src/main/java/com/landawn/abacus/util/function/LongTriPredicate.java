@@ -23,9 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(long, long, long)}.
  *
- * <p>The interface extends {@code Throwables.LongTriPredicate} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * LongTriPredicate isTriangle = (a, b, c) ->
@@ -138,7 +135,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongTriPredicate and(final LongTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -169,7 +166,7 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongTriPredicate or(final LongTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

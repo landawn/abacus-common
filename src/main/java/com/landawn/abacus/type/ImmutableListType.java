@@ -24,11 +24,12 @@ import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.SK;
 
 /**
- * Type handler for ImmutableList objects.
- * This class provides serialization and deserialization capabilities for ImmutableList instances,
- * delegating most operations to the underlying List type handler while ensuring immutability.
+ * Type handler for {@link ImmutableList} objects.
+ * This class provides serialization and deserialization for {@code ImmutableList} instances,
+ * delegating most operations to the underlying {@link List} type handler while ensuring immutability.
  *
  * @param <E> the element type of the immutable list
+ * @see ImmutableList
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {

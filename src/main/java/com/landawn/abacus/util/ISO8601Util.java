@@ -208,8 +208,8 @@ final class ISO8601Util {
      *
      * @param date the ISO8601 string to parse
      * @return the parsed Date object
-     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or has
-     *         unparsed trailing characters
+     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or has unparsed trailing
+     *         characters.
      * @see #parse(String, ParsePosition)
      */
     public static Date parse(final String date) {
@@ -253,7 +253,7 @@ final class ISO8601Util {
      *            updated to the index immediately after the last consumed character, and on
      *            failure it is left unchanged
      * @return the parsed {@link Date} object
-     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or is malformed
+     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or is malformed.
      * @throws NullPointerException if {@code pos} is {@code null}
      * @see #parse(String)
      */

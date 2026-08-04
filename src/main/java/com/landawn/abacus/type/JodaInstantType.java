@@ -30,11 +30,11 @@ import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Joda-Time Instant objects.
+ * Type handler for Joda-Time {@link org.joda.time.Instant} objects.
  * <p>
- * This class provides serialization, deserialization, and database access capabilities for
- * {@code org.joda.time.Instant} instances. It supports multiple string formats including ISO 8601 formats,
- * numeric milliseconds representation, and provides database conversion using {@code java.sql.Timestamp}.
+ * This class provides serialization, deserialization, and database access for
+ * {@code Instant} instances. It supports multiple string formats including ISO-8601,
+ * numeric milliseconds, and maps to the database via {@link java.sql.Timestamp}.
  *
  * @see org.joda.time.Instant
  * @see AbstractJodaDateTimeType
@@ -104,7 +104,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
-     * @throws IllegalArgumentException if the string format is not recognized
+     * @throws IllegalArgumentException if the string format is not recognized.
      * @see #valueOf(Object)
      * @see #stringOf(Instant)
      */

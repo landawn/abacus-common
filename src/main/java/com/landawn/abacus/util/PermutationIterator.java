@@ -79,7 +79,7 @@ public final class PermutationIterator {
      * @param elements the original collection whose elements have to be permuted
      * @return an iterator that lazily yields every permutation of the original collection,
      *         each as a new {@code List}; for an empty collection it yields a single empty list
-     * @throws IllegalArgumentException if {@code elements} is {@code null}
+     * @throws IllegalArgumentException if {@code elements} is {@code null}.
      * @see #ordered(Collection)
      */
     public static <T> ObjIterator<List<T>> of(final Collection<T> elements) throws IllegalArgumentException {
@@ -199,7 +199,7 @@ public final class PermutationIterator {
      * @param elements the original collection whose elements have to be permuted
      * @return an iterator that lazily yields every distinct permutation in lexicographical
      *         order; for an empty collection it yields a single empty list
-     * @throws IllegalArgumentException if {@code elements} is {@code null}
+     * @throws IllegalArgumentException if {@code elements} is {@code null}.
      * @see #ordered(Collection, Comparator)
      * @see #of(Collection)
      */

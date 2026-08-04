@@ -19,7 +19,7 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts two double-valued arguments and produces a result.
- * This is the two-arity specialization of {@link java.util.function.Function}.
+ * This is the primitive type specialization of {@link java.util.function.BiFunction} for {@code double}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(double, double)}.
  *
@@ -76,7 +76,7 @@ public interface DoubleBiFunction<R> extends Throwables.DoubleBiFunction<R, Runt
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> DoubleBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

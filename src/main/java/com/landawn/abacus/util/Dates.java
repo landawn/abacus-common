@@ -645,8 +645,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static final String RFC_1123_DATE_TIME_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     /**
-     * Sentinel value representing half a month; used internally to indicate whether a date
-     * falls in the first or second half of the month during rounding operations.
+     * Sentinel value representing half a month; may be passed as the {@code field} argument of the
+     * {@code round}, {@code truncate}, and {@code ceiling} methods to operate at half-month
+     * granularity (the first vs. the second half of the month).
      *
      * @see #round(java.util.Date, int)
      * @see #truncate(java.util.Date, int)
@@ -813,7 +814,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code true} if the date creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
      *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
-     * @throws IllegalArgumentException if {@code dateCreator} is {@code null}.
+     * @throws IllegalArgumentException if {@code dateClass} or {@code dateCreator} is {@code null}.
      * @see #registerCalendarCreator(Class, LongObjFunction)
      */
     public static <T extends java.util.Date> boolean registerDateCreator(final Class<? extends T> dateClass, final LongFunction<? extends T> dateCreator)
@@ -858,7 +859,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code true} if the calendar creator was successfully registered, {@code false} if the class was already registered
      *         or is from a restricted package ({@code java.*}, {@code javax.*}, or {@code com.landawn.abacus.*}).
      *         Registration is atomic for a given class, so at most one concurrent caller can succeed.
-     * @throws IllegalArgumentException if {@code calendarCreator} is {@code null}.
+     * @throws IllegalArgumentException if {@code calendarClass} or {@code calendarCreator} is {@code null}.
      * @see #registerDateCreator(Class, LongFunction)
      */
     public static <T extends java.util.Calendar> boolean registerCalendarCreator(final Class<? extends T> calendarClass,
@@ -1900,6 +1901,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the string representation of the date to be parsed.
      * @return the parsed {@code java.util.Date} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the date string cannot be parsed.
      * @see #parseJUDate(String, String)
      * @see #parseJUDate(String, String, TimeZone)
      * @see #createJUDate(long)
@@ -1959,7 +1961,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Combining a format pattern ending in the literal {@code 'Z'} (explicit or auto-detected), or a
      * date string ending in {@code 'Z'}, with a non-UTC {@code timeZone} throws an
      * {@code IllegalArgumentException}; a {@code null} or UTC-equivalent zone is accepted and resolved
-     * to UTC. The {@code format} counterpart now rejects the same conflict; see
+     * to UTC. The {@code format} counterpart rejects the same conflict; see
      * {@link #format(java.util.Date, String, TimeZone)}.</p>
      *
      * <p>Note: a purely numeric input (a {@code null} format with an epoch-millisecond string) is
@@ -1970,8 +1972,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the date format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.util.Date} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the date string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the date string cannot be parsed using the specified format, or if an ISO
+     *         8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseJUDate(String)
      * @see #parseJUDate(String, String)
      * @see SimpleDateFormat
@@ -2047,6 +2049,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the string representation of the date to be parsed.
      * @return the parsed {@code java.sql.Date} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the date string cannot be parsed.
      * @see #parseDate(String, String)
      * @see #parseDate(String, String, TimeZone)
      * @see #parseJUDate(String)
@@ -2112,8 +2115,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the date format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.sql.Date} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the date string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the date string cannot be parsed using the specified format, or if an ISO
+     *         8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseDate(String)
      * @see #parseDate(String, String)
      * @see #parseJUDate(String, String, TimeZone)
@@ -2176,6 +2179,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the string representation of the time to be parsed.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the time string cannot be parsed.
      * @see #parseTime(String, String)
      * @see #parseTime(String, String, TimeZone)
      * @see #parseDate(String)
@@ -2241,8 +2245,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.sql.Time} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the time string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the time string cannot be parsed using the specified format, or if an ISO
+     *         8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseTime(String)
      * @see #parseTime(String, String)
      * @see #parseDate(String, String, TimeZone)
@@ -2310,6 +2314,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the string representation of the timestamp to be parsed.
      * @return the parsed {@code java.sql.Timestamp} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the timestamp string cannot be parsed.
      * @see #parseTimestamp(String, String)
      * @see #parseTimestamp(String, String, TimeZone)
      * @see #parseDate(String)
@@ -2372,8 +2377,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the timestamp format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.sql.Timestamp} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the timestamp string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the timestamp string cannot be parsed using the specified format, or if an
+     *         ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseTimestamp(String)
      * @see #parseTimestamp(String, String)
      * @see #parseTime(String, String, TimeZone)
@@ -2414,6 +2419,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the string representation of the date/time to be parsed.
      * @return the parsed {@code java.util.Calendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the date/time string cannot be parsed.
      * @see #parseCalendar(String, String)
      * @see #parseCalendar(String, String, TimeZone)
      * @see #createCalendar(long)
@@ -2478,8 +2484,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the date/time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing and for the returned calendar; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.util.Calendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format, or if an
+     *         ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseCalendar(String)
      * @see #parseCalendar(String, String)
      * @see #createCalendar(long, TimeZone)
@@ -2510,6 +2516,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the string representation of the date/time to be parsed.
      * @return the parsed {@code java.util.GregorianCalendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the date/time string cannot be parsed.
      * @see #parseGregorianCalendar(String, String)
      * @see #parseGregorianCalendar(String, String, TimeZone)
      * @see #parseCalendar(String)
@@ -2574,8 +2581,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the date/time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing and for the returned calendar; if {@code null}, the default time zone is used.
      * @return the parsed {@code java.util.GregorianCalendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format, or if an
+     *         ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @see #parseGregorianCalendar(String)
      * @see #parseGregorianCalendar(String, String)
      * @see #parseCalendar(String, String, TimeZone)
@@ -2608,6 +2615,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the string representation of the date/time to be parsed.
      * @return the parsed {@code javax.xml.datatype.XMLGregorianCalendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
+     * @throws IllegalArgumentException if the date/time string cannot be parsed.
      * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #parseXMLGregorianCalendar(String, String)
      * @see #parseXMLGregorianCalendar(String, String, TimeZone)
@@ -2674,8 +2682,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param format the date/time format pattern; if {@code null}, common formats are attempted automatically.
      * @param timeZone the time zone for parsing and for the returned calendar; if {@code null}, the default time zone is used.
      * @return the parsed {@code javax.xml.datatype.XMLGregorianCalendar} instance, or {@code null} if the input is {@code null}, empty, or the string "null".
-     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format,
-     *         or if an ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
+     * @throws IllegalArgumentException if the date/time string cannot be parsed using the specified format, or if an
+     *         ISO 8601 {@code 'Z'} format is combined with a time zone other than UTC.
      * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
      * @see #parseXMLGregorianCalendar(String)
      * @see #parseXMLGregorianCalendar(String, String)
@@ -3012,8 +3020,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @return a string representation of the date, or {@code null} if the date is {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @see #format(java.util.Date, String)
      * @see #parseJUDate(String, String, TimeZone)
      * @see SimpleDateFormat
@@ -3100,8 +3108,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @return a string representation of the calendar, or {@code null} if the calendar is {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @see #format(Calendar, String)
      * @see #format(Calendar)
      * @see #parseCalendar(String, String, TimeZone)
@@ -3200,8 +3208,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @return a string representation of the XMLGregorianCalendar instance, or {@code null} if the calendar is {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @see #format(XMLGregorianCalendar)
      * @see #format(XMLGregorianCalendar, String)
      * @see #format(Calendar, String, TimeZone)
@@ -3320,8 +3328,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @param appendable the Appendable to which the formatted date string is to be appended; must not be {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @throws UncheckedIOException if an I/O error occurs during the append operation.
      * @see #format(java.util.Date, String, TimeZone)
      * @see #formatTo(java.util.Date, Appendable)
@@ -3424,8 +3432,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @param appendable the Appendable to which the formatted date string is to be appended; must not be {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @throws UncheckedIOException if an I/O error occurs during the append operation.
      * @see #format(java.util.Calendar, String, TimeZone)
      * @see #formatTo(Calendar, Appendable)
@@ -3532,8 +3540,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param timeZone the time zone for formatting; if {@code null}, the default time zone is used;
      *        must be {@code null} or UTC-equivalent when the format pattern ends with the literal {@code 'Z'}.
      * @param appendable the Appendable to which the formatted date string is to be appended; must not be {@code null}.
-     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a
-     *         non-UTC {@code timeZone} is supplied.
+     * @throws IllegalArgumentException if the format pattern ends with the literal {@code 'Z'} and a non-UTC
+     *         {@code timeZone} is supplied.
      * @throws UncheckedIOException if an I/O error occurs during the append operation.
      * @see #format(XMLGregorianCalendar, String, TimeZone)
      * @see #formatTo(XMLGregorianCalendar, Appendable)
@@ -3862,7 +3870,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Sets the minute field to a date returning a new object.
+     * Sets the minutes field to a date returning a new object.
      * The original {@code Date} is unchanged.
      *
      * <p><b>Usage Examples:</b></p>
@@ -4760,7 +4768,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field.
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar
+     *         field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #round(java.util.Date, CalendarField)
      * @see #truncate(java.util.Date, int)
@@ -4865,7 +4874,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the field.
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported
+     *         Calendar field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #round(Calendar, CalendarField)
      * @see #truncate(Calendar, int)
@@ -4964,7 +4974,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar
+     *         field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #truncate(java.util.Date, CalendarField)
      * @see #round(java.util.Date, int)
@@ -5047,7 +5058,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported
+     *         Calendar field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #truncate(Calendar, CalendarField)
      * @see #round(Calendar, int)
@@ -5135,7 +5147,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new date object of type T, adjusted to the ceiling of the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar
+     *         field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #ceiling(java.util.Date, CalendarField)
      * @see #round(java.util.Date, int)
@@ -5213,7 +5226,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param field the field from {@code Calendar} or {@code SEMI_MONTH}.
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field.
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field.
+     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported
+     *         Calendar field.
      * @throws ArithmeticException if the year is over 280 million.
      * @see #ceiling(Calendar, CalendarField)
      * @see #round(Calendar, int)
@@ -6180,7 +6194,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param fragment the {@code Calendar} field part of {@code calendar} to calculate.
      * @param unit the time unit.
      * @return the number of units within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the specified fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the specified fragment is not
+     *         supported.
      */
     @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     private static long getFragment(final Calendar calendar, final int fragment, final TimeUnit unit) {
@@ -6569,7 +6584,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Calendar c2 = Dates.createCalendar(1672585530123L);
      * Dates.isSameLocalTime(c1, c2);                        // returns true (identical fields and type)
      *
-     * Calendar c3 = Dates.createCalendar(1672585531123L);   // returns 1 second later
+     * Calendar c3 = Dates.createCalendar(1672585531123L);   // 1 second later
      * Dates.isSameLocalTime(c1, c3);                        // returns false (different second field)
      * Dates.isSameLocalTime((Calendar) null, c2);           // throws IllegalArgumentException
      * }</pre>
@@ -7040,7 +7055,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param startDate2 start of the second range, not {@code null}.
      * @param endDate2 end of the second range, not {@code null}.
      * @return {@code true} if the two date ranges overlap (exclusive of the endpoints).
-     * @throws IllegalArgumentException if any argument is {@code null}, or if a start date is after its corresponding end date.
+     * @throws IllegalArgumentException if any argument is {@code null}, or if a start date is after its
+     *         corresponding end date.
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
     public static boolean isOverlapping(final java.util.Date startDate1, final java.util.Date endDate1, final java.util.Date startDate2,
@@ -7074,7 +7090,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param startDate2 start of the second range, not {@code null}.
      * @param endDate2 end of the second range, not {@code null}.
      * @return {@code true} if the two calendar ranges overlap (exclusive of the endpoints).
-     * @throws IllegalArgumentException if any argument is {@code null}, or if a start is after its corresponding end.
+     * @throws IllegalArgumentException if any argument is {@code null}, or if a start is after its corresponding
+     *         end.
      * @see #isOverlapping(java.util.Date, java.util.Date, java.util.Date, java.util.Date)
      */
     public static boolean isOverlapping(final Calendar startDate1, final Calendar endDate1, final Calendar startDate2, final Calendar endDate2)
@@ -7111,7 +7128,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param startDate the start of the range (inclusive).
      * @param endDate the end of the range (inclusive).
      * @return {@code true} if the date is within the specified range (inclusive).
-     * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after {@code endDate}.
+     * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after
+     *         {@code endDate}.
      * @see N#geAndLe(Comparable, Comparable, Comparable)
      * @see N#gtAndLt(Comparable, Comparable, Comparable)
      */
@@ -7145,7 +7163,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param startDate the start of the range (inclusive).
      * @param endDate the end of the range (inclusive).
      * @return {@code true} if the calendar is within the specified range (inclusive).
-     * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after {@code endDate}.
+     * @throws IllegalArgumentException if any argument is {@code null}, or if {@code startDate} is after
+     *         {@code endDate}.
      * @see #isBetween(java.util.Date, java.util.Date, java.util.Date)
      */
     @Beta
@@ -7344,7 +7363,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         /**
          * Date/Time format: {@code yyyy-MM-dd'T'HH:mm:ssXXX}.
          *
-         * <p>ISO 8601 format with UTC offset. Useful for representing moment in time with offset
+         * <p>ISO 8601 format with UTC offset. Useful for representing a moment in time with offset
          * information, but without timezone ID. Format includes offset like +05:30, -08:00, or Z for UTC.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -7502,7 +7521,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param pattern the date/time pattern as defined by {@link DateTimeFormatter#ofPattern(String)}
          * @return a {@code DTF} instance for the specified pattern
-         * @throws IllegalArgumentException if {@code pattern} is {@code null} or empty, or is not a valid date/time pattern
+         * @throws IllegalArgumentException if {@code pattern} is {@code null} or empty, or is not a valid date/time
+         *         pattern.
          * @see DateTimeFormatter#ofPattern(String)
          */
         public static DTF of(final String pattern) throws IllegalArgumentException {
@@ -8077,7 +8097,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToJUDate(CharSequence, TimeZone)
          * @see Dates#parseJUDate(String, String)
          */
@@ -8125,7 +8148,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *        Ignored when this formatter is {@link #ISO_ZONED_DATE_TIME} (the input's own zone is always used)
          *        or when the input is purely numeric (epoch milliseconds).
          * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToJUDate(CharSequence)
          * @see Dates#parseJUDate(String, String, TimeZone)
          */
@@ -8168,7 +8194,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @return a {@code java.sql.Date} instance representing the parsed date, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToDate(CharSequence, TimeZone)
          * @see Dates#parseDate(String, String)
          */
@@ -8214,7 +8243,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @param tz the time zone to use for parsing the date; if {@code null}, the default time zone is used.
          * @return a {@code java.sql.Date} instance representing the parsed date, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToDate(CharSequence)
          * @see Dates#parseDate(String, String, TimeZone)
          */
@@ -8258,7 +8290,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @return a {@code java.sql.Time} instance representing the parsed time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToTime(CharSequence, TimeZone)
          * @see Dates#parseTime(String, String)
          */
@@ -8304,7 +8339,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @param tz the time zone to use for parsing the time; if {@code null}, the default time zone is used.
          * @return a {@code java.sql.Time} instance representing the parsed time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToTime(CharSequence)
          * @see Dates#parseTime(String, String, TimeZone)
          */
@@ -8346,7 +8384,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @return a {@code java.sql.Timestamp} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToTimestamp(CharSequence, TimeZone)
          * @see Dates#parseTimestamp(String, String)
          */
@@ -8393,7 +8434,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *        Ignored when this formatter is {@link #ISO_ZONED_DATE_TIME} (the input's own zone is always used)
          *        or when the input is purely numeric (epoch milliseconds).
          * @return a {@code java.sql.Timestamp} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToTimestamp(CharSequence)
          * @see Dates#parseTimestamp(String, String, TimeZone)
          */
@@ -8435,7 +8479,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @return a {@code java.util.Calendar} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToCalendar(CharSequence, TimeZone)
          * @see Dates#parseCalendar(String, String)
          */
@@ -8478,7 +8525,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null} or empty.
          * @param tz the time zone to use for parsing and for the returned calendar; if {@code null}, the default time zone is used.
          * @return a {@code java.util.Calendar} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or empty.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's pattern.
+         * @throws DateTimeParseException if this formatter is {@link #ISO_ZONED_DATE_TIME} and the text is non-empty
+         *         but cannot be parsed.
+         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed using this formatter's
+         *         pattern.
          * @see #parseToCalendar(CharSequence)
          * @see Dates#parseCalendar(String, String, TimeZone)
          */

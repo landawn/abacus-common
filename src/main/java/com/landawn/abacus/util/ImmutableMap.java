@@ -538,7 +538,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the
      * underlying Map will be reflected in the returned ImmutableMap, which
-     * violates the immutability contract. For a {@code true} immutable copy, use
+     * violates the immutability contract. For a truly independent immutable copy, use
      * {@link #copyOf(Map)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>

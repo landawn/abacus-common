@@ -19,7 +19,7 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents an operation that accepts two {@code boolean}-valued arguments and returns no result.
- * This is the primitive type specialization of {@link BiConsumer} for {@code boolean}.
+ * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code boolean}.
  * Unlike most other functional interfaces, {@code BooleanBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(boolean, boolean)}.
@@ -33,6 +33,7 @@ import com.landawn.abacus.util.cs;
 public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40,8 +41,8 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      * logger.accept(true, false);   // Prints: AND: false
      * }</pre>
      *
-     * @param a the first input argument (boolean value)
-     * @param b the second input argument (boolean value)
+     * @param a the first input argument
+     * @param b the second input argument
      */
     @Override
     void accept(boolean a, boolean b);
@@ -60,7 +61,7 @@ public interface BooleanBiConsumer extends Throwables.BooleanBiConsumer<RuntimeE
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code BooleanBiConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default BooleanBiConsumer andThen(final BooleanBiConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

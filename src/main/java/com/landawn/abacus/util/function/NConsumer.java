@@ -63,20 +63,8 @@ import com.landawn.abacus.util.cs;
 public interface NConsumer<T> {
     /**
      * Performs this operation on the given arguments.
-     *
-     * <p>The varargs parameter allows this method to accept any number of arguments
-     * of type T, including zero arguments (empty array).
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Processing multiple values in batch operations</li>
-     *   <li>Logging or printing multiple values</li>
-     *   <li>Aggregating variable numbers of inputs</li>
-     *   <li>Storing collections of values</li>
-     * </ul>
-     *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
-     * declaration-site generic-varargs warning for this method.
+     * The varargs parameter may contain any number of arguments of type {@code T},
+     * including zero (empty array).
      *
      * @param args the input arguments as a varargs array
      */
@@ -90,9 +78,6 @@ public interface NConsumer<T> {
      * <p>If performing either operation throws an exception, it is relayed to the
      * caller of the composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
-     *
-     * <p>This method is useful for chaining multiple operations that need to process
-     * the same variable number of arguments in sequence.
      * Both operations receive the same varargs array reference.
      *
      * <p><b>Usage Examples:</b></p>
@@ -116,7 +101,7 @@ public interface NConsumer<T> {
      * @param after the operation to perform after this operation.
      * @return a composed {@code NConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default NConsumer<T> andThen(final NConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

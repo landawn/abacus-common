@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * arguments. This is the two-arity primitive type specialization of
  * {@link java.util.function.Predicate}.
  *
- * <p>This interface extends {@link Throwables.LongBiPredicate} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #test(long, long)}.
  *
@@ -146,7 +142,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongBiPredicate and(final LongBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -176,7 +172,7 @@ public interface LongBiPredicate extends Throwables.LongBiPredicate<RuntimeExcep
      *
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongBiPredicate or(final LongBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

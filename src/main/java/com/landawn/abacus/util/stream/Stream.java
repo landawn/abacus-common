@@ -722,7 +722,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to start including elements
      * @return a new Stream consisting of the remaining elements starting from the first element that matches the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #dropWhile(Predicate)
      * @see #takeWhile(Predicate)
      * @see #skip(long)
@@ -932,7 +932,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each pair of elements
      * @return a new stream consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #slidingMap(BiFunction)
      * @see #slidingMap(int, boolean, BiFunction)
      */
@@ -991,7 +991,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each pair of elements
      * @return a new stream consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #slidingMap(int, BiFunction)
      * @see #sliding(int, int)
      */
@@ -1058,7 +1058,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each triple of elements
      * @return a new stream consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #slidingMap(TriFunction)
      * @see #slidingMap(int, boolean, TriFunction)
      */
@@ -1121,7 +1121,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each triple of elements
      * @return a new stream consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #slidingMap(int, TriFunction)
      * @see #sliding(int, int)
      */
@@ -1152,7 +1152,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
-     *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
+     *              The first argument tested by sameRange is the first (not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element.
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
@@ -1200,7 +1200,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream consisting of the elements of this stream with the first element transformed by the specified {@code mapperForFirst}
      * and all other elements transformed by {@code mapperForElse}.
      *
-     * <p>This operation is parallel supported and can be parallelized if the stream supports parallel processing.
+     * <p>This operation can be parallelized if the stream supports parallel processing.
      * It applies different transformation functions to the first element and all subsequent elements.
      *
      * <p>For example, if this stream contains elements [a, b, c, d], the resulting stream will contain [f(a), g(b), g(c), g(d)],
@@ -1271,7 +1271,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream consisting of the elements of this stream with the last element transformed by the specified {@code mapperForLast}
      * and all other elements transformed by {@code mapperForElse}.
      *
-     * <p>This operation is parallel supported and can be parallelized if the stream supports parallel processing.
+     * <p>This operation can be parallelized if the stream supports parallel processing.
      * It applies different transformation functions to the last element and all preceding elements.
      *
      * <p>For example, if this stream contains elements [a, b, c, d], the resulting stream will contain [g(a), g(b), g(c), f(d)],
@@ -1762,7 +1762,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new {@link Stream} consisting of the flattened contents of the mapped JDK streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Beta
     @ParallelSupported
@@ -3787,7 +3787,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
-     * @param <D> The type of the value in the resulting EntryStream. The type is determined by the result type of the Collector.
+     * @param <D> The type of the value in the resulting Stream. The type is determined by the result type of the Collector.
      * @param predicate a non-interfering, stateless predicate to be used for partitioning the stream elements
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new Stream consisting of Map.Entry where the key is a Boolean and the value is the result of applying the Collector to the elements of the group
@@ -3890,7 +3890,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @return a new Stream consisting of Map.Entry where the key is the mapped key and the value is the count of elements that were mapped to this key
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      * @see #countByToEntry(Function)
      * @see #groupBy(Function, Collector)
      */
@@ -3928,7 +3928,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry where the key is the mapped key and the value is the count of elements that were mapped to this key
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      * @see #countByToEntry(Function, Supplier)
      * @see #groupBy(Function, Collector, Supplier)
      */
@@ -3967,7 +3967,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper the Function to be used for mapping stream elements to keys.
      * @return a new EntryStream consisting of entries where the key is the mapped key and the value is the count of elements that were mapped to this key
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      * @see #countBy(Function)
      * @see #groupByToEntry(Function, Collector)
      */
@@ -4005,7 +4005,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the mapped key and the value is the count of elements that were mapped to this key
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      * @see #countBy(Function, Supplier)
      * @see #groupByToEntry(Function, Collector, Supplier)
      */
@@ -4470,7 +4470,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param chunkSize the desired size of each chunk (the last chunk may be smaller). Must be positive.
      * @return a Stream of Lists, each containing a chunk of elements from the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if chunkSize is not positive
+     * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(int, IntFunction)
      * @see #sliding(int)
      */
@@ -4500,7 +4500,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collectionSupplier a function that provides a new collection of type C for each chunk
      * @return a Stream of Collections, each containing a chunk of elements from the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if chunkSize is not positive
+     * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(int)
      * @see #split(int, Collector)
      */
@@ -4529,7 +4529,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for collecting elements of each sub stream
      * @return a new Stream consisting of results produced by the collector for each sub stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if chunkSize is not positive or collector is null
+     * @throws IllegalArgumentException if chunkSize is not positive or collector is null.
      * @see #split(int)
      * @see #split(int, IntFunction)
      */
@@ -4614,7 +4614,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for collecting elements of each chunk
      * @return a new Stream consisting of elements from the original Stream collected by the provided collector
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if collector is null
+     * @throws IllegalArgumentException if collector is null.
      * @see #split(Predicate)
      * @see #split(Predicate, Supplier)
      */
@@ -4641,7 +4641,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param position the index at which to split the stream. Must be non-negative.
      * @return a new Stream consisting of two sub-streams split at the given index
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code position} is negative
+     * @throws IllegalArgumentException if {@code position} is negative.
      * @see #splitAt(int, Collector)
      * @see #splitAt(Predicate)
      */
@@ -4673,7 +4673,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for collecting elements of each part of the stream
      * @return a new Stream consisting of two elements: the collected first part followed by the collected second part
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code position} is negative
+     * @throws IllegalArgumentException if {@code position} is negative.
      * @see #splitAt(int)
      * @see #splitAt(Predicate, Collector)
      */
@@ -4760,7 +4760,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @return a new Stream where each element is a List of elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize is not positive
+     * @throws IllegalArgumentException if windowSize is not positive.
      * @see #sliding(int, int)
      * @see #sliding(int, IntFunction)
      */
@@ -4791,7 +4791,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collectionSupplier the function to create a new collection for each window
      * @return a new Stream where each element is a collection of elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize is not positive
+     * @throws IllegalArgumentException if windowSize is not positive.
      * @see #sliding(int)
      * @see #sliding(int, int, IntFunction)
      */
@@ -4822,7 +4822,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for reduction of the elements in each window
      * @return a new Stream where each element is a result container of the collected elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize is not positive or collector is null
+     * @throws IllegalArgumentException if windowSize is not positive or collector is null.
      * @see #sliding(int)
      * @see #sliding(int, int, Collector)
      */
@@ -4852,7 +4852,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param increment the number of elements to move the window by each time. Must be positive.
      * @return a new Stream where each element is a List of elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize or increment is not positive
+     * @throws IllegalArgumentException if windowSize or increment is not positive.
      * @see #sliding(int)
      * @see #sliding(int, int, IntFunction)
      */
@@ -4884,7 +4884,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collectionSupplier the function to create a new collection for each window
      * @return a new Stream where each element is a collection of elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize or increment is not positive
+     * @throws IllegalArgumentException if windowSize or increment is not positive.
      * @see #sliding(int, int)
      * @see #sliding(int, int, Collector)
      */
@@ -4916,7 +4916,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for reduction of the elements in each window
      * @return a new Stream where each element is a result container of the collected elements from the original Stream, representing a window
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if windowSize or increment is not positive, or collector is null
+     * @throws IllegalArgumentException if windowSize or increment is not positive, or collector is null.
      * @see #sliding(int, Collector)
      * @see #sliding(int, int)
      */
@@ -4971,7 +4971,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction a binary operator used to merge duplicate elements.
      * @return a new Stream consisting of the distinct elements of this stream with duplicates merged
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
      * @see #distinct()
      * @see #distinctBy(Function)
      */
@@ -5053,7 +5053,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction a binary operator used to merge duplicate elements.
      * @return a new Stream consisting of the distinct elements of this stream with duplicates merged
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mergeFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mergeFunction} is {@code null}.
      * @see #distinct(BinaryOperator)
      * @see #distinctBy(Function)
      */
@@ -5105,7 +5105,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator a Comparator to be used to compare stream elements
      * @return a new stream that contains the elements of the original stream, sorted according to the provided Comparator
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see #sortedBy(Function)
      * @see #reverseSorted(Comparator)
      */
@@ -5403,7 +5403,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a new stream that contains the top (largest) n elements of the original stream, according to the natural order of the elements.
      *            There is no guarantee on the order of the returned elements.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is less than zero
+     * @throws IllegalArgumentException if n is less than zero.
      * @see #top(int, Comparator)
      * @see #kthLargest(int, Comparator)
      */
@@ -5434,7 +5434,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a new Stream consisting of the top n elements of this stream compared by the provided Comparator.
      *              There is no guarantee on the order of the returned elements.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is less than zero
+     * @throws IllegalArgumentException if n is less than zero.
      * @see #top(int)
      * @see #kthLargest(int, Comparator)
      */
@@ -5463,7 +5463,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param endExclusive the last position in the range to skip, exclusive. Must be &gt;= startInclusive.
      * @return a new stream that skips the specified range of the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if startInclusive is negative or endExclusive &lt; startInclusive
+     * @throws IllegalArgumentException if startInclusive is negative or endExclusive &lt; startInclusive.
      * @see #skip(long)
      * @see #limit(long)
      */
@@ -5515,7 +5515,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param n the number of elements from the end of the stream to skip. Must be non-negative.
      * @return a new stream that excludes the last n elements of the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      * @see #takeLast(int)
      * @see #skip(long)
      */
@@ -5545,7 +5545,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param n the number of elements from the end of the stream to include. Must be non-negative.
      * @return a new stream that includes the last n elements of the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      * @deprecated Use {@link #takeLast(int)} instead
      * @see #takeLast(int)
      */
@@ -5581,7 +5581,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param n the number of elements from the end of the stream to include. Must be non-negative.
      * @return a new stream that includes the last n elements of the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      * @see #skipLast(int)
      * @see #limit(long)
      */
@@ -5696,7 +5696,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action the action to be performed on the elements pulled by downstream/terminal operation.
      * @return a new Stream consisting of the elements of this stream with the provided action applied to each element.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #onEach(Consumer)
      */
     @Beta
@@ -5732,7 +5732,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on the first element of the stream
      * @return a new stream that includes the action on the first element
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #onFirst(Consumer)
      * @see #onEach(Consumer)
      */
@@ -5767,7 +5767,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on the last element of the stream
      * @return a new stream that includes the action on the last element
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #onLast(Consumer)
      * @see #onEach(Consumer)
      */
@@ -5801,7 +5801,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on the elements that satisfy the predicate
      * @return a new stream that includes the action on the elements that satisfy the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} or {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} or {@code action} is {@code null}.
      * @see #onEach(Consumer)
      * @see #peekIf(BiPredicate, Consumer)
      */
@@ -5839,7 +5839,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on the elements that satisfy the predicate
      * @return a new stream that includes the action on the elements that satisfy the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} or {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} or {@code action} is {@code null}.
      * @see #onEach(Consumer)
      * @see #peekIf(Predicate, Consumer)
      */
@@ -5889,7 +5889,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEach(Throwables.Consumer)
      */
     @Beta
@@ -6051,7 +6051,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Performs the provided action for each element of the Stream, where the action is an instance of Throwables.IntObjConsumer.
-     * The action is a Consumer functional interface which accepts an index parameter and an element parameter.
+     * The action is an IntObjConsumer functional interface which accepts an index parameter and an element parameter.
      * This is a terminal operation that consumes all elements with their indices.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -6208,7 +6208,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on each pair of elements
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #forEachPair(Throwables.BiConsumer)
      */
     @Beta
@@ -6268,7 +6268,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param action a non-interfering action to perform on each triple of elements
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if increment is not positive
+     * @throws IllegalArgumentException if increment is not positive.
      * @see #forEachTriple(Throwables.TriConsumer)
      */
     @Beta
@@ -6382,7 +6382,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to apply to elements in the stream
      * @return {@code true} if the number of elements matching the predicate is within the range [atLeast, atMost], {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast} is greater than {@code atMost}
+     * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast} is
+     *         greater than {@code atMost}.
      * @throws E Exception thrown by the predicate
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
@@ -6724,7 +6725,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param c the elements to check for presence in the stream
-     * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the collection is {@code null} or empty. {@code false} otherwise
+     * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the collection is {@code null} or empty, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @see #containsAny(Collection)
      * @see #containsAll(Collection)
@@ -6788,7 +6789,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws IllegalStateException if there are duplicated keys
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code valueMapper} is {@code null}.
      * @see #toImmutableMap(Throwables.Function, Throwables.Function, BinaryOperator)
      * @see #toMap(Throwables.Function, Throwables.Function)
      * @see #toMap(Throwables.Function, Throwables.Function, BinaryOperator)
@@ -6841,7 +6842,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the keyMapper function throws an exception
      * @throws E2 if the valueMapper function throws an exception
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction}
+     *         is {@code null}.
      * @see #toImmutableMap(Throwables.Function, Throwables.Function)
      * @see #toMap(Throwables.Function, Throwables.Function, BinaryOperator)
      * @see Fn#throwingMerger()
@@ -8073,7 +8075,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param accumulator the function for combining the current reduced value and the current stream element. Must be associative.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8449,7 +8451,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8474,7 +8476,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8507,7 +8509,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator the comparator to compare elements of this stream.
      * @return a <i>List</i> containing all the minimum elements of this stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8534,7 +8536,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8559,7 +8561,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8592,7 +8594,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator the comparator to compare elements of this stream.
      * @return a <i>List</i> containing all the maximum elements of this stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @ParallelSupported
     @TerminalOp
@@ -8779,8 +8781,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator a comparator to determine the order of the elements.
      * @return an {@code Optional} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Optional}.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code k} is not positive
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code k} is not positive, or if {@code comparator} is {@code null}.
      */
     @SequentialOnly
     @TerminalOp
@@ -8923,7 +8924,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param repeat if {@code true}, elements can be repeated in the combinations; otherwise, elements are not repeated.
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code repeat} is {@code true} and {@code len} is negative
+     * @throws IllegalArgumentException if {@code repeat} is {@code true} and {@code len} is negative.
      * @throws IndexOutOfBoundsException if {@code repeat} is {@code false} and {@code len} is negative or greater than the number of stream elements
      */
     @SequentialOnly
@@ -9014,7 +9015,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param comparator the comparator that should be used to determine the order of the elements in the permutations.
      * @return a new Stream consisting of all the ordered permutations of the elements in the original Stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see Iterables#orderedPermutations(Collection, Comparator)
      */
     @SequentialOnly
@@ -9022,7 +9023,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract Stream<List<T>> orderedPermutations(Comparator<? super T> comparator);
 
     /**
-     * Generates the Cartesian product of the provided collections.
+     * Generates the Cartesian product of the elements of this stream and the provided collections.
      * The Cartesian product is a mathematical operation that returns a set from multiple sets.
      * Each member of the Cartesian product is an ordered tuple consisting of one member from each of the given sets.
      *
@@ -9051,7 +9052,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param cs the collections to generate the Cartesian product from.
-     * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in the original collections.
+     * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in this stream and the specified collections.
      * @throws IllegalStateException if the stream is already closed
      * @see #cartesianProduct(Collection)
      * @see Iterables#cartesianProduct(Collection...)
@@ -9066,7 +9067,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Generates the Cartesian product of the provided collections.
+     * Generates the Cartesian product of the elements of this stream and the provided collections.
      * The Cartesian product is a mathematical operation that returns a set from multiple sets.
      * Each member of the Cartesian product is an ordered tuple consisting of one member from each of the given sets.
      *
@@ -9095,7 +9096,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param cs the collections to generate the Cartesian product from.
-     * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in the original collections.
+     * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in this stream and the specified collections.
      * @throws IllegalStateException if the stream is already closed
      * @see Iterables#cartesianProduct(Collection)
      */
@@ -9110,7 +9111,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
      * before producing a result. For example, one cannot generate a rollup until one has seen all elements.
      * As a result, for infinite input streams, this operation may never complete.
-     * The operation is terminal operation triggered, meaning it requires a terminal operation to actually execute.
+     * The operation is terminal-operation-triggered, meaning it consumes the entire upstream before emitting any result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9429,7 +9430,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param bufferSize the size of the buffer to be used for the Stream. Must be positive.
      * @return a new Stream&lt;T&gt; that is buffered
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if bufferSize is non-positive
+     * @throws IllegalArgumentException if bufferSize is non-positive.
      */
     @SequentialOnly
     @IntermediateOp
@@ -9451,10 +9452,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in {@code queueToBuffer}.
      *
-     * @param queueToBuffer the queue to be used for buffering the Stream.
+     * @param queueToBuffer the queue to be used for buffering the Stream. It must be empty.
      * @return a new Stream&lt;T&gt; that is buffered
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if queueToBuffer is null
+     * @throws IllegalArgumentException if queueToBuffer is null or not empty.
      */
     @SequentialOnly
     @IntermediateOp
@@ -9477,7 +9478,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param b the Collection to be merged. It should be ordered with the current Stream.
+     * @param b the Collection to be merged. It should be ordered consistently with the current Stream.
      * @param nextSelector a BiFunction that determines the order of elements in the merged Stream.
      * @return a new Stream that is the result of merging the current Stream with the given Collection
      * @throws IllegalStateException if the stream is already closed
@@ -9503,7 +9504,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param b the Stream to be merged. It should be ordered with the current Stream.
+     * @param b the Stream to be merged. It should be ordered consistently with the current Stream.
      * @param nextSelector a BiFunction that determines the order of elements in the merged Stream.
      * @return a new Stream that is the result of merging the current Stream with the given Stream
      * @throws IllegalStateException if the stream is already closed
@@ -9617,7 +9618,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Zips this stream with the given collections using the provided zip function.
      * The zip function combines elements from this stream and the given collections until both the current stream and the given collections run out of elements.
      * The resulting stream will have the length of the longest of the current stream and the given collections.
-     * If the current stream or one of the given collections runs out of elements before the other, the provided default values are used.
+     * If the current stream or one of the given collections runs out of elements before the others, the provided default values are used.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -10006,7 +10007,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified prepared statement is null
+     * @throws IllegalArgumentException if the specified prepared statement is null.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10044,7 +10045,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified prepared statement is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified prepared statement is {@code null}, or {@code batchSize} or
+     *         {@code batchIntervalInMillis} is negative.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(PreparedStatement, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10078,7 +10080,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified Connection or insert script is null
+     * @throws IllegalArgumentException if the specified Connection or insert script is null.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10119,7 +10121,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified Connection or insert script is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified Connection or insert script is {@code null}, or
+     *         {@code batchSize} or {@code batchIntervalInMillis} is negative.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(Connection, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10154,7 +10157,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified DataSource or insert script is null
+     * @throws IllegalArgumentException if the specified DataSource or insert script is null.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10193,7 +10196,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified DataSource or insert script is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified DataSource or insert script is {@code null}, or
+     *         {@code batchSize} or {@code batchIntervalInMillis} is negative.
      * @throws UncheckedSQLException may be thrown in the terminal operation if an SQL error happens
      * @see #persist(javax.sql.DataSource, String, int, long, Throwables.BiConsumer)
      * @see #onEach(Consumer)
@@ -10593,7 +10597,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified prepared statement is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified prepared statement is {@code null}, or {@code batchSize} or
+     *         {@code batchIntervalInMillis} is negative.
      * @throws SQLException if an SQL error occurs
      */
     @SequentialOnly
@@ -10628,7 +10633,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified Connection or insert script is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified Connection or insert script is {@code null}, or
+     *         {@code batchSize} or {@code batchIntervalInMillis} is negative.
      * @throws SQLException if an SQL error occurs
      */
     @SequentialOnly
@@ -10668,7 +10674,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified DataSource or insert script is {@code null}, or {@code batchSize} or {@code batchIntervalInMillis} is negative
+     * @throws IllegalArgumentException if the specified DataSource or insert script is {@code null}, or
+     *         {@code batchSize} or {@code batchIntervalInMillis} is negative.
      * @throws SQLException if an SQL error occurs
      */
     @SequentialOnly
@@ -10721,7 +10728,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * long count = Stream.of(new Object[] {"Alice", 30}, new Object[] {"Bob", 25})
      *                    .persistToCsv(Arrays.asList("Name", "Age"),
      *                                 new File("people.csv"));
-     * // CSV file contains "Name,Age" header and data rows
+     * // CSV file contains the "Name","Age" header line and data rows
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -10849,7 +10856,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Persists the stream with CSV format to the specified writer with the specified headers.
-     * This is a terminal operation that writes the stream elements as CSV data and closes the stream.
+     * This is a terminal operation that writes the stream elements as CSV data and closes this stream.
      *
      * <p>The CSV output follows these rules:
      * - Each element is written as a row in CSV format
@@ -10891,7 +10898,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Persists the stream with JSON format to the specified file.
-     * This is a terminal operation that writes all stream elements as a JSON array to the file and closes the stream.
+     * This is a terminal operation that writes all stream elements as a JSON array to the file and closes this stream.
      *
      * <p>The JSON output is written as a single array containing all stream elements.
      * Each element is serialized to JSON format. The operation is sequential and cannot be parallelized.
@@ -10917,7 +10924,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Persists the stream with JSON format to the specified output stream.
-     * This is a terminal operation that writes all stream elements as a JSON array to the output stream and closes the stream.
+     * This is a terminal operation that writes all stream elements as a JSON array to the output stream and closes this stream.
      *
      * <p>The JSON output is written as a single array containing all stream elements.
      * Each element is serialized to JSON format. The operation is sequential and cannot be parallelized.
@@ -10947,7 +10954,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Persists the stream with JSON format to the specified writer.
-     * This is a terminal operation that writes all stream elements as a JSON array to the writer and closes the stream.
+     * This is a terminal operation that writes all stream elements as a JSON array to the writer and closes this stream.
      *
      * <p>The JSON output is written as a single array containing all stream elements.
      * Each element is serialized to JSON format. The operation is sequential and cannot be parallelized.
@@ -10996,8 +11003,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @return a java.util.stream.Stream containing the elements of this Stream
      * @throws IllegalStateException if the stream is already closed
-     * @see #transformB(Function)
-     * @see #transformB(Function, boolean)
+     * @see #transformViaJdkStream(Function)
+     * @see #transformViaJdkStream(Function, boolean)
      */
     @SequentialOnly
     @IntermediateOp
@@ -11015,7 +11022,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<Integer> result = Stream.of(1, 2, 3, 4, 5)
-     *     .transformB(jdkStream -> jdkStream
+     *     .transformViaJdkStream(jdkStream -> jdkStream
      *         .filter(x -> x % 2 == 0)
      *         .map(x -> x * 2));
      * // result contains: [4, 8]
@@ -11027,19 +11034,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param transfer the function to be applied on the current stream to produce a new stream.
      * @return a new Stream transformed by the provided function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code transfer} is {@code null}
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      * @see #toJdkStream()
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public <U> Stream<U> transformB(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer)
+    public <U> Stream<U> transformViaJdkStream(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer)
             throws IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
-        return transformB(transfer, false);
+        return transformViaJdkStream(transfer, false);
     }
 
     /**
@@ -11056,7 +11063,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * // Deferred transformation
      * Stream<String> result = Stream.of("hello", "world")
-     *     .transformB(jdkStream -> jdkStream
+     *     .transformViaJdkStream(jdkStream -> jdkStream
      *         .map(String::toUpperCase)
      *         .sorted(), true);
      * // Transformation happens when terminal operation is called
@@ -11070,13 +11077,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
      * @return a new Stream transformed by the provided function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code transfer} is {@code null}
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      * @see #toJdkStream()
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public <U> Stream<U> transformB(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer,
+    public <U> Stream<U> transformViaJdkStream(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer,
             final boolean deferred) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
@@ -11119,8 +11126,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param op the operation applied to each chunk of elements, producing a new Stream; applied repeatedly by multiple threads in parallel.
      * @return a new Stream transformed by the provided function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the specified maxThreadNum or chunkSize is equal to or less than 0
-     * @throws IllegalArgumentException if {@code op} is {@code null}
+     * @throws IllegalArgumentException if the specified maxThreadNum or chunkSize is equal to or less than 0, or if
+     *         {@code op} is {@code null}.
      */
     @Beta
     @IntermediateOp
@@ -11165,7 +11172,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11200,7 +11207,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11235,7 +11242,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11270,7 +11277,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11305,7 +11312,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to apply to each element to determine if it should be included.
      * @return a new Stream with the specified filter applied in parallel
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11341,7 +11348,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11377,7 +11384,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11413,7 +11420,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11450,7 +11457,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -11488,7 +11495,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -11526,7 +11533,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -11565,7 +11572,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -11602,7 +11609,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11639,7 +11646,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11676,7 +11683,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11714,7 +11721,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(Function)
      */
     @Beta
@@ -11752,7 +11759,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11790,7 +11797,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11829,7 +11836,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11868,7 +11875,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #sps(int, Function)
      */
     @Beta
@@ -11908,7 +11915,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param op the function to be applied to the JDK parallel stream.
      * @return a new Stream with the specified operation applied in parallel
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code op} is {@code null}
+     * @throws IllegalArgumentException if {@code op} is {@code null}.
      */
     @Beta
     @IntermediateOp
@@ -11948,7 +11955,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a new stream that contains only the elements that match the predicate
      * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the predicate throws an exception (wrapped)
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see Fn#pp(Throwables.Predicate)
      */
     @Beta
@@ -11984,7 +11991,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception (wrapped)
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see Fn#ff(Throwables.Function)
      */
     @Beta
@@ -12021,7 +12028,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *         and then flattening the resulting streams
      * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #flatMap(Function)
      * @see Fn#ff(Throwables.Function)
      */
@@ -12060,7 +12067,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *         and then flattening the resulting collections
      * @throws IllegalStateException if the stream is already closed
      * @throws RuntimeException if the mapper function throws an exception
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #flatmap(Function)
      * @see Fn#ff(Throwables.Function)
      */
@@ -12785,7 +12792,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity. For large datasets,
      * use {@link #fullJoin(Collection, Function, Function)} for {@code O(n + m)} performance with key-based joining.
-     * The predicate must handle {@code null} values since unmatched elements will be paired with {@code null}.
+     * The predicate is only invoked with pairs of actual elements; unmatched elements are paired with {@code null}
+     * in the result.
      *
      * <p>Use this method only when:
      * <ul>
@@ -12800,14 +12808,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * List<Order> orders = Arrays.asList(new Order(2, 200), new Order(3, 300));
      *
      * Stream.of(users)
-     *       .fullJoin(orders, (user, order) -> user != null && order != null &&
-     *                                          user.getId() == order.getUserId())
+     *       .fullJoin(orders, (user, order) -> user.getId() == order.getUserId())
      *       .forEach(pair -> System.out.println(pair.left() + " - " + pair.right()));
      *
-     * // Complex condition with null handling
+     * // Complex matching condition
      * Stream.of(dataset1)
      *         .fullJoin(dataset2, (item1, item2) ->
-     *             item1 != null && item2 != null &&
      *             item1.getCategory().equals(item2.getCategory()) &&
      *             Math.abs(item1.getValue() - item2.getValue()) < 0.01)
      *         .collect(Collectors.toList());
@@ -12817,7 +12823,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> the type of elements in the collection to join with
      * @param b the collection to join with; must not be null
-     * @param predicate the condition to test pairs; must handle {@code null} values
+     * @param predicate the condition to test pairs of elements from this stream and the collection
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code fullJoin(Collection, Function, Function)}
@@ -12832,13 +12838,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Performs a full outer join based on a predicate with result transformation.
-     * This operation includes all elements from both sources and transforms the results. The predicate and
-     * transformation function must handle {@code null} values. Time complexity is O(n * m).
+     * This operation includes all elements from both sources and transforms the results. The transformation
+     * function must handle {@code null} values for unmatched elements. Time complexity is O(n * m).
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity. For large datasets
      * with simple equality conditions, use {@link #fullJoin(Collection, Function, Function, BiFunction)}
-     * for {@code O(n + m)} performance. Both the predicate and transformation function must handle {@code null} values
-     * for unmatched elements.
+     * for {@code O(n + m)} performance. The predicate is only invoked with pairs of actual elements; the
+     * transformation function must handle {@code null} values for unmatched elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -12847,8 +12853,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * Stream.of(users)
      *       .fullJoin(orders,
-     *                 (user, order) -> user != null && order != null &&
-     *                                  user.getId() == order.getUserId(),
+     *                 (user, order) -> user.getId() == order.getUserId(),
      *                 (user, order) -> (user != null ? user.getName() : "Unknown") +
      *                                  ": $" + (order != null ? order.getAmount() : 0))
      *       .forEach(System.out::println);
@@ -12856,8 +12861,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Range-based full join with transformation
      * Stream.of(ranges)
      *       .fullJoin(values,
-     *                 (range, value) -> value != null && range != null &&
-     *                                   value.getAmount() >= range.getMin() &&
+     *                 (range, value) -> value.getAmount() >= range.getMin() &&
      *                                   value.getAmount() <= range.getMax(),
      *                 (range, value) -> {
      *                     if (range == null) return "Unmatched value: " + value;
@@ -12872,7 +12876,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the collection to join with
      * @param <R> the type of the result elements after transformation
      * @param b the collection to join with; must not be null
-     * @param predicate the condition to test pairs; must handle {@code null} values
+     * @param predicate the condition to test pairs of elements from this stream and the collection
      * @param func the function to apply to pairs; must handle {@code null} values
      * @return a new Stream consisting of the results of applying the function to all pairs
      * @throws IllegalStateException if the stream is already closed
@@ -13146,8 +13150,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * List<Order> orders = Arrays.asList(new Order(1, 100), new Order(3, 300));
      *
      * Stream.of(users)
-     *       .leftJoin(orders, (user, order) -> order != null &&
-     *                                          user.getId() == order.getUserId())
+     *       .leftJoin(orders, (user, order) -> user.getId() == order.getUserId())
      *       .forEach(pair -> System.out.println(pair.left() + " - " + pair.right()));
      * }</pre>
      *
@@ -13155,7 +13158,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> the type of elements in the collection to join with
      * @param b the collection to join with.
-     * @param predicate the condition to test pairs of elements. Must handle {@code null} right values.
+     * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
      * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code leftJoin(Collection, Function, Function)} first.
@@ -13183,7 +13186,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * Stream.of(users)
      *       .leftJoin(orders,
-     *                 (user, order) -> order != null && user.getId() == order.getUserId(),
+     *                 (user, order) -> user.getId() == order.getUserId(),
      *                 (user, order) -> user.getName() + ": $" +
      *                                  (order != null ? order.getAmount() : 0))
      *       .forEach(System.out::println);
@@ -13194,7 +13197,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the collection to join with
      * @param <R> the type of the result elements
      * @param b the collection to join with.
-     * @param predicate the condition to test pairs of elements. Must handle {@code null} right values.
+     * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} right values.
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
      * @throws IllegalStateException if the stream is already closed
@@ -13415,8 +13418,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * List<Order> orders = Arrays.asList(new Order(1, 100), new Order(2, 200));
      *
      * Stream.of(users)
-     *       .rightJoin(orders, (user, order) -> user != null &&
-     *                                           user.getId() == order.getUserId())
+     *       .rightJoin(orders, (user, order) -> user.getId() == order.getUserId())
      *       .forEach(pair -> System.out.println(pair.left() + " - " + pair.right()));
      * }</pre>
      *
@@ -13424,7 +13426,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> the type of elements in the collection to join with
      * @param b the collection to join with.
-     * @param predicate the condition to test pairs of elements. Must handle {@code null} left values.
+     * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
      * @throws IllegalStateException if the stream is already closed
      * @deprecated The time complexity is O(n * m). You should try {@code rightJoin(Collection, Function, Function)} first.
@@ -13452,7 +13454,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * Stream.of(users)
      *       .rightJoin(orders,
-     *                  (user, order) -> user != null && user.getId() == order.getUserId(),
+     *                  (user, order) -> user.getId() == order.getUserId(),
      *                  (user, order) -> (user != null ? user.getName() : "Unknown") +
      *                                   ": $" + order.getAmount())
      *       .forEach(System.out::println);
@@ -13463,7 +13465,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the collection to join with
      * @param <R> the type of the result elements
      * @param b the collection to join with.
-     * @param predicate the condition to test pairs of elements. Must handle {@code null} left values.
+     * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
      * @throws IllegalStateException if the stream is already closed
@@ -13697,7 +13699,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream.
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param mergeFunction binary operator to merge multiple matching elements into one.
-     * @return a new Stream of Pair objects containing elements paired with merged matching elements
+     * @return a new Stream of Pair objects containing elements paired with merged matching elements, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator, BiFunction)
      */
@@ -13737,7 +13739,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream.
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @param mergeFunction binary operator to merge multiple matching elements into one.
-     * @param func the function to apply to paired elements to produce result elements.
+     * @param func the function to apply to paired elements to produce result elements; receives {@code null} for the right value when no match is found.
      * @return a new Stream consisting of the results of applying the function to merged pairs
      * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator)
@@ -13776,7 +13778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param leftKeyExtractor function to extract keys from elements of this stream.
      * @param rightKeyExtractor function to extract keys from elements of the second stream.
      * @param mergeFunction binary operator to merge multiple matching elements into one.
-     * @param func the function to apply to paired elements to produce result elements.
+     * @param func the function to apply to paired elements to produce result elements; receives {@code null} for the right value when no match is found.
      * @return a new Stream consisting of the results of applying the function to merged pairs
      * @throws IllegalStateException if the stream is already closed
      * @see #groupJoin(Collection, Function, Function, BinaryOperator, BiFunction)
@@ -14342,7 +14344,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @return a ContinuableFuture representing the result of the asynchronous computation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}
+     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}.
      */
     @Beta
     @TerminalOp
@@ -14388,8 +14390,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a ContinuableFuture representing the result of the asynchronous computation
      * @throws IllegalStateException if the stream is already closed
      * @throws java.util.concurrent.RejectedExecutionException if the executor rejects the task; this stream is still closed
-     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}
-     * @throws IllegalArgumentException if {@code terminalAction} or {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code terminalAction} or {@code executor} is {@code null}.
      */
     @Beta
     @TerminalOp
@@ -14435,7 +14436,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param terminalAction the terminal operation to be executed on this Stream.
      * @return a ContinuableFuture representing the result of the asynchronous computation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}
+     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}.
      */
     @Beta
     @TerminalOp
@@ -14483,8 +14484,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a ContinuableFuture representing the result of the asynchronous computation
      * @throws IllegalStateException if the stream is already closed
      * @throws java.util.concurrent.RejectedExecutionException if the executor rejects the task; this stream is still closed
-     * @throws IllegalArgumentException if {@code terminalAction} is {@code null}
-     * @throws IllegalArgumentException if {@code terminalAction} or {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code terminalAction} or {@code executor} is {@code null}.
      */
     @Beta
     @TerminalOp
@@ -14565,7 +14565,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <T> the type of the stream elements
      * @param supplier the Supplier that generates the Stream.
      * @return a Stream instance that will be populated by the supplier when consumed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static <T> Stream<T> defer(final Supplier<? extends Stream<? extends T>> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
@@ -14971,7 +14971,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param fromIndex the starting index (inclusive) of the iterator
      * @param toIndex the ending index (exclusive) of the iterator
      * @return a stream containing the specified elements from the iterator
-     * @throws IllegalArgumentException if {@code fromIndex} is negative or {@code toIndex < fromIndex}
+     * @throws IllegalArgumentException if {@code fromIndex} is negative or {@code toIndex < fromIndex}.
      */
     static <T> Stream<T> of(final Iterator<? extends T> iterator, final int fromIndex, final int toIndex) {
         if (iterator == null && (fromIndex == 0 && toIndex == 0)) {
@@ -15906,7 +15906,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param map the map whose keys are to be included in the stream
      * @param valueFilter the predicate to filter the values
      * @return a stream containing the keys of the specified map whose values match the given predicate
-     * @throws IllegalArgumentException if {@code valueFilter} is {@code null}
+     * @throws IllegalArgumentException if {@code valueFilter} is {@code null}.
      */
     public static <K, V> Stream<K> ofKeys(final Map<? extends K, ? extends V> map, final Predicate<? super V> valueFilter) throws IllegalArgumentException {
         N.checkArgNotNull(valueFilter, cs.valueFilter);
@@ -15940,7 +15940,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param map the map whose keys are to be included in the stream
      * @param filter the bi-predicate to filter the entries
      * @return a stream containing the keys of the specified map whose entries match the given bi-predicate
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> Stream<K> ofKeys(final Map<? extends K, ? extends V> map, final BiPredicate<? super K, ? super V> filter)
             throws IllegalArgumentException {
@@ -16002,7 +16002,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param map the map whose values are to be included in the stream
      * @param keyFilter the predicate to filter the keys
      * @return a stream containing the values of the specified map whose keys match the given predicate
-     * @throws IllegalArgumentException if {@code keyFilter} is {@code null}
+     * @throws IllegalArgumentException if {@code keyFilter} is {@code null}.
      */
     public static <K, V> Stream<V> ofValues(final Map<? extends K, ? extends V> map, final Predicate<? super K> keyFilter) throws IllegalArgumentException {
         N.checkArgNotNull(keyFilter, cs.keyFilter);
@@ -16036,7 +16036,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param map the map whose values are to be included in the stream
      * @param filter the bi-predicate to filter the entries
      * @return a stream containing the values of the specified map whose entries match the given bi-predicate
-     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public static <K, V> Stream<V> ofValues(final Map<? extends K, ? extends V> map, final BiPredicate<? super K, ? super V> filter)
             throws IllegalArgumentException {
@@ -16421,8 +16421,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxChunkCount the maximum number of chunks to split into
      * @param mapper a function to map the chunk from and to index to an element in the resulting stream
      * @return a Stream of the mapped chunk values
-     * @throws IllegalArgumentException if totalSize is negative or maxChunkCount is not positive
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if totalSize is negative or maxChunkCount is not positive, or if
+     *         {@code mapper} is {@code null}.
      * @see #splitByChunkCount(int, int, boolean, IntBiFunction)
      */
     public static <T> Stream<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBiFunction<? extends T> mapper)
@@ -16452,8 +16452,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param sizeSmallerFirst if {@code true}, smaller chunks will be created first; otherwise, larger chunks will be created first
      * @param mapper a function to map the chunk from and to index to an element in the resulting stream
      * @return a Stream of the mapped chunk values
-     * @throws IllegalArgumentException if totalSize is negative or maxChunkCount is not positive
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if totalSize is negative or maxChunkCount is not positive, or if
+     *         {@code mapper} is {@code null}.
      * @see IntStream#splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
     public static <T> Stream<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final boolean sizeSmallerFirst,
@@ -16835,7 +16835,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param element the element to be repeated
      * @param n the number of times to repeat the element
      * @return a stream of the repeated element
-     * @throws IllegalArgumentException if the number of repetitions is negative
+     * @throws IllegalArgumentException if the number of repetitions is negative.
      */
     public static <T> Stream<T> repeat(final T element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -16921,7 +16921,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a Supplier that provides the next element in the iteration
      * @return a stream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}.
      */
     public static <T> Stream<T> iterate(final BooleanSupplier hasNext, final Supplier<? extends T> next) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext, cs.hasNext);
@@ -16977,8 +16977,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param hasNext a supplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a stream of elements generated by the iteration
-     * @throws IllegalArgumentException if the initial element is null
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if the initial element is null, or if {@code hasNext} or {@code f} is
+     *         {@code null}.
      */
     public static <T> Stream<T> iterate(final T init, final BooleanSupplier hasNext, final UnaryOperator<T> f) throws IllegalArgumentException {
         N.checkArgNotNull(init);
@@ -17033,8 +17033,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param hasNext tests if there is a next element by {@code hasNext.test(init)} for the first time and {@code hasNext.test(f.apply(previous))} for the remaining
      * @param f a function to apply to the previous element to generate the next element
      * @return a stream of elements generated by the iteration
-     * @throws IllegalArgumentException if the initial element is null
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if the initial element is null, or if {@code hasNext} or {@code f} is
+     *         {@code null}.
      */
     public static <T> Stream<T> iterate(final T init, final Predicate<? super T> hasNext, final UnaryOperator<T> f) throws IllegalArgumentException {
         N.checkArgNotNull(init);
@@ -17088,7 +17088,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param init the initial element
      * @param f the function to apply to the previous element to produce the next element
      * @return a stream of elements generated by iterating with the given function
-     * @throws IllegalArgumentException if the initial element is null
+     * @throws IllegalArgumentException if the initial element is null.
      */
     public static <T> Stream<T> iterate(final T init, final UnaryOperator<T> f) throws IllegalArgumentException {
         N.checkArgNotNull(init);
@@ -17125,7 +17125,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <T> the type of the elements in the stream
      * @param supplier the Supplier that provides the elements of the stream.
      * @return a Stream generated by the given supplier
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static <T> Stream<T> generate(final Supplier<T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
@@ -17159,7 +17159,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param file the file to read lines from
      * @return a stream of lines from the file
-     * @throws IllegalArgumentException if the file is {@code null}
+     * @throws IllegalArgumentException if the file is {@code null}.
      */
     public static Stream<String> ofLines(final File file) {
         return ofLines(file, Charsets.UTF_8);
@@ -17183,7 +17183,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param file the file to read lines from
      * @param charset the character set to use for reading the file
      * @return a stream of lines from the file
-     * @throws IllegalArgumentException if the file is {@code null}
+     * @throws IllegalArgumentException if the file is {@code null}.
      */
     public static Stream<String> ofLines(final File file, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(file, cs.file);
@@ -17210,7 +17210,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param path the path to read lines from
      * @return a stream of lines from the path
-     * @throws IllegalArgumentException if the path is {@code null}
+     * @throws IllegalArgumentException if the path is {@code null}.
      */
     public static Stream<String> ofLines(final Path path) {
         return ofLines(path, Charsets.UTF_8);
@@ -17235,7 +17235,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param path the path to read lines from
      * @param charset the character set to use for reading the file
      * @return a stream of lines from the path
-     * @throws IllegalArgumentException if the path is {@code null}
+     * @throws IllegalArgumentException if the path is {@code null}.
      */
     public static Stream<String> ofLines(final Path path, final Charset charset) throws IllegalArgumentException {
         N.checkArgNotNull(path, cs.path);
@@ -17262,7 +17262,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param reader the Reader to read lines from
      * @return a Stream of lines read from the Reader
-     * @throws IllegalArgumentException if the reader is {@code null}
+     * @throws IllegalArgumentException if the reader is {@code null}.
      */
     public static Stream<String> ofLines(final Reader reader) {
         return ofLines(reader, false);
@@ -17286,7 +17286,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param reader the Reader to read lines from
      * @param closeReaderWhenStreamIsClosed if {@code true}, the input Reader will be closed when the stream is closed
      * @return a Stream of lines read from the Reader
-     * @throws IllegalArgumentException if the reader is null
+     * @throws IllegalArgumentException if the reader is null.
      */
     public static Stream<String> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
         N.checkArgNotNull(reader, cs.reader);
@@ -17363,7 +17363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param parentPath the parent directory to list files from
      * @return a stream of files in the parent directory
-     * @throws IllegalArgumentException if parentPath is {@code null}
+     * @throws IllegalArgumentException if parentPath is {@code null}.
      */
     public static Stream<File> listFiles(final File parentPath) throws IllegalArgumentException {
         N.checkArgNotNull(parentPath, cs.parentPath);
@@ -17393,7 +17393,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param parentPath the parent directory to list files from
      * @param recursively if {@code true}, lists files recursively in sub-directories
      * @return a stream of files in the parent directory
-     * @throws IllegalArgumentException if parentPath is {@code null}
+     * @throws IllegalArgumentException if parentPath is {@code null}.
      */
     public static Stream<File> listFiles(final File parentPath, final boolean recursively) throws IllegalArgumentException {
         N.checkArgNotNull(parentPath, cs.parentPath);
@@ -17463,7 +17463,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param recursively if {@code true}, lists files recursively in sub-directories
      * @param excludeDirectory if {@code true}, excludes directories from the stream
      * @return a stream of files in the parent directory
-     * @throws IllegalArgumentException if parentPath is {@code null}
+     * @throws IllegalArgumentException if parentPath is {@code null}.
      */
     public static Stream<File> listFiles(final File parentPath, final boolean recursively, final boolean excludeDirectory) {
         if (excludeDirectory) {
@@ -17490,7 +17490,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      */
     public static <T> Stream<T> interval(final long intervalInMillis, final Supplier<T> s) throws IllegalArgumentException {
         N.checkArgNotNull(s, cs.s);
@@ -17517,7 +17517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      */
     public static <T> Stream<T> interval(final long delayInMillis, final long intervalInMillis, final Supplier<T> s) throws IllegalArgumentException {
         N.checkArgNotNull(s, cs.s);
@@ -17545,7 +17545,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param unit the time unit of the delay and interval
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      * @see LongStream#interval(long, long, TimeUnit)
      */
     public static <T> Stream<T> interval(final long delay, final long interval, final TimeUnit unit, final Supplier<T> s) throws IllegalArgumentException {
@@ -17573,7 +17573,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the function that generates the elements based on the current time in milliseconds
      * @return a stream that generates elements at the specified interval
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      */
     public static <T> Stream<T> interval(final long intervalInMillis, final LongFunction<? extends T> s) throws IllegalArgumentException {
         N.checkArgNotNull(s, cs.s);
@@ -17600,7 +17600,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the function that generates the elements based on the current time in milliseconds
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      */
     public static <T> Stream<T> interval(final long delayInMillis, final long intervalInMillis, final LongFunction<? extends T> s)
             throws IllegalArgumentException {
@@ -17630,7 +17630,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param unit the time unit of the delay and interval
      * @param s the function that generates the elements based on the current time in milliseconds
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      * @see LongStream#interval(long, long, TimeUnit)
      */
     public static <T> Stream<T> interval(final long delay, final long interval, final TimeUnit unit, final LongFunction<? extends T> s)
@@ -17666,7 +17666,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param queue the blocking queue to observe
      * @param duration the total time to observe the queue
      * @return a stream that polls elements from the queue until the duration expires
-     * @throws IllegalArgumentException if the queue or duration is null
+     * @throws IllegalArgumentException if the queue or duration is null.
      */
     @Beta
     public static <T> Stream<T> observe(final BlockingQueue<T> queue, final Duration duration) throws IllegalArgumentException {
@@ -17731,8 +17731,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param hasMore a supplier that returns {@code true} if the upstream may still put more elements into the queue, or {@code false} if the upstream is completed.
      * @param maxWaitIntervalInMillis the maximum wait interval in milliseconds between polling the queue
      * @return a stream that polls elements from the queue at the specified interval
-     * @throws IllegalArgumentException if the queue is {@code null}, or if maxWaitIntervalInMillis is not positive (zero or negative)
-     * @throws IllegalArgumentException if {@code hasMore} is {@code null}
+     * @throws IllegalArgumentException if the queue is {@code null}, or if maxWaitIntervalInMillis is not positive
+     *         (zero or negative), or if {@code hasMore} is {@code null}.
      */
     @Beta
     public static <T> Stream<T> observe(final BlockingQueue<T> queue, final BooleanSupplier hasMore, final long maxWaitIntervalInMillis)
@@ -17974,7 +17974,6 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The iterables are processed sequentially, maintaining the order of elements within each iterable
      * and the order of iterables as provided in the collection. If the collection is empty, an empty stream is returned.
      * The collection's membership and encounter order are snapshotted when this method is called.
-     * This method is marked as @Beta, indicating it may be subject to changes in future versions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18032,7 +18031,6 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The iterators are processed sequentially, maintaining the order of elements within each iterator
      * and the order of iterators as provided in the collection. If the collection is empty, an empty stream is returned.
      * The collection's membership and encounter order are snapshotted when this method is called.
-     * This method is marked as @Beta, indicating it may be subject to changes in future versions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18205,7 +18203,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param streams the collection of streams to be concatenated in parallel
      * @param readThreadNum the number of threads used to read elements from streams; must be positive
      * @return a stream containing all elements from the provided streams
-     * @throws IllegalArgumentException if {@code readThreadNum} is not positive
+     * @throws IllegalArgumentException if {@code readThreadNum} is not positive.
      * @see #parallelConcat(Collection)
      * @see #parallelConcat(Collection, int, int)
      */
@@ -18244,7 +18242,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param readThreadNum the number of threads used to read elements from streams; must be positive
      * @param bufferSize the size of the buffer used to store elements from the streams read by the reading threads
      * @return a stream containing all elements from the provided streams
-     * @throws IllegalArgumentException if {@code readThreadNum} or {@code bufferSize} is not positive
+     * @throws IllegalArgumentException if {@code readThreadNum} or {@code bufferSize} is not positive.
      * @see #parallelConcat(Collection, int)
      */
     public static <T> Stream<T> parallelConcat(final Collection<? extends Stream<? extends T>> streams, final int readThreadNum, final int bufferSize)
@@ -18454,7 +18452,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterators the collection of iterators to be concatenated in parallel
      * @param readThreadNum the number of threads used to read elements from iterators; must be positive
      * @return a stream containing all elements from the provided iterators
-     * @throws IllegalArgumentException if {@code readThreadNum} is not positive
+     * @throws IllegalArgumentException if {@code readThreadNum} is not positive.
      * @see #parallelConcatIterators(Collection)
      * @see #parallelConcatIterators(Collection, int, int)
      */
@@ -18496,7 +18494,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param readThreadNum the number of threads used to read elements from iterators; must be positive
      * @param bufferSize the size of the buffer used to store elements from the iterators read by the reading threads
      * @return a stream containing all elements from the provided iterators
-     * @throws IllegalArgumentException if {@code readThreadNum} or {@code bufferSize} is not positive
+     * @throws IllegalArgumentException if {@code readThreadNum} or {@code bufferSize} is not positive.
      * @see #parallelConcatIterators(Collection, int)
      */
     public static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
@@ -18755,7 +18753,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second char array
      * @param zipFunction the function to combine elements from the two arrays
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(char[], char[], char, char, CharBiFunction)
      */
     public static <R> Stream<R> zip(final char[] a, final char[] b, final CharBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -18786,7 +18784,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third char array
      * @param zipFunction the function to combine elements from the three arrays
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(char[], char[], char[], char, char, char, CharTriFunction)
      */
     public static <R> Stream<R> zip(final char[] a, final char[] b, final char[] c, final CharTriFunction<? extends R> zipFunction)
@@ -18817,7 +18815,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second char iterator. Can be {@code null} (treated as empty)
      * @param zipFunction the function to combine elements from the two iterators
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharIterator a, final CharIterator b, final CharBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -18861,7 +18859,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third char iterator. Can be {@code null} (treated as empty)
      * @param zipFunction the function to combine elements from the three iterators
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharIterator a, final CharIterator b, final CharIterator c, final CharTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -18905,7 +18903,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second CharStream
      * @param zipFunction the function to combine elements from the two streams
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -18936,7 +18934,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third CharStream
      * @param zipFunction the function to combine elements from the three streams
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharStream c, final CharTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -18969,7 +18967,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of character streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine elements from all streams
      * @return a stream of combined values. Empty if the collection is empty
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends CharStream> c, final CharNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -19034,7 +19032,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(char[], char[], CharBiFunction)
      */
     public static <R> Stream<R> zip(final char[] a, final char[] b, final char valueForNoneA, final char valueForNoneB,
@@ -19069,7 +19067,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final char[] a, final char[] b, final char[] c, final char valueForNoneA, final char valueForNoneB,
             final char valueForNoneC, final CharTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19101,7 +19099,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharIterator a, final CharIterator b, final char valueForNoneA, final char valueForNoneB,
             final CharBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19153,7 +19151,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharIterator a, final CharIterator b, final CharIterator c, final char valueForNoneA, final char valueForNoneB,
             final char valueForNoneC, final CharTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19206,7 +19204,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final char valueForNoneA, final char valueForNoneB,
             final CharBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19241,7 +19239,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third stream runs out of values
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final CharStream a, final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB,
             final char valueForNoneC, final CharTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19278,8 +19276,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
+     *         if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends CharStream> c, final char[] valuesForNone, final CharNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -19365,7 +19363,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second byte array
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(byte[], byte[], byte, byte, ByteBiFunction)
      */
     public static <R> Stream<R> zip(final byte[] a, final byte[] b, final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19396,7 +19394,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third byte array
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final byte[] a, final byte[] b, final byte[] c, final ByteTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -19425,7 +19423,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second byte iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteIterator a, final ByteIterator b, final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -19468,7 +19466,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third byte iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteIterator a, final ByteIterator b, final ByteIterator c, final ByteTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -19511,7 +19509,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second byte stream
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -19541,7 +19539,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third byte stream
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -19572,7 +19570,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of byte streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends ByteStream> c, final ByteNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -19637,7 +19635,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final byte[] a, final byte[] b, final byte valueForNoneA, final byte valueForNoneB,
             final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19671,7 +19669,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final byte[] a, final byte[] b, final byte[] c, final byte valueForNoneA, final byte valueForNoneB,
             final byte valueForNoneC, final ByteTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19703,7 +19701,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteIterator a, final ByteIterator b, final byte valueForNoneA, final byte valueForNoneB,
             final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19755,7 +19753,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteIterator a, final ByteIterator b, final ByteIterator c, final byte valueForNoneA, final byte valueForNoneB,
             final byte valueForNoneC, final ByteTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19808,7 +19806,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final byte valueForNoneA, final byte valueForNoneB,
             final ByteBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19843,7 +19841,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third stream runs out of values
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ByteStream a, final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB,
             final byte valueForNoneC, final ByteTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19880,8 +19878,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
+     *         if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends ByteStream> c, final byte[] valuesForNone, final ByteNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -19967,7 +19965,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second short array
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(short[], short[], short, short, ShortBiFunction)
      */
     public static <R> Stream<R> zip(final short[] a, final short[] b, final ShortBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -19998,7 +19996,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third short array
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final short[] a, final short[] b, final short[] c, final ShortTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20027,7 +20025,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second short iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortIterator a, final ShortIterator b, final ShortBiFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20071,7 +20069,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third short iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortIterator a, final ShortIterator b, final ShortIterator c, final ShortTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20114,7 +20112,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second short stream
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20144,7 +20142,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third short stream
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortStream c, final ShortTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20175,7 +20173,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of short streams to zip; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends ShortStream> c, final ShortNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20240,7 +20238,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final short[] a, final short[] b, final short valueForNoneA, final short valueForNoneB,
             final ShortBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20274,7 +20272,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the default value to use when the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final short[] a, final short[] b, final short[] c, final short valueForNoneA, final short valueForNoneB,
             final short valueForNoneC, final ShortTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20307,7 +20305,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortIterator a, final ShortIterator b, final short valueForNoneA, final short valueForNoneB,
             final ShortBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20360,7 +20358,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortIterator a, final ShortIterator b, final ShortIterator c, final short valueForNoneA, final short valueForNoneB,
             final short valueForNoneC, final ShortTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20415,7 +20413,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final short valueForNoneA, final short valueForNoneB,
             final ShortBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20452,7 +20450,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final ShortStream a, final ShortStream b, final ShortStream c, final short valueForNoneA, final short valueForNoneB,
             final short valueForNoneC, final ShortTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20489,8 +20487,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the array of default values to use when streams run out of values. Must have the same length as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends ShortStream> c, final short[] valuesForNone, final ShortNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20577,7 +20575,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second int array. Can be {@code null} or empty.
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values with length equal to the shorter array
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final int[] a, final int[] b, final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20609,7 +20607,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third int array. Can be {@code null} or empty.
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values with length equal to the shortest array
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final int[] a, final int[] b, final int[] c, final IntTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20639,7 +20637,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second int iterator. Can be {@code null} (treated as empty iterator).
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntIterator a, final IntIterator b, final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20684,7 +20682,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third int iterator. Can be {@code null} (treated as empty iterator).
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntIterator a, final IntIterator b, final IntIterator c, final IntTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20729,7 +20727,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second int stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20762,7 +20760,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third int stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntStream c, final IntTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -20795,7 +20793,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of int streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends IntStream> c, final IntNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -20861,7 +20859,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final int[] a, final int[] b, final int valueForNoneA, final int valueForNoneB,
             final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20897,7 +20895,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final int[] a, final int[] b, final int[] c, final int valueForNoneA, final int valueForNoneB, final int valueForNoneC,
             final IntTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20929,7 +20927,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntIterator a, final IntIterator b, final int valueForNoneA, final int valueForNoneB,
             final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -20982,7 +20980,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntIterator a, final IntIterator b, final IntIterator c, final int valueForNoneA, final int valueForNoneB,
             final int valueForNoneC, final IntTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21036,7 +21034,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB,
             final IntBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21073,7 +21071,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final IntStream a, final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB,
             final int valueForNoneC, final IntTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21110,8 +21108,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the array of default values to use when streams run out of values. Must have the same length as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends IntStream> c, final int[] valuesForNone, final IntNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21198,7 +21196,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second long array. Can be {@code null} or empty.
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values with length equal to the shorter array
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final long[] a, final long[] b, final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21230,7 +21228,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third long array. Can be {@code null} or empty.
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values with length equal to the shortest array
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final long[] a, final long[] b, final long[] c, final LongTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21260,7 +21258,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second long iterator. Can be {@code null} (treated as empty iterator).
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongIterator a, final LongIterator b, final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21305,7 +21303,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third long iterator. Can be {@code null} (treated as empty iterator).
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongIterator a, final LongIterator b, final LongIterator c, final LongTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21350,7 +21348,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second long stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21383,7 +21381,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third long stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongStream c, final LongTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21416,7 +21414,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of long streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends LongStream> c, final LongNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21482,7 +21480,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final long[] a, final long[] b, final long valueForNoneA, final long valueForNoneB,
             final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21517,7 +21515,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final long[] a, final long[] b, final long[] c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21549,7 +21547,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongIterator a, final LongIterator b, final long valueForNoneA, final long valueForNoneB,
             final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21601,7 +21599,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongIterator a, final LongIterator b, final LongIterator c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21655,7 +21653,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final long valueForNoneA, final long valueForNoneB,
             final LongBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21691,7 +21689,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final LongStream a, final LongStream b, final LongStream c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -21727,8 +21725,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if the streams run out of values. Must have the same size as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends LongStream> c, final long[] valuesForNone, final LongNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21813,7 +21811,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second float array. Can be {@code null} or empty.
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final float[] a, final float[] b, final FloatBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21842,7 +21840,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third float array. Can be {@code null} or empty.
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final float[] a, final float[] b, final float[] c, final FloatTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21870,7 +21868,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second float iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatIterator a, final FloatIterator b, final FloatBiFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21913,7 +21911,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third float iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatIterator a, final FloatIterator b, final FloatIterator c, final FloatTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -21956,7 +21954,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second float stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -21986,7 +21984,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third float stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22017,7 +22015,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of float streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends FloatStream> c, final FloatNFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -22083,7 +22081,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final float[] a, final float[] b, final float valueForNoneA, final float valueForNoneB,
             final FloatBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22118,7 +22116,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final float[] a, final float[] b, final float[] c, final float valueForNoneA, final float valueForNoneB,
             final float valueForNoneC, final FloatTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22150,7 +22148,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatIterator a, final FloatIterator b, final float valueForNoneA, final float valueForNoneB,
             final FloatBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22202,7 +22200,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatIterator a, final FloatIterator b, final FloatIterator c, final float valueForNoneA, final float valueForNoneB,
             final float valueForNoneC, final FloatTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22256,7 +22254,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final float valueForNoneA, final float valueForNoneB,
             final FloatBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22292,7 +22290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final FloatStream a, final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB,
             final float valueForNoneC, final FloatTriFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22328,8 +22326,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if the streams run out of values. Must have the same size as the collection.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of the collection, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends FloatStream> c, final float[] valuesForNone, final FloatNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22414,7 +22412,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second double array. Can be {@code null} or empty.
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final double[] a, final double[] b, final DoubleBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -22443,7 +22441,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third double array. Can be {@code null} or empty.
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final double[] a, final double[] b, final double[] c, final DoubleTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22471,7 +22469,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second double iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final DoubleIterator a, final DoubleIterator b, final DoubleBiFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22514,7 +22512,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third double iterator, may be {@code null} (treated as empty)
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final DoubleIterator a, final DoubleIterator b, final DoubleIterator c, final DoubleTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22557,7 +22555,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second double stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final DoubleBiFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22588,7 +22586,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third double stream. Can be {@code null} (treated as empty stream).
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final DoubleStream a, final DoubleStream b, final DoubleStream c, final DoubleTriFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22619,7 +22617,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the collection of double streams; its contents are snapshotted when this method is called, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final Collection<? extends DoubleStream> c, final DoubleNFunction<? extends R> zipFunction)
             throws IllegalArgumentException {
@@ -22686,7 +22684,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static <R> Stream<R> zip(final double[] a, final double[] b, final double valueForNoneA, final double valueForNoneB,
             final DoubleBiFunction<? extends R> zipFunction) throws IllegalArgumentException {
@@ -22722,7 +22720,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(double[], double[], double, double, DoubleBiFunction)
      * @see #zip(DoubleIterator, DoubleIterator, DoubleIterator, double, double, double, DoubleTriFunction)
      */
@@ -22757,7 +22755,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(DoubleIterator, DoubleIterator, DoubleIterator, double, double, double, DoubleTriFunction)
      * @see #zip(DoubleStream, DoubleStream, double, double, DoubleBiFunction)
      */
@@ -22812,7 +22810,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(DoubleIterator, DoubleIterator, double, double, DoubleBiFunction)
      * @see #zip(DoubleStream, DoubleStream, DoubleStream, double, double, double, DoubleTriFunction)
      */
@@ -22869,7 +22867,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(DoubleIterator, DoubleIterator, double, double, DoubleBiFunction)
      * @see #zip(DoubleStream, DoubleStream, DoubleStream, double, double, double, DoubleTriFunction)
      */
@@ -22908,7 +22906,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(DoubleStream, DoubleStream, double, double, DoubleBiFunction)
      * @see #zip(Collection, double[], DoubleNFunction)
      */
@@ -22948,8 +22946,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if the streams run out of values. Size must match the collection size.
      * @param zipFunction the function to combine sets of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the collection size
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the collection size, or if
+     *         {@code zipFunction} is {@code null}.
      * @see #zip(DoubleStream, DoubleStream, DoubleStream, double, double, double, DoubleTriFunction)
      */
     public static <R> Stream<R> zip(final Collection<? extends DoubleStream> c, final double[] valuesForNone, final DoubleNFunction<? extends R> zipFunction)
@@ -23040,7 +23038,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second array
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Object[], Object[], BiFunction)
      * @see Fn#pair()
      * @see Fn#tuple2()
@@ -23080,7 +23078,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third array
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Object[], Object[], Object[], TriFunction)
      * @see Fn#triple()
      * @see Fn#tuple3()
@@ -23117,7 +23115,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second iterable
      * @param zipFunction the function to combine pairs of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Fn#pair()
      * @see Fn#tuple2()
@@ -23157,7 +23155,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third iterable
      * @param zipFunction the function to combine triples of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      * @see Fn#triple()
      * @see Fn#tuple3()
@@ -23194,7 +23192,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second iterator
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Fn#pair()
      * @see Fn#tuple2()
@@ -23247,7 +23245,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third iterator
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      * @see Fn#triple()
      * @see Fn#tuple3()
@@ -23298,7 +23296,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second stream
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Fn#pair()
      * @see Fn#tuple2()
@@ -23338,7 +23336,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third stream
      * @param zipFunction the function to combine triplets of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, TriFunction)
      * @see Fn#triple()
      * @see Fn#tuple3()
@@ -23378,7 +23376,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param streams the collection of streams to be zipped. Can be {@code null} or empty (returns an empty stream).
      * @param zipFunction the function to combine lists of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Collection, List, Function)
      * @see #zipIterables(Collection, Function)
      */
@@ -23417,7 +23415,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterables the collection of iterables to be zipped
      * @param zipFunction the function to combine lists of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zipIterators(Collection, Function)
      * @see #zipIterables(Collection, List, Function)
      */
@@ -23453,7 +23451,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *            and {@code null} iterators are treated as empty.
      * @param zipFunction the function to combine lists of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zipIterables(Collection, Function)
      * @see #zipIterators(Collection, List, Function)
      */
@@ -23519,7 +23517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Object[], Object[], Object, Object, BiFunction)
      * @see #zip(Object[], Object[], BiFunction)
      */
@@ -23563,7 +23561,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third array runs out of values
      * @param zipFunction the function to combine triplets of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      * @see #zip(Object[], Object[], Object[], TriFunction)
      */
@@ -23600,7 +23598,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterable runs out of values
      * @param zipFunction the function to combine pairs of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      * @see #zip(Iterable, Iterable, BiFunction)
      */
@@ -23642,7 +23640,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterable runs out of values
      * @param zipFunction the function to combine triplets of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      * @see #zip(Iterable, Iterable, Iterable, TriFunction)
      */
@@ -23680,7 +23678,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      * @see #zip(Iterator, Iterator, BiFunction)
      */
@@ -23738,7 +23736,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      * @see #zip(Iterator, Iterator, Iterator, TriFunction)
      */
@@ -23797,7 +23795,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneB the value to use if the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      * @see #zip(Stream, Stream, BiFunction)
      */
@@ -23839,7 +23837,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valueForNoneC the value to use if the third stream runs out of values
      * @param zipFunction the function to combine triplets of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see N#zip(Iterable, Iterable, Iterable, Object, Object, Object, TriFunction)
      */
     public static <A, B, C, R> Stream<R> zip(final Stream<? extends A> a, final Stream<? extends B> b, final Stream<? extends C> c, final A valueForNoneA,
@@ -23880,8 +23878,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if any stream runs out of values. Size must match streams size.
      * @param zipFunction the function to combine lists of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <T, R> Stream<R> zip(final Collection<? extends Stream<? extends T>> streams, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction) throws IllegalArgumentException {
@@ -23920,8 +23918,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if an iterable runs out of values. Size must match iterables size.
      * @param zipFunction the function to combine lists of values from the iterables.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of iterables
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of iterables, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <T, R> Stream<R> zipIterables(final Collection<? extends Iterable<? extends T>> iterables, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction) throws IllegalArgumentException {
@@ -23958,8 +23956,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param valuesForNone the values to use if an iterator runs out of values. Size must match iterators size.
      * @param zipFunction the function to combine lists of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of iterators
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of iterators, or if
+     *         {@code zipFunction} is {@code null}.
      */
     public static <T, R> Stream<R> zipIterators(final Collection<? extends Iterator<? extends T>> iterators, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction) throws IllegalArgumentException {
@@ -24042,8 +24040,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterable<? extends A> a, final Iterable<? extends B> b,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24080,8 +24078,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24175,8 +24173,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24216,8 +24214,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24257,8 +24255,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the iterators.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24358,8 +24356,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24400,8 +24398,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterable<? extends A> a, final Iterable<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24440,8 +24438,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final A valueForNoneA, final B valueForNoneB,
             final BiFunction<? super A, ? super B, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
@@ -24544,8 +24542,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine pairs of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24591,8 +24589,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterable<? extends A> a, final Iterable<? extends B> b, final Iterable<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction,
@@ -24637,8 +24635,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the iterators.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      */
     public static <A, B, C, R> Stream<R> parallelZip(final Iterator<? extends A> a, final Iterator<? extends B> b, final Iterator<? extends C> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC, final TriFunction<? super A, ? super B, ? super C, ? extends R> zipFunction,
@@ -24756,8 +24754,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine triplets of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24800,8 +24798,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24850,8 +24848,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the streams.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or sizes don't match
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or sizes don't match, or if
+     *         {@code zipFunction} is {@code null}.
      * @see Stream#buffered()
      * @see Stream#buffered(int)
      */
@@ -24893,8 +24891,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see N#iterateEach(Collection)
      */
     public static <T, R> Stream<R> parallelZipIterables(final Collection<? extends Iterable<? extends T>> iterables,
@@ -24936,8 +24934,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the iterables.
      * @param maxThreadNumForZipFunction the max thread number for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or sizes don't match
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or sizes don't match, or if
+     *         {@code zipFunction} is {@code null}.
      * @see N#iterateEach(Collection)
      */
     public static <T, R> Stream<R> parallelZipIterables(final Collection<? extends Iterable<? extends T>> iterables, final List<? extends T> valuesForNone,
@@ -24974,8 +24972,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the iterators.
      * @param maxThreadNumForZipFunction the maximum number of threads for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive, or if {@code zipFunction} is
+     *         {@code null}.
      * @see #zipIterators(Collection, Function)
      */
     public static <T, R> Stream<R> parallelZipIterators(final Collection<? extends Iterator<? extends T>> iterators,
@@ -25084,8 +25082,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param zipFunction the function to combine lists of values from the iterators.
      * @param maxThreadNumForZipFunction the maximum number of threads for executing the zipFunction. Must be positive.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or if valuesForNone size doesn't match iterators size
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if maxThreadNumForZipFunction is not positive or if valuesForNone size doesn't
+     *         match iterators size, or if {@code zipFunction} is {@code null}.
      * @see #zipIterators(Collection, List, Function)
      */
     public static <T, R> Stream<R> parallelZipIterators(final Collection<? extends Iterator<? extends T>> iterators, final List<? extends T> valuesForNone,
@@ -25188,7 +25186,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      *                     Returns TAKE_FIRST to select from the first array, TAKE_SECOND for the second.
      * @return a stream containing the merged elements from the two arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Object[], Object[], BiFunction)
      */
     public static <T> Stream<T> merge(final T[] a, final T[] b, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
@@ -25251,7 +25249,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third array to be merged. It should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Object[], Object[], BiFunction)
      */
     public static <T> Stream<T> merge(final T[] a, final T[] b, final T[] c, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
@@ -25282,7 +25280,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second iterable to be merged. It should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the two iterables
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b,
@@ -25314,7 +25312,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third iterable to be merged. It should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three iterables
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterable<? extends T> a, final Iterable<? extends T> b, final Iterable<? extends T> c,
@@ -25344,7 +25342,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second iterator to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the two iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
@@ -25436,7 +25434,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third iterator to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see N#merge(Iterable, Iterable, BiFunction)
      */
     public static <T> Stream<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b, final Iterator<? extends T> c,
@@ -25468,7 +25466,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param b the second stream to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the two streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -25500,7 +25498,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param c the third stream to be merged. It should be ordered. Can be {@code null} (treated as empty).
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from the three streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> Stream<T> merge(final Stream<? extends T> a, final Stream<? extends T> b, final Stream<? extends T> c,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -25533,7 +25531,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *            and {@code null} elements are treated as empty streams.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all streams in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> Stream<T> merge(final Collection<? extends Stream<? extends T>> streams, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
             throws IllegalArgumentException {
@@ -25581,7 +25579,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterables the collection of iterables to be merged. Each iterable should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterables in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> Stream<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -25612,7 +25610,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterators the collection of iterators to be merged. Each iterator should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterators in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     public static <T> Stream<T> mergeIterators(final Collection<? extends Iterator<? extends T>> iterators,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -25665,7 +25663,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *            and {@code null} elements are treated as empty streams.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all streams in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see #merge(Collection, BiFunction)
      * @see #parallelMerge(Collection, BiFunction, int)
      */
@@ -25677,7 +25675,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Merges a collection of streams into a single stream in parallel with specified maximum thread number.
+     * Merges a collection of streams into a single stream in parallel with the specified maximum thread number.
      * All elements from each input stream will be merged into intermediate queues by multiple threads first,
      * then these queues will be merged into one stream.
      *
@@ -25705,8 +25703,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all streams in the collection
-     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, or if {@code nextSelector} is
+     *         {@code null}.
      * @see #merge(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMerge(final Collection<? extends Stream<? extends T>> streams,
@@ -25826,7 +25824,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterables the collection of iterables to be merged. Each iterable should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterables in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see #mergeIterables(Collection, BiFunction)
      * @see #parallelMergeIterables(Collection, BiFunction, int)
      */
@@ -25838,7 +25836,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Merges a collection of iterables into a single stream in parallel with specified maximum thread number.
+     * Merges a collection of iterables into a single stream in parallel with the specified maximum thread number.
      * All elements from each input iterable will be merged into intermediate queues by multiple threads first,
      * then these queues will be merged into one stream.
      *
@@ -25864,8 +25862,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all iterables in the collection
-     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, or if {@code nextSelector} is
+     *         {@code null}.
      * @see #mergeIterables(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
@@ -25903,7 +25901,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param iterators the collection of iterators to be merged. Each iterator should be ordered. Can be {@code null} or empty.
      * @param nextSelector a function that determines which element to select next.
      * @return a stream containing the merged elements from all iterators in the collection
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see #mergeIterators(Collection, BiFunction)
      * @see #parallelMergeIterators(Collection, BiFunction, int)
      */
@@ -25915,7 +25913,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Merges a collection of iterators into a single stream in parallel with specified maximum thread number.
+     * Merges a collection of iterators into a single stream in parallel with the specified maximum thread number.
      * All elements from each input iterator will be merged into intermediate queues by multiple threads first,
      * then these queues will be merged into one stream.
      *
@@ -25941,8 +25939,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param nextSelector a function that determines which element to select next.
      * @param maxThreadNum the maximum number of threads for the parallel merge. Must be positive.
      * @return a stream containing the merged elements from all iterators in the collection
-     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, or if {@code nextSelector} is
+     *         {@code null}.
      * @see #mergeIterators(Collection, BiFunction)
      */
     public static <T> Stream<T> parallelMergeIterators(final Collection<? extends Iterator<? extends T>> iterators,

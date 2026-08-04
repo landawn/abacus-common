@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * a result. This is the {@code long}-consuming primitive specialization for
  * {@link java.util.function.BiFunction}.
  *
- * <p>This interface extends {@link Throwables.LongBiFunction} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #apply(long, long)}.
  *
@@ -82,7 +78,7 @@ public interface LongBiFunction<R> extends Throwables.LongBiFunction<R, RuntimeE
      *
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> LongBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

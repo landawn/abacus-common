@@ -1164,7 +1164,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param rnd the source of randomness to use for shuffling.
      *            Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     public abstract void shuffle(final Random rnd);
 
@@ -1261,7 +1261,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *             negative values select elements in reverse direction.
      * @return a new PrimitiveList containing the selected elements
      * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if step is zero
+     * @throws IllegalArgumentException if step is zero.
      */
     public abstract L copy(final int fromIndex, final int toIndex, final int step);
 
@@ -1284,7 +1284,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a List containing the PrimitiveList chunks
-     * @throws IllegalArgumentException if chunkSize &lt;= 0
+     * @throws IllegalArgumentException if chunkSize &lt;= 0.
      */
     public List<L> split(final int chunkSize) {
         return split(0, size(), chunkSize);
@@ -1313,7 +1313,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a List containing the PrimitiveList chunks
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if chunkSize &lt;= 0
+     * @throws IllegalArgumentException if chunkSize &lt;= 0.
      */
     public abstract List<L> split(final int fromIndex, final int toIndex, final int chunkSize);
 
@@ -1572,7 +1572,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance with the given initial capacity.
      *                 The supplier receives the number of elements that will be added.
      * @return a Collection containing all elements from this list as boxed objects
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      * @see #toCollection(int, int, IntFunction)
      */
@@ -1600,8 +1600,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
      * @return a Collection containing elements from the specified range in the same order
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Collection creation
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier);
@@ -1668,7 +1667,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) throws IllegalArgumentException {
@@ -1697,8 +1696,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing elements from the specified range with their occurrence counts
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws NullPointerException if {@code supplier} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier);

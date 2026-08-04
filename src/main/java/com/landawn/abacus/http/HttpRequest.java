@@ -99,7 +99,7 @@ public final class HttpRequest {
      * so use {@link #create(HttpClient)} or one of the {@code url(...)} factories.
      *
      * @param httpClient the client used to execute this request; must not be {@code null}
-     * @throws IllegalArgumentException if {@code httpClient} is {@code null}
+     * @throws IllegalArgumentException if {@code httpClient} is {@code null}.
      */
     HttpRequest(final HttpClient httpClient) {
         this.httpClient = N.checkArgNotNull(httpClient, cs.httpClient);
@@ -118,7 +118,7 @@ public final class HttpRequest {
      *
      * @param httpClient The HttpClient to use for the request. Must not be {@code null}.
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code httpClient} is {@code null}
+     * @throws IllegalArgumentException if {@code httpClient} is {@code null}.
      */
     public static HttpRequest create(final HttpClient httpClient) {
         return new HttpRequest(httpClient);
@@ -135,8 +135,8 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or its scheme is not
-     *         {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or its scheme is not {@code http} or
+     *         {@code https}.
      */
     public static HttpRequest url(final String url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
@@ -155,8 +155,8 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, its scheme is not
-     *         {@code http} or {@code https}, or either timeout is negative.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, its scheme is not {@code http} or
+     *         {@code https}, or either timeout is negative.
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -175,8 +175,8 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}, or its scheme is not
-     *         {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or its scheme is not {@code http} or
+     *         {@code https}.
      */
     public static HttpRequest url(final URL url) {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
@@ -197,8 +197,8 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}, its scheme is not
-     *         {@code http} or {@code https}, or either timeout is negative.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, its scheme is not {@code http} or
+     *         {@code https}, or either timeout is negative.
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -305,7 +305,7 @@ public final class HttpRequest {
      * @param name The header name; must not be {@code null}
      * @param value The header value; may be {@code null}
      * @return This HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -336,7 +336,7 @@ public final class HttpRequest {
      * @param name2 The second header name
      * @param value2 The second header value
      * @return This HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}.
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -370,7 +370,7 @@ public final class HttpRequest {
      * @param name3 The third header name
      * @param value3 The third header value
      * @return This HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}
+     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}.
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
@@ -404,7 +404,7 @@ public final class HttpRequest {
      * @param headers A map containing header names and values; must not be {@code null}
      * @return This HttpRequest instance for method chaining
      * @throws NullPointerException if {@code headers} is {@code null}
-     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}.
      * @see #setHeaders(HttpHeaders)
      * @see HttpHeaders
      * @see HttpHeaders.Names
@@ -464,7 +464,7 @@ public final class HttpRequest {
      * @param connectTimeout The connection timeout in milliseconds. Must be non-negative;
      *        {@code 0} means "not set", so the client-level default applies.
      * @return This HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative.
      */
     public HttpRequest connectTimeout(final long connectTimeout) {
         checkSettings();
@@ -488,7 +488,7 @@ public final class HttpRequest {
      *        not be negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
      * @throws NullPointerException if {@code connectTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative.
      */
     public HttpRequest connectTimeout(final Duration connectTimeout) {
         checkSettings();
@@ -513,7 +513,7 @@ public final class HttpRequest {
      * @param readTimeout The read timeout in milliseconds. Must be non-negative;
      *        {@code 0} means "not set", so the client-level default applies.
      * @return This HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code readTimeout} is negative
+     * @throws IllegalArgumentException if {@code readTimeout} is negative.
      */
     public HttpRequest readTimeout(final long readTimeout) {
         checkSettings();
@@ -537,7 +537,7 @@ public final class HttpRequest {
      *        negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
      * @throws NullPointerException if {@code readTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code readTimeout} is negative
+     * @throws IllegalArgumentException if {@code readTimeout} is negative.
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
         checkSettings();
@@ -1017,11 +1017,14 @@ public final class HttpRequest {
 
     /**
      * Executes a HEAD request with the specified result class.
-     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
+     * HEAD responses carry no body, so with any {@code resultClass} other than {@link HttpResponse} this
+     * deserializes an empty body (for example, an empty string for {@code String.class}); {@link HttpResponse}
+     * is the meaningful result type for HEAD.
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
-     * @return The response object — populated when {@code resultClass} is {@link HttpResponse}, otherwise typically {@code null}
+     * @return The response object — a populated {@link HttpResponse} when {@code resultClass} is {@link HttpResponse},
+     *         otherwise the result of deserializing the empty body (e.g. an empty string for {@code String.class})
      * @throws UncheckedIOException if an I/O error occurs
      */
     public <T> T head(final Class<T> resultClass) throws UncheckedIOException {
@@ -1062,7 +1065,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1096,7 +1099,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1135,7 +1138,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1174,7 +1177,7 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
      * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
      *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1263,7 +1266,7 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1305,7 +1308,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1346,7 +1349,7 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1391,7 +1394,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1432,7 +1435,7 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1477,7 +1480,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1516,7 +1519,7 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1559,7 +1562,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1598,7 +1601,7 @@ public final class HttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1608,7 +1611,9 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HEAD request with the specified result class.
-     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
+     * HEAD responses carry no body, so with any {@code resultClass} other than {@link HttpResponse} the
+     * returned future completes with the result of deserializing an empty body (for example, an empty
+     * string for {@code String.class}); {@link HttpResponse} is the meaningful result type for HEAD.
      *
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
@@ -1620,7 +1625,9 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HEAD request with a custom executor and the specified result class.
-     * HEAD responses have no body, so non-{@link HttpResponse} result classes will typically yield {@code null}.
+     * HEAD responses carry no body, so with any {@code resultClass} other than {@link HttpResponse} the
+     * returned future completes with the result of deserializing an empty body (for example, an empty
+     * string for {@code String.class}); {@link HttpResponse} is the meaningful result type for HEAD.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1634,7 +1641,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1676,7 +1683,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
@@ -1700,7 +1707,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -1728,7 +1735,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}.
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
@@ -1784,7 +1791,7 @@ public final class HttpRequest {
      * @param output The file to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the file
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) throws IllegalArgumentException {
@@ -1843,7 +1850,7 @@ public final class HttpRequest {
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the stream
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor)
@@ -1903,7 +1910,7 @@ public final class HttpRequest {
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the writer
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) throws IllegalArgumentException {

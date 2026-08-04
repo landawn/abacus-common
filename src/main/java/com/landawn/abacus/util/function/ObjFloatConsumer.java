@@ -39,19 +39,14 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
     /**
      * Performs this operation on the given arguments.
      *
-     * <p>This method consumes an object of type T and a float value, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * updating the object's state based on the float value, accumulating float values,
-     * or performing calculations where the result is stored within the object.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjFloatConsumer<FloatBuffer> addToBuffer = (buffer, value) -> buffer.put(value);
      * ObjFloatConsumer<Statistics> updateStats = (stats, value) -> stats.addSample(value);
      * }</pre>
      *
-     * @param t the first input argument of type T
-     * @param value the second input argument, a primitive float value
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, float value);
@@ -74,7 +69,7 @@ public interface ObjFloatConsumer<T> extends Throwables.ObjFloatConsumer<T, Runt
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjFloatConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjFloatConsumer<T> andThen(final ObjFloatConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

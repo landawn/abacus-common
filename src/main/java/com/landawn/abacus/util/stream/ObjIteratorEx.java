@@ -226,7 +226,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param iter the Iterator to wrap (can be null)
+     * @param iter the Iterator to wrap (can be {@code null})
      * @return the same instance if {@code iter} is already an ObjIteratorEx, an ObjIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
      */
     public static <T> ObjIteratorEx<T> of(final Iterator<? extends T> iter) {
@@ -316,7 +316,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      *         the same failure is rethrown on subsequent access attempts
      * @throws Error if the supplier throws an error when initialized;
      *         the same failure is rethrown on subsequent access attempts
-     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}
+     * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static <T> ObjIteratorEx<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);

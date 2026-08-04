@@ -22,14 +22,9 @@ import com.landawn.abacus.util.cs;
  * Represents an operation that accepts a single input argument and returns no result.
  * Unlike most other functional interfaces, {@code Consumer} is expected to operate via side-effects.
  *
- * <p>This interface extends both {@link java.util.function.Consumer} and {@link Throwables.Consumer},
- * providing compatibility with the standard Java Consumer while restricting thrown exceptions to RuntimeException.
- *
  * <p>This is a functional interface whose functional method is {@link #accept(Object)}.
  *
- * <p>For more information about functional interfaces, refer to the JDK API documentation at:
- * <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">
- * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the input to the operation
  *
@@ -61,9 +56,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * Returns a composed {@code Consumer} that performs, in sequence, this operation
      * followed by the {@code after} operation. If performing either operation throws an exception,
      * it is relayed to the caller of the composed operation.
-     *
-     * <p>This method overrides the default implementation in {@link java.util.function.Consumer}
-     * to return the more specific {@code Consumer} type from this package.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -76,7 +69,7 @@ public interface Consumer<T> extends Throwables.Consumer<T, RuntimeException>, j
      * @param after the operation to perform after this operation.
      * @return a composed {@code Consumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default Consumer<T> andThen(final java.util.function.Consumer<? super T> after) throws IllegalArgumentException {

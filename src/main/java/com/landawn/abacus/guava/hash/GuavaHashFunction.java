@@ -207,7 +207,7 @@ final class GuavaHashFunction implements HashFunction {
      * @param instance the object instance to hash
      * @param funnel the funnel that translates the object into bytes
      * @return the hash code for the supplied object
-     * @throws IllegalArgumentException if {@code funnel} is {@code null}
+     * @throws IllegalArgumentException if {@code funnel} is {@code null}.
      */
     @Override
     public <T> HashCode hash(final T instance, final Funnel<? super T> funnel) throws IllegalArgumentException {

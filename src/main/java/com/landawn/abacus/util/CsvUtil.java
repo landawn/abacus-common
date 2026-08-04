@@ -493,7 +493,7 @@ public final class CsvUtil {
      * @param source the File containing CSV data, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @return a Dataset containing the loaded CSV data with selected columns
-     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #load(File)
      * @see #load(File, Collection, long, long)
@@ -519,8 +519,8 @@ public final class CsvUtil {
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in {@code selectColumnNames}
+     *         is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File)
      * @see #load(File, Collection)
@@ -553,10 +553,9 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter predicate applied to each data row (as a {@code String[]} of field values); return {@code true} to include the row; must not be {@code null}
      * @return a Dataset containing the filtered CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in {@code selectColumnNames}
+     *         is not present in the CSV header, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #load(File)
      * @see #load(File, Collection)
      * @see #load(File, Collection, long, long)
@@ -613,7 +612,7 @@ public final class CsvUtil {
      * @param source the Reader providing CSV data
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @return a Dataset containing the selected columns
-     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
      * @see #load(Reader, Collection, long, long)
@@ -641,8 +640,8 @@ public final class CsvUtil {
      * @param offset the number of data rows to skip from the beginning (after header)
      * @param count the maximum number of rows to process
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in {@code selectColumnNames}
+     *         is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
      * @see #load(Reader, Collection)
@@ -678,10 +677,9 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter predicate applied to each data row (as a {@code String[]} of field values); return {@code true} to include the row; must not be {@code null}
      * @return a Dataset containing the filtered CSV data
-     * @throws IllegalArgumentException if offset or count are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if offset or count are negative, or if any name in {@code selectColumnNames}
+     *         is not present in the CSV header, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #load(Reader)
      * @see #load(Reader, Collection)
      * @see #load(Reader, Collection, long, long)
@@ -807,7 +805,7 @@ public final class CsvUtil {
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}
+     * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File)
      * @see #load(File, Collection, Class)
@@ -838,7 +836,7 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
      * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Class)
      * @see #load(File, Collection, long, long, Class)
@@ -872,8 +870,8 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code beanClassForColumnType} is {@code null}, or if any name in {@code selectColumnNames}
-     *         is not present in the CSV header
+     *         {@code beanClassForColumnType} is {@code null}, or if any name in {@code selectColumnNames} is not
+     *         present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Class)
      * @see #load(File, Collection, Class)
@@ -910,10 +908,9 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code beanClassForColumnType}
-     *         is {@code null}
+     *         {@code selectColumnNames} is not present in the CSV header, or if {@code beanClassForColumnType} is
+     *         {@code null}, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #load(File, Class)
      * @see #load(File, Collection, Class)
      * @see #load(File, Collection, long, long, Class)
@@ -946,7 +943,7 @@ public final class CsvUtil {
      * @param beanClassForColumnType the bean class whose property types are used for column type conversion,
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}
+     * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader)
      * @see #load(Reader, Collection, Class)
@@ -978,7 +975,7 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
      * @throws IllegalArgumentException if {@code beanClassForColumnType} is {@code null}, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader, Class)
      * @see #load(Reader, Collection, long, long, Class)
@@ -1009,8 +1006,8 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed columns
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code beanClassForColumnType} is {@code null}, or if any name in {@code selectColumnNames}
-     *         is not present in the CSV header
+     *         {@code beanClassForColumnType} is {@code null}, or if any name in {@code selectColumnNames} is not
+     *         present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader, Class)
      * @see #load(Reader, Collection, Class)
@@ -1049,10 +1046,9 @@ public final class CsvUtil {
      *        must not be {@code null}. CSV columns with no matching property on the bean class are loaded as {@code String}
      * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code beanClassForColumnType}
-     *         is {@code null}
+     *         {@code selectColumnNames} is not present in the CSV header, or if {@code beanClassForColumnType} is
+     *         {@code null}, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #load(Reader, Class)
      * @see #load(Reader, Collection, Class)
      * @see #load(Reader, Collection, long, long, Class)
@@ -1186,7 +1182,7 @@ public final class CsvUtil {
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
      *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with explicitly typed columns
-     * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Collection, long, long, Predicate, Map)
      */
@@ -1217,9 +1213,8 @@ public final class CsvUtil {
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
      *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code columnTypeMap} is {@code null} or empty, or if any name in {@code selectColumnNames}
-     *         is not present in the CSV header
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if {@code columnTypeMap}
+     *         is {@code null} or empty, or if any name in {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(File, Collection, long, long, Predicate, Map)
      */
@@ -1254,10 +1249,9 @@ public final class CsvUtil {
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
      * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code columnTypeMap} is
-     *         {@code null} or empty
+     *         {@code selectColumnNames} is not present in the CSV header, or if {@code columnTypeMap} is {@code null}
+     *         or empty, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
@@ -1294,7 +1288,7 @@ public final class CsvUtil {
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty.
      *        Missing columns and entries mapped to {@code null} default to {@link String}
      * @return a Dataset with explicitly typed columns
-     * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code columnTypeMap} is {@code null} or empty.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader, Collection, long, long, Predicate, Map)
      */
@@ -1327,9 +1321,8 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
      * @return a Dataset with typed columns
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if
-     *         {@code columnTypeMap} is {@code null} or empty, or if any name in {@code selectColumnNames}
-     *         is not present in the CSV header
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if {@code columnTypeMap}
+     *         is {@code null} or empty, or if any name in {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs
      * @see #load(Reader, Collection, long, long, Predicate, Map)
      */
@@ -1367,10 +1360,9 @@ public final class CsvUtil {
      * @param columnTypeMap a mapping of column names to their target {@link Type}s; must not be {@code null} or empty
      * @return a Dataset with typed and filtered data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code columnTypeMap} is
-     *         {@code null} or empty
+     *         {@code selectColumnNames} is not present in the CSV header, or if {@code columnTypeMap} is {@code null}
+     *         or empty, or if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
@@ -1529,9 +1521,9 @@ public final class CsvUtil {
      *        The first parameter is the selected column name list, the second is the disposable row data array,
      *        and the third is the output array to populate
      * @return a Dataset with custom extracted data
-     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header, or
+     *         if {@code rowExtractor} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}.
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
@@ -1565,9 +1557,9 @@ public final class CsvUtil {
      *        The first parameter is the column name list, the second is the disposable row data array,
      *        and the third is the output array to populate
      * @return a Dataset with custom extracted data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if {@code rowExtractor} is
+     *         {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}.
      */
     public static Dataset load(final File source, final long offset, final long count,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
@@ -1597,7 +1589,7 @@ public final class CsvUtil {
      * Dataset ds2 = CsvUtil.load(new File("data.csv"), null, 50, 200, row -> true, extractor);
      *
      * // Load from empty file returns empty Dataset
-     * Dataset ds3 = CsvUtil.load(new File("empty.csv"), null, 0, Long.MAX_VALUE, null, extractor);
+     * Dataset ds3 = CsvUtil.load(new File("empty.csv"), null, 0, Long.MAX_VALUE, row -> true, extractor);
      *
      * // Load with all columns selected and zero offset
      * Dataset ds4 = CsvUtil.load(new File("small.csv"), null, 0, Long.MAX_VALUE, row -> true, extractor);
@@ -1613,9 +1605,9 @@ public final class CsvUtil {
      *        and the third is the output array to populate
      * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header, or if any of {@code rowFilter},
+     *         {@code rowExtractor} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if any of {@code rowFilter}, {@code rowExtractor} is {@code null}.
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter,
@@ -1689,9 +1681,9 @@ public final class CsvUtil {
      * @param rowExtractor a TriConsumer to extract the row data to the output array;
      *      the first parameter is the column names, the second is the row data, and the third is the output array
      * @return a Dataset containing the loaded CSV data with selected columns
-     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header, or
+     *         if {@code rowExtractor} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}.
      * @see #load(Reader, TriConsumer)
      * @see #load(Reader, Collection, long, long, Predicate, TriConsumer)
      */
@@ -1729,9 +1721,8 @@ public final class CsvUtil {
      * @param rowExtractor a TriConsumer to extract the row data to the output array;
      *      the first parameter is the column names, the second is the row data, and the third is the output array
      * @return a Dataset containing the loaded CSV data
-     * @throws IllegalArgumentException if offset or count are negative
+     * @throws IllegalArgumentException if offset or count are negative, or if {@code rowExtractor} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}.
      * @see #load(Reader, TriConsumer)
      * @see #load(Reader, Collection, long, long, Predicate, TriConsumer)
      */
@@ -1761,14 +1752,14 @@ public final class CsvUtil {
      *     Dataset ds = CsvUtil.load(reader, Arrays.asList("name", "price"), 0, 500, filter, extractor);
      * }
      *
-     * // Load with null filter (all rows included)
+     * // Load with an always-true filter (all rows included)
      * try (Reader reader = new StringReader(csvContent)) {
-     *     Dataset ds2 = CsvUtil.load(reader, null, 10, 50, null, extractor);
+     *     Dataset ds2 = CsvUtil.load(reader, null, 10, 50, row -> true, extractor);
      * }
      *
      * // Load from empty Reader returns empty Dataset
      * try (Reader reader = new StringReader("")) {
-     *     Dataset ds3 = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, null, extractor);
+     *     Dataset ds3 = CsvUtil.load(reader, null, 0, Long.MAX_VALUE, row -> true, extractor);
      * }
      *
      * // Load with negative offset throws IllegalArgumentException
@@ -1785,9 +1776,9 @@ public final class CsvUtil {
      *        and the third is the output array to populate
      * @return a Dataset containing the loaded CSV data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header, or if any of {@code rowFilter},
+     *         {@code rowExtractor} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs
-     * @throws IllegalArgumentException if any of {@code rowFilter}, {@code rowExtractor} is {@code null}.
      */
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
@@ -1921,7 +1912,7 @@ public final class CsvUtil {
      * @param source the File source to load CSV data from
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, Collection, Class)
      * @see #stream(File, Collection, long, long, Predicate, Class)
@@ -1957,7 +1948,8 @@ public final class CsvUtil {
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param targetType the Class of the target type
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns are not found in CSV
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns
+     *         are not found in CSV.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
      * @see #stream(File, Class)
      * @see #stream(File, Collection, long, long, Predicate, Class)
@@ -2002,11 +1994,11 @@ public final class CsvUtil {
      * @param rowFilter predicate applied to each data row (as a {@code String[]} of field values); return {@code true} to include the row; must not be {@code null}
      * @param targetType the Class of the target type, must not be {@code null}
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if
-     *         {@code targetType} is {@code null} or not a supported type, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code targetType} is a bean class and a selected column has no matching property
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if {@code targetType} is
+     *         {@code null} or not a supported type, or if any name in {@code selectColumnNames} is not present in the
+     *         CSV header, or if {@code targetType} is a bean class and a selected column has no matching property, or
+     *         if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #stream(File, Class)
      * @see #stream(File, Collection, Class)
      * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
@@ -2055,7 +2047,7 @@ public final class CsvUtil {
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported.
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, Collection, Class, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
@@ -2094,7 +2086,8 @@ public final class CsvUtil {
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns are not found
+     * @throws IllegalArgumentException if the target type is {@code null} or not supported, or if selected columns
+     *         are not found.
      * @throws UncheckedIOException if an I/O error occurs while reading
      * @see #stream(Reader, Class, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
@@ -2149,11 +2142,11 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if
-     *         {@code targetType} is {@code null} or not a supported type, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header, or if {@code targetType} is a bean class and a selected column has no matching property
+     * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, if {@code targetType} is
+     *         {@code null} or not a supported type, or if any name in {@code selectColumnNames} is not present in the
+     *         CSV header, or if {@code targetType} is a bean class and a selected column has no matching property, or
+     *         if {@code rowFilter} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws IllegalArgumentException if {@code rowFilter} is {@code null}.
      * @see #stream(Reader, Class, boolean)
      * @see #stream(Reader, Collection, Class, boolean)
      * @see #stream(File, Collection, long, long, Predicate, Class)
@@ -2430,9 +2423,8 @@ public final class CsvUtil {
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the selected columns are not found
+     * @throws IllegalArgumentException if the selected columns are not found, or if {@code rowMapper} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
      * @see #stream(File, BiFunction)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
      * @see #stream(Reader, Collection, BiFunction, boolean)
@@ -2481,12 +2473,12 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter predicate applied to each data row (as a {@code String[]} of field values); return {@code true} to include the row; must not be {@code null}
      * @param rowMapper converts each row to the target type;
-     *        The first argument is the selected column names, the second is the disposable row data array
+     *        the first argument is the selected column names, the second is the disposable row data array
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header, or if any of {@code rowFilter},
+     *         {@code rowMapper} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading the file
-     * @throws IllegalArgumentException if any of {@code rowFilter}, {@code rowMapper} is {@code null}.
      * @see #stream(File, BiFunction)
      * @see #stream(File, Collection, BiFunction)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
@@ -2592,9 +2584,8 @@ public final class CsvUtil {
      *                  first parameter is the column names, second parameter is the row data
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if the selected columns are not found
+     * @throws IllegalArgumentException if the selected columns are not found, or if {@code rowMapper} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
      * @see #stream(File, Collection, BiFunction)
@@ -2654,14 +2645,14 @@ public final class CsvUtil {
      * @param count the maximum number of rows to process
      * @param rowFilter predicate applied to each data row (as a {@code String[]} of field values); return {@code true} to include the row; must not be {@code null}
      * @param rowMapper converts each row to the target type;
-     *        The first argument is the selected column names, the second is the disposable row data array
+     *        the first argument is the selected column names, the second is the disposable row data array
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
      * @throws IllegalArgumentException if {@code offset} or {@code count} are negative, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header, or if any of {@code rowFilter},
+     *         {@code rowMapper} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while reading
-     * @throws IllegalArgumentException if any of {@code rowFilter}, {@code rowMapper} is {@code null}.
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, BiFunction, boolean)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
@@ -2807,7 +2798,7 @@ public final class CsvUtil {
      * @param csvFile the source CSV file to convert
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
-     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}
+     * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, Collection, File)
      * @see #csvToJson(File, Collection, File, Class)
@@ -2857,7 +2848,7 @@ public final class CsvUtil {
      * @param jsonFile the destination JSON file to create
      * @return the number of rows written to the JSON file
      * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File, Class)
@@ -2924,7 +2915,7 @@ public final class CsvUtil {
      *                               {@code null} to treat all values as strings
      * @return the number of rows written to the JSON file
      * @throws IllegalArgumentException if csvFile or jsonFile is {@code null}, or if any name in
-     *         {@code selectColumnNames} is not present in the CSV header
+     *         {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs during file operations
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File)
@@ -2975,7 +2966,7 @@ public final class CsvUtil {
      * @param beanClassForColumnTypeInference the bean class defining property types for conversion,
      *                               {@code null} to treat all values as strings
      * @return the number of rows written to the JSON output
-     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header
+     * @throws IllegalArgumentException if any name in {@code selectColumnNames} is not present in the CSV header.
      * @throws UncheckedIOException if an I/O error occurs during reading or writing
      * @see #csvToJson(File, File)
      * @see #csvToJson(File, Collection, File)
@@ -3157,9 +3148,8 @@ public final class CsvUtil {
      *
      * @param jsonFile the source JSON file to convert
      * @param csvFile the destination CSV file to create
-     * @return the number of data rows converted (excluding the header row); with an explicitly
-     *         empty column selection, rows are counted but nothing is written
-     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
+     * @return the number of data rows converted (excluding the header row)
+     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, Collection, File)
      */
@@ -3208,7 +3198,7 @@ public final class CsvUtil {
      * @param csvFile the destination CSV file to create
      * @return the number of data rows converted (excluding the header row); with an explicitly
      *         empty column selection, rows are counted but nothing is written
-     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}
+     * @throws IllegalArgumentException if jsonFile or csvFile is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during file operations or if the JSON format is invalid
      * @see #jsonToCsv(File, File)
      */
@@ -3591,7 +3581,7 @@ public final class CsvUtil {
          *
          * @param source the File to read CSV/JSON data from
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if source is {@code null} or if a Reader source is already set
+         * @throws IllegalArgumentException if source is {@code null} or if a Reader source is already set.
          */
         public This source(final File source) throws IllegalArgumentException {
             N.checkArgNotNull(source, cs.sourceFile);
@@ -3633,7 +3623,7 @@ public final class CsvUtil {
          *
          * @param source the Reader to read CSV/JSON data from
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if source is {@code null} or if a File source is already set
+         * @throws IllegalArgumentException if source is {@code null} or if a File source is already set.
          */
         public This source(final Reader source) throws IllegalArgumentException {
             N.checkArgNotNull(source, cs.sourceReader);
@@ -3714,7 +3704,7 @@ public final class CsvUtil {
          *
          * @param offset the number of rows to skip
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if {@code offset} is negative
+         * @throws IllegalArgumentException if {@code offset} is negative.
          */
         public This offset(final long offset) {
             N.checkArgNotNegative(offset, cs.offset);
@@ -3760,7 +3750,7 @@ public final class CsvUtil {
          *
          * @param count the maximum number of rows to process
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if {@code count} is negative
+         * @throws IllegalArgumentException if {@code count} is negative.
          */
         public This count(final long count) {
             N.checkArgNotNegative(count, cs.count);
@@ -3796,7 +3786,7 @@ public final class CsvUtil {
          *
          * @param beanClassForColumnTypeInference the bean class defining property types
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null}
+         * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null}.
          */
         public This beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) throws IllegalArgumentException {
             N.checkArgNotNull(beanClassForColumnTypeInference, cs.beanClassForColumnTypeInference);
@@ -3813,7 +3803,7 @@ public final class CsvUtil {
          * builder are not touched.
          *
          * @param <T> the result type of the action
-         * @param action the terminal operation to run;
+         * @param action the terminal operation to run
          * @return the value returned by {@code action}
          */
         <T> T apply(Callable<T> action) {
@@ -3906,7 +3896,8 @@ public final class CsvUtil {
          *
          * @param beanClassForColumnTypeInference the bean class defining property types
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null} or if columnTypeMap is already set
+         * @throws IllegalArgumentException if beanClassForColumnTypeInference is {@code null} or if columnTypeMap is
+         *         already set.
          */
         @Override
         public CsvLoader beanClassForColumnTypeInference(final Class<?> beanClassForColumnTypeInference) throws IllegalArgumentException {
@@ -3954,7 +3945,8 @@ public final class CsvUtil {
          *
          * @param columnTypeMap mapping of column names to their Types
          * @return this instance for method chaining
-         * @throws IllegalArgumentException if columnTypeMap is {@code null} or if beanClassForColumnTypeInference is already set
+         * @throws IllegalArgumentException if columnTypeMap is {@code null} or if beanClassForColumnTypeInference is
+         *         already set.
          */
         public CsvLoader columnTypeMap(final Map<String, ? extends Type<?>> columnTypeMap) throws IllegalArgumentException {
             N.checkArgNotNull(columnTypeMap, cs.columnTypeMap);
@@ -4047,7 +4039,7 @@ public final class CsvUtil {
          * }</pre>
          *
          * @return a Dataset containing the loaded CSV data
-         * @throws IllegalArgumentException if no source has been set
+         * @throws IllegalArgumentException if no source has been set.
          * @throws UncheckedIOException if an I/O error occurs
          * @see #load(TriConsumer)
          */
@@ -4107,12 +4099,11 @@ public final class CsvUtil {
          * }</pre>
          *
          * @param rowExtractor function to extract data from each row;
-         *        The first parameter is the selected column names, the second is the disposable row data array,
+         *        the first parameter is the selected column names, the second is the disposable row data array,
          *        and the third is the output array to populate
          * @return a Dataset containing the loaded CSV data
-         * @throws IllegalArgumentException if no source has been set
+         * @throws IllegalArgumentException if no source has been set, or if {@code rowExtractor} is {@code null}.
          * @throws UncheckedIOException if an I/O error occurs
-         * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}.
          * @see #load()
          */
         public Dataset load(final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
@@ -4169,10 +4160,9 @@ public final class CsvUtil {
          *
          * @param <T> the type of elements in the stream
          * @param rowMapper function to convert each row to the target type;
-         *        The first argument is the selected column names, the second is the disposable row data array
+         *        the first argument is the selected column names, the second is the disposable row data array
          * @return a Stream of mapped elements
-         * @throws IllegalArgumentException if no source has been set
-         * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
+         * @throws IllegalArgumentException if no source has been set, or if {@code rowMapper} is {@code null}.
          */
         public <T> Stream<T> stream(final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper)
                 throws IllegalArgumentException {
@@ -4212,12 +4202,11 @@ public final class CsvUtil {
          *
          * @param <T> the type of elements in the stream
          * @param rowMapper function to convert each row to the target type;
-         *        The first argument is the selected column names, the second is the disposable row data array
+         *        the first argument is the selected column names, the second is the disposable row data array
          * @param closeReaderWhenStreamIsClosed {@code true} to close the reader source when the stream is
          *        closed, {@code false} to leave it open
          * @return a Stream of mapped elements
-         * @throws IllegalArgumentException if no source has been set
-         * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
+         * @throws IllegalArgumentException if no source has been set, or if {@code rowMapper} is {@code null}.
          */
         public <T> Stream<T> stream(BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
                 final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
@@ -4286,7 +4275,7 @@ public final class CsvUtil {
          *
          * @param outputJsonFile the file to write JSON output to
          * @return the number of rows converted
-         * @throws IllegalArgumentException if outputJsonFile is {@code null} or source is not set
+         * @throws IllegalArgumentException if outputJsonFile is {@code null} or source is not set.
          * @throws UncheckedIOException if an I/O error occurs
          */
         public long csvToJson(File outputJsonFile) throws IllegalArgumentException, UncheckedIOException {
@@ -4343,7 +4332,7 @@ public final class CsvUtil {
          *
          * @param outputJsonWriter the Writer to write JSON output to
          * @return the number of rows converted
-         * @throws IllegalArgumentException if outputJsonWriter is {@code null} or source is not set
+         * @throws IllegalArgumentException if outputJsonWriter is {@code null} or source is not set.
          * @throws UncheckedIOException if an I/O error occurs
          */
         public long csvToJson(Writer outputJsonWriter) throws IllegalArgumentException, UncheckedIOException {
@@ -4396,7 +4385,7 @@ public final class CsvUtil {
          *
          * @param outputCsvFile the file to write CSV output to
          * @return the number of rows converted
-         * @throws IllegalArgumentException if outputCsvFile is {@code null} or source is not set
+         * @throws IllegalArgumentException if outputCsvFile is {@code null} or source is not set.
          * @throws UncheckedIOException if an I/O error occurs
          */
         public long jsonToCsv(File outputCsvFile) throws IllegalArgumentException, UncheckedIOException {
@@ -4455,7 +4444,7 @@ public final class CsvUtil {
          *
          * @param outputCsvWriter the Writer to write CSV output to
          * @return the number of rows converted
-         * @throws IllegalArgumentException if outputCsvWriter is {@code null} or source is not set
+         * @throws IllegalArgumentException if outputCsvWriter is {@code null} or source is not set.
          * @throws UncheckedIOException if an I/O error occurs
          */
         public long jsonToCsv(Writer outputCsvWriter) throws IllegalArgumentException, UncheckedIOException {

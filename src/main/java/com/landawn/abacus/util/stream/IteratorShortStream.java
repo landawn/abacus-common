@@ -113,7 +113,7 @@ class IteratorShortStream extends AbstractShortStream {
      * }</pre>
      *
      * @param values the short iterator to wrap as a stream
-     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
+     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be {@code null}
      */
     IteratorShortStream(final ShortIterator values, final Collection<LocalRunnable> closeHandlers) {
         this(values, false, closeHandlers);
@@ -143,7 +143,7 @@ class IteratorShortStream extends AbstractShortStream {
      *
      * @param values the short iterator to wrap as a stream
      * @param sorted {@code true} if the elements are already sorted in natural order, {@code false} otherwise
-     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be null
+     * @param closeHandlers collection of close handlers to execute when the stream is closed, may be {@code null}
      */
     IteratorShortStream(final ShortIterator values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         super(sorted, closeHandlers);

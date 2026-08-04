@@ -22,10 +22,7 @@ import com.landawn.abacus.util.cs;
 /**
  * A functional interface that represents an operation that accepts four input arguments
  * and returns no result. This is the four-arity specialization of {@link java.util.function.Consumer}.
- *
- * <p>This interface generalizes the standard Java functional consumer interfaces to support
- * operations with four parameters, which is useful for more complex operations that require
- * multiple inputs without producing a return value.
+ * Unlike most other functional interfaces, {@code QuadConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, Object, Object, Object)}.
  *
@@ -43,11 +40,6 @@ import com.landawn.abacus.util.cs;
 public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, C, D, RuntimeException> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
-     *
-     * <p>This method consumes four arguments of types A, B, C, and D, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * updating multiple related objects, logging with multiple parameters, or
-     * performing complex state changes that require four inputs.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -80,10 +72,6 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
-     * <p>This method allows for chaining multiple consumers together, where each
-     * consumer receives the same four input arguments. This is useful for performing
-     * multiple independent operations on the same set of data.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * QuadConsumer<Order, Customer, Product, Integer> saveOrder =
@@ -104,7 +92,7 @@ public interface QuadConsumer<A, B, C, D> extends Throwables.QuadConsumer<A, B, 
      * @param after the operation to perform after this operation.
      * @return a composed {@code QuadConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default QuadConsumer<A, B, C, D> andThen(final QuadConsumer<? super A, ? super B, ? super C, ? super D> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

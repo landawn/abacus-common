@@ -118,11 +118,10 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * Creates an ImmutableListIterator that wraps the provided ListIterator.
      * The returned iterator provides read-only access to the elements.
      *
-     * <p>If the provided iterator is {@code null}, an empty ImmutableListIterator is returned.
-     * Otherwise, a new read-only wrapper is returned (apart from the shared iterator returned by
-     * {@link #empty()}). Wrapping an arbitrary {@code ImmutableListIterator} prevents a mutable
-     * subclass from overriding the inherited modification methods and leaking those operations
-     * through this factory.
+     * <p>If the provided iterator is {@code null} — or is the shared instance returned by
+     * {@link #empty()} — an empty ImmutableListIterator is returned. Otherwise, a new read-only
+     * wrapper is returned; even an {@code ImmutableListIterator} argument is re-wrapped, so a
+     * mutable subclass cannot expose modification operations through the returned iterator.
      *
      * <p>The returned iterator reflects the current state of the provided iterator,
      * including its current position. Modifications to the underlying collection

@@ -505,7 +505,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new JAXB parser instance with default configuration.
-     * JAXB (Java Architecture for XML Binding) provides annotation-based XML binding.
+     * JAXB (Jakarta XML Binding) provides annotation-based XML binding.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -557,7 +557,7 @@ public final class ParserFactory {
      * }</pre>
      *
      * @param type the class to register (must not be {@code null})
-     * @throws IllegalArgumentException if {@code type} is {@code null}
+     * @throws IllegalArgumentException if {@code type} is {@code null}.
      */
     public static void registerKryo(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -584,7 +584,8 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if {@code type} is {@code null}, {@code id} is negative, or {@code id} is assigned to another class
+     * @throws IllegalArgumentException if {@code type} is {@code null}, {@code id} is negative, or {@code id} is
+     *         assigned to another class.
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -612,7 +613,7 @@ public final class ParserFactory {
      *
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
-     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}.
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -640,8 +641,8 @@ public final class ParserFactory {
      * @param type the class to register (must not be {@code null})
      * @param serializer the custom serializer for this class (must not be {@code null})
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}, {@code id} is negative, or {@code id} is assigned to
-     *             another class
+     * @throws IllegalArgumentException if {@code type} or {@code serializer} is {@code null}, {@code id} is
+     *         negative, or {@code id} is assigned to another class.
      */
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

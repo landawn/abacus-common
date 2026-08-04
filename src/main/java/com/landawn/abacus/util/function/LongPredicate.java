@@ -135,7 +135,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p>When evaluating the composed predicate, if this predicate is {@code false},
      * then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -148,7 +148,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default LongPredicate and(final java.util.function.LongPredicate other) throws IllegalArgumentException {
@@ -164,7 +164,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p>When evaluating the composed predicate, if this predicate is {@code true},
      * then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -177,7 +177,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default LongPredicate or(final java.util.function.LongPredicate other) throws IllegalArgumentException {
@@ -189,8 +189,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
     /**
      * Returns the specified predicate instance.
      *
-     * <p>This is a utility method that simply returns the input predicate,
-     * useful for method chaining or type conversion contexts.
+     * <p>This method is useful for explicit type declaration or method references.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,7 +199,7 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      *
      * @param predicate the predicate to return
      * @return the specified predicate
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static LongPredicate of(final LongPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);

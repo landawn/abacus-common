@@ -79,7 +79,7 @@ public abstract class AbstractPoolable implements Poolable {
      *
      * @param liveTime the maximum lifetime in milliseconds before this object expires (must be positive)
      * @param maxIdleTime the maximum idle time in milliseconds before this object expires (must be positive)
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
+     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
      */
     protected AbstractPoolable(final long liveTime, final long maxIdleTime) {
         activityPrint = new ActivityPrint(liveTime, maxIdleTime);

@@ -17,10 +17,7 @@ import com.landawn.abacus.util.Throwables;
 
 /**
  * Represents a supplier of results.
- *
- * <p>This is an extended version of {@link java.util.function.Supplier} that implements both
- * the standard Java supplier interface and a throwable variant. There is no requirement that
- * a new or distinct result be returned each time the supplier is invoked.
+ * There is no requirement that a new or distinct result be returned each time the supplier is invoked.
  *
  * <p>This is a functional interface whose functional method is {@link #get()}.
  *

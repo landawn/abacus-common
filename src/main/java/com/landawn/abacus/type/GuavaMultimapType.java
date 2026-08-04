@@ -39,14 +39,15 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Google Guava Multimap implementations.
- * This class provides serialization and deserialization capabilities for various Guava Multimap types
- * including ListMultimap, SetMultimap, and their concrete implementations.
+ * Type handler for Google Guava {@link Multimap} implementations.
+ * This class provides serialization and deserialization for Guava multimap types
+ * including {@link ListMultimap}, {@link SetMultimap}, and their concrete implementations.
  * Multimaps are serialized as {@code Map<K, Collection<V>>} structures.
  *
  * @param <K> the key type of the multimap
  * @param <V> the value type of the multimap
  * @param <T> the multimap type (must extend {@code Multimap<K, V>})
+ * @see Multimap
  */
 @SuppressWarnings("java:S2160")
 public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractType<T> {
@@ -246,7 +247,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param keySize the expected number of keys
      * @param avgValueSize the expected average number of values per key
      * @return a new multimap instance
-     * @throws IllegalArgumentException if no suitable constructor or factory method is found
+     * @throws IllegalArgumentException if no suitable constructor or factory method is found.
      */
     private T newInstance(int keySize, final int avgValueSize) {
         if (ArrayListMultimap.class.isAssignableFrom(typeClass) || ImmutableListMultimap.class.isAssignableFrom(typeClass) //

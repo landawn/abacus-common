@@ -135,8 +135,8 @@ public final class ExceptionUtil {
      * @param exceptionClass the class of the exception to map; must not be {@code null} and must not be a built-in class
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
-     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."},
-     *         or {@code "com.landawn.abacus."}), or if a mapper is already registered for {@code exceptionClass}
+     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."}
+     *         or {@code "com.landawn.abacus."}), or if a mapper is already registered for {@code exceptionClass}.
      * @see #registerRuntimeExceptionMapper(Class, Function, boolean)
      */
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
@@ -166,9 +166,9 @@ public final class ExceptionUtil {
      * @param force if {@code true}, overwrites an existing mapper; if {@code false}, throws if a mapper already exists.
      *              The check-and-register operation is atomic for concurrent registrations of the same class.
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
-     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."},
-     *         or {@code "com.landawn.abacus."}), or if {@code force} is {@code false} and a mapper is already registered
-     *         for {@code exceptionClass}
+     *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."}
+     *         or {@code "com.landawn.abacus."}), or if {@code force} is {@code false} and a mapper is already
+     *         registered for {@code exceptionClass}.
      */
     @SuppressWarnings("rawtypes")
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,

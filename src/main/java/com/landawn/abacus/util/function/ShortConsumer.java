@@ -27,6 +27,8 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
+ * @see ShortBiConsumer
+ * @see ShortTriConsumer
  */
 @FunctionalInterface
 public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException> { //NOSONAR
@@ -64,7 +66,7 @@ public interface ShortConsumer extends Throwables.ShortConsumer<RuntimeException
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code ShortConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ShortConsumer andThen(final ShortConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

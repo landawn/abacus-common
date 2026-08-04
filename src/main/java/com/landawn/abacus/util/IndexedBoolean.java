@@ -67,7 +67,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * @param value the boolean value to be associated with the index
      * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
      * @return a new immutable IndexedBoolean instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index &lt; 0)
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedBoolean of(final boolean value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -88,7 +88,7 @@ public final class IndexedBoolean extends AbstractIndexed {
      * @param value the boolean value to be associated with the index
      * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
      * @return a new immutable IndexedBoolean instance containing the specified value and index
-     * @throws IllegalArgumentException if index is negative (index &lt; 0)
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedBoolean of(final boolean value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);

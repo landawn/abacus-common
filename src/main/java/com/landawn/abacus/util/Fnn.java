@@ -320,10 +320,12 @@ public final class Fnn {
      * @param <T> the type of results supplied by this supplier
      * @param <E> the type of exception that may be thrown by the supplier
      * @param supplier the delegate supplier whose results should be memoized
-     * @param duration the length of time after a refresh starts before its value expires and must be recomputed
-     * @param unit the time unit for the duration parameter; must not be null
+     * @param duration the length of time after a refresh starts before its value expires and must be recomputed;
+     *                 must be positive
+     * @param unit the time unit for the duration parameter; must not be {@code null}
      * @return a supplier that caches results with time-based expiration
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, {@code duration} is not positive,
+     *         or {@code unit} is {@code null}.
      * @see #memoize(Throwables.Supplier)
      * @see #memoize(Throwables.Function)
      * @see TimeUnit
@@ -414,7 +416,8 @@ public final class Fnn {
      * @param duration the length of time after a refresh starts before its value expires and must be recomputed;
      *                 must not be {@code null} and must be positive (its millisecond value must be {@code > 0})
      * @return a supplier that caches results with time-based expiration
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} or {@code duration} is {@code null}, or if
+     *         {@code duration} is not positive (milliseconds {@code <= 0}).
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
      */
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final Duration duration)
@@ -1141,7 +1144,7 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown
      * @param permitsPerSecond the desired throughput in permits per second; must be positive
      * @return a stateful Consumer that rate limits execution to {@code permitsPerSecond} invocations per second
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is not positive or is NaN
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is not positive or is NaN.
      * @see RateLimiter#create(double)
      * @see #rateLimiter(RateLimiter)
      */
@@ -1167,7 +1170,7 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown
      * @param rateLimiter the RateLimiter to acquire a permit from before each invocation; must not be null
      * @return a stateful Consumer that acquires a permit from {@code rateLimiter} before each invocation
-     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}
+     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}.
      * @see RateLimiter#acquire()
      * @see #rateLimiter(double)
      */
@@ -2168,7 +2171,7 @@ public final class Fnn {
      * @param count the maximum number of times the predicate should return {@code true}; must not be negative
      * @return a stateful Predicate that returns {@code true} for the first {@code count} evaluations,
      *         then {@code false} for all subsequent evaluations
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     @Beta
     @Stateful
@@ -3077,20 +3080,22 @@ public final class Fnn {
     }
 
     /**
-     * Casts a standard Java Predicate to a Throwables.Predicate.
-     * This method performs an unchecked cast and should be used with caution.
-     * It enables using standard Java predicates in contexts that expect exception-throwing predicates.
+     * Casts an abacus functional {@link Predicate} (which is already a
+     * {@code Throwables.Predicate<T, RuntimeException>}) to a {@code Throwables.Predicate} with a
+     * wider exception type. This method performs an unchecked cast; since the predicate will never
+     * actually throw a checked exception, the cast is safe at runtime.
+     * It enables using non-throwing predicates in contexts that expect exception-throwing predicates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Predicate<String> javaPred = String::isEmpty;
-     * Throwables.Predicate<String, IOException> throwablePred = Fnn.pp(javaPred);
+     * com.landawn.abacus.util.function.Predicate<String> pred = String::isEmpty;
+     * Throwables.Predicate<String, IOException> throwablePred = Fnn.pp(pred);
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
-     * @param predicate the Java Predicate to cast
-     * @return the predicate cast to Throwables.Predicate
+     * @param predicate the abacus {@link Predicate} to cast
+     * @return the {@code predicate} cast to {@code Throwables.Predicate}
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #from(java.util.function.Predicate)
      */
@@ -3158,9 +3163,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a BiPredicate that can throw checked exceptions by wrapping the provided BiPredicate.
-     * This method is used to convert a standard BiPredicate to a Throwables.BiPredicate, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link BiPredicate} (which is already a
+     * {@code Throwables.BiPredicate<T, U, RuntimeException>}) to a {@code Throwables.BiPredicate}
+     * with a wider exception type. This method performs an unchecked cast; since the bi-predicate
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3173,8 +3179,8 @@ public final class Fnn {
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param <E> the type of the checked exception that the returned predicate may throw
-     * @param biPredicate the BiPredicate to wrap
-     * @return a Throwables.BiPredicate that wraps the provided BiPredicate
+     * @param biPredicate the abacus {@link BiPredicate} to cast
+     * @return the {@code biPredicate} cast to {@code Throwables.BiPredicate}
      * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
      * @see #from(java.util.function.BiPredicate)
      */
@@ -3216,9 +3222,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a TriPredicate that can throw checked exceptions by wrapping the provided TriPredicate.
-     * This method is used to convert a standard TriPredicate to a Throwables.TriPredicate, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link TriPredicate} (which is already a
+     * {@code Throwables.TriPredicate<A, B, C, RuntimeException>}) to a {@code Throwables.TriPredicate}
+     * with a wider exception type. This method performs an unchecked cast; since the tri-predicate
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3232,8 +3239,8 @@ public final class Fnn {
      * @param <B> the type of the second argument to the predicate
      * @param <C> the type of the third argument to the predicate
      * @param <E> the type of the checked exception that the returned predicate may throw
-     * @param triPredicate the TriPredicate to wrap
-     * @return a Throwables.TriPredicate that wraps the provided TriPredicate
+     * @param triPredicate the abacus {@link TriPredicate} to cast
+     * @return the {@code triPredicate} cast to {@code Throwables.TriPredicate}
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
     @Beta
@@ -3245,9 +3252,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Consumer that can throw checked exceptions by wrapping the provided Consumer.
-     * This method is used to convert a standard Consumer to a Throwables.Consumer, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link Consumer} (which is already a
+     * {@code Throwables.Consumer<T, RuntimeException>}) to a {@code Throwables.Consumer} with a
+     * wider exception type. This method performs an unchecked cast; since the consumer will never
+     * actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3258,8 +3266,8 @@ public final class Fnn {
      *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of the checked exception that the returned consumer may throw
-     * @param consumer the Consumer to wrap
-     * @return a Throwables.Consumer that wraps the provided Consumer
+     * @param consumer the abacus {@link Consumer} to cast
+     * @return the {@code consumer} cast to {@code Throwables.Consumer}
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      * @see #from(java.util.function.Consumer)
      */
@@ -3330,9 +3338,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a BiConsumer that can throw checked exceptions by wrapping the provided BiConsumer.
-     * This method is used to convert a standard BiConsumer to a Throwables.BiConsumer, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link BiConsumer} (which is already a
+     * {@code Throwables.BiConsumer<T, U, RuntimeException>}) to a {@code Throwables.BiConsumer}
+     * with a wider exception type. This method performs an unchecked cast; since the bi-consumer
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3345,8 +3354,8 @@ public final class Fnn {
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param <E> the type of the checked exception that the returned consumer may throw
-     * @param biConsumer the BiConsumer to wrap
-     * @return a Throwables.BiConsumer that wraps the provided BiConsumer
+     * @param biConsumer the abacus {@link BiConsumer} to cast
+     * @return the {@code biConsumer} cast to {@code Throwables.BiConsumer}
      * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
      * @see #from(java.util.function.BiConsumer)
      */
@@ -3388,9 +3397,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a TriConsumer that can throw checked exceptions by wrapping the provided TriConsumer.
-     * This method is used to convert a standard TriConsumer to a Throwables.TriConsumer, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link TriConsumer} (which is already a
+     * {@code Throwables.TriConsumer<A, B, C, RuntimeException>}) to a {@code Throwables.TriConsumer}
+     * with a wider exception type. This method performs an unchecked cast; since the tri-consumer
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3404,8 +3414,8 @@ public final class Fnn {
      * @param <B> the type of the second argument to the consumer
      * @param <C> the type of the third argument to the consumer
      * @param <E> the type of the checked exception that the returned consumer may throw
-     * @param triConsumer the TriConsumer to wrap
-     * @return a Throwables.TriConsumer that wraps the provided TriConsumer
+     * @param triConsumer the abacus {@link TriConsumer} to cast
+     * @return the {@code triConsumer} cast to {@code Throwables.TriConsumer}
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
      */
     @Beta
@@ -3416,9 +3426,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a Function that can throw checked exceptions by wrapping the provided Function.
-     * This method is used to convert a standard Function to a Throwables.Function, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link Function} (which is already a
+     * {@code Throwables.Function<T, R, RuntimeException>}) to a {@code Throwables.Function} with a
+     * wider exception type. This method performs an unchecked cast; since the function will never
+     * actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3430,8 +3441,8 @@ public final class Fnn {
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the checked exception that the returned function may throw
-     * @param function the Function to wrap
-     * @return a Throwables.Function that wraps the provided Function
+     * @param function the abacus {@link Function} to cast
+     * @return the {@code function} cast to {@code Throwables.Function}
      * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #from(java.util.function.Function)
      */
@@ -3503,9 +3514,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a BiFunction that can throw checked exceptions by wrapping the provided BiFunction.
-     * This method is used to convert a standard BiFunction to a Throwables.BiFunction, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link BiFunction} (which is already a
+     * {@code Throwables.BiFunction<T, U, R, RuntimeException>}) to a {@code Throwables.BiFunction}
+     * with a wider exception type. This method performs an unchecked cast; since the bi-function
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3518,8 +3530,8 @@ public final class Fnn {
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the checked exception that the returned function may throw
-     * @param biFunction the BiFunction to wrap
-     * @return a Throwables.BiFunction that wraps the provided BiFunction
+     * @param biFunction the abacus {@link BiFunction} to cast
+     * @return the {@code biFunction} cast to {@code Throwables.BiFunction}
      * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
      * @see #from(java.util.function.BiFunction)
      */
@@ -3561,9 +3573,10 @@ public final class Fnn {
     }
 
     /**
-     * Returns a TriFunction that can throw checked exceptions by wrapping the provided TriFunction.
-     * This method is used to convert a standard TriFunction to a Throwables.TriFunction, allowing
-     * it to be used in contexts where checked exceptions are expected.
+     * Casts an abacus functional {@link TriFunction} (which is already a
+     * {@code Throwables.TriFunction<A, B, C, R, RuntimeException>}) to a {@code Throwables.TriFunction}
+     * with a wider exception type. This method performs an unchecked cast; since the tri-function
+     * will never actually throw a checked exception, the cast is safe at runtime.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3577,8 +3590,8 @@ public final class Fnn {
      * @param <C> the type of the third argument to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of the checked exception that the returned function may throw
-     * @param triFunction the TriFunction to wrap
-     * @return a Throwables.TriFunction that wraps the provided TriFunction
+     * @param triFunction the abacus {@link TriFunction} to cast
+     * @return the {@code triFunction} cast to {@code Throwables.TriFunction}
      * @throws IllegalArgumentException if {@code triFunction} is {@code null}.
      */
     @Beta
@@ -3605,8 +3618,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param predicate the predicate to be executed within the synchronized block
      * @return a Throwables.Predicate that synchronizes on the mutex before executing the predicate
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code predicate} is {@code null}.
      */
     @Beta
     public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<T, E> predicate)
@@ -3641,8 +3653,7 @@ public final class Fnn {
      * @param a the first argument to be partially applied to the BiPredicate
      * @param biPredicate the BiPredicate to be partially applied and executed within the synchronized block
      * @return a Throwables.Predicate that synchronizes on the mutex before executing the partially applied BiPredicate
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      */
     @Beta
     public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final Throwables.BiPredicate<A, T, E> biPredicate)
@@ -3675,8 +3686,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param biPredicate the BiPredicate to be executed within the synchronized block
      * @return a Throwables.BiPredicate that synchronizes on the mutex before executing the BiPredicate
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex, final Throwables.BiPredicate<T, U, E> biPredicate)
@@ -3709,8 +3719,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param consumer the consumer to be executed within the synchronized block
      * @return a Throwables.Consumer that synchronizes on the mutex before executing the consumer
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code consumer} is {@code null}.
      */
     @Beta
     public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<T, E> consumer)
@@ -3746,8 +3755,7 @@ public final class Fnn {
      * @param a the first argument to be partially applied to the BiConsumer
      * @param biConsumer the BiConsumer to be partially applied and executed within the synchronized block
      * @return a Throwables.Consumer that synchronizes on the mutex before executing the partially applied BiConsumer
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      */
     @Beta
     public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
@@ -3781,8 +3789,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param biConsumer the BiConsumer to be executed within the synchronized block
      * @return a Throwables.BiConsumer that synchronizes on the mutex before executing the BiConsumer
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex, final Throwables.BiConsumer<T, U, E> biConsumer)
@@ -3815,8 +3822,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param function the function to be executed within the synchronized block
      * @return a Throwables.Function that synchronizes on the mutex before executing the function
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code function} is {@code null}.
      */
     @Beta
     public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function)
@@ -3852,8 +3858,7 @@ public final class Fnn {
      * @param a the first argument to be partially applied to the BiFunction
      * @param biFunction the BiFunction to be partially applied and executed within the synchronized block
      * @return a Throwables.Function that synchronizes on the mutex before executing the partially applied BiFunction
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biFunction} is {@code null}.
      */
     @Beta
     public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
@@ -3887,8 +3892,7 @@ public final class Fnn {
      * @param mutex the object to synchronize on
      * @param biFunction the BiFunction to be executed within the synchronized block
      * @return a Throwables.BiFunction that synchronizes on the mutex before executing the BiFunction
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biFunction} is {@code null}.
      */
     @Beta
     public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex, final Throwables.BiFunction<T, U, R, E> biFunction)

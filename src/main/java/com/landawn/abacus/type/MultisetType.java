@@ -25,11 +25,12 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Multiset objects with a generic element type.
- * A Multiset is a collection that allows duplicate elements and keeps track of their count.
- * This class handles serialization and deserialization of Multiset instances.
+ * Type handler for {@link Multiset} objects with a generic element type.
+ * A {@code Multiset} is a collection that allows duplicate elements and tracks each element's count.
+ * This class handles serialization and deserialization of {@code Multiset} instances.
  *
  * @param <E> the element type
+ * @see Multiset
  */
 @SuppressWarnings("java:S2160")
 public class MultisetType<E> extends AbstractType<Multiset<E>> {

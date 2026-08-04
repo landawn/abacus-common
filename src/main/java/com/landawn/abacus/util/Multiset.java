@@ -316,12 +316,15 @@ public final class Multiset<E> implements Collection<E> {
      * Multiset<String> multiset = new Multiset<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
      * }</pre>
      *
-     * @param mapSupplier the supplier that provides the empty map to be used as the backing map.
-     * @throws IllegalArgumentException if the supplied map is not empty
+     * @param mapSupplier the supplier that provides the empty map to be used as the backing map; must not be {@code null}
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the map returned by the
+     *         supplier is {@code null} or not empty.
      */
     @SuppressWarnings("unchecked")
-    public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) {
-        final Map<? extends E, ?> suppliedMap = N.requireNonNull(mapSupplier.get());
+    public Multiset(final Supplier<? extends Map<? extends E, ?>> mapSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+
+        final Map<? extends E, ?> suppliedMap = N.checkArgNotNull(mapSupplier.get(), "mapSupplier.get()");
 
         if (!suppliedMap.isEmpty()) {
             throw new IllegalArgumentException("The supplied map must be empty");
@@ -809,7 +812,8 @@ public final class Multiset<E> implements Collection<E> {
      * @param element the element to add occurrences of.
      * @param occurrencesToAdd the number of occurrences to add; must be non-negative.
      * @return the count of the element before the operation.
-     * @throws IllegalArgumentException if occurrencesToAdd is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
+     * @throws IllegalArgumentException if occurrencesToAdd is negative, or if the addition would exceed
+     *         {@link Integer#MAX_VALUE} occurrences.
      * @see #addAndGetCount(Object, int)
      * @see #setCount(Object, int)
      */
@@ -850,7 +854,8 @@ public final class Multiset<E> implements Collection<E> {
      * @param element the element to add occurrences of.
      * @param occurrences the number of occurrences to add; must be non-negative.
      * @return the count of the element after the operation.
-     * @throws IllegalArgumentException if occurrences is negative, or if the addition would exceed {@link Integer#MAX_VALUE} occurrences.
+     * @throws IllegalArgumentException if occurrences is negative, or if the addition would exceed
+     *         {@link Integer#MAX_VALUE} occurrences.
      * @see #add(Object, int)
      */
     @Beta
@@ -1174,7 +1179,11 @@ public final class Multiset<E> implements Collection<E> {
 
         boolean result = false;
 
-        for (final Object e : c.toArray()) {
+        // Multiset.toArray() expands every occurrence (O(total count)), which can OOM for high
+        // counts. Removal only needs distinct keys once, so use elementSet() for Multisets.
+        final Object[] keys = (c instanceof Multiset) ? ((Multiset<?>) c).elementSet().toArray() : c.toArray();
+
+        for (final Object e : keys) {
             if (!result) {
                 result = backingMap.remove(e) != null;
             } else {
@@ -1332,7 +1341,7 @@ public final class Multiset<E> implements Collection<E> {
      * @return the existing count if the element is already present; otherwise the count returned by
      *         {@code mappingFunction} when it is positive (the element is then added with that count), or
      *         {@code 0} when the function returns a non-positive value (in which case the element is not added)
-     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}.
      */
     public int computeIfAbsent(final E e, final ToIntFunction<? super E> mappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(mappingFunction, cs.mappingFunction);
@@ -1368,7 +1377,7 @@ public final class Multiset<E> implements Collection<E> {
      *                          non-positive value removes the element from the multiset.
      * @return the new count of the element after applying the function, or 0 if the element was
      *         not present or was removed by the function
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      */
     public int computeIfPresent(final E e, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
@@ -1413,7 +1422,7 @@ public final class Multiset<E> implements Collection<E> {
      *                          count (0 if absent); returning {@code null} or a non-positive value
      *                          removes the element from the multiset.
      * @return the new count of the element, or 0 if the element was removed
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      */
     public int compute(final E key, final ObjIntFunction<? super E, Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
@@ -1456,10 +1465,11 @@ public final class Multiset<E> implements Collection<E> {
      * @param remappingFunction the function to compute the new count from the old count and {@code value};
      *                          returning {@code null} or a non-positive value removes the element.
      * @return the new count of the element, or 0 if the element was removed
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code value} is negative or {@code remappingFunction} is {@code null}.
      */
     public int merge(final E key, final int value, final IntBiFunction<Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
+        checkOccurrences(value);
 
         final int oldValue = getCount(key);
         // Box to allow null return from the remapping function — treated as "remove" per
@@ -1831,10 +1841,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @return an array containing all the elements in this multiset
+     * @throws IllegalStateException if the exact number of occurrences exceeds {@link Integer#MAX_VALUE}.
      */
     @Override
     public Object[] toArray() {
-        return toArray(new Object[size()]);
+        return toArray(N.EMPTY_OBJECT_ARRAY);
     }
 
     /**
@@ -1855,13 +1866,19 @@ public final class Multiset<E> implements Collection<E> {
      * @param a the array into which the elements of this multiset are to be stored, if it is big enough;
      *              otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing all the elements in this multiset
-     * @throws IllegalArgumentException if the provided array is {@code null}
+     * @throws IllegalArgumentException if the provided array is {@code null}.
+     * @throws IllegalStateException if the exact number of occurrences exceeds {@link Integer#MAX_VALUE}.
      */
     @Override
     public <T> T[] toArray(final T[] a) throws IllegalArgumentException {
         N.checkArgNotNull(a, "The specified array cannot be null");
 
-        final int size = size();
+        final long total = sumOfOccurrences();
+        if (total > Integer.MAX_VALUE) {
+            throw new IllegalStateException("Multiset too large to materialize as array: " + total);
+        }
+
+        final int size = (int) total;
         final T[] ret = a.length < size ? N.newArray(a.getClass().getComponentType(), size) : a;
 
         int idx = 0;
@@ -2113,7 +2130,7 @@ public final class Multiset<E> implements Collection<E> {
      * multiset.forEach(System.out::println);   // prints a, a, b (order may vary)
      * }</pre>
      *
-     * @param action The action to be performed for each element.
+     * @param action the action to be performed for each element.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
@@ -2139,7 +2156,7 @@ public final class Multiset<E> implements Collection<E> {
      * // Prints: a occurs 2 times, b occurs 3 times (order may vary)
      * }</pre>
      *
-     * @param action The action to be performed for each distinct element in the multiset and its count. This can be any instance of ObjIntConsumer.
+     * @param action the action to be performed for each distinct element in the multiset and its count. This can be any instance of ObjIntConsumer.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ObjIntConsumer<? super E> action) throws IllegalArgumentException {
@@ -2308,7 +2325,8 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Checks if this Multiset is equal to the specified object.
-     * The method returns {@code true} if the specified object is also a Multiset and has the same keys and occurrences pair.
+     * The method returns {@code true} if the specified object is also a Multiset with the same
+     * elements and the same occurrence count for each element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2317,7 +2335,7 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(ms1.equals(ms2));   // prints true
      * }</pre>
      *
-     * @param obj The object to be compared with this Multiset for equality.
+     * @param obj the object to be compared with this Multiset for equality.
      * @return {@code true} if the specified object is equal to this Multiset, {@code false} otherwise.
      */
     @Override
@@ -2542,7 +2560,7 @@ public final class Multiset<E> implements Collection<E> {
         }
 
         /**
-         * Return this entry's hash code, following the behavior specified in {@link
+         * Returns this entry's hash code, following the behavior specified in {@link
          * Multiset.Entry#hashCode}.
          *
          * @return the hash code for this entry

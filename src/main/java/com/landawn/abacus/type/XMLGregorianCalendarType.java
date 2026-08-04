@@ -128,7 +128,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      *
      * @param str the string to convert to XMLGregorianCalendar
      * @return an XMLGregorianCalendar instance, or {@code null} if the string is {@code null} or empty
-     * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time
+     * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time.
      * @see #valueOf(Object)
      * @see #stringOf(XMLGregorianCalendar)
      */

@@ -95,7 +95,7 @@ public final class ObjectPool<K, V> extends AbstractMap<K, V> {
      * }</pre>
      *
      * @param capacity the initial capacity hint; used to size the underlying hash table
-     * @throws IllegalArgumentException if {@code capacity} is negative
+     * @throws IllegalArgumentException if {@code capacity} is negative.
      */
     public ObjectPool(final int capacity) {
         this.map = new ConcurrentHashMap<>(capacity);

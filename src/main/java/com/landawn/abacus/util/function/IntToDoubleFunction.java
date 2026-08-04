@@ -20,11 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * {@code double}-valued result. This is the {@code int}-to-{@code double} primitive
  * specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link Throwables.IntToDoubleFunction} with
- * {@link RuntimeException} and {@link java.util.function.IntToDoubleFunction},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsDouble(int)}.
  *
@@ -47,26 +42,14 @@ public interface IntToDoubleFunction extends Throwables.IntToDoubleFunction<Runt
     /**
      * Applies this function to the given argument.
      *
-     * <p>The function performs a transformation from an {@code int} value to a
-     * {@code double} value. The default implementation provided by {@link #DEFAULT}
-     * performs a widening primitive conversion which is lossless, but other
-     * implementations may apply arbitrary computations.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Converting integer counts or indices to double values for mathematical calculations</li>
-     *   <li>Preparing integer data for floating-point arithmetic operations</li>
-     *   <li>Converting integer measurements to double for higher precision calculations</li>
-     * </ul>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToDoubleFunction half = value -> value / 2.0d;
      * double result = half.applyAsDouble(9);   // 4.5
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to double.
-     * @return the function result as a double value.
+     * @param value the {@code int} function argument
+     * @return the {@code double} function result
      */
     @Override
     double applyAsDouble(int value);

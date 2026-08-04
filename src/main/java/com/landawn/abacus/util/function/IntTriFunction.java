@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a function that accepts three {@code int}-valued arguments and produces
  * a result. This is the three-arity specialization of {@link java.util.function.Function}.
  *
- * <p>This interface extends {@link Throwables.IntTriFunction} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #apply(int, int, int)}.
  *
@@ -82,7 +78,7 @@ public interface IntTriFunction<R> extends Throwables.IntTriFunction<R, RuntimeE
      *
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> IntTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

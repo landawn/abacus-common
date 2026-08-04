@@ -91,10 +91,8 @@ public class URLType extends AbstractType<URL> {
     }
 
     /**
-     * Converts a URL instance to its external string representation.
+     * Converts a {@link URL} instance to its external string form (suitable for reconstructing a URL).
      * <p>
-     * This method returns the external form of the URL by calling its {@code toExternalForm()} method,
-     * which produces a string representation of the URL suitable for use in creating new URL instances.
      * If the input URL is {@code null}, this method returns {@code null}.
      * </p>
      *
@@ -140,7 +138,7 @@ public class URLType extends AbstractType<URL> {
      *
      * @param str the string to convert to a URL
      * @return a URL instance created from the string, or {@code null} if the string is {@code null} or empty
-     * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)})
+     * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)}).
      * @throws com.landawn.abacus.exception.UncheckedIOException if the URI cannot be converted to a URL
      *         (wraps the thrown {@link MalformedURLException})
      * @see #valueOf(Object)

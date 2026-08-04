@@ -105,9 +105,9 @@ public interface Pool extends Serializable, AutoCloseable {
      * determined by the pool's balance factor (the proportion of the current size, with at
      * least one object removed when the pool is non-empty).
      *
-     * <p>This method is invoked automatically by the pool when {@code autoBalance} is enabled
-     * and a put/add finds the pool at capacity. It can also be called explicitly to proactively
-     * shed objects.
+     * <p>An equivalent removal happens automatically when {@code autoBalance} is enabled
+     * and a put/add finds the pool at capacity. This method can also be called explicitly to
+     * proactively shed objects.
      *
      * <p>Note that this method does <em>not</em> target only expired objects — periodic
      * removal of expired objects is performed by the pool's scheduled eviction task and is not

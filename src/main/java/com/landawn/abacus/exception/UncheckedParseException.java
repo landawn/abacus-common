@@ -86,7 +86,7 @@ public class UncheckedParseException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link java.text.ParseException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedParseException(final java.text.ParseException cause) {
         super(cause);
@@ -114,7 +114,7 @@ public class UncheckedParseException extends UncheckedException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the {@link java.text.ParseException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedParseException(final String message, final java.text.ParseException cause) {
         super(message, cause);

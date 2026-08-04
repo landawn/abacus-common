@@ -17,77 +17,33 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * Internal utility class providing secure random number generators for different primitive types.
- * This class is used by functional interfaces and suppliers to generate random values in a
- * cryptographically secure manner.
+ * Package-private helpers for random primitive values used by supplier defaults in this package.
  *
- * <p>Each primitive type has its own dedicated {@link SecureRandom} instance. {@code SecureRandom}
- * is thread-safe; using separate instances avoids sharing a single generator across all primitive
- * supplier categories, although calls through the same supplier may still contend.</p>
- *
- * <p>The random generators in this class are used by:</p>
- * <ul>
- *   <li>Default supplier implementations for primitive types</li>
- *   <li>Random value generators in functional interfaces</li>
- * </ul>
- *
- * <p><strong>Note:</strong> This class uses {@link SecureRandom} rather than {@link Random}
- * to ensure cryptographically strong random values, which is important for:</p>
- * <ul>
- *   <li>Security-sensitive applications</li>
- *   <li>Avoiding predictable patterns in generated values</li>
- *   <li>Better distribution of random values</li>
- * </ul>
+ * <p>Each primitive category has its own dedicated {@link SecureRandom} instance.
+ * {@code SecureRandom} is thread-safe; separate instances avoid sharing one generator across
+ * all categories, though concurrent callers of the same instance may still contend.
  */
 final class Util {
     private Util() {
         // Utility class - prevent instantiation
     }
 
-    /**
-     * Secure random generator for boolean values.
-     * Used by BooleanSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code boolean} supplier defaults. */
     static final Random RAND_BOOLEAN = new SecureRandom();
-    /**
-     * Secure random generator for char values.
-     * Used by CharSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code char} supplier defaults. */
     static final Random RAND_CHAR = new SecureRandom();
-    /**
-     * Secure random generator for byte values.
-     * Used by ByteSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code byte} supplier defaults. */
     static final Random RAND_BYTE = new SecureRandom();
-    /**
-     * Secure random generator for short values.
-     * Used by ShortSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code short} supplier defaults. */
     static final Random RAND_SHORT = new SecureRandom();
-    /**
-     * Secure random generator for int values.
-     * Used by IntSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code int} supplier defaults. */
     static final Random RAND_INT = new SecureRandom();
-    /**
-     * Secure random generator for long values.
-     * Used by LongSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code long} supplier defaults. */
     static final Random RAND_LONG = new SecureRandom();
-    /**
-     * Secure random generator for float values.
-     * Used by FloatSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code float} supplier defaults. */
     static final Random RAND_FLOAT = new SecureRandom();
-    /**
-     * Secure random generator for double values.
-     * Used by DoubleSupplier implementations.
-     */
+    /** Shared {@link SecureRandom} for {@code double} supplier defaults. */
     static final Random RAND_DOUBLE = new SecureRandom();
-    /**
-     * Modulo value for generating random char values.
-     * Equal to Character.MAX_VALUE + 1 (65536).
-     * Used to ensure random char generation stays within valid char range.
-     */
+    /** Bound for random {@code char} generation: {@code Character.MAX_VALUE + 1}. */
     static final int CHAR_MOD = Character.MAX_VALUE + 1;
 }

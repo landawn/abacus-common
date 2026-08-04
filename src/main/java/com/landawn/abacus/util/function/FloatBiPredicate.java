@@ -23,9 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(float, float)}.</p>
  *
- * <p>This interface extends {@link Throwables.FloatBiPredicate} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
  * <p>The interface provides several predefined constants for common comparison operations:</p>
  * <ul>
  *   <li>{@link #ALWAYS_TRUE} - Always returns {@code true}</li>
@@ -164,7 +161,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatBiPredicate and(final FloatBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -192,7 +189,7 @@ public interface FloatBiPredicate extends Throwables.FloatBiPredicate<RuntimeExc
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatBiPredicate or(final FloatBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

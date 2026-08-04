@@ -20,11 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * {@code int}-valued result. This is the {@code long}-to-{@code int} primitive
  * specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link Throwables.LongToIntFunction} with
- * {@link RuntimeException} and {@link java.util.function.LongToIntFunction},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(long)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -56,26 +51,8 @@ public interface LongToIntFunction extends Throwables.LongToIntFunction<RuntimeE
     /**
      * Applies this function to the given argument.
      *
-     * <p>Converts a long value to an int value according to the function's implementation.
-     * The specific conversion logic depends on the implementation, but common use cases include:
-     * <ul>
-     *   <li>Narrowing conversion with overflow handling</li>
-     *   <li>Extracting specific bits or bit ranges</li>
-     *   <li>Hash code generation from long values</li>
-     *   <li>Index calculations where the result must be an int</li>
-     *   <li>Custom business logic requiring int output</li>
-     * </ul>
-     *
-     * <p>Implementations that use a narrowing primitive conversion, such as {@link #DEFAULT},
-     * have the following properties:
-     * <ul>
-     *   <li>Values outside the int range will be truncated</li>
-     *   <li>The sign of the result may differ from the original</li>
-     *   <li>Information about the magnitude may be lost</li>
-     * </ul>
-     *
      * @param value the {@code long} function argument
-     * @return the {@code int} result of applying this function to the argument
+     * @return the {@code int} function result
      */
     @Override
     int applyAsInt(long value);

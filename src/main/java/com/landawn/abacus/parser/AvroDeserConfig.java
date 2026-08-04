@@ -21,8 +21,13 @@ import com.landawn.abacus.util.N;
 
 /**
  * Configuration class for Apache Avro deserialization operations.
- * This class extends {@link DeserializationConfig} and adds Avro-specific configuration options,
- * particularly the Avro schema required for deserialization.
+ * This class extends {@link DeserializationConfig} and adds the Avro {@link Schema} required for
+ * deserializing types that are not {@code SpecificRecord} instances.
+ *
+ * <p><b>Settings applied by {@link AvroParser}:</b> {@link #getSchema()}/{@link #setSchema(Schema)}
+ * and the inherited element type ({@link #setElementType(Class)} and overloads) used when deserializing
+ * collections. Other inherited deserialization options (for example ignore-unmatched-property and map
+ * key/value types) are not consulted by the current Avro implementation.</p>
  *
  * <p><b>Design note:</b> The {@link #getSchema()}/{@link #setSchema(Schema)} pair is intentionally
  * duplicated between this class and {@link AvroSerConfig}. A shared {@code AvroConfig} base is not
@@ -36,8 +41,7 @@ import com.landawn.abacus.util.N;
  * Schema schema = new Schema.Parser().parse(schemaString);
  * AvroDeserConfig config = AvroDeserConfig.create()
  *     .setSchema(schema)
- *     .setElementType(Person.class)
- *     .setIgnoreUnmatchedProperty(true);
+ *     .setElementType(Person.class);
  *
  * List<Person> people = parser.deserialize(inputStream, config, List.class);
  * }</pre>
@@ -123,7 +127,8 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
     /**
      * Compares this configuration with another object for equality.
      * Two configurations are considered equal if they have the same ignored properties,
-     * unmatched property handling, element/map key/map value types, value-type mappings, and schema.
+     * unmatched property handling, element/map key/map value types, value-type mappings,
+     * bean-derived value types, and schema.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -168,7 +173,7 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
      * <pre>{@code
      * AvroDeserConfig config = AvroDeserConfig.create()
      *     .setSchema(schema)
-     *     .setIgnoreUnmatchedProperty(true);
+     *     .setElementType(Person.class);
      * }</pre>
      *
      * @return a new {@code AvroDeserConfig} instance

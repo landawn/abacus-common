@@ -135,7 +135,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     }
 
     /**
-     * Parses a string representation of an int list and returns the corresponding IntList.
+     * Parses a string representation and creates an IntList.
      * The string should contain comma-separated integer values enclosed in square brackets.
      * For example, "[1, 2, 3]" will be parsed to an IntList containing {1, 2, 3}.
      *
@@ -157,7 +157,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed IntList, or {@code null} if the input string is {@code null} or blank
+     * @return the parsed IntList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as an integer
      * @see #valueOf(Object)
      * @see #stringOf(IntList)
@@ -173,7 +173,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     }
 
     /**
-     * Appends the string representation of an IntList to the given Appendable.
+     * Appends the string representation of an IntList to an Appendable.
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is {@code null}, appends "null".
      *
@@ -219,7 +219,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
     }
 
     /**
-     * Writes the character representation of an IntList to the given CharacterWriter.
+     * Writes the character representation of an IntList to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
      * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.

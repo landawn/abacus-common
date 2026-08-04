@@ -2266,4 +2266,35 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             p.close();
         }
     }
+
+    @Test
+    public void testPut_sameInstanceRePoolFailureRestoresMapping() {
+        // Pre-fix: same-instance re-put removed the mapping then failed (e.g. sizeOf < 0) and left
+        // the instance neither pooled nor destroyed — a leak / orphan.
+        final AtomicInteger measureCalls = new AtomicInteger();
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
+            final int call = measureCalls.incrementAndGet();
+            if (call <= 2) {
+                return 100; // first put + same-instance memory subtract
+            }
+            return -1; // re-measure fails → put returns false
+        };
+
+        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 10_000, measure);
+        try {
+            final TestPoolable value = new TestPoolable("v1");
+            assertTrue(memPool.put("k", value));
+            assertEquals(1, memPool.size());
+
+            final TestPoolable same = memPool.get("k");
+            assertNotNull(same);
+            assertFalse(memPool.put("k", same, true), "re-put must fail when sizeOf returns negative");
+            assertEquals(1, memPool.size(), "mapping must be restored after same-instance re-put failure");
+            assertEquals(100L, memPool.totalDataSize.get(), "restoring the mapping must also restore memory accounting");
+            assertNotNull(memPool.get("k"));
+            assertFalse(same.isDestroyed(), "auto-destroy must not destroy the restored pooled instance");
+        } finally {
+            memPool.close();
+        }
+    }
 }

@@ -258,7 +258,7 @@ public final class JsonMappers {
      * @param first the first serialization feature to apply (required to ensure at least one feature)
      * @param features additional serialization features to apply; may be empty but not {@code null}
      * @return a JSON string representation of the object
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}.
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see SerializationFeature
      * @see #toJson(Object, SerializationConfig)
@@ -634,7 +634,7 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see #fromJson(byte[], Class)
@@ -724,7 +724,7 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON string is "null"
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}.
      * @throws RuntimeException if deserialization fails
      * @see DeserializationFeature
      * @see #fromJson(String, Class, DeserializationConfig)
@@ -1225,7 +1225,7 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see TypeReference
@@ -1312,7 +1312,7 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}
+     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}.
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationFeature
@@ -2086,7 +2086,7 @@ public final class JsonMappers {
          * @param len the number of bytes to read
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
@@ -2295,7 +2295,7 @@ public final class JsonMappers {
          * @param len the number of bytes to read
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference

@@ -1044,7 +1044,11 @@ abstract class AbstractIntStream extends IntStream {
      * @return a new IntStream backed by the transformed array
      */
     private IntStream lazyLoad(final UnaryOperator<int[]> op, final boolean sorted) {
-        return IntStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(IntIterator.defer(() -> {
+            final int[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? IntIterator.empty() : IntIterator.of(a);
+        }), sorted);
     }
 
     @Override

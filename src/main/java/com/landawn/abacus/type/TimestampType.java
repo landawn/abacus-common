@@ -31,7 +31,7 @@ import com.landawn.abacus.util.N;
 public class TimestampType extends AbstractDateType<Timestamp> {
 
     /**
-     * The type name constant for Timestamp type.
+     * The type name identifier for Timestamp type, equal to the simple class name {@code "Timestamp"}.
      */
     public static final String TIMESTAMP = Timestamp.class.getSimpleName();
 

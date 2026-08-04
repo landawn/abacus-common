@@ -119,8 +119,8 @@ public enum Color {
      *
      * @param intValue the integer value to look up; valid values are 0 through 8 inclusive
      * @return the {@code Color} enum constant associated with the specified integer value
-     * @throws IllegalArgumentException if no {@code Color} is mapped to the specified value
-     *         (i.e. {@code intValue} is outside the range 0 through 8)
+     * @throws IllegalArgumentException if no {@code Color} is mapped to the specified value (i.e. {@code intValue} is
+     *         outside the range 0 through 8).
      */
     public static Color of(final int intValue) {
         switch (intValue) {

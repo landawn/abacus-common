@@ -60,7 +60,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     /**
      * Constructs a new MutableChar with the default value of zero (the null character
-     * <code>&#92;u0000</code>). This constructor has package-private visibility.
+     * <code>&#92;u0000</code>).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -73,7 +73,6 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
 
     /**
      * Constructs a new MutableChar with the specified initial value.
-     * This constructor has package-private visibility.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -356,7 +355,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Increments the value by one and then returns the new value.
+     * Increments the value by one and then returns it.
      * This mimics the pre-increment operator ({@code ++value}) for primitives.
      *
      * <p><b>Usage Examples:</b></p>
@@ -373,7 +372,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Decrements the value by one and then returns the new value.
+     * Decrements the value by one and then returns it.
      * This mimics the pre-decrement operator ({@code --value}) for primitives.
      *
      * <p><b>Usage Examples:</b></p>
@@ -390,7 +389,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     }
 
     /**
-     * Returns the current value and then adds the specified delta.
+     * Returns the current value and then adds the specified delta to it.
      *
      * <p>Note: This operation wraps around if adding causes overflow.</p>
      *
@@ -438,7 +437,7 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this MutableChar to another MutableChar.
+     * Compares this MutableChar to another MutableChar in ascending order.
      * The comparison is based on the underlying char values in natural ascending order.
      *
      * <p>Returns a negative integer if this value is less than the other,

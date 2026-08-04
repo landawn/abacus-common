@@ -457,7 +457,8 @@ public final class URLEncodedUtil {
      *
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @see #encode(Object, Charset)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, Charset)
@@ -493,7 +494,8 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @see #encode(Object)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, Charset)
@@ -528,7 +530,8 @@ public final class URLEncodedUtil {
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @see #encode(Object, Charset)
      */
     public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
@@ -731,7 +734,8 @@ public final class URLEncodedUtil {
      * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended.
      * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, Appendable)
      */
@@ -764,7 +768,8 @@ public final class URLEncodedUtil {
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
      * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, NamingPolicy, Appendable)
      */
@@ -805,7 +810,8 @@ public final class URLEncodedUtil {
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
      * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
+     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
+     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
      * @throws UncheckedIOException if an I/O error occurs while appending to the output.
      * @see #encode(Object, Charset, Appendable)
      */
@@ -1279,7 +1285,8 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a
+     *         supported bean class.
      * @see #decode(String, Charset, Class)
      */
     public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
@@ -1316,7 +1323,8 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a
+     *         supported bean class.
      * @see #decode(String, Class)
      */
     @SuppressWarnings("rawtypes")

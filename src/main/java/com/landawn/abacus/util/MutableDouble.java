@@ -375,7 +375,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Returns the current value and then adds the given delta to it.
+     * Returns the current value and then adds the specified delta to it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -393,7 +393,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     }
 
     /**
-     * Adds the given delta to the current value and then returns it.
+     * Adds the specified delta to the current value and then returns it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -502,7 +502,7 @@ public final class MutableDouble extends Number implements Comparable<MutableDou
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this MutableDouble to another MutableDouble numerically.
+     * Compares this MutableDouble to another MutableDouble in ascending order.
      * The comparison follows the same rules as {@link Double#compare(double, double)}:
      * <ul>
      * <li>Negative zero is considered less than positive zero</li>

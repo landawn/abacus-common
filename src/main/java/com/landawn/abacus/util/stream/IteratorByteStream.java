@@ -171,7 +171,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the non-interfering, stateless predicate to apply to each element
      * @return a new {@code ByteStream} containing only matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream filter(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -220,7 +220,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the non-interfering, stateless predicate applied to each element
      * @return a new {@code ByteStream} of the initial matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream takeWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -270,7 +270,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the non-interfering, stateless predicate applied during the drop phase
      * @return a new {@code ByteStream} with the initial matching prefix removed
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream dropWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -327,7 +327,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function to apply to each element
      * @return a new {@code ByteStream} containing the mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream map(final ByteUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
@@ -356,7 +356,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function to apply to each element
      * @return a new {@code IntStream} containing the mapped int values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -386,7 +386,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function to apply to each element
      * @return a new {@code Stream<T>} containing the mapped object values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -416,7 +416,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning a {@code ByteStream} for each element
      * @return a new {@code ByteStream} consisting of the concatenated mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -484,7 +484,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning a collection for each element
      * @return a new {@code ByteStream} consisting of the concatenated collection elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -526,7 +526,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning a {@code byte[]} for each element
      * @return a new {@code ByteStream} consisting of the concatenated array elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -578,7 +578,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning an {@code IntStream} for each element
      * @return a new {@code IntStream} consisting of the concatenated mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -648,7 +648,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning a {@code Stream} for each element
      * @return a new {@code Stream<T>} consisting of the concatenated mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -718,7 +718,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapper the non-interfering, stateless function returning a collection for each element
      * @return a new {@code Stream<T>} consisting of the concatenated collection elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -818,7 +818,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param maxSize the maximum number of elements the returned stream may contain; must be &gt;= 0
      * @return a new {@code ByteStream} truncated to at most {@code maxSize} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code maxSize} is negative
+     * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
     @Override
     public ByteStream limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
@@ -864,7 +864,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param n the number of leading elements to skip; must be &gt;= 0
      * @return a new {@code ByteStream} with the first {@code n} elements omitted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     @Override
     public ByteStream skip(final long n) throws IllegalStateException, IllegalArgumentException {
@@ -946,7 +946,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param action the non-interfering action to perform on each element as it is consumed
      * @return a new {@code ByteStream} with the side-effect action attached
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public ByteStream onEach(final ByteConsumer action) throws IllegalArgumentException, IllegalStateException {
@@ -978,7 +978,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param action the non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
@@ -1068,7 +1068,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param supplier a function that returns a new, empty collection into which results are inserted
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1109,7 +1109,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param supplier a function that returns a new, empty {@code Multiset} to populate
      * @return the {@code Multiset<Byte>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public Multiset<Byte> toMultiset(final Supplier<? extends Multiset<Byte>> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1148,7 +1148,8 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
+     *         {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
@@ -1191,9 +1192,9 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key
+     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key, or if {@code keyMapper} or
+     *         {@code mapFactory} is {@code null}.
      * @throws E if {@code keyMapper} throws
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ByteFunction<? extends K, E> keyMapper,
@@ -1246,7 +1247,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1275,7 +1276,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalByte} with the reduction result, or empty if stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -1310,7 +1311,8 @@ class IteratorByteStream extends AbstractByteStream {
      * @param combiner a function that combines two result containers (used in parallel)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
+     *         {@code null}.
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
@@ -1419,7 +1421,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param k the rank of the desired element (1 = largest); must be positive
      * @return an {@code OptionalByte} containing the k-th largest element, or empty if not enough elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code k} is less than 1
+     * @throws IllegalArgumentException if {@code k} is less than 1.
      */
     @Override
     public OptionalByte kthLargest(final int k) throws IllegalStateException, IllegalArgumentException {
@@ -1575,7 +1577,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @return {@code true} if at least one element matches, {@code false} otherwise (including empty stream)
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1606,7 +1608,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @return {@code true} if all elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1637,7 +1639,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @return {@code true} if no elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1668,7 +1670,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @return an {@code OptionalByte} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1701,7 +1703,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @return an {@code OptionalByte} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1790,7 +1792,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param supplier a supplier of a substitute {@code ByteStream} to use when this stream is empty
      * @return a stream of this stream's elements if non-empty, or of the elements of the stream produced by the supplier
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) throws IllegalArgumentException, IllegalStateException {
@@ -1865,7 +1867,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @param action the action to run if this stream has no elements
      * @return a stream equivalent to this stream, with the side-effect action attached if empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public ByteStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {

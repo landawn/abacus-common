@@ -285,7 +285,7 @@ public interface Hasher {
      * @param off the starting offset in the array (zero-based, inclusive)
      * @param len the number of characters to process from the array
      * @return this hasher instance for method chaining
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative, or if {@code off + len > chars.length}
      */
     Hasher put(char[] chars, int off, int len);

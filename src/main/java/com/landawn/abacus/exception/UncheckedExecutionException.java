@@ -95,7 +95,7 @@ public class UncheckedExecutionException extends UncheckedException {
      * }</pre>
      *
      * @param cause the {@link ExecutionException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedExecutionException(final ExecutionException cause) {
         super(cause);
@@ -120,7 +120,7 @@ public class UncheckedExecutionException extends UncheckedException {
      * @param message the detail message. The detail message is saved for later retrieval
      *                by the {@link #getMessage()} method.
      * @param cause the {@link ExecutionException} to wrap. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code cause} is {@code null}
+     * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
     public UncheckedExecutionException(final String message, final ExecutionException cause) {
         super(message, cause);

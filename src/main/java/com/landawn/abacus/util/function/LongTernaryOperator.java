@@ -26,9 +26,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(long, long, long)}.
  *
- * <p>The interface extends {@code Throwables.LongTernaryOperator} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * <p><b>Usage Examples:</b></p>
@@ -50,17 +47,6 @@ import com.landawn.abacus.util.Throwables;
 public interface LongTernaryOperator extends Throwables.LongTernaryOperator<RuntimeException> { //NOSONAR
     /**
      * Applies this operator to the given operands.
-     *
-     * <p>This method takes three long values as input and produces a long result.
-     * The implementation defines how the three operands are combined to produce the result.
-     *
-     * <p>Common implementations might include:
-     * <ul>
-     *   <li>Mathematical operations (sum, product, average)</li>
-     *   <li>Conditional operations (min, max, median)</li>
-     *   <li>Bitwise operations</li>
-     *   <li>Custom business logic involving three long values</li>
-     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

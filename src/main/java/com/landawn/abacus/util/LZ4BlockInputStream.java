@@ -61,7 +61,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * }</pre>
      *
      * @param is the input stream to read compressed data from; must not be {@code null}
-     * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws IllegalArgumentException if {@code is} is {@code null}.
      */
     public LZ4BlockInputStream(final InputStream is) {
         N.checkArgNotNull(is, cs.is);
@@ -172,7 +172,7 @@ public final class LZ4BlockInputStream extends InputStream {
      *
      * @param n the number of bytes to skip
      * @return the actual number of bytes skipped; 0 if the end of the stream has already been reached
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @throws IOException if an I/O error occurs
      */
     @Override

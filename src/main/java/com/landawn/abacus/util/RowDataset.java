@@ -269,7 +269,7 @@ public final class RowDataset implements Dataset, Cloneable {
      * mutate them after construction. All columns must have the same size to maintain a
      * consistent row count.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> columnNames = Arrays.asList("id", "name", "age");
      * List<List<Object>> columns = Arrays.asList(
@@ -290,11 +290,10 @@ public final class RowDataset implements Dataset, Cloneable {
      *                   holding the values for that column. Must not be {@code null};
      *                   each element must not be {@code null}. All columns must have the
      *                   same size.
-     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
-     *         {@code null}; if any column name is {@code null} or empty; if column names
-     *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
-     *         differ; if any column (element of {@code columnList}) is {@code null}; or if the
-     *         columns do not all have the same size.
+     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is {@code null}; if any
+     *         column name is {@code null} or empty; if column names contain duplicates; if the sizes of
+     *         {@code columnNameList} and {@code columnList} differ; if any column (element of {@code columnList}) is
+     *         {@code null}; or if the columns do not all have the same size.
      * @see #RowDataset(List, List, Map)
      * @see Dataset#columns(Collection, Collection)
      * @see Dataset#rows(Collection, Collection)
@@ -314,7 +313,7 @@ public final class RowDataset implements Dataset, Cloneable {
      * (preserving the input map's type/ordering where possible), so
      * subsequent changes to the passed map will not affect this dataset.</p>
      *
-     * <p><b>Usage example:</b></p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> columnNames = Arrays.asList("id", "name", "score");
      * List<List<Object>> columns = Arrays.asList(
@@ -337,11 +336,10 @@ public final class RowDataset implements Dataset, Cloneable {
      *                   same size.
      * @param properties optional metadata map. May be {@code null}. A copy is made, so
      *                   later changes to the provided map are not reflected in this dataset.
-     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is
-     *         {@code null}; if any column name is {@code null} or empty; if column names
-     *         contain duplicates; if the sizes of {@code columnNameList} and {@code columnList}
-     *         differ; if any column (element of {@code columnList}) is {@code null}; or if the
-     *         columns do not all have the same size.
+     * @throws IllegalArgumentException if {@code columnNameList} or {@code columnList} is {@code null}; if any
+     *         column name is {@code null} or empty; if column names contain duplicates; if the sizes of
+     *         {@code columnNameList} and {@code columnList} differ; if any column (element of {@code columnList}) is
+     *         {@code null}; or if the columns do not all have the same size.
      * @see #RowDataset(List, List)
      * @see Dataset#columns(Collection, Collection)
      * @see Dataset#rows(Collection, Collection)
@@ -424,7 +422,7 @@ public final class RowDataset implements Dataset, Cloneable {
      *
      * @param columnName the column name to resolve
      * @return the zero-based index of the column
-     * @throws IllegalArgumentException if {@code columnName} is not a column of this dataset
+     * @throws IllegalArgumentException if {@code columnName} is not a column of this dataset.
      */
     int checkColumnName(final String columnName) throws IllegalArgumentException {
         return getColumnIndex(columnName);
@@ -490,8 +488,8 @@ public final class RowDataset implements Dataset, Cloneable {
      *
      * @param columnNames the column selection to resolve
      * @return the zero-based indexes of the selected columns, in selection order
-     * @throws IllegalArgumentException if {@code columnNames} is {@code null}, if it is empty while this
-     *         dataset has at least one column, or if it names a column this dataset does not have
+     * @throws IllegalArgumentException if {@code columnNames} is {@code null}, if it is empty while this dataset has
+     *         at least one column, or if it names a column this dataset does not have.
      */
     int[] checkColumnNames(final Collection<String> columnNames) throws IllegalArgumentException {
         // A null selection is always invalid for the strict column-selection methods. Previously the guard only
@@ -1700,6 +1698,10 @@ public final class RowDataset implements Dataset, Cloneable {
         final Object[] tmp = new Object[newColumnsLen];
 
         for (final Object val : column) {
+            // Clear the reusable output buffer each row so slots left unwritten by the consumer
+            // cannot leak values from a previous row into later rows.
+            N.fill(tmp, null);
+
             outputToUse.accept(val, tmp);
 
             for (int i = 0; i < newColumnsLen; i++) {
@@ -3131,7 +3133,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
-    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter} is {@code null}.
+    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter} is
+    *         {@code null}.
     */
     @Override
     public <T> List<T> toList(final Predicate<? super String> columnNameFilter, final Function<? super String, String> columnNameConverter,
@@ -3143,7 +3146,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
-    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter} is {@code null}.
+    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter} is
+    *         {@code null}.
     */
     @Override
     public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, final Predicate<? super String> columnNameFilter,
@@ -3179,7 +3183,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
-    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter}, {@code rowSupplier} is {@code null}.
+    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter},
+    *         {@code rowSupplier} is {@code null}.
     */
     @Override
     public <T> List<T> toList(final Predicate<? super String> columnNameFilter, final Function<? super String, String> columnNameConverter,
@@ -3192,7 +3197,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
-    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter}, {@code rowSupplier} is {@code null}.
+    * @throws IllegalArgumentException if any of {@code columnNameFilter}, {@code columnNameConverter},
+    *         {@code rowSupplier} is {@code null}.
     */
     @Override
     public <T> List<T> toList(final int fromRowIndex, final int toRowIndex, final Predicate<? super String> columnNameFilter,
@@ -9974,6 +9980,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+    * @throws E if the provided function throws an exception.
     * @throws IllegalArgumentException if {@code func} is {@code null}.
     */
     @Override
@@ -9984,6 +9991,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+    * @throws E if the provided function throws an exception.
     * @throws IllegalArgumentException if {@code func} is {@code null}.
     */
     @Override
@@ -9999,6 +10007,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+    * @throws E if the provided action throws an exception.
     * @throws IllegalArgumentException if {@code action} is {@code null}.
     */
     @Override
@@ -10009,6 +10018,7 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+    * @throws E if the provided action throws an exception.
     * @throws IllegalArgumentException if {@code action} is {@code null}.
     */
     @Override
@@ -10194,7 +10204,7 @@ public final class RowDataset implements Dataset, Cloneable {
                         appendable.append(" | ");
                     }
 
-                    appendable.append(Strings.padEndByDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
+                    appendable.append(Strings.padEndToDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 appendable.append(" |");
@@ -10218,7 +10228,7 @@ public final class RowDataset implements Dataset, Cloneable {
                             appendable.append(" | ");
                         }
 
-                        appendable.append(Strings.padEndByDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        appendable.append(Strings.padEndToDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     appendable.append(" |");
@@ -10429,7 +10439,7 @@ public final class RowDataset implements Dataset, Cloneable {
          *
          * @param columnNames the column names to include in each page; must not be {@code null}
          * @param pageSize the maximum number of rows per page; must be positive
-         * @throws IllegalArgumentException if {@code pageSize} is not positive
+         * @throws IllegalArgumentException if {@code pageSize} is not positive.
          */
         private PaginatedDataset(final Collection<String> columnNames, final int pageSize) {
             // N.checkArgNotEmpty(columnNames, "columnNames");   // empty Dataset.
@@ -10500,7 +10510,7 @@ public final class RowDataset implements Dataset, Cloneable {
          *
          * @param pageNum the zero-based page number; must be {@code >= 0} and {@code < totalPages()}
          * @return a frozen {@link Dataset} slice representing the requested page
-         * @throws IllegalArgumentException if {@code pageNum} is out of range
+         * @throws IllegalArgumentException if {@code pageNum} is out of range.
          * @throws ConcurrentModificationException if the outer dataset was structurally
          *         modified since this {@code PaginatedDataset} was created
          */

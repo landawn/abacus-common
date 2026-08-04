@@ -94,8 +94,7 @@ public enum OperationType {
      *
      * @param intValue the integer value to convert
      * @return the corresponding {@code OperationType}
-     * @throws IllegalArgumentException if {@code intValue} does not match one of the defined
-     *         enum constants exactly
+     * @throws IllegalArgumentException if {@code intValue} does not match one of the defined enum constants exactly.
      */
     public static OperationType of(final int intValue) {
         switch (intValue) {

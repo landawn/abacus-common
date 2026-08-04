@@ -16,19 +16,19 @@ package com.landawn.abacus.parser;
 
 /**
  * Configuration class for Kryo deserialization operations.
- * This class extends {@link DeserializationConfig} to provide Kryo-specific deserialization settings.
+ * This class extends {@link DeserializationConfig} so Kryo shares the same configuration type
+ * hierarchy as other parsers.
  *
- * <p>The configuration allows control over various aspects of the deserialization process,
- * including property handling, type mappings, and value conversions inherited from the parent class.</p>
+ * <p><b>Note:</b> {@link KryoParser} does <i>not</i> apply inherited settings such as
+ * {@code ignoreUnmatchedProperty}, element/map types, or value-type maps. Kryo reconstructs
+ * objects from binary class metadata (or the caller-supplied target type). The config type exists
+ * for API symmetry and future extension; passing {@code null} is equivalent for current behavior.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * KryoDeserConfig config = KryoDeserConfig.create()
- *     .setIgnoreUnmatchedProperty(true)
- *     .setElementType(String.class);
- *
  * KryoParser parser = ParserFactory.createKryoParser();
- * MyObject obj = parser.deserialize(kryoData, config, MyObject.class);
+ * // config may be null; KryoDeserConfig is accepted for API symmetry
+ * MyObject obj = parser.deserialize(kryoData, KryoDeserConfig.create(), MyObject.class);
  * }</pre>
  *
  * @see DeserializationConfig
@@ -41,9 +41,7 @@ public class KryoDeserConfig extends DeserializationConfig<KryoDeserConfig> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * KryoDeserConfig config = new KryoDeserConfig()
-     *     .setIgnoreUnmatchedProperty(true)
-     *     .setElementType(String.class);
+     * KryoDeserConfig config = new KryoDeserConfig();
      * }</pre>
      *
      */
@@ -89,9 +87,8 @@ public class KryoDeserConfig extends DeserializationConfig<KryoDeserConfig> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * KryoDeserConfig config = KryoDeserConfig.create()
-     *     .setMapKeyType(String.class)
-     *     .setMapValueType(Object.class);
+     * KryoDeserConfig config = KryoDeserConfig.create();
+     * MyObject obj = parser.deserialize(data, config, MyObject.class);
      * }</pre>
      *
      * @return a new {@code KryoDeserConfig} instance

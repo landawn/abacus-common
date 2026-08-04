@@ -992,7 +992,11 @@ abstract class AbstractCharStream extends CharStream {
      * @return a new CharStream backed by the transformed array
      */
     private CharStream lazyLoad(final UnaryOperator<char[]> op, final boolean sorted) {
-        return CharStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(CharIterator.defer(() -> {
+            final char[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? CharIterator.empty() : CharIterator.of(a);
+        }), sorted);
     }
 
     @Override

@@ -1006,7 +1006,11 @@ abstract class AbstractFloatStream extends FloatStream {
      * @return a new FloatStream backed by the transformed array
      */
     private FloatStream lazyLoad(final UnaryOperator<float[]> op, final boolean sorted) {
-        return FloatStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(FloatIterator.defer(() -> {
+            final float[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? FloatIterator.empty() : FloatIterator.of(a);
+        }), sorted);
     }
 
     @Override

@@ -119,8 +119,9 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
-     * Converts a RowId object to its string representation.
-     * The string representation is obtained by calling toString() on the RowId object.
+     * Converts a {@link RowId} object to its string representation.
+     * The format is vendor-specific and is not guaranteed to round-trip through {@link #valueOf(String)}
+     * (which is unsupported for this type).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

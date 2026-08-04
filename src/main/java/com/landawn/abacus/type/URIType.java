@@ -84,9 +84,8 @@ public class URIType extends AbstractType<URI> {
     }
 
     /**
-     * Converts a URI instance to its string representation.
+     * Converts a {@link URI} instance to its string representation (the URI text).
      * <p>
-     * This method returns the string representation of the URI by calling its {@code toString()} method.
      * If the input URI is {@code null}, this method returns {@code null}.
      * </p>
      *
@@ -134,7 +133,7 @@ public class URIType extends AbstractType<URI> {
      *
      * @param str the string to convert to a URI
      * @return a URI instance created from the string, or {@code null} if the string is {@code null}
-     * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules
+     * @throws IllegalArgumentException if the string violates RFC 2396 URI syntax rules.
      * @see #valueOf(Object)
      * @see #stringOf(URI)
      */

@@ -21,8 +21,12 @@ import com.landawn.abacus.util.N;
 
 /**
  * Configuration class for Apache Avro serialization operations.
- * This class extends {@link SerializationConfig} and adds Avro-specific configuration options,
- * particularly the Avro schema required for serialization.
+ * This class extends {@link SerializationConfig} and adds the Avro {@link Schema} required for
+ * serializing types that are not {@code SpecificRecord} instances.
+ *
+ * <p><b>Settings applied by {@link AvroParser}:</b> only {@link #getSchema()}/{@link #setSchema(Schema)}.
+ * Inherited options such as exclusion and skip-transient are not consulted; Avro field inclusion is
+ * driven by the schema and the Avro type model.</p>
  *
  * <p><b>Design note:</b> The {@link #getSchema()}/{@link #setSchema(Schema)} pair is intentionally
  * duplicated between this class and {@link AvroDeserConfig}. A shared {@code AvroConfig} base is not
@@ -35,8 +39,7 @@ import com.landawn.abacus.util.N;
  * <pre>{@code
  * Schema schema = new Schema.Parser().parse(schemaString);
  * AvroSerConfig config = new AvroSerConfig()
- *     .setSchema(schema)
- *     .setExclusion(Exclusion.NULL);
+ *     .setSchema(schema);
  * }</pre>
  *
  * @see SerializationConfig
@@ -53,8 +56,7 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AvroSerConfig config = new AvroSerConfig()
-     *     .setSchema(schema)
-     *     .setExclusion(Exclusion.NULL);
+     *     .setSchema(schema);
      * }</pre>
      *
      */

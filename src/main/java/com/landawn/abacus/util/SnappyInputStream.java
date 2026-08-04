@@ -60,7 +60,7 @@ public final class SnappyInputStream extends InputStream {
      * }</pre>
      *
      * @param is the input stream containing Snappy-compressed data; must not be {@code null}
-     * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws IllegalArgumentException if {@code is} is {@code null}.
      * @throws IOException if an I/O error occurs during initialization
      */
     public SnappyInputStream(final InputStream is) throws IOException {
@@ -163,7 +163,7 @@ public final class SnappyInputStream extends InputStream {
      *
      * @param n the number of bytes to be skipped
      * @return the actual number of bytes skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @throws IOException if an I/O error occurs
      */
     @Override

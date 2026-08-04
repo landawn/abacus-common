@@ -19,10 +19,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents an operation upon two {@code int}-valued operands and producing an {@code int}-valued result.
  * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code int}.
  *
- * <p>This interface extends both {@link java.util.function.IntBinaryOperator} and
- * {@link Throwables.IntBinaryOperator}, providing compatibility with the standard Java functional
- * interfaces while also supporting the Throwables framework.
- *
  * <p>Note: arithmetic operations on {@code int} values are subject to integer overflow
  * (silently wraps around). Use {@link Math#addExact(int, int)} or similar methods
  * when overflow detection is required.

@@ -155,7 +155,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      *
      * @param str the string to parse, expected to be a JSON array with exactly two elements
      * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly 2 elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly 2 elements.
      * @see #valueOf(Object)
      * @see #stringOf(Pair)
      */

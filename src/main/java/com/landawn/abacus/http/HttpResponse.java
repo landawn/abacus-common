@@ -282,7 +282,7 @@ public class HttpResponse {
      * @param <T> The type to deserialize to
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null}
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null}.
      */
     public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
         N.checkArgNotNull(resultClass, cs.resultClass);
@@ -342,7 +342,7 @@ public class HttpResponse {
      * @param <T> The type to deserialize to
      * @param resultType The type information including generic parameters. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
-     * @throws IllegalArgumentException if {@code resultType} is {@code null}
+     * @throws IllegalArgumentException if {@code resultType} is {@code null}.
      */
     public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
         N.checkArgNotNull(resultType, cs.resultType);

@@ -28,12 +28,12 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Joda-Time MutableDateTime objects.
+ * Type handler for Joda-Time {@link org.joda.time.MutableDateTime} objects.
  * <p>
- * This class provides serialization, deserialization, and database access capabilities for
- * {@code org.joda.time.MutableDateTime} instances. MutableDateTime is a mutable version of DateTime
- * that allows modification after creation. It supports multiple string formats including
- * ISO 8601 formats and provides database conversion using {@code java.sql.Timestamp}.
+ * This class provides serialization, deserialization, and database access for
+ * {@code MutableDateTime} instances (a mutable counterpart of {@code DateTime}).
+ * It supports multiple string formats including ISO-8601 and maps to the database
+ * via {@link java.sql.Timestamp}.
  *
  * @see org.joda.time.MutableDateTime
  * @see AbstractJodaDateTimeType
@@ -44,8 +44,8 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
     public static final String JODA_MUTABLE_DATE_TIME = "JodaMutableDateTime";
 
     /**
-     * Package-private constructor for JodaMutableDateTimeType.
-     * This constructor is called by the TypeFactory to create Joda MutableDateTime type instances.
+     * Package-private constructor for {@code JodaMutableDateTimeType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     JodaMutableDateTimeType() {
         super(JODA_MUTABLE_DATE_TIME);
@@ -112,9 +112,9 @@ public class JodaMutableDateTimeType extends AbstractJodaDateTimeType<MutableDat
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed Joda {@link MutableDateTime}, or {@code null} if {@code str} is {@code null} or a null-datetime string
-     * @throws IllegalArgumentException if the string format is not recognized
+     * @throws IllegalArgumentException if the string format is not recognized.
      * @see #valueOf(Object)
-     * @see #stringOf(org.joda.time.base.AbstractInstant)
+     * @see #stringOf(org.joda.time.MutableDateTime)
      */
     @Override
     public MutableDateTime valueOf(final String str) {

@@ -24,11 +24,6 @@ import com.landawn.abacus.util.cs;
  * functional interfaces, {@code LongConsumer} is expected to operate via
  * side-effects.
  *
- * <p>This interface extends both {@link Throwables.LongConsumer} with
- * {@link RuntimeException} and {@link java.util.function.LongConsumer},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #accept(long)}.
  *
@@ -74,7 +69,7 @@ public interface LongConsumer extends Throwables.LongConsumer<RuntimeException>,
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code LongConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default LongConsumer andThen(final java.util.function.LongConsumer after) throws IllegalArgumentException {

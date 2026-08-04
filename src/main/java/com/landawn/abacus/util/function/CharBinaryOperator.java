@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation upon two char-valued operands and producing a char-valued result.
+ * Represents an operation upon two {@code char} operands and producing a {@code char} result.
  * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code char}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char, char)}.
@@ -25,12 +25,12 @@ import com.landawn.abacus.util.Throwables;
  *
  * @see java.util.function.BinaryOperator
  * @see CharUnaryOperator
+ * @see CharTernaryOperator
  */
 @FunctionalInterface
 public interface CharBinaryOperator extends Throwables.CharBinaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given char operands.
-     * This method performs a binary operation on two char values and returns a char result.
+     * Applies this operator to the given operands.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -41,9 +41,9 @@ public interface CharBinaryOperator extends Throwables.CharBinaryOperator<Runtim
      * char smallest = min.applyAsChar('A', 'Z');   // Returns 'A'
      * }</pre>
      *
-     * @param a the first char operand
-     * @param b the second char operand
-     * @return the char result of applying this operator to the two operands
+     * @param a the first operand
+     * @param b the second operand
+     * @return the operator result
      */
     @Override
     char applyAsChar(char a, char b);

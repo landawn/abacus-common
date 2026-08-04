@@ -30,7 +30,7 @@ import com.landawn.abacus.util.stream.Stream;
  * supports conversion to {@link ImmutableList} and {@link Stream} for functional operations.</p>
  *
  * <p>Note: While the ImmutableArray itself cannot be modified, if it contains mutable objects,
- * those objects themselves can still be modified. For {@code true} immutability, ensure that the
+ * those objects themselves can still be modified. For deep immutability, ensure that the
  * array contains only immutable objects.</p>
  *
  * <p><b>Usage Examples:</b></p>
@@ -71,7 +71,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
 
     /**
      * Returns the cached empty ImmutableArray. This method always returns the same shared instance,
-     * whose backing storage is an {@code Object[]} regardless of the requested element type.
+     * making it memory efficient for representing empty arrays.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -336,7 +336,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * @param elements the array to be wrapped; if {@code null}, an empty {@code ImmutableArray} is returned
      * @return an {@code ImmutableArray} backed by the specified array, or an empty instance if {@code elements} is {@code null}
      * @deprecated the ImmutableArray may be modified through the specified {@code elements};
-     *             use {@link #copyOf(Object[])} instead for {@code true} immutability.
+     *             use {@link #copyOf(Object[])} instead for a truly independent immutable copy.
      */
     @Deprecated
     @Beta

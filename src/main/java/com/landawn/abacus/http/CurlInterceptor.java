@@ -69,10 +69,11 @@ class CurlInterceptor implements Interceptor {
      * This constructor uses {@link #DEFAULT_QUOTE_CHAR} as the quote character.
      *
      * @param logHandler A consumer function that handles the generated cURL command string.
-     *                   This is typically used to log or store the command.
+     *                   This is typically used to log or store the command. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
      * @see #CurlInterceptor(char, Consumer)
      */
-    public CurlInterceptor(final Consumer<? super String> logHandler) {
+    public CurlInterceptor(final Consumer<? super String> logHandler) throws IllegalArgumentException {
         this(DEFAULT_QUOTE_CHAR, logHandler);
     }
 
@@ -83,7 +84,7 @@ class CurlInterceptor implements Interceptor {
      *                  Can be either single quote ({@code '}) or double quote ({@code "}) depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
         N.checkArgNotNull(logHandler, cs.logHandler);

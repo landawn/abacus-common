@@ -78,7 +78,7 @@ public final class MoreExecutors {
      *
      * @param executor the executor to modify
      * @return an unconfigurable ExecutorService that will shut down on JVM exit
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      * @see #getExitingExecutorService(ThreadPoolExecutor, long, TimeUnit)
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor) {
@@ -116,7 +116,7 @@ public final class MoreExecutors {
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ExecutorService that will shut down on JVM exit
      * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
-     *         {@code terminationTimeout} is negative
+     *         {@code terminationTimeout} is negative.
      */
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
         N.checkArgNotNull(executor, cs.executor);
@@ -149,7 +149,7 @@ public final class MoreExecutors {
      *
      * @param executor the scheduled executor to modify
      * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      * @see #getExitingScheduledExecutorService(ScheduledThreadPoolExecutor, long, TimeUnit)
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor) {
@@ -183,7 +183,7 @@ public final class MoreExecutors {
      * @param timeUnit the time unit for the termination timeout
      * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
      * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
-     *         {@code terminationTimeout} is negative
+     *         {@code terminationTimeout} is negative.
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
             final TimeUnit timeUnit) {
@@ -220,7 +220,7 @@ public final class MoreExecutors {
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
      * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}, or
-     *         {@code terminationTimeout} is negative
+     *         {@code terminationTimeout} is negative.
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException {
@@ -274,7 +274,7 @@ public final class MoreExecutors {
              *
              * @param r the runnable to execute in the new thread; must not be {@code null}
              * @return the created thread, or {@code null} if the wrapped factory returns {@code null}
-             * @throws IllegalArgumentException if {@code r} is {@code null}
+             * @throws IllegalArgumentException if {@code r} is {@code null}.
              */
             @Override
             public Thread newThread(final Runnable r) throws IllegalArgumentException {

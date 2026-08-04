@@ -394,7 +394,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code FloatIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public FloatIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -453,7 +453,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @param count the maximum number of elements to iterate; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code FloatIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public FloatIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -550,7 +550,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * float[] empty = FloatIterator.empty().toArray();   // returns empty.length == 0
+     * float[] empty = FloatIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code float} array containing all remaining elements; an empty array if there are none
@@ -573,7 +573,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * FloatList empty = FloatIterator.empty().toList();   // returns empty.size() == 0
+     * FloatList empty = FloatIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link FloatList} containing all remaining elements; an empty list if there are none
@@ -590,8 +590,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Converts this iterator to a {@link FloatStream} for use with the Stream API.
-     * The stream is lazily populated from this iterator as elements are consumed.
-     * The iterator must not be used directly after calling this method.
+     *
+     * <p><b>Note:</b> The returned stream is backed by this iterator. Consuming the stream
+     * will consume the iterator, and vice versa. After the stream is consumed, this iterator
+     * will be exhausted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -639,7 +641,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices beginning at {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
@@ -706,7 +708,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     }
 
     /**
-     * Performs the given action for each remaining float element.
+     * Performs the given action for each remaining element without boxing overhead.
      * This method uses a primitive float consumer to avoid boxing overhead,
      * making it more efficient than {@link #forEachRemaining(java.util.function.Consumer)}.
      * The action is applied to each remaining element until all elements have been processed

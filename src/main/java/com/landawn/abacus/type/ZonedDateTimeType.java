@@ -145,9 +145,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * This method handles conversion from:
      * </p>
      * <ul>
-     *   <li>Number types - interpreted as epoch milliseconds in the default timezone</li>
-     *   <li>String types - parsed according to supported date/time formats</li>
-     *   <li>null - returns null</li>
+     *   <li>{@link ZonedDateTime} - returned unchanged</li>
+     *   <li>{@link Number}, {@link java.util.Date}, or {@link java.util.Calendar} - interpreted as epoch milliseconds in the default zone</li>
+     *   <li>Other non-null objects - converted to a string and parsed according to supported date/time formats</li>
+     *   <li>{@code null} - returns {@code null}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -161,11 +162,19 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @Override
     public ZonedDateTime valueOf(final Object obj) {
-        if (obj instanceof Number) {
+        if (obj == null) {
+            return null;
+        } else if (obj instanceof ZonedDateTime zonedDateTime) {
+            return zonedDateTime;
+        } else if (obj instanceof Number) {
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Date date) {
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar cal) {
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), DEFAULT_ZONE_ID);
         }
 
-        return obj == null ? null : valueOf(N.stringOf(obj));
+        return valueOf(N.stringOf(obj));
     }
 
     /**

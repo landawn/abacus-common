@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts three short-valued arguments and returns no result.
+ * Represents an operation that accepts three {@code short}-valued arguments and returns no result.
  * This is the three-arity specialization of {@link ShortConsumer}.
  * Unlike most other functional interfaces, {@code ShortTriConsumer} is expected to operate via side-effects.
  *
@@ -49,9 +49,9 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      * rangeChecker.accept((short) 0, (short) 100, (short) 50);   // Prints "In range: 50"
      * }</pre>
      *
-     * @param a the first input argument
-     * @param b the second input argument
-     * @param c the third input argument
+     * @param a the first {@code short} input argument
+     * @param b the second {@code short} input argument
+     * @param c the third {@code short} input argument
      */
     @Override
     void accept(short a, short b, short c);
@@ -71,7 +71,7 @@ public interface ShortTriConsumer extends Throwables.ShortTriConsumer<RuntimeExc
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code ShortTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ShortTriConsumer andThen(final ShortTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

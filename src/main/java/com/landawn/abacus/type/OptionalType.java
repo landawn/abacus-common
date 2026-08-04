@@ -18,9 +18,9 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Optional;
 
 /**
- * Generic type handler for {@link Optional} wrapper objects from the {@code com.landawn.abacus.util.u}
- * package, providing serialization, deserialization, and database interaction capabilities for
- * optional values of any type.
+ * Generic type handler for {@link Optional} wrapper objects (a nested class of the
+ * {@code com.landawn.abacus.util.u} utility class), providing serialization, deserialization,
+ * and database interaction capabilities for optional values of any type.
  * <p>
  * Note: this handles the abacus-specific {@code Optional<T>}, not {@code java.util.Optional<T>}
  * (which is handled by {@code JdkOptionalType}).

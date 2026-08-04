@@ -32,25 +32,11 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface CharPredicate extends Throwables.CharPredicate<RuntimeException> { //NOSONAR
     /**
-     * A predicate that always evaluates to {@code true}, regardless of the input char value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharPredicate.ALWAYS_TRUE.test('a');    // Always returns true
-     * boolean result2 = CharPredicate.ALWAYS_TRUE.test('5');   // Always returns true
-     * }</pre>
-     *
+     * A predicate that always returns {@code true} regardless of the input value.
      */
     CharPredicate ALWAYS_TRUE = value -> true;
     /**
-     * A predicate that always evaluates to {@code false}, regardless of the input char value.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharPredicate.ALWAYS_FALSE.test('a');    // Always returns false
-     * boolean result2 = CharPredicate.ALWAYS_FALSE.test('5');   // Always returns false
-     * }</pre>
-     *
+     * A predicate that always returns {@code false} regardless of the input value.
      */
     CharPredicate ALWAYS_FALSE = value -> false;
     /**
@@ -92,8 +78,8 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
     boolean test(char value);
 
     /**
-     * Returns the specified CharPredicate instance.
-     * This method is useful for type inference or when you need to explicitly cast a lambda expression.
+     * Returns the specified predicate instance.
+     * This method is useful for type inference in lambda expressions and method references.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -102,8 +88,8 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * }</pre>
      *
      * @param predicate the predicate to return
-     * @return the same predicate instance
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @return the specified predicate
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static CharPredicate of(final CharPredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
@@ -131,7 +117,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -142,7 +128,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharPredicate and(final CharPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -154,7 +140,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -165,7 +151,7 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharPredicate or(final CharPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

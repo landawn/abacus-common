@@ -68,7 +68,7 @@ public interface IntBiConsumer extends Throwables.IntBiConsumer<RuntimeException
      * @param after the operation to perform after this operation.
      * @return a composed {@code IntBiConsumer} that performs in sequence this operation followed by
      *         the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default IntBiConsumer andThen(final IntBiConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

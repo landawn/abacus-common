@@ -23,10 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(double)}.</p>
  *
- * <p>This interface extends both {@link Throwables.DoubleUnaryOperator} with {@link RuntimeException}
- * and {@link java.util.function.DoubleUnaryOperator}, providing a bridge between the Throwables-based
- * exception handling and the standard Java functional interface.</p>
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.UnaryOperator
@@ -83,7 +79,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.DoubleUnaryOperator)
      */
     @Override
@@ -113,7 +109,7 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(java.util.function.DoubleUnaryOperator)
      */
     @Override

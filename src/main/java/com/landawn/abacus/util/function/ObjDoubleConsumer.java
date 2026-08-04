@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * and a double-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive double.
  *
- * <p>This interface extends both {@link Throwables.ObjDoubleConsumer} and
- * {@link java.util.function.ObjDoubleConsumer}, providing compatibility with the standard
- * Java functional interfaces while adding exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, double)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -39,13 +35,8 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
     /**
      * Performs this operation on the given arguments.
      *
-     * <p>This method consumes an object of type T and a double value, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * updating the object's state based on the double value, accumulating values,
-     * or performing calculations where the result is stored within the object.
-     *
-     * @param t the first input argument of type T
-     * @param value the second input argument, a primitive double value
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, double value);
@@ -56,10 +47,6 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * operation throws an exception, it is relayed to the caller of the
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
-     *
-     * <p>This method allows for chaining multiple consumers together, where each
-     * consumer receives the same input arguments. This is useful for performing
-     * multiple independent operations on the same data.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -74,7 +61,7 @@ public interface ObjDoubleConsumer<T> extends Throwables.ObjDoubleConsumer<T, Ru
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjDoubleConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjDoubleConsumer<T> andThen(final ObjDoubleConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

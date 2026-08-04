@@ -15,21 +15,18 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable container that pairs a byte value with its index position.
- * This class is useful for operations where both the value and its original position
- * need to be preserved, such as when sorting or filtering collections while maintaining
- * knowledge of the original indices.
+ * Represents a primitive byte value paired with an index position.
  *
- * <p>This class is a specialized version of {@code Indexed<Byte>} for primitive byte values,
- * providing better performance by avoiding boxing/unboxing overhead. It extends
- * {@link AbstractIndexed} and provides factory methods for creating instances with validated
- * non-negative indices.</p>
+ * <p>This class is a specialized version of {@code Indexed<Byte>} for primitive byte
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
+ *
+ * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * IndexedByte ib = IndexedByte.of((byte) 42, 5);
- * System.out.println(ib.value());   // prints 42
- * System.out.println(ib.index());   // prints 5
+ * IndexedByte indexedByte = IndexedByte.of((byte) 42, 5);
+ * byte value = indexedByte.value();   // returns 42
+ * int index = indexedByte.index();    // returns 5
  * }</pre>
  *
  * @see Indexed
@@ -60,7 +57,7 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedByte} instance with the specified value and index.
+     * Creates a new IndexedByte instance with the specified value and index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -69,8 +66,8 @@ public final class IndexedByte extends AbstractIndexed {
      *
      * @param value the byte value to be associated with the index
      * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
-     * @return a new immutable {@code IndexedByte} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @return a new immutable IndexedByte instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedByte of(final byte value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -79,9 +76,9 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedByte} instance with the specified value and long index.
-     * This method is useful when working with large collections or arrays where the index
-     * might exceed the range of an int.
+     * Creates a new IndexedByte instance with the specified value and index.
+     *
+     * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -89,9 +86,9 @@ public final class IndexedByte extends AbstractIndexed {
      * }</pre>
      *
      * @param value the byte value to be associated with the index
-     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
-     * @return a new immutable {@code IndexedByte} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedByte instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedByte of(final byte value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -119,11 +116,11 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Returns a hash code value for this object. The hash code is computed
-     * using both the index and the value to ensure proper distribution in
-     * hash-based collections.
+     * Returns the hash code of this {@code IndexedByte} instance.
      *
-     * @return a hash code value for this object
+     * <p>The hash code is computed from both the index and the value.</p>
+     *
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -131,13 +128,23 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one.
-     * Two {@code IndexedByte} objects are considered equal if they have
-     * the same index and the same value.
+     * Checks if this IndexedByte instance is equal to another object.
      *
-     * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the obj argument;
-     *         {@code false} otherwise
+     * <p>Two IndexedByte instances are equal if they have the same index and value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedByte indexed1 = IndexedByte.of((byte) 42, 5);
+     * IndexedByte indexed2 = IndexedByte.of((byte) 42, 5);
+     * IndexedByte indexed3 = IndexedByte.of((byte) 43, 5);
+     *
+     * indexed1.equals(indexed2);   // returns true
+     * indexed1.equals(indexed3);   // returns false
+     * }</pre>
+     *
+     * @param obj the object to compare with this IndexedByte instance for equality
+     * @return {@code true} if the specified object is an IndexedByte with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -145,14 +152,17 @@ public final class IndexedByte extends AbstractIndexed {
     }
 
     /**
-     * Returns a string representation of this {@code IndexedByte}.
-     * The string representation consists of the index in square brackets
-     * followed by an equals sign and the value.
+     * Returns a string representation of this IndexedByte instance.
      *
-     * <p>For example, an {@code IndexedByte} with index 5 and value 42
-     * would return the string {@code "[5]=42"}.</p>
+     * <p>The format is: {@code [index]=value}</p>
      *
-     * @return a string representation of this object
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedByte indexed = IndexedByte.of((byte) 42, 5);
+     * System.out.println(indexed);   // prints [5]=42
+     * }</pre>
+     *
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

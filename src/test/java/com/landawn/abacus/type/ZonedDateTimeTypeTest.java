@@ -25,6 +25,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +79,27 @@ public class ZonedDateTimeTypeTest extends TestBase {
         assertNotNull(result);
         assertTrue(result.contains("2023-12-25"));
         assertTrue(result.contains("10:30:45"));
+    }
+
+    @Test
+    public void testValueOf_Object_ZonedDateTime_identity() {
+        ZonedDateTime zdt = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 123456789, ZoneId.of("UTC"));
+        assertEquals(zdt, zonedDateTimeType.valueOf((Object) zdt));
+        assertEquals(123456789, zonedDateTimeType.valueOf((Object) zdt).getNano());
+    }
+
+    @Test
+    public void testValueOf_Object_Date_and_Calendar() {
+        long millis = 1703502645123L;
+        ZonedDateTime fromDate = zonedDateTimeType.valueOf(new Date(millis));
+        assertNotNull(fromDate);
+        assertEquals(millis, fromDate.toInstant().toEpochMilli());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        ZonedDateTime fromCal = zonedDateTimeType.valueOf(cal);
+        assertNotNull(fromCal);
+        assertEquals(millis, fromCal.toInstant().toEpochMilli());
     }
 
     @Test

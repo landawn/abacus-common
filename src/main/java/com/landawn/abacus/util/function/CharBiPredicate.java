@@ -18,8 +18,8 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a predicate (boolean-valued function) of two char-valued arguments.
- * This is the two-arity specialization of {@link CharPredicate}.
+ * Represents a predicate (boolean-valued function) of two {@code char}-valued arguments.
+ * This is the primitive type specialization of {@link java.util.function.BiPredicate} for {@code char}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(char, char)}.
  *
@@ -27,102 +27,49 @@ import com.landawn.abacus.util.cs;
  *
  * @see java.util.function.BiPredicate
  * @see CharPredicate
+ * @see CharTriPredicate
  */
 @FunctionalInterface
 public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeException> { //NOSONAR
     /**
-     * A predicate that always evaluates to {@code true}, regardless of the two char input values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.ALWAYS_TRUE.test('a', 'b');    // Always returns true
-     * boolean result2 = CharBiPredicate.ALWAYS_TRUE.test('x', 'x');   // Always returns true
-     * }</pre>
-     *
+     * A predicate that always returns {@code true} regardless of the input arguments.
      */
     CharBiPredicate ALWAYS_TRUE = (a, b) -> true;
     /**
-     * A predicate that always evaluates to {@code false}, regardless of the two char input values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.ALWAYS_FALSE.test('a', 'b');    // Always returns false
-     * boolean result2 = CharBiPredicate.ALWAYS_FALSE.test('x', 'x');   // Always returns false
-     * }</pre>
-     *
+     * A predicate that always returns {@code false} regardless of the input arguments.
      */
     CharBiPredicate ALWAYS_FALSE = (a, b) -> false;
     /**
-     * A predicate that tests if the two char values are equal.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.EQUAL.test('a', 'a');    // Returns true
-     * boolean result2 = CharBiPredicate.EQUAL.test('a', 'b');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if both arguments are equal.
      */
     CharBiPredicate EQUAL = (a, b) -> a == b;
     /**
-     * A predicate that tests if the two char values are not equal.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.NOT_EQUAL.test('a', 'b');    // Returns true
-     * boolean result2 = CharBiPredicate.NOT_EQUAL.test('a', 'a');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if the arguments are not equal.
      */
     CharBiPredicate NOT_EQUAL = (a, b) -> a != b;
     /**
-     * A predicate that tests if the first char value is greater than the second.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.GREATER_THAN.test('b', 'a');    // Returns true
-     * boolean result2 = CharBiPredicate.GREATER_THAN.test('a', 'b');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if the first argument is greater than the second.
+     * Comparison is based on UTF-16 code unit values.
      */
     CharBiPredicate GREATER_THAN = (a, b) -> a > b;
     /**
-     * A predicate that tests if the first char value is greater than or equal to the second.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('b', 'a');    // Returns true
-     * boolean result2 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'a');   // Returns true
-     * boolean result3 = CharBiPredicate.GREATER_THAN_OR_EQUAL.test('a', 'b');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if the first argument is greater than or equal to the second.
+     * Comparison is based on UTF-16 code unit values.
      */
     CharBiPredicate GREATER_THAN_OR_EQUAL = (a, b) -> a >= b;
     /**
-     * A predicate that tests if the first char value is less than the second.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.LESS_THAN.test('a', 'b');    // Returns true
-     * boolean result2 = CharBiPredicate.LESS_THAN.test('b', 'a');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if the first argument is less than the second.
+     * Comparison is based on UTF-16 code unit values.
      */
     CharBiPredicate LESS_THAN = (a, b) -> a < b;
     /**
-     * A predicate that tests if the first char value is less than or equal to the second.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * boolean result = CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'b');    // Returns true
-     * boolean result2 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('a', 'a');   // Returns true
-     * boolean result3 = CharBiPredicate.LESS_THAN_OR_EQUAL.test('b', 'a');   // Returns false
-     * }</pre>
-     *
+     * A predicate that returns {@code true} if the first argument is less than or equal to the second.
+     * Comparison is based on UTF-16 code unit values.
      */
     CharBiPredicate LESS_THAN_OR_EQUAL = (a, b) -> a <= b;
 
     /**
-     * Evaluates this predicate on the given char arguments.
+     * Evaluates this predicate on the given arguments.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -133,9 +80,9 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * boolean result2 = areBothLetters.test('a', 'b');   // Returns true
      * }</pre>
      *
-     * @param a the first char input argument
-     * @param b the second char input argument
-     * @return {@code true} if the two input arguments match the predicate, otherwise {@code false}
+     * @param a the first input argument
+     * @param b the second input argument
+     * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
     boolean test(char a, char b);
@@ -176,7 +123,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharBiPredicate and(final CharBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -202,7 +149,7 @@ public interface CharBiPredicate extends Throwables.CharBiPredicate<RuntimeExcep
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate
      *         and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default CharBiPredicate or(final CharBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

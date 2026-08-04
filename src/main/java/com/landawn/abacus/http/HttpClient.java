@@ -118,7 +118,7 @@ import com.landawn.abacus.util.cs;
  *     <td>Form URL-encoded</td>
  *     <td>application/x-www-form-urlencoded</td>
  *     <td>URLEncodedUtil conversion</td>
- *     <td>GZIP</td>
+ *     <td>None ({@link ContentFormat#FORM_URL_ENCODED} has no compression variant)</td>
  *   </tr>
  *   <tr>
  *     <td>Kryo Binary</td>
@@ -254,11 +254,11 @@ import com.landawn.abacus.util.cs;
  *
  * <p><b>Compression and Content Encoding:</b>
  * <ul>
- *   <li><b>GZIP:</b> Standard HTTP compression for text-based content</li>
- *   <li><b>Brotli:</b> Modern compression algorithm with better compression ratios</li>
- *   <li><b>LZ4:</b> Fast compression optimized for binary content (Kryo serialization)</li>
- *   <li><b>Snappy:</b> High-speed compression/decompression for real-time applications</li>
- *   <li><b>Automatic Detection:</b> Content-Type-based compression algorithm selection</li>
+ *   <li><b>GZIP:</b> Standard HTTP compression for request and response bodies</li>
+ *   <li><b>Brotli:</b> Response decompression only ({@code *_BR}/{@link ContentFormat#BR} request bodies are rejected; there is no bundled Brotli encoder)</li>
+ *   <li><b>LZ4:</b> Fast compression for JSON, XML, and raw bodies ({@link ContentFormat} does not combine Kryo with LZ4)</li>
+ *   <li><b>Snappy:</b> High-speed compression/decompression for JSON, XML, and raw bodies</li>
+ *   <li><b>Automatic Detection:</b> Compression/decompression is selected from the active {@link ContentFormat} / {@code Content-Encoding} (not from {@code Content-Type} alone)</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
@@ -467,7 +467,7 @@ public final class HttpClient implements AutoCloseable {
      * @param settings the default HTTP settings for requests made by this client
      * @param sharedActiveConnectionCounter the shared counter used to enforce connection limits
      * @param executor the executor used for asynchronous operations, or {@code null} to use the default
-     * @throws IllegalArgumentException if URL/protocol is invalid or timeout/connection limits are negative
+     * @throws IllegalArgumentException if URL/protocol is invalid or timeout/connection limits are negative.
      */
     private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
@@ -497,7 +497,7 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param url the URL string to parse
      * @return the parsed URL
-     * @throws IllegalArgumentException if URL is {@code null} or uses an unsupported protocol
+     * @throws IllegalArgumentException if URL is {@code null} or uses an unsupported protocol.
      */
     private static URL createNetUrl(final String url) {
         try {
@@ -514,7 +514,7 @@ public final class HttpClient implements AutoCloseable {
      * Validates that the specified URL uses HTTP or HTTPS protocol.
      *
      * @param netUrl the URL to validate
-     * @throws IllegalArgumentException if protocol is not HTTP/HTTPS
+     * @throws IllegalArgumentException if protocol is not HTTP/HTTPS.
      */
     private static void checkSupportedProtocol(final URL netUrl) {
         final String protocol = netUrl == null ? null : netUrl.getProtocol();
@@ -551,7 +551,7 @@ public final class HttpClient implements AutoCloseable {
      * @param url The base URL for the HTTP client
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, or uses an unsupported protocol
+     * @throws IllegalArgumentException if url is {@code null} or empty, or uses an unsupported protocol.
      */
     public static HttpClient create(final String url) {
         return create(url, DEFAULT_MAX_CONNECTION);
@@ -570,7 +570,8 @@ public final class HttpClient implements AutoCloseable {
      * @param maxConnection Maximum number of concurrent connections
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or maxConnection is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or
+     *         maxConnection is negative.
      */
     public static HttpClient create(final String url, final int maxConnection) {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -590,7 +591,8 @@ public final class HttpClient implements AutoCloseable {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or timeouts are negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or timeouts are
+     *         negative.
      */
     public static HttpClient create(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
@@ -610,7 +612,8 @@ public final class HttpClient implements AutoCloseable {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
@@ -634,7 +637,8 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings (headers, content type, etc.)
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
@@ -662,7 +666,8 @@ public final class HttpClient implements AutoCloseable {
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
@@ -687,7 +692,8 @@ public final class HttpClient implements AutoCloseable {
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) throws IllegalArgumentException {
@@ -717,7 +723,8 @@ public final class HttpClient implements AutoCloseable {
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws IllegalArgumentException, UncheckedIOException {
@@ -749,7 +756,8 @@ public final class HttpClient implements AutoCloseable {
      * @param executor Custom executor for asynchronous operations; must not be {@code null}
      * @return A new HttpClient instance
      * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) throws IllegalArgumentException {
@@ -770,7 +778,7 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null} or uses an unsupported protocol
+     * @throws IllegalArgumentException if url is {@code null} or uses an unsupported protocol.
      */
     public static HttpClient create(final URL url) {
         return create(url, DEFAULT_MAX_CONNECTION);
@@ -789,7 +797,8 @@ public final class HttpClient implements AutoCloseable {
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @param maxConnection Maximum number of concurrent connections
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or maxConnection is negative
+     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or maxConnection is
+     *         negative.
      */
     public static HttpClient create(final URL url, final int maxConnection) {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
@@ -809,7 +818,8 @@ public final class HttpClient implements AutoCloseable {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or timeouts are negative
+     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or timeouts are
+     *         negative.
      */
     public static HttpClient create(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
@@ -829,7 +839,8 @@ public final class HttpClient implements AutoCloseable {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
@@ -853,7 +864,8 @@ public final class HttpClient implements AutoCloseable {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings) throws UncheckedIOException {
@@ -881,7 +893,8 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param sharedActiveConnectionCounter Shared counter for active connections across multiple clients
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
@@ -906,7 +919,8 @@ public final class HttpClient implements AutoCloseable {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) throws IllegalArgumentException {
@@ -936,7 +950,8 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final Executor executor) throws IllegalArgumentException, UncheckedIOException {
@@ -968,7 +983,8 @@ public final class HttpClient implements AutoCloseable {
      * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
      * @param executor Custom executor for asynchronous operations; must not be {@code null}
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an unsupported protocol, or any numeric parameter is negative
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) throws IllegalArgumentException {

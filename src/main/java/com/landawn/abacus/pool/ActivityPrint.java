@@ -110,7 +110,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * @param liveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
+     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
      */
     public ActivityPrint(final long liveTime, final long maxIdleTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
@@ -142,7 +142,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * @param liveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
      * @return a new ActivityPrint instance
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
+     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
      */
     public static ActivityPrint of(final long liveTime, final long maxIdleTime) {
         return new ActivityPrint(liveTime, maxIdleTime);
@@ -173,7 +173,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * @param liveTime the new maximum lifetime in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
-     * @throws IllegalArgumentException if liveTime is not positive
+     * @throws IllegalArgumentException if liveTime is not positive.
      */
     public ActivityPrint setMaxLiveTime(final long liveTime) throws IllegalArgumentException {
         if (liveTime <= 0) {
@@ -210,7 +210,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * @param maxIdleTime the new maximum idle time in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
-     * @throws IllegalArgumentException if maxIdleTime is not positive
+     * @throws IllegalArgumentException if maxIdleTime is not positive.
      */
     public ActivityPrint setMaxIdleTime(final long maxIdleTime) throws IllegalArgumentException {
         if (maxIdleTime <= 0) {

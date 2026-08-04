@@ -125,7 +125,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code ByteStream} of matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream filter(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -154,7 +154,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code ByteStream} of the elements selected by the parallel {@code takeWhile} operation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream takeWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -183,7 +183,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code ByteStream} of the elements selected by the parallel {@code dropWhile} operation
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public ByteStream dropWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
@@ -208,7 +208,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code ByteStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream map(final ByteUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
@@ -234,7 +234,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code IntStream} of mapped values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
@@ -261,7 +261,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code Stream} of mapped objects
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -286,7 +286,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns a {@code ByteStream} for each element
      * @return a new parallel {@code ByteStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -315,7 +315,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<Byte>} for each element
      * @return a new parallel {@code ByteStream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -344,7 +344,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns a {@code byte[]} for each element
      * @return a new parallel {@code ByteStream} of the flattened array contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -373,7 +373,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns an {@code IntStream} for each element
      * @return a new parallel {@code IntStream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -403,7 +403,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Stream<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened mapped streams
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -431,7 +431,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<T>} for each element
      * @return a new parallel object {@code Stream} of the flattened collection contents
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
     public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
@@ -459,7 +459,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param action a non-interfering action to perform on each element
      * @return a new parallel {@code ByteStream} with the side-effecting action attached
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public ByteStream onEach(final ByteConsumer action) throws IllegalArgumentException, IllegalStateException {
@@ -490,7 +490,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
     public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
@@ -575,7 +575,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
+     *         {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
@@ -616,7 +617,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return a {@code Map} from keys to downstream reduction results
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the key mapper throws an exception
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ByteFunction<? extends K, E> keyMapper,
@@ -648,7 +649,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the parallel reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -740,7 +741,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalByte} with the reduction result, or empty if the stream has no elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
     public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
@@ -849,7 +850,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param combiner a function that combines two result containers into one
      * @return the result of the parallel mutable reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
+     *         {@code null}.
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
@@ -934,7 +936,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1018,7 +1020,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return {@code true} if all elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1102,7 +1104,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return {@code true} if no elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1188,7 +1190,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return an {@code OptionalByte} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1290,7 +1292,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return an {@code OptionalByte} with any matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1389,7 +1391,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @return an {@code OptionalByte} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
      * @throws E if the predicate throws an exception
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
     public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
@@ -1489,7 +1491,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param zipFunction a function applied to corresponding elements of both streams
      * @return a new parallel {@code ByteStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
@@ -1519,7 +1521,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param zipFunction a function applied to corresponding elements of all three streams
      * @return a new parallel {@code ByteStream} of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction)
@@ -1552,7 +1554,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code ByteStream} of zipped results, with length equal to the longer stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final byte valueForNoneA, final byte valueForNoneB, final ByteBinaryOperator zipFunction)
@@ -1586,7 +1588,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code ByteStream} of zipped results, with length equal to the longest stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB, final byte valueForNoneC,
@@ -1643,9 +1645,9 @@ final class ParallelArrayByteStream extends ArrayByteStream {
     }
 
     /**
-     * Returns the maximum number of threads configured for parallel operations on this stream.
+     * Returns the maximum number of threads used for parallel execution of this stream.
      *
-     * @return the maximum thread count
+     * @return the maximum thread count configured for this parallel stream
      */
     @Override
     protected int maxThreadNum() {
@@ -1655,9 +1657,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
     }
 
     /**
-     * Returns the {@link BaseStream.SplitStrategy} strategy used to divide work among threads.
+     * Returns the {@link BaseStream.SplitStrategy} strategy used to partition elements across threads.
+     * {@code ARRAY} divides the backing array into fixed slices; {@code ITERATOR} uses a shared
+     * synchronized cursor for dynamic load balancing.
      *
-     * @return the splitStrategy strategy
+     * @return the splitStrategy strategy for this parallel stream
      */
     @Override
     protected BaseStream.SplitStrategy splitStrategy() {
@@ -1667,9 +1671,9 @@ final class ParallelArrayByteStream extends ArrayByteStream {
     }
 
     /**
-     * Returns the {@link AsyncExecutor} used to run parallel tasks for this stream.
+     * Returns the {@link AsyncExecutor} used to submit parallel tasks for this stream.
      *
-     * @return the async executor
+     * @return the async executor for this parallel stream
      */
     @Override
     protected AsyncExecutor asyncExecutor() {

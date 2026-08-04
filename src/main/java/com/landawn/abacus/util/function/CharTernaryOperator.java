@@ -29,8 +29,7 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface CharTernaryOperator extends Throwables.CharTernaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given char operands.
-     * This method performs a ternary operation on three char values and returns a char result.
+     * Applies this operator to the given operands.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -42,10 +41,10 @@ public interface CharTernaryOperator extends Throwables.CharTernaryOperator<Runt
      * char max = maxOfThree.applyAsChar('A', 'Z', 'M');   // Returns 'Z'
      * }</pre>
      *
-     * @param a the first char operand
-     * @param b the second char operand
-     * @param c the third char operand
-     * @return the char result of applying this operator to the three operands
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     char applyAsChar(char a, char b, char c);

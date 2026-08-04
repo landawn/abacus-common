@@ -566,7 +566,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * NavigableMap will be visible through the returned ImmutableNavigableMap, which violates the
-     * immutability contract. Use {@link #copyOf(Map)} for a {@code true} immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Map)} for a truly independent immutable copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -993,7 +993,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *         using this map's comparator (or, if the map has no comparator, using natural ordering)
      * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map's comparator
      *         does not permit {@code null} keys
-     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}
+     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}.
      */
     @Override
     public ImmutableNavigableMap<K, V> subMap(final K fromKey, final boolean fromInclusive, final K toKey, final boolean toInclusive) {

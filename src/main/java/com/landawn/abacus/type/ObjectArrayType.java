@@ -174,7 +174,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * into the original value.</p>
      *
      * @param x the array to convert
-     * @return JSON string representation, {@code null} if input is {@code null}, or "[]" for empty arrays
+     * @return JSON string representation, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
      * @throws UncheckedIOException if an I/O error occurs during serialization
      * @see #valueOf(String)
      * @see #valueOf(Object)
@@ -467,7 +467,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * This method produces a shallow string representation using toString() on elements.
      *
      * @param x the array to convert to string
-     * @return string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
+     * @return string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
      */
     @Override
     public String toString(final Object[] x) {
@@ -485,7 +485,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * This method recursively converts nested arrays and objects to strings.
      *
      * @param x the array to convert to string
-     * @return deep string representation of the array, {@code null} if input is {@code null}, or "[]" for empty arrays
+     * @return deep string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
      */
     @Override
     public String deepToString(final Object[] x) {

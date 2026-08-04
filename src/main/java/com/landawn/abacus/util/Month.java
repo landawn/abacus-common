@@ -137,7 +137,7 @@ public enum Month {
      *
      * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)
      * @return the corresponding {@code Month} enum constant; never {@code null}
-     * @throws IllegalArgumentException if {@code intValue} is not between 1 and 12 inclusive
+     * @throws IllegalArgumentException if {@code intValue} is not between 1 and 12 inclusive.
      */
     public static Month of(final int intValue) {
         switch (intValue) {

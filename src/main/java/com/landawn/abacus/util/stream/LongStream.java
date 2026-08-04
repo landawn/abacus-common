@@ -1418,8 +1418,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public abstract LongStream append(final long... a);
 
     /**
-     * Returns a stream consisting of the elements of this stream with the specified elements appended if this stream is empty.
-     * If this stream is not empty, returns this stream unchanged.
+     * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
      *
      * <p>This is an intermediate operation.
      *
@@ -1430,7 +1429,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *       .appendIfEmpty(1L, 2L, 3L)
      *       .toArray();   // returns [1L, 2L, 3L]
      *
-     * // Non-empty stream unchanged
+     * // Non-empty stream keeps its elements
      * LongStream.of(100L, 200L)
      *       .appendIfEmpty(999L)
      *       .toArray();   // returns [100L, 200L]
@@ -1439,7 +1438,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param a the elements to append if this stream is empty
-     * @return this stream if not empty, otherwise a new stream containing the specified elements
+     * @return a stream containing this stream's elements if it is non-empty, otherwise the specified elements
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -1474,7 +1473,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param n the number of elements to select
      * @return a new {@link LongStream} consisting of the top {@code n} elements; the order of the returned elements is not guaranteed
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     @SequentialOnly
     @IntermediateOp
@@ -1509,8 +1508,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param comparator a non-interfering, stateless comparator to be used to compare stream elements
      * @return a new {@link LongStream} consisting of the top {@code n} elements as determined by the comparator; the order of the returned elements is not guaranteed
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code n} is negative, or if {@code comparator} is {@code null}.
      */
     @SequentialOnly
     @IntermediateOp
@@ -1899,7 +1897,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #forEach(Throwables.LongConsumer)
      */
     @ParallelSupported
@@ -2291,7 +2289,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalLong} containing the k-th largest element, or an empty {@code OptionalLong} if the stream is empty or the count of elements is less than k
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code k} is not positive
+     * @throws IllegalArgumentException if {@code k} is not positive.
      */
     @SequentialOnly
     @TerminalOp
@@ -2730,7 +2728,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(1L, 2L, 3L, 4L)
-     *     .transformB(s -> s.map(x -> x * 2).sorted())
+     *     .transformViaJdkStream(s -> s.map(x -> x * 2).sorted())
      *     .toArray();   // returns [2L, 4L, 6L, 8L]
      * }</pre>
      *
@@ -2740,20 +2738,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param transfer a function that transforms a {@code java.util.stream.LongStream} to another {@code java.util.stream.LongStream}
      * @return a new {@code LongStream} that is the result of applying the transfer function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code transfer} is {@code null}
-     * @see #transformB(Function, boolean)
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}.
+     * @see #transformViaJdkStream(Function, boolean)
      * @see #toJdkStream()
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public LongStream transformB(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer)
+    public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer)
             throws IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
-        return transformB(transfer, false);
+        return transformViaJdkStream(transfer, false);
     }
 
     /**
@@ -2766,7 +2764,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(1L, 2L, 3L, 4L)
-     *     .transformB(s -> s.map(x -> x * 2).sorted(), true)
+     *     .transformViaJdkStream(s -> s.map(x -> x * 2).sorted(), true)
      *     .toArray();   // transforms only when toArray() is called
      * }</pre>
      *
@@ -2777,15 +2775,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
      * @return a new {@code LongStream} that is the result of applying the transfer function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code transfer} is {@code null}
-     * @see #transformB(Function)
+     * @throws IllegalArgumentException if {@code transfer} is {@code null}.
+     * @see #transformViaJdkStream(Function)
      * @see #defer(Supplier)
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public LongStream transformB(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer, final boolean deferred)
-            throws IllegalArgumentException {
+    public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer,
+            final boolean deferred) throws IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -2875,7 +2873,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param supplier the supplier that provides the LongStream
      * @return a new LongStream supplied by the given supplier
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Stream#defer(Supplier)
      */
     public static LongStream defer(final Supplier<LongStream> supplier) throws IllegalArgumentException {
@@ -3689,7 +3687,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     {500L, 600L}     // row is missing one value
      * };
      * long[] normalized = LongStream.flatten(dataTable, 0L, false)
-     *     .toArray();   // returns [100, 200, 300, 400, 0, 0, 500, 600, 0]
+     *     .toArray();   // returns [100L, 200L, 300L, 400L, 0L, 0L, 500L, 600L, 0L]
      *
      * // Sum columns with padding
      * long[][] matrix = {{1L, 2L}, {3L, 4L, 5L}, {6L}};
@@ -3958,7 +3956,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param endExclusive the ending value (exclusive)
      * @param by the step size (must not be zero)
      * @return a LongStream of values with the specified step
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static LongStream range(final long startInclusive, final long endExclusive, final long by) {
         if (by == 0) {
@@ -4150,7 +4148,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param endInclusive the ending value (inclusive)
      * @param by the step size (must not be zero)
      * @return a LongStream of values with the specified step
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static LongStream rangeClosed(final long startInclusive, final long endInclusive, final long by) {
         if (by == 0) {
@@ -4281,7 +4279,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param element the element to repeat
      * @param n the number of times to repeat the element (must be non-negative)
      * @return a LongStream containing n copies of the element, or an empty stream if n is 0
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      * @see #generate(LongSupplier)
      * @see #iterate(long, LongUnaryOperator)
      */
@@ -4436,7 +4434,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param intervalInMillis the time interval in milliseconds between emissions
      * @return an infinite LongStream that emits timestamp values at the specified intervals
-     * @throws IllegalArgumentException if {@code intervalInMillis} is not positive
+     * @throws IllegalArgumentException if {@code intervalInMillis} is not positive.
      * @see #interval(long, long, TimeUnit)
      * @see N#sleepUninterruptibly(long)
      * @see System#currentTimeMillis()
@@ -4465,8 +4463,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param delayInMillis the initial delay in milliseconds before the first emission
      * @param intervalInMillis the time interval in milliseconds between subsequent emissions
      * @return an infinite LongStream that emits timestamp values at the specified intervals after the delay
-     * @throws IllegalArgumentException if {@code delayInMillis} is negative or
-     *         {@code intervalInMillis} is not positive
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative or {@code intervalInMillis} is not
+     *         positive.
      * @see #interval(long, long, TimeUnit)
      * @see N#sleepUninterruptibly(long)
      * @see System#currentTimeMillis()
@@ -4534,8 +4532,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param unit the time unit for both delay and interval parameters
      * @return an infinite LongStream that emits timestamp values at the specified intervals
      * @throws NullPointerException if unit is null
-     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive,
-     *         or a positive interval is shorter than one millisecond after conversion
+     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive, or a positive
+     *         interval is shorter than one millisecond after conversion.
      *
      * @see #interval(long)
      * @see #interval(long, long)
@@ -4605,7 +4603,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a LongSupplier that provides the next long value in the iteration
      * @return a LongStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}.
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static LongStream iterate(final BooleanSupplier hasNext, final LongSupplier next) throws IllegalArgumentException {
@@ -4663,7 +4661,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a LongStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}.
      * @see Stream#iterate(Object, BooleanSupplier, java.util.function.UnaryOperator)
      */
     public static LongStream iterate(final long init, final BooleanSupplier hasNext, final LongUnaryOperator f) throws IllegalArgumentException {
@@ -4768,7 +4766,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *                returns {@code true} to continue iteration, {@code false} to terminate
      * @param f a stateless function to apply to the previous element to generate the next element
      * @return a finite LongStream of elements generated by the iteration while the predicate holds
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}.
      * @see #iterate(long, LongUnaryOperator)
      * @see #iterate(BooleanSupplier, LongSupplier)
      * @see #takeWhile(LongPredicate)
@@ -4892,7 +4890,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param init the initial seed value
      * @param f a stateless function to apply to the previous element to generate the next element
      * @return an infinite LongStream of elements generated by repeatedly applying the function
-     * @throws IllegalArgumentException if {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code f} is {@code null}.
      * @see #iterate(long, LongPredicate, LongUnaryOperator)
      * @see #generate(LongSupplier)
      * @see #limit(long)
@@ -5010,7 +5008,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param s the LongSupplier that provides the elements of the stream; invoked for each element
      * @return an infinite LongStream where each element is generated by invoking the supplier
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      * @see #iterate(long, LongUnaryOperator)
      * @see #random()
      * @see #repeat(long, long)
@@ -5344,7 +5342,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param b the second long array
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final long[] a, final long[] b, final LongBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -5395,7 +5393,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param c the third long array
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final long[] a, final long[] b, final long[] c, final LongTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -5444,7 +5442,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param b the second long iterator. Can be {@code null} (treated as empty)
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongIterator a, final LongIterator b, final LongBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -5486,7 +5484,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param c the third long iterator. Can be {@code null} (treated as empty)
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongIterator a, final LongIterator b, final LongIterator c, final LongTernaryOperator zipFunction)
             throws IllegalArgumentException {
@@ -5528,7 +5526,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param b the second LongStream
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongStream a, final LongStream b, final LongBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -5557,7 +5555,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param c the third LongStream
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongStream a, final LongStream b, final LongStream c, final LongTernaryOperator zipFunction)
             throws IllegalArgumentException {
@@ -5593,7 +5591,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param streams the collection of long streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values. Empty if the collection is empty
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final Collection<? extends LongStream> streams, final LongNFunction<Long> zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
@@ -5623,7 +5621,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneB the default value to use when the second array runs out of values
      * @param zipFunction the function to combine pairs of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final long[] a, final long[] b, final long valueForNoneA, final long valueForNoneB, final LongBinaryOperator zipFunction)
             throws IllegalArgumentException {
@@ -5680,7 +5678,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneC the default value to use when the third array runs out of values
      * @param zipFunction the function to combine triples of values from the arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final long[] a, final long[] b, final long[] c, final long valueForNoneA, final long valueForNoneB, final long valueForNoneC,
             final LongTernaryOperator zipFunction) throws IllegalArgumentException {
@@ -5736,7 +5734,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneB the default value to use when the second iterator runs out of values
      * @param zipFunction the function to combine pairs of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongIterator a, final LongIterator b, final long valueForNoneA, final long valueForNoneB,
             final LongBinaryOperator zipFunction) throws IllegalArgumentException {
@@ -5787,7 +5785,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneC the default value to use when the third iterator runs out of values
      * @param zipFunction the function to combine triples of values from the iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongIterator a, final LongIterator b, final LongIterator c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTernaryOperator zipFunction) throws IllegalArgumentException {
@@ -5839,7 +5837,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneB the default value to use when the second stream runs out of values
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongStream a, final LongStream b, final long valueForNoneA, final long valueForNoneB,
             final LongBinaryOperator zipFunction) throws IllegalArgumentException {
@@ -5873,7 +5871,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueForNoneC the default value to use when the third stream runs out of values
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final LongStream a, final LongStream b, final LongStream c, final long valueForNoneA, final long valueForNoneB,
             final long valueForNoneC, final LongTernaryOperator zipFunction) throws IllegalArgumentException {
@@ -5913,8 +5911,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valuesForNone array of default values, must have same size as streams collection
      * @param zipFunction the function to combine arrays of values from the streams.
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
+     *         if {@code zipFunction} is {@code null}.
      */
     public static LongStream zip(final Collection<? extends LongStream> streams, final long[] valuesForNone, final LongNFunction<Long> zipFunction)
             throws IllegalArgumentException {
@@ -5957,7 +5955,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from the first array, otherwise from the second
      * @return a LongStream containing the merged elements from the two input arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static LongStream merge(final long[] a, final long[] b, final LongBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
@@ -6021,7 +6019,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected next.
      *                     Returns MergeResult.TAKE_FIRST to select from the first array, otherwise from the second
      * @return a LongStream containing the merged elements from the three input arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
     public static LongStream merge(final long[] a, final long[] b, final long[] c, final LongBiFunction<MergeResult> nextSelector)
@@ -6054,7 +6052,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the two input iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static LongStream merge(final LongIterator a, final LongIterator b, final LongBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
@@ -6141,7 +6139,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the three input iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
     public static LongStream merge(final LongIterator a, final LongIterator b, final LongIterator c, final LongBiFunction<MergeResult> nextSelector)
@@ -6174,7 +6172,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the two input streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
@@ -6202,7 +6200,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the three input streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static LongStream merge(final LongStream a, final LongStream b, final LongStream c, final LongBiFunction<MergeResult> nextSelector)
@@ -6213,7 +6211,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     }
 
     /**
-     * Merges a collection of LongStream into a single LongStream based on the provided nextSelector function.
+     * Merges a collection of LongStreams into a single LongStream based on the provided nextSelector function.
      * The nextSelector function determines which element to take next from the multiple streams.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6236,7 +6234,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a LongStream containing the merged elements from the input LongStreams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Collection, BiFunction)
      */
     public static LongStream merge(final Collection<? extends LongStream> streams, final LongBiFunction<MergeResult> nextSelector)

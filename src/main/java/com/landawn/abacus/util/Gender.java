@@ -103,7 +103,7 @@ public enum Gender {
      *
      * @param intValue the integer value to convert to Gender (0, 1, 2 or 3)
      * @return the corresponding Gender enum constant
-     * @throws IllegalArgumentException if the intValue is not 0, 1, 2 or 3
+     * @throws IllegalArgumentException if the intValue is not 0, 1, 2 or 3.
      */
     public static Gender of(final int intValue) {
         switch (intValue) {

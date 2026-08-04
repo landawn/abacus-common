@@ -26,7 +26,10 @@ import com.landawn.abacus.util.Numbers;
  * <p>When reading from a database, the column value is retrieved via
  * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
  * a {@code null} result returns {@code null}, a {@code Float} result is returned directly, and
- * any other numeric type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.
+ * any other numeric type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.</p>
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractFloatType}.</p>
  *
  * @see AbstractFloatType
  */

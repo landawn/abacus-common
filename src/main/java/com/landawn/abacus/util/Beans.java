@@ -627,8 +627,8 @@ public final class Beans {
      *
      * @param beanType the bean type to get bean information for.
      * @return a {@link BeanInfo} instance containing metadata about the specified type.
-     * @throws IllegalArgumentException if the specified type is not a bean class (no property getter/setter
-     *         method or public field found).
+     * @throws IllegalArgumentException if the specified type is not a bean class (no property getter/setter method or
+     *         public field found).
      * @see ParserUtil#getBeanInfo(Class)
      */
     public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
@@ -919,7 +919,7 @@ public final class Beans {
      *
      * @param cls the class for which the non-property get/set method is to be registered.
      * @param propName the name of the property to be registered as a non-property get/set method.
-     * @throws IllegalArgumentException if {@code cls} is {@code null} or {@code propName} is empty
+     * @throws IllegalArgumentException if {@code cls} is {@code null} or {@code propName} is empty.
      */
     @SuppressWarnings("deprecation")
     public static void registerNonPropertyAccessor(final Class<?> cls, final String propName) {
@@ -980,9 +980,8 @@ public final class Beans {
      *
      * @param propName the name of the property to associate with the method.
      * @param method the getter or setter method to register as the property accessor.
-     * @throws IllegalArgumentException if {@code propName} is empty, {@code method} is {@code null},
-     *         the method is not a valid getter or setter,
-     *         or if {@code propName} is already registered with a different method.
+     * @throws IllegalArgumentException if {@code propName} is empty, {@code method} is {@code null}, the method is
+     *         not a valid getter or setter, or if {@code propName} is already registered with a different method.
      */
     @SuppressWarnings("deprecation")
     public static void registerPropertyAccessor(final String propName, final Method method) {
@@ -1502,8 +1501,8 @@ public final class Beans {
      *
      * @param cls the class for which the diff-ignored property names are to be retrieved; must be a bean class.
      * @return an immutable set of property names excluded from diff operations; never {@code null}.
-     * @throws IllegalArgumentException if {@code cls} is not a bean class (no property getter/setter method
-     *         or public field found).
+     * @throws IllegalArgumentException if {@code cls} is not a bean class (no property getter/setter method or public
+     *         field found).
      * @see com.landawn.abacus.util.Difference.MapDifference
      * @see com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)
      */
@@ -2461,7 +2460,8 @@ public final class Beans {
      *        if {@code false}, throws {@link IllegalArgumentException}.
      * @return the value of the specified property, or {@code null} if the property is not found and
      *         {@code ignoreUnmatchedProperty} is {@code true}.
-     * @throws IllegalArgumentException if the specified property cannot be found and {@code ignoreUnmatchedProperty} is {@code false}.
+     * @throws IllegalArgumentException if the specified property cannot be found and {@code ignoreUnmatchedProperty}
+     *         is {@code false}.
      */
     @MayReturnNull
     public static <T> T getPropValue(final Object bean, final String propName, final boolean ignoreUnmatchedProperty) throws IllegalArgumentException {
@@ -2542,9 +2542,9 @@ public final class Beans {
      * Returns the value of the specified property wrapped in a {@link Nullable}, distinguishing
      * "property present (value may be {@code null})" from "property absent / unreachable".
      *
-     * <p>Unlike {@link #getPropValue(Object, String, boolean)} — which returns {@code null} both for a
-     * genuinely {@code null} value and for an unmatched property, and returns the leaf type's default value
-     * when a nested intermediate is {@code null} — this method returns:</p>
+     * <p>Unlike {@link #getPropValue(Object, String, boolean)} — which (with {@code ignoreUnmatchedProperty=true})
+     * returns {@code null} both for a genuinely {@code null} value and for an unmatched property, and returns
+     * the leaf type's default value when a nested intermediate is {@code null} — this method returns:</p>
      * <ul>
      *   <li>{@code Nullable.of(value)} when the property is found (the wrapped value may itself be {@code null});</li>
      *   <li>{@code Nullable.empty()} when no property/path matches {@code propName}, or when a nested
@@ -2768,7 +2768,8 @@ public final class Beans {
      *        instead of throwing an exception.
      * @return {@code true} if the property value was set successfully, {@code false} if the property
      *         was not found and {@code ignoreUnmatchedProperty} is {@code true}.
-     * @throws IllegalArgumentException if the property cannot be found and {@code ignoreUnmatchedProperty} is {@code false}.
+     * @throws IllegalArgumentException if the property cannot be found and {@code ignoreUnmatchedProperty} is
+     *         {@code false}.
      * @deprecated replaced by {@link ParserUtil.BeanInfo#setPropValue(Object, String, Object, boolean)}
      */
     @Deprecated
@@ -2780,7 +2781,9 @@ public final class Beans {
     /**
      * Sets the property value returned by invoking the getter method on the provided bean.
      * The returned type of the get method should be {@code Collection} or {@code Map}.
-     * And the specified property value and the returned value must be the same type.
+     * The specified property value must be a {@code Collection} when the getter returns a
+     * {@code Collection}, or a {@code Map} when the getter returns a {@code Map}; its contents
+     * are copied into the returned collection or map (the concrete implementations need not match).
      * If {@code propValue} is {@code null}, this method does nothing.
      *
      * <p>This method is particularly useful for JAXB-style beans where collections
@@ -2805,7 +2808,8 @@ public final class Beans {
      * @param propGetMethod the getter method whose return value (a {@link java.util.Collection} or {@link Map})
      *        will be cleared and repopulated with the contents of {@code propValue}.
      * @param propValue the new contents to populate into the existing collection or map;
-     *        must be the same collection/map type as the getter's return type.
+     *        must be a {@code Collection} if the getter returns a {@code Collection}, or a
+     *        {@code Map} if the getter returns a {@code Map} (the concrete implementations need not match).
      *        If {@code null}, the method does nothing.
      * @throws IllegalArgumentException if the getter does not return a {@link java.util.Collection} or {@link Map}.
      */
@@ -3165,8 +3169,8 @@ public final class Beans {
      * @param targetType the class of the bean to create; must be a valid bean class.
      * @return a new bean of the specified type with the selected properties populated from the map,
      *         or {@code null} if {@code map} is {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
-     *         or if a selected property does not exist in the target bean class.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if a selected property
+     *         does not exist in the target bean class.
      */
     @MayReturnNull
     public static <T> T mapToBean(final Map<String, Object> map, final Collection<String> selectPropNames, final Class<? extends T> targetType) {
@@ -3319,8 +3323,8 @@ public final class Beans {
      *        If {@code null}, all properties are considered. If empty, no properties are set.
      * @param targetType the class of the bean to create for each map; must be a valid bean class.
      * @return a list of new bean instances with the selected properties populated from the corresponding maps.
-     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class,
-     *         or if a selected property does not exist in the target bean class.
+     * @throws IllegalArgumentException if {@code targetType} is not a valid bean class, or if a selected property
+     *         does not exist in the target bean class.
      * @see #mapToBean(Map, Class)
      */
     public static <T> List<T> mapsToBeans(final Collection<? extends Map<String, Object>> mapList, final Collection<String> selectPropNames,
@@ -3455,8 +3459,8 @@ public final class Beans {
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type with the selected (or all non-{@code null}) property name-value pairs;
      *         never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class, or if
+     *         {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames,
             final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -3502,8 +3506,8 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that creates a new Map instance given an initial capacity.
      * @return a map of the specified type with property name-value pairs; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist in the bean class, or if
+     *         {@code mapSupplier} is {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -4041,7 +4045,7 @@ public final class Beans {
      *        are included. In selection mode, selected top-level properties are included even when
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @return a {@link java.util.LinkedHashMap} representation of the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final Collection<String> selectPropNames) {
@@ -4081,8 +4085,8 @@ public final class Beans {
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param mapSupplier a supplier function to create the Map instance.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is
+     *         {@code null}.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -4127,8 +4131,8 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a supplier function to create the Map instance into which the bean properties will be put.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is
+     *         {@code null}.
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -4213,7 +4217,7 @@ public final class Beans {
      *        are included. In selection mode, selected top-level properties are included even when
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param output the map into which the bean's properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -4255,7 +4259,7 @@ public final class Beans {
      *        {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the map into which the bean's properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -4696,7 +4700,7 @@ public final class Beans {
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @return a map with only the selected properties flattened; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final Collection<String> selectPropNames) {
         return beanToFlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
@@ -4727,8 +4731,8 @@ public final class Beans {
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with selected properties flattened; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is
+     *         {@code null}.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
@@ -4768,8 +4772,8 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map of the specified type with the bean's (selected) properties flattened using dot notation for nested beans; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is
+     *         {@code null}.
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
@@ -4837,7 +4841,7 @@ public final class Beans {
      *        are included. In selection mode, selected top-level properties are included
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param output the Map instance into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, final M output) {
@@ -4871,7 +4875,7 @@ public final class Beans {
      *        even when {@code null}, while {@code null} properties inside nested beans are always omitted.
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to {@link NamingPolicy#CAMEL_CASE}.
      * @param output the Map instance into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist
+     * @throws IllegalArgumentException if a selected property does not exist.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy,
@@ -5420,7 +5424,7 @@ public final class Beans {
          * Performs the conversion, returning a {@link java.util.LinkedHashMap}.
          *
          * @return a new {@link java.util.LinkedHashMap} with the converted properties; never {@code null}.
-         * @throws IllegalArgumentException if a {@code select}ed property is not found in the bean class.
+         * @throws IllegalArgumentException if a property selected via {@code select(...)} is not found in the bean class.
          */
         public Map<String, Object> toMap() {
             return toMap(IntFunctions.ofLinkedHashMap());
@@ -5432,8 +5436,8 @@ public final class Beans {
          * @param <M> the map type.
          * @param mapSupplier a function that creates a new map given an initial capacity.
          * @return the created map with the converted properties; never {@code null}.
-         * @throws IllegalArgumentException if a {@code select}ed property is not found in the bean class.
-         * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+         * @throws IllegalArgumentException if a property selected via {@code select(...)} is not found in the bean class, or if
+         *         {@code mapSupplier} is {@code null}.
          */
         public <M extends Map<String, Object>> M toMap(final IntFunction<? extends M> mapSupplier) throws IllegalArgumentException {
             N.checkArgNotNull(mapSupplier, cs.mapSupplier);
@@ -5451,8 +5455,8 @@ public final class Beans {
          * @param <M> the map type.
          * @param output the map to fill; must not be {@code null}.
          * @return {@code output}.
-         * @throws IllegalArgumentException if {@code output} is {@code null}, or if a {@code select}ed property is
-         *         not found in the bean class.
+         * @throws IllegalArgumentException if {@code output} is {@code null}, or if a property selected via
+         *         {@code select(...)} is not found in the bean class.
          */
         public <M extends Map<String, Object>> M into(final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, cs.output);
@@ -5546,7 +5550,8 @@ public final class Beans {
      * @param <T> the type of the object to be created.
      * @param targetType the class to instantiate; must have an accessible no-argument constructor.
      * @return a new instance of the specified class; never {@code null}.
-     * @throws IllegalArgumentException if the class cannot be instantiated (e.g., abstract, no accessible no-arg constructor).
+     * @throws IllegalArgumentException if the class cannot be instantiated (e.g., abstract, no accessible no-arg
+     *         constructor).
      */
     public static <T> T newBean(final Class<T> targetType) {
         return N.newInstance(targetType);
@@ -5816,8 +5821,8 @@ public final class Beans {
      *        If {@code null}, all matching properties are copied; an empty collection copies no properties.
      * @param targetType the class of the target bean to create; must not be {@code null}.
      * @return a new instance of the target type with the selected properties copied; never {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a selected property
-     *         is not found in the source bean or in the target bean.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a selected property is not found
+     *         in the source bean or in the target bean.
      */
     public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
@@ -5855,9 +5860,9 @@ public final class Beans {
      *        target property name; use {@link Fn#identity()} to keep names unchanged.
      * @param targetType the class of the target bean to create; must not be {@code null}.
      * @return a new instance of the target type with properties copied and names converted; never {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a selected property
-     *         is not found in the source bean or its (converted) name is not found in the target bean.
-     * @throws IllegalArgumentException if {@code propNameConverter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a selected property is not found
+     *         in the source bean or its (converted) name is not found in the target bean, or if
+     *         {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -5922,9 +5927,8 @@ public final class Beans {
      *        the property in the copy.
      * @param targetType the class of the target bean to create; must not be {@code null}.
      * @return a new instance of the target type with filtered properties copied; never {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that
-     *         passes the filter has no matching property in the target bean.
-     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that passes
+     *         the filter has no matching property in the target bean, or if {@code propFilter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -5968,9 +5972,9 @@ public final class Beans {
      * @param targetType the class of the target bean to create; must not be {@code null}.
      * @return a new instance of the target type with filtered and name-converted properties copied;
      *         never {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that
-     *         passes the filter has no matching (converted) property name in the target bean.
-     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if a source property that passes
+     *         the filter has no matching (converted) property name in the target bean, or if any of
+     *         {@code propFilter}, {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6050,9 +6054,8 @@ public final class Beans {
      * @param targetType the class of the target bean to create; must not be {@code null}.
      * @return a new instance of the target type with properties copied (excluding ignored ones);
      *         never {@code null}.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if
-     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property with a
-     *         non-{@code null} source value is found.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if {@code ignoreUnmatchedProperty}
+     *         is {@code false} and an unmatched property with a non-{@code null} source value is found.
      */
     @SuppressWarnings({ "unchecked" })
     public static <T> T copyAs(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,
@@ -6168,8 +6171,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if {@code mergeFunc} is
+     *         {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6207,8 +6210,8 @@ public final class Beans {
      *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
      * @param ignoredPropNames a set of source property names to exclude from merging; ignored if {@code null}.
      * @return {@code targetBean} with properties merged (excluding ignored ones).
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if
-     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if {@code ignoreUnmatchedProperty}
+     *         is {@code false} and an unmatched property is found.
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
             final Set<String> ignoredPropNames) throws IllegalArgumentException {
@@ -6250,9 +6253,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with properties merged using custom logic.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if
-     *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched property is found.
-     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if {@code ignoreUnmatchedProperty}
+     *         is {@code false} and an unmatched property is found, or if {@code mergeFunc} is {@code null}.
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
             final Set<String> ignoredPropNames, final BinaryOperator<?> mergeFunc) throws IllegalArgumentException {
@@ -6317,8 +6319,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}.
-     * @throws IllegalArgumentException if any of {@code propNameConverter}, {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if any of
+     *         {@code propNameConverter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6366,8 +6368,8 @@ public final class Beans {
      * @param selectPropNames the source property names to merge. If {@code null}, all properties
      *        are merged. If empty, no properties are merged.
      * @return {@code targetBean} with the selected properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
-     *         is not found in the source bean or in the target bean.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
+     *         in the source bean or in the target bean.
      */
     public static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final Collection<String> selectPropNames)
             throws IllegalArgumentException {
@@ -6407,9 +6409,8 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with the selected properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
-     *         is not found in the source bean or in the target bean.
-     * @throws IllegalArgumentException if {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
+     *         in the source bean or in the target bean, or if {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6451,9 +6452,8 @@ public final class Beans {
      * @param propNameConverter a function that converts each source property name to the corresponding
      *        target property name; use {@link Fn#identity()} to keep names unchanged.
      * @return {@code targetBean} with the selected (and name-converted) properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
-     *         is not found in the source bean or in the target bean.
-     * @throws IllegalArgumentException if {@code propNameConverter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
+     *         in the source bean or in the target bean, or if {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6505,9 +6505,9 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with the selected, name-converted, and merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property
-     *         is not found in the source bean or in the target bean.
-     * @throws IllegalArgumentException if any of {@code propNameConverter}, {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
+     *         in the source bean or in the target bean, or if any of {@code propNameConverter}, {@code mergeFunc} is
+     *         {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6624,9 +6624,8 @@ public final class Beans {
      * @param propFilter a predicate receiving the property name and source value; returns {@code true} to
      *        merge the property into the target.
      * @return {@code targetBean} with matching properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
-     *         the filter has no matching property in the target bean.
-     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes the
+     *         filter has no matching property in the target bean, or if {@code propFilter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6669,9 +6668,9 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with filtered and merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
-     *         the filter has no matching property in the target bean.
-     * @throws IllegalArgumentException if any of {@code propFilter}, {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes the
+     *         filter has no matching property in the target bean, or if any of {@code propFilter}, {@code mergeFunc}
+     *         is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6715,9 +6714,9 @@ public final class Beans {
      * @param propNameConverter a function that converts each source property name to the corresponding
      *        target property name; use {@link Fn#identity()} to keep names unchanged.
      * @return {@code targetBean} with filtered and name-converted properties merged.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
-     *         the filter has no matching property in the target bean.
-     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes the
+     *         filter has no matching property in the target bean, or if any of {@code propFilter},
+     *         {@code propNameConverter} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6774,9 +6773,9 @@ public final class Beans {
      * @param mergeFunc a binary operator that receives {@code (sourceValue, targetValue)} and returns
      *        the value to set on the target.
      * @return {@code targetBean} with filtered, name-converted, and merged properties applied.
-     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes
-     *         the filter has no matching property in the target bean.
-     * @throws IllegalArgumentException if any of {@code propFilter}, {@code propNameConverter}, {@code mergeFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a property that passes the
+     *         filter has no matching property in the target bean, or if any of {@code propFilter},
+     *         {@code propNameConverter}, {@code mergeFunc} is {@code null}.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -6994,8 +6993,8 @@ public final class Beans {
      *
      * @param bean the bean object to populate; must not be {@code null} and must be a valid bean class.
      * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
-     * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class,
-     *         if {@code propNamesToFill} is {@code null}, or if a property name is not found in the bean.
+     * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class, if
+     *         {@code propNamesToFill} is {@code null}, or if a property name is not found in the bean.
      */
     public static void randomize(final Object bean, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(bean, cs.bean);
@@ -7056,8 +7055,8 @@ public final class Beans {
      * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
      * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
      * @return a new instance with the specified properties filled with random values; never {@code null}.
-     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class,
-     *         if {@code propNamesToFill} is {@code null}, or if a property name is not found in the class.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class, if
+     *         {@code propNamesToFill} is {@code null}, or if a property name is not found in the class.
      */
     public static <T> T newRandomBean(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -7105,8 +7104,8 @@ public final class Beans {
      * @param count the number of instances to create; must not be negative.
      * @return a list containing exactly {@code count} newly created and fully populated bean instances;
      *         never {@code null}.
-     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class,
-     *         or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class, or
+     *         {@code count} is negative.
      */
     public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
@@ -7145,9 +7144,8 @@ public final class Beans {
      * @param count the number of instances to create; must not be negative.
      * @return a list containing exactly {@code count} newly created bean instances with the specified
      *         properties filled; never {@code null}.
-     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class,
-     *         {@code count} is negative, {@code propNamesToFill} is {@code null}, or a property name is
-     *         not found in the class.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class, {@code count}
+     *         is negative, {@code propNamesToFill} is {@code null}, or a property name is not found in the class.
      */
     public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
@@ -7286,8 +7284,7 @@ public final class Beans {
      * @return a {@link Stream} of {@link Map.Entry} objects where each key is a property name
      *         and each value is the corresponding property value (which may be {@code null}),
      *         containing only those properties for which {@code propFilter} returned {@code true}.
-     * @throws IllegalArgumentException if {@code bean} is {@code null}.
-     * @throws IllegalArgumentException if {@code propFilter} is {@code null}.
+     * @throws IllegalArgumentException if {@code bean} is {@code null}, or if {@code propFilter} is {@code null}.
      */
     public static Stream<Map.Entry<String, Object>> stream(final Object bean, final BiPredicate<? super String, Object> propFilter)
             throws IllegalArgumentException {

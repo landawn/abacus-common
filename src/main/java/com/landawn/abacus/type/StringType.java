@@ -39,7 +39,7 @@ package com.landawn.abacus.type;
  *     stmt.executeUpdate();
  * }
  *
- * try (PreparedStatement stmt2 = conn.prepareStatement("SELECT name FROM users");
+ * try (PreparedStatement stmt2 = conn.prepareStatement("SELECT name FROM users"));
  *      ResultSet rs = stmt2.executeQuery()) {
  *     if (rs.next()) {
  *         String name = stringType.get(rs, 1);   // or get(rs, "name")

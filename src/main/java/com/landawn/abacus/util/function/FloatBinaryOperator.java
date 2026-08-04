@@ -21,9 +21,6 @@ import com.landawn.abacus.util.Throwables;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(float, float)}.</p>
  *
- * <p>This interface extends {@link Throwables.FloatBinaryOperator} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
  * <p>Unlike {@link FloatBiFunction}, this interface is specifically designed for operations where both
  * inputs and the output are of the same primitive type {@code float}, making it ideal for mathematical
  * and arithmetic operations.</p>

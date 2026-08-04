@@ -156,16 +156,10 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
 
     /**
      * Deserializes a JSON string into an object of the specified target class using custom deserialization configuration.
-     * This method allows fine-grained control over the deserialization process through configuration options.
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
-     * subclasses must override this method to provide actual parsing behavior.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * JsonDeserConfig config = new JsonDeserConfig();
-     * User user = parser.parse("{\"name\":\"John\"}", config, User.class);
-     * }</pre>
+     * subclasses (for example {@link JsonParserImpl}) must override this method to provide parsing behavior.
+     * See {@link JsonParser#parse(String, JsonDeserConfig, Class)} for the public contract and usage.</p>
      *
      * @param <T> the type of the target class
      * @param source the JSON string to deserialize; may be {@code null} or empty
@@ -202,17 +196,10 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
 
     /**
      * Deserializes a JSON array string and populates the provided object array using custom deserialization configuration.
-     * This method allows fine-grained control over how array elements are deserialized.
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
-     * subclasses must override this method to provide actual parsing behavior.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Object[] output = new Object[3];
-     * JsonDeserConfig config = new JsonDeserConfig();
-     * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", config, output);
-     * }</pre>
+     * subclasses must override this method to provide parsing behavior.
+     * See {@link JsonParser#parse(String, JsonDeserConfig, Object[])} for the public contract and usage.</p>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -247,17 +234,10 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
 
     /**
      * Deserializes a JSON array string and populates the provided collection using custom deserialization configuration.
-     * This method allows fine-grained control over how collection elements are deserialized.
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
-     * subclasses must override this method to provide actual parsing behavior.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<String> output = new ArrayList<>();
-     * JsonDeserConfig config = new JsonDeserConfig();
-     * parser.parse("[\"Alice\",\"Bob\"]", config, output);
-     * }</pre>
+     * subclasses must override this method to provide parsing behavior.
+     * See {@link JsonParser#parse(String, JsonDeserConfig, Collection)} for the public contract and usage.</p>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -292,17 +272,10 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
 
     /**
      * Deserializes a JSON object string and populates the provided map using custom deserialization configuration.
-     * This method allows fine-grained control over how map entries are deserialized.
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
-     * subclasses must override this method to provide actual parsing behavior.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, Object> output = new HashMap<>();
-     * JsonDeserConfig config = new JsonDeserConfig();
-     * parser.parse("{\"name\":\"John\",\"age\":30}", config, output);
-     * }</pre>
+     * subclasses must override this method to provide parsing behavior.
+     * See {@link JsonParser#parse(String, JsonDeserConfig, Map)} for the public contract and usage.</p>
      *
      * @param source the JSON object string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -315,8 +288,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
     }
 
     /**
-     * Deserializes a substring of a JSON string into an object of the specified target type using default configuration.
-     * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
+     * Deserializes a range of a JSON string into an object of the specified target type using default configuration.
+     * Useful when the JSON payload is embedded in a larger string. Concrete parsers may parse the range
+     * without allocating an intermediate {@code String} copy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -325,11 +299,11 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the JSON string containing the substring to deserialize; must not be {@code null}
-     * @param fromIndex the beginning index of the substring, inclusive
-     * @param toIndex the ending index of the substring, exclusive
+     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param fromIndex the beginning index of the range, inclusive
+     * @param toIndex the ending index of the range, exclusive
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target type populated with data from the JSON substring; if the substring is
+     * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
@@ -341,8 +315,9 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
     }
 
     /**
-     * Deserializes a substring of a JSON string into an object of the specified target class using default configuration.
-     * This method is useful when parsing a portion of a larger JSON string without creating a substring copy.
+     * Deserializes a range of a JSON string into an object of the specified target class using default configuration.
+     * Useful when the JSON payload is embedded in a larger string. Concrete parsers may parse the range
+     * without allocating an intermediate {@code String} copy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -351,11 +326,11 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string containing the substring to deserialize; must not be {@code null}
-     * @param fromIndex the beginning index of the substring, inclusive
-     * @param toIndex the ending index of the substring, exclusive
+     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param fromIndex the beginning index of the range, inclusive
+     * @param toIndex the ending index of the range, exclusive
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target class populated with data from the JSON substring; if the substring is
+     * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
@@ -367,8 +342,11 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
     }
 
     /**
-     * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
-     * This method allows fine-grained control over the deserialization process for a specific portion of the input.
+     * Deserializes a range of a JSON string into an object using custom deserialization configuration.
+     *
+     * <p>This base-class implementation extracts the range with {@link String#substring(int, int)}
+     * and then deserializes. {@link JsonParserImpl} overrides this path to parse the range without
+     * allocating an intermediate string copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -378,12 +356,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the JSON string containing the substring to deserialize; must not be {@code null}
-     * @param fromIndex the beginning index of the substring, inclusive
-     * @param toIndex the ending index of the substring, exclusive
+     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param fromIndex the beginning index of the range, inclusive
+     * @param toIndex the ending index of the range, exclusive
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target type populated with data from the JSON substring; if the substring is
+     * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
@@ -395,8 +373,11 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
     }
 
     /**
-     * Deserializes a substring of a JSON string into an object using custom deserialization configuration.
-     * This method allows fine-grained control over the deserialization process for a specific portion of the input.
+     * Deserializes a range of a JSON string into an object using custom deserialization configuration.
+     *
+     * <p>This base-class implementation extracts the range with {@link String#substring(int, int)}
+     * and then deserializes. {@link JsonParserImpl} overrides this path to parse the range without
+     * allocating an intermediate string copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -406,12 +387,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string containing the substring to deserialize; must not be {@code null}
-     * @param fromIndex the beginning index of the substring, inclusive
-     * @param toIndex the ending index of the substring, exclusive
+     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param fromIndex the beginning index of the range, inclusive
+     * @param toIndex the ending index of the range, exclusive
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
-     * @return an instance of the target class populated with data from the JSON substring; if the substring is
+     * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
      * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class

@@ -135,7 +135,7 @@ public interface Poolable {
      * @param liveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
      * @return a PoolableAdapter containing the source object with the specified expiration settings
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive
+     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
      */
     static <T> PoolableAdapter<T> wrap(final T value, final long liveTime, final long maxIdleTime) {
         return PoolableAdapter.of(value, liveTime, maxIdleTime);

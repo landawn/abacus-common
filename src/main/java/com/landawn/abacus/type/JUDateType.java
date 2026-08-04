@@ -118,7 +118,7 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link java.util.Date}, or {@code null} if {@code str} is {@code null} or a null-datetime string
-     * @throws IllegalArgumentException if the string format is not recognized
+     * @throws IllegalArgumentException if the string format is not recognized.
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Date)
      */

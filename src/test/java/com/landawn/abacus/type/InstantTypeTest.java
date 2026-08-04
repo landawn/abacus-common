@@ -18,6 +18,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,6 +76,25 @@ public class InstantTypeTest extends TestBase {
         Instant result = instantType.valueOf((Object) str);
         assertNotNull(result);
         assertEquals(str, result.toString());
+    }
+
+    @Test
+    public void testValueOf_Object_Instant_preservesNanos() {
+        Instant nanos = Instant.parse("2023-12-25T10:30:45.123456789Z");
+        Instant result = instantType.valueOf((Object) nanos);
+        assertEquals(nanos, result);
+        assertEquals(123456789, result.getNano());
+    }
+
+    @Test
+    public void testValueOf_Object_Date_and_Calendar() {
+        long millis = 1703502645123L;
+        Date date = new Date(millis);
+        assertEquals(millis, instantType.valueOf(date).toEpochMilli());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        assertEquals(millis, instantType.valueOf(cal).toEpochMilli());
     }
 
     @Test

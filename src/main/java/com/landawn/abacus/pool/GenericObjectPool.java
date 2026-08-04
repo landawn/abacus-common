@@ -129,7 +129,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -161,7 +161,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
@@ -259,7 +259,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param element the object to add, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -359,7 +359,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param element the object to add, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -403,7 +403,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *         available, the element was already (or became) expired, the memory measure rejected the element (returned
      *         a negative size, threw, or the element would exceed {@code maxMemorySize} and
      *         balancing did not free enough memory)
-     * @throws IllegalArgumentException if the element or unit is null
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -524,7 +524,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if the timeout elapsed or add failed
-     * @throws IllegalArgumentException if the element or unit is null
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -651,7 +651,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
+     * @throws IllegalArgumentException if the unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull

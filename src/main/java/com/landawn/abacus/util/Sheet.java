@@ -319,7 +319,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *            A {@code null} collection is treated as empty
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values.
      *            A {@code null} collection is treated as empty
-     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null} or duplicated
+     * @throws IllegalArgumentException if any of the row keys or column keys are {@code null} or duplicated.
      * @see #Sheet()
      * @see #Sheet(Collection, Collection, Object[][])
      * @see #rows(Collection, Collection, Object[][])
@@ -363,8 +363,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rows the initial data as a two-dimensional array where rows[i][j] is the value at row i, column j;
      *             {@code null} or empty is treated as no initial values; otherwise it must have length equal to rowKeySet size,
      *             and every inner array must be non-{@code null} and have length equal to columnKeySet size
-     * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, an inner row is {@code null},
-     *             or the array dimensions don't match the key sets
+     * @throws IllegalArgumentException if any row/column keys are {@code null} or duplicated, an inner row is
+     *         {@code null}, or the array dimensions don't match the key sets.
      * @see #Sheet(Collection, Collection)
      * @see #rows(Collection, Collection, Object[][])
      * @see #columns(Collection, Collection, Object[][])
@@ -459,7 +459,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rows the data as a two-dimensional array where each inner array represents a row; {@code null} or empty means no initial values,
      *             and a non-empty array must not contain {@code null} rows
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or
+     *         dimensions don't match.
      * @see #Sheet(Collection, Collection, Object[][])
      * @see #rows(Collection, Collection, Collection)
      * @see #columns(Collection, Collection, Object[][])
@@ -496,7 +497,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param rows the data as a collection of collections where each inner collection represents a row; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner row is {@code null}, or
+     *         dimensions don't match.
      * @see #rows(Collection, Collection, Object[][])
      * @see #columns(Collection, Collection, Collection)
      */
@@ -565,7 +567,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columns the data as a two-dimensional array where each inner array represents a column; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null}, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null},
+     *         or dimensions don't match.
      * @see #columns(Collection, Collection, Collection)
      * @see #rows(Collection, Collection, Object[][])
      */
@@ -625,7 +628,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys for the Sheet; must not contain {@code null} or duplicate values
      * @param columns the data as a collection of collections where each inner collection represents a column; {@code null} or empty means no initial values
      * @return a new Sheet with the specified keys and data
-     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null}, or dimensions don't match
+     * @throws IllegalArgumentException if any keys are {@code null} or duplicated, an inner column is {@code null},
+     *         or dimensions don't match.
      * @see #columns(Collection, Collection, Object[][])
      * @see #rows(Collection, Collection, Collection)
      */
@@ -742,7 +746,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key identifying the row
      * @param columnKey the key identifying the column
      * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
-     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
      * @see #isNull(int, int)
      * @see #isNull(Point)
      * @see #get(Object, Object)
@@ -841,7 +845,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key identifying the row
      * @param columnKey the key identifying the column
      * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
-     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
      * @see #get(int, int)
      * @see #get(Point)
      * @see #set(Object, Object, Object)
@@ -949,7 +953,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param value the new value to store in the cell (can be {@code null})
      * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
      * @see #set(int, int, Object)
      * @see #set(Point, Object)
      * @see #get(Object, Object)
@@ -1043,7 +1047,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * <p>Copies all values from the source Sheet into this Sheet.</p>
+     * Copies all values from the source Sheet into this Sheet.
      *
      * <p>This method transfers data from the source Sheet into this Sheet. The source Sheet must have row keys
      * and column keys that are contained within this Sheet. Values from the source Sheet will replace any
@@ -1079,7 +1083,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param source the source Sheet from which to get the values
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
-     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
+     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in
+     *         this Sheet.
      * @see #putAll(Sheet, BiFunction)
      * @see #set(Object, Object, Object)
      * @see #merge(Sheet, BiFunction)
@@ -1111,7 +1116,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     /**
-     * <p>Merges all values from the source Sheet into this Sheet, combining each pair of values with the specified merge function.</p>
+     * Merges all values from the source Sheet into this Sheet, combining each pair of values with the specified merge function.
      *
      * <p>This method combines data from the source Sheet into this Sheet. For every cell within the source Sheet's
      * row and column key range, the provided merge function is applied with the current value from this Sheet and the
@@ -1150,8 +1155,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param source the source Sheet from which to get the values
      * @param mergeFunction the function used to combine conflicting cell values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
-     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in this Sheet
-     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
+     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in
+     *         this Sheet, or if {@code mergeFunction} is {@code null}.
      * @see #putAll(Sheet)
      * @see #set(Object, Object, Object)
      * @see #merge(Sheet, BiFunction)
@@ -1207,7 +1212,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the column key of the cell to clear
      * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
      * @see #remove(int, int)
      * @see #remove(Point)
      * @see #set(Object, Object, Object)
@@ -1444,7 +1449,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the row key identifying the row to retrieve
      * @return a lazy immutable list view of values at the row's current numeric position, in column order
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      * @see #columnValues(Object)
      * @see #setRow(Object, Collection)
      * @see #rowAsMap(Object)
@@ -1503,7 +1508,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key of the row to be set
      * @param row the collection of values to set in the row; must match the number of columns, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet or the collection size does not match column count (unless {@code null} or empty)
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet or the collection size does not
+     *         match column count (unless {@code null} or empty).
      * @see #rowValues(Object)
      * @see #updateRow(Object, Function)
      * @see #addRow(Object, Collection)
@@ -1560,7 +1566,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param row the collection of values for the new row; must match the number of columns, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code rowKey} is {@code null}, the row key already exists in this Sheet,
-     *             or the collection size does not match column count (unless {@code null} or empty)
+     *         or the collection size does not match column count (unless {@code null} or empty).
      * @see #addRow(int, Object, Collection)
      * @see #removeRow(Object)
      * @see #setRow(Object, Collection)
@@ -1628,7 +1634,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt; rowCount()
      * @throws IllegalArgumentException if {@code rowKey} is {@code null}, the row key already exists in this Sheet,
-     *             or the collection size does not match column count (unless {@code null} or empty)
+     *         or the collection size does not match column count (unless {@code null} or empty).
      * @see #addRow(Object, Collection)
      * @see #moveRow(Object, int)
      * @see #removeRow(Object)
@@ -1714,8 +1720,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key of the row to be updated
      * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet, or if {@code func} is
+     *         {@code null}.
      * @see #updateColumn(Object, Function)
      * @see #updateAll(Function)
      */
@@ -1756,7 +1762,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the key of the row to be removed
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      * @see #removeColumn(Object)
      * @see #addRow(Object, Collection)
      */
@@ -1813,7 +1819,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key of the row to be moved
      * @param newRowIndex the new zero-based index where the row should be positioned
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      * @throws IndexOutOfBoundsException if newRowIndex &lt; 0 or newRowIndex &gt;= rowCount()
      * @see #swapRows(Object, Object)
      * @see #moveColumn(Object, int)
@@ -1865,7 +1871,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKeyA the key of the first row to swap
      * @param rowKeyB the key of the second row to swap
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if either row key does not exist in this Sheet
+     * @throws IllegalArgumentException if either row key does not exist in this Sheet.
      * @see #moveRow(Object, int)
      * @see #swapColumns(Object, Object)
      */
@@ -1923,7 +1929,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the current key of the row to rename
      * @param newRowKey the new key for the row; must not be {@code null} and must not already exist
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if rowKey does not exist in this Sheet, or newRowKey is {@code null} or already exists
+     * @throws IllegalArgumentException if rowKey does not exist in this Sheet, or newRowKey is {@code null} or
+     *         already exists.
      * @see #renameColumn(Object, Object)
      */
     public void renameRow(final R rowKey, final R newRowKey) throws IllegalStateException, IllegalArgumentException {
@@ -2004,7 +2011,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the key identifying the row
      * @return a new map of column keys to cell values for the specified row, in column order
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      * @see #columnAsMap(Object)
      * @see #rowsMap()
      * @see #rowValues(Object)
@@ -2097,7 +2104,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKey the key identifying the column to retrieve
      * @return a lazy immutable list view of values at the column's current numeric position, in row order
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      * @see #rowValues(Object)
      * @see #setColumn(Object, Collection)
      * @see #columnAsMap(Object)
@@ -2158,7 +2165,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key of the column to be set
      * @param column the collection of values to set in the column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet or collection size does not match row count (unless {@code null} or empty)
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet or collection size does not
+     *         match row count (unless {@code null} or empty).
      * @see #columnValues(Object)
      * @see #updateColumn(Object, Function)
      * @see #addColumn(Object, Collection)
@@ -2223,8 +2231,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the unique key for the new column; must not be {@code null} and must not already exist in this Sheet
      * @param column the collection of values for the new column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if {@code columnKey} is {@code null}, the column key already exists,
-     *             or the collection size does not match row count (unless {@code null} or empty)
+     * @throws IllegalArgumentException if {@code columnKey} is {@code null}, the column key already exists, or the
+     *         collection size does not match row count (unless {@code null} or empty).
      * @see #addColumn(int, Object, Collection)
      * @see #removeColumn(Object)
      * @see #setColumn(Object, Collection)
@@ -2287,8 +2295,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param column the collection of values for the new column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if columnIndex &lt; 0 or columnIndex &gt; columnCount()
-     * @throws IllegalArgumentException if {@code columnKey} is {@code null}, the column key already exists,
-     *             or the collection size does not match row count (unless {@code null} or empty)
+     * @throws IllegalArgumentException if {@code columnKey} is {@code null}, the column key already exists, or the
+     *         collection size does not match row count (unless {@code null} or empty).
      * @see #addColumn(Object, Collection)
      * @see #moveColumn(Object, int)
      */
@@ -2368,8 +2376,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key of the column to be updated
      * @param func the function applied to each selected value; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet, or if {@code func} is
+     *         {@code null}.
      * @see #updateRow(Object, Function)
      * @see #updateAll(Function)
      */
@@ -2413,7 +2421,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKey the key of the column to be removed
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      * @see #addColumn(Object, Collection)
      * @see #removeRow(Object)
      */
@@ -2467,7 +2475,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key of the column to be moved
      * @param newColumnIndex the new zero-based index where the column should be positioned
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      * @throws IndexOutOfBoundsException if newColumnIndex &lt; 0 or newColumnIndex &gt;= columnCount()
      * @see #swapColumns(Object, Object)
      * @see #moveRow(Object, int)
@@ -2517,7 +2525,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeyA the key of the first column to swap
      * @param columnKeyB the key of the second column to swap
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if either column key does not exist in this Sheet
+     * @throws IllegalArgumentException if either column key does not exist in this Sheet.
      * @see #moveColumn(Object, int)
      * @see #swapRows(Object, Object)
      */
@@ -2572,7 +2580,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the current key of the column to rename
      * @param newColumnKey the new key for the column; must not be {@code null} and must not already exist
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if columnKey does not exist in this Sheet, or newColumnKey is {@code null} or already exists
+     * @throws IllegalArgumentException if columnKey does not exist in this Sheet, or newColumnKey is {@code null} or
+     *         already exists.
      * @see #renameRow(Object, Object)
      */
     public void renameColumn(final C columnKey, final C newColumnKey) throws IllegalStateException, IllegalArgumentException {
@@ -2653,7 +2662,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKey the key identifying the column
      * @return a new map of row keys to cell values for the specified column, in row order
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      * @see #rowAsMap(Object)
      * @see #columnsMap()
      * @see #columnValues(Object)
@@ -3225,9 +3234,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key of the column whose values will determine the row ordering
      * @param cmp the comparator to determine the order of values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet, or if {@code cmp} is
+     *         {@code null}.
      * @throws ClassCastException if comparing two column values throws a ClassCastException
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
@@ -3341,9 +3350,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      *            {@code null} or empty, and every key must exist in this Sheet
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if {@code columnKeysToSort} is {@code null} or empty (an empty collection
-     *         is accepted only on a zero-column Sheet), or if any specified column key does not exist in this Sheet
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code columnKeysToSort} is {@code null} or empty (an empty collection is
+     *         accepted only on a zero-column Sheet), or if any specified column key does not exist in this Sheet, or
+     *         if {@code cmp} is {@code null}.
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
@@ -3592,9 +3601,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKey the key of the row whose values will determine the column ordering
      * @param cmp the comparator to apply to values in the specified row; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet, or if {@code cmp} is {@code null}.
      * @throws ClassCastException if comparing two row values throws a ClassCastException
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
@@ -3698,9 +3706,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      *            {@code null} or empty, and every key must exist in this Sheet
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IllegalArgumentException if {@code rowKeysToSort} is {@code null} or empty (an empty collection
-     *         is accepted only on a zero-row Sheet), or if any specified row key does not exist in this Sheet
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code rowKeysToSort} is {@code null} or empty (an empty collection is
+     *         accepted only on a zero-row Sheet), or if any specified row key does not exist in this Sheet, or if
+     *         {@code cmp} is {@code null}.
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
@@ -3888,7 +3896,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a new mutable Sheet containing the values at the intersection of the specified keys
      * @throws IllegalArgumentException if {@code rowKeySet} or {@code columnKeySet} is {@code null} or empty (an
      *         empty collection is accepted only on the corresponding empty axis of a zero-row / zero-column Sheet),
-     *         or if any specified row key or column key is not present in this Sheet
+     *         or if any specified row key or column key is not present in this Sheet.
      * @see #copy()
      * @see #clone()
      */
@@ -4040,7 +4048,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // | row3 | 30   | 40   |
      * // +------+------+------+
      *
-     * // Combine values from both sheets into a "a#b" string (null where a sheet has no value)
+     * // Combine values from both sheets into an "a#b" string (null where a sheet has no value)
      * Sheet<String, String, String> merged = sheet1.merge(sheet2, (a, b) -> a + "#" + b);
      * merged.println();
      *
@@ -6322,7 +6330,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet rows and columns named by Sheet column keys
-     * @throws IllegalArgumentException if converted column-key names are empty or duplicated
+     * @throws IllegalArgumentException if converted column-key names are empty or duplicated.
      * @see #toTransposedDataset()
      * @see #toArray()
      */
@@ -6377,7 +6385,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet columns and columns named by Sheet row keys (transposed)
-     * @throws IllegalArgumentException if converted row-key names are empty or duplicated
+     * @throws IllegalArgumentException if converted row-key names are empty or duplicated.
      * @see #toDataset()
      * @see #toTransposedArray()
      */
@@ -6841,7 +6849,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKeySet the row keys to include in the output; {@code null} is treated as empty
      * @param columnKeySet the column keys to include in the output; {@code null} is treated as empty
-     * @throws IllegalArgumentException if any specified row or column keys do not exist in this Sheet
+     * @throws IllegalArgumentException if any specified row or column keys do not exist in this Sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing
      * @see #println()
      * @see #println(Collection, Collection, Appendable)
@@ -6878,7 +6886,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param output the destination for the formatted output; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs while writing
      * @see #println()
      * @see #println(Collection, Collection, Appendable)
@@ -6914,7 +6922,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKeySet the collection of row keys to include in the output; {@code null} is treated as empty
      * @param columnKeySet the collection of column keys to include in the output; {@code null} is treated as empty
      * @param output the destination for the formatted output; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do not exist in this Sheet
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do
+     *         not exist in this Sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing
      * @see #println()
      * @see #println(Appendable)
@@ -6929,9 +6938,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Prints a subset of the Sheet to the specified Appendable output with a prefix on each line.
      * <p>
      * Outputs a formatted ASCII table containing only the rows and columns specified by the key sets
-     * with the specified prefix prepended to every line. Unlike the key-selection methods, both key
-     * collections tolerate {@code null} and empty: a {@code null} collection is treated as empty, and
-     * when both are empty a placeholder empty table is written.
+     * with the specified prefix prepended to every line. Both key collections tolerate {@code null} and
+     * empty: a {@code null} collection is treated as empty, and when both are empty a placeholder empty
+     * table is written.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6956,7 +6965,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKeySet the collection of column keys to include in the output; {@code null} is treated as empty
      * @param prefix the string to prepend to each line of output; may be {@code null} or empty for no prefix
      * @param output the destination for the formatted output; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do not exist in this Sheet
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do
+     *         not exist in this Sheet.
      * @throws UncheckedIOException if an I/O error occurs while printing
      * @see #println()
      * @see #println(String)
@@ -7086,7 +7096,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                         appendable.append(" | ");
                     }
 
-                    appendable.append(Strings.padEndByDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
+                    appendable.append(Strings.padEndToDisplayWidth(columnNameList.get(i), maxColumnLens[i]));
                 }
 
                 appendable.append(" |");
@@ -7114,7 +7124,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                             appendable.append(" | ");
                         }
 
-                        appendable.append(Strings.padEndByDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
+                        appendable.append(Strings.padEndToDisplayWidth(strColumnList.get(i).get(j), maxColumnLens[i]));
                     }
 
                     appendable.append(" |");
@@ -7364,7 +7374,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The rowKey is valid if it exists in the Sheet's row keys.
      *
      * @param rowKey the key of the row to be checked
-     * @throws IllegalArgumentException if the rowKey does not exist in the Sheet
+     * @throws IllegalArgumentException if the rowKey does not exist in the Sheet.
      */
     private void checkRowKey(final R rowKey) throws IllegalArgumentException {
         if (!_rowKeySet.contains(rowKey)) {
@@ -7377,7 +7387,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The columnKey is valid if it exists in the Sheet's column keys.
      *
      * @param columnKey the key of the column to be checked
-     * @throws IllegalArgumentException if the columnKey does not exist in the Sheet
+     * @throws IllegalArgumentException if the columnKey does not exist in the Sheet.
      */
     private void checkColumnKey(final C columnKey) throws IllegalArgumentException {
         if (!_columnKeySet.contains(columnKey)) {
@@ -7451,7 +7461,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param rowKey the key of the row
      * @return the index of the row
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      */
     private int getRowIndex(final R rowKey) throws IllegalArgumentException {
         if (_rowKeyIndexMap == null) {
@@ -7473,7 +7483,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param columnKey the key of the column
      * @return the index of the column
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      */
     private int getColumnIndex(final C columnKey) throws IllegalArgumentException {
         if (_columnKeyIndexMap == null) {

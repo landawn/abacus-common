@@ -14,7 +14,7 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts a byte-valued argument and produces an int-valued result.
+ * Represents a function that accepts a {@code byte}-valued argument and produces an {@code int}-valued result.
  * This is the {@code byte}-to-{@code int} primitive specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(byte)}.
@@ -41,8 +41,7 @@ public interface ByteToIntFunction {
     ByteToIntFunction DEFAULT = value -> value;
 
     /**
-     * Applies this function to the given byte argument and returns an int result.
-     * This method performs a transformation from a byte value to an int value.
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -53,8 +52,8 @@ public interface ByteToIntFunction {
      * int result = multiplier.applyAsInt((byte) 5);   // Returns 50
      * }</pre>
      *
-     * @param value the byte function argument
-     * @return the int function result
+     * @param value the function argument
+     * @return the function result
      */
     int applyAsInt(byte value);
 }

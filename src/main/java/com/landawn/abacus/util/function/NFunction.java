@@ -26,9 +26,6 @@ import com.landawn.abacus.util.cs;
  * <p>The 'N' in NFunction stands for <i>N-ary</i>, indicating that this function can accept
  * any number of arguments of the same type.
  *
- * <p>The interface extends {@code Throwables.NFunction} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * NFunction<Integer, Integer> sum = args -> {
@@ -56,23 +53,11 @@ import com.landawn.abacus.util.cs;
 public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given arguments.
-     *
-     * <p>The varargs parameter allows this method to accept any number of arguments
-     * of type T, including zero arguments (empty array), and produces a result of type R.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Aggregating multiple values into a single result</li>
-     *   <li>Creating composite objects from multiple inputs</li>
-     *   <li>Performing calculations on variable numbers of inputs</li>
-     *   <li>Building formatted strings from multiple arguments</li>
-     * </ul>
-     *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
-     * declaration-site generic-varargs warning for this method.
+     * The varargs parameter may contain any number of arguments of type {@code T},
+     * including zero (empty array).
      *
      * @param args the function arguments as a varargs array
-     * @return the function result of type R
+     * @return the function result
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -84,9 +69,6 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      *
      * <p>If evaluation of either function throws an exception, it is relayed to
      * the caller of the composed function.
-     *
-     * <p>This method allows for function composition, enabling the chaining of
-     * operations where the output of this function becomes the input of the next.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -108,7 +90,7 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default <V> NFunction<T, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {

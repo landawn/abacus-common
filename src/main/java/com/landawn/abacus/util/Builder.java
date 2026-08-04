@@ -248,7 +248,7 @@ public class Builder<T> {
      * Constructs a new Builder wrapping the given value.
      *
      * @param val the value to wrap; must not be {@code null}
-     * @throws IllegalArgumentException if {@code val} is {@code null}
+     * @throws IllegalArgumentException if {@code val} is {@code null}.
      */
     Builder(final T val) {
         N.checkArgNotNull(val, cs.val);
@@ -718,7 +718,7 @@ public class Builder<T> {
      *     .val();
      * }</pre>
      *
-     * @param consumer the action to perform on the wrapped value,
+     * @param consumer the action to perform on the wrapped value; must not be {@code null}
      * @return this builder instance for method chaining
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
@@ -739,7 +739,7 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <R> the type of the result of the function
-     * @param func the function to apply to the wrapped value,
+     * @param func the function to apply to the wrapped value; must not be {@code null}
      * @return the result of applying the function to the wrapped value
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
@@ -781,7 +781,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         BooleanListBuilder(final BooleanList val) {
             super(val);
@@ -958,7 +958,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         CharListBuilder(final CharList val) {
             super(val);
@@ -1135,7 +1135,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         ByteListBuilder(final ByteList val) {
             super(val);
@@ -1312,7 +1312,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         ShortListBuilder(final ShortList val) {
             super(val);
@@ -1489,7 +1489,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         IntListBuilder(final IntList val) {
             super(val);
@@ -1666,7 +1666,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         LongListBuilder(final LongList val) {
             super(val);
@@ -1843,7 +1843,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         FloatListBuilder(final FloatList val) {
             super(val);
@@ -2020,7 +2020,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param val the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code val} is {@code null}
+         * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
         DoubleListBuilder(final DoubleList val) {
             super(val);
@@ -2201,7 +2201,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param c the list to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code c} is {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
         ListBuilder(final L c) {
             super(c);
@@ -2473,7 +2473,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param c the collection to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code c} is {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
         CollectionBuilder(final C c) {
             super(c);
@@ -2629,7 +2629,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param c the multiset to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code c} is {@code null}
+         * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
         MultisetBuilder(final Multiset<T> c) {
             super(c);
@@ -2656,7 +2656,7 @@ public class Builder<T> {
          * @param e the element whose count is to be set
          * @param occurrences the desired count of the element; must be non-negative
          * @return this builder instance
-         * @throws IllegalArgumentException if {@code occurrences} is negative
+         * @throws IllegalArgumentException if {@code occurrences} is negative.
          * @see Multiset#setCount(Object, int)
          */
         public MultisetBuilder<T> setCount(final T e, final int occurrences) {
@@ -2677,7 +2677,7 @@ public class Builder<T> {
          *
          * @param e the element to add
          * @return this builder instance
-         * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences
+         * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences.
          * @see Multiset#add(Object)
          */
         public MultisetBuilder<T> add(final T e) {
@@ -2705,8 +2705,8 @@ public class Builder<T> {
          * @param e the element to add
          * @param occurrencesToAdd the number of occurrences to add; must be non-negative
          * @return this builder instance
-         * @throws IllegalArgumentException if {@code occurrencesToAdd} is negative, or if the
-         *         resulting total count would overflow an {@code int}
+         * @throws IllegalArgumentException if {@code occurrencesToAdd} is negative, or if the resulting total count
+         *         would overflow an {@code int}.
          * @see Multiset#add(Object, int)
          */
         public MultisetBuilder<T> add(final T e, final int occurrencesToAdd) {
@@ -2757,7 +2757,7 @@ public class Builder<T> {
          * @param e the element to remove occurrences of
          * @param occurrencesToRemove the number of occurrences to remove; must be non-negative
          * @return this builder instance
-         * @throws IllegalArgumentException if {@code occurrencesToRemove} is negative
+         * @throws IllegalArgumentException if {@code occurrencesToRemove} is negative.
          * @see Multiset#remove(Object, int)
          */
         public MultisetBuilder<T> remove(final Object e, final int occurrencesToRemove) {
@@ -2846,7 +2846,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param m the map to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code m} is {@code null}
+         * @throws IllegalArgumentException if {@code m} is {@code null}.
          */
         MapBuilder(final M m) {
             super(m);
@@ -2905,7 +2905,7 @@ public class Builder<T> {
          * is not already associated with a value or is associated with {@code null}.
          *
          * <br />
-         * Absent -> key is not found in the specified map or found with {@code null} value.
+         * Absent -> key is not found in this map or found with {@code null} value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2933,7 +2933,7 @@ public class Builder<T> {
          * The supplier is only invoked if the value needs to be added.
          *
          * <br />
-         * Absent -> key is not found in the specified map or found with {@code null} value.
+         * Absent -> key is not found in this map or found with {@code null} value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3038,7 +3038,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param m the multimap to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code m} is {@code null}
+         * @throws IllegalArgumentException if {@code m} is {@code null}.
          */
         MultimapBuilder(final M m) {
             super(m);
@@ -3283,7 +3283,7 @@ public class Builder<T> {
          * mutations made through this builder are applied to it directly.
          *
          * @param ds the dataset to wrap; must not be {@code null}
-         * @throws IllegalArgumentException if {@code ds} is {@code null}
+         * @throws IllegalArgumentException if {@code ds} is {@code null}.
          */
         DatasetBuilder(final Dataset ds) {
             super(ds);
@@ -4126,8 +4126,7 @@ public class Builder<T> {
      * @param right the second object to compare
      * @param comparator the comparator to use for comparison
      * @return a new ComparisonBuilder for method chaining
-     * @throws ClassCastException if {@code comparator} is {@code null} and the compared objects are not mutually {@link Comparable}
-     * @throws IllegalArgumentException if the comparator itself throws this exception
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(comparator, cs.comparator);
@@ -4338,7 +4337,7 @@ public class Builder<T> {
      * @param right the second float to compare
      * @param tolerance the acceptable difference between the two floats
      * @return a new ComparisonBuilder for method chaining
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static ComparisonBuilder compare(final float left, final float right, final float tolerance) {
         return new ComparisonBuilder().compare(left, right, tolerance);
@@ -4378,7 +4377,7 @@ public class Builder<T> {
      * @param right the second double to compare
      * @param tolerance the acceptable difference between the two doubles
      * @return a new ComparisonBuilder for method chaining
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static ComparisonBuilder compare(final double left, final double right, final double tolerance) {
         return new ComparisonBuilder().compare(left, right, tolerance);
@@ -4417,7 +4416,7 @@ public class Builder<T> {
      * @param <T> the type of objects being compared
      * @param left the first object to compare
      * @param right the second object to compare
-     * @param predicate the predicate to check equality,
+     * @param predicate the predicate to check equality.
      * @return a new EquivalenceBuilder for method chaining
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
@@ -4570,7 +4569,7 @@ public class Builder<T> {
      * @param right the second float to compare
      * @param tolerance the acceptable difference between the two floats
      * @return a new EquivalenceBuilder for method chaining
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
         return new EquivalenceBuilder().equals(left, right, tolerance);
@@ -4610,7 +4609,7 @@ public class Builder<T> {
      * @param right the second double to compare
      * @param tolerance the acceptable difference between the two doubles
      * @return a new EquivalenceBuilder for method chaining
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      */
     public static EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
         return new EquivalenceBuilder().equals(left, right, tolerance);
@@ -4874,7 +4873,7 @@ public class Builder<T> {
          * @param right the second object to compare, may be {@code null}
          * @param comparator the comparator used to compare {@code left} and {@code right}; must not be {@code null}
          * @return this ComparisonBuilder instance for method chaining
-         * @throws IllegalArgumentException if {@code comparator} is {@code null}
+         * @throws IllegalArgumentException if {@code comparator} is {@code null}.
          */
         public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
             N.checkArgNotNull(comparator, cs.comparator);
@@ -5047,7 +5046,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((byte)10, (byte)20)
-         *     .result();   // returns a negative value (-10)
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first byte value
@@ -5071,7 +5070,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((short)100, (short)200)
-         *     .result();   // returns a negative value (-100)
+         *     .result();   // returns -1
          * }</pre>
          *
          * @param left the first short value
@@ -5183,7 +5182,7 @@ public class Builder<T> {
          * @param right the second float to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this ComparisonBuilder instance for method chaining
-         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
         public ComparisonBuilder compare(final float left, final float right, final float tolerance) {
             if (result == 0) {
@@ -5242,7 +5241,7 @@ public class Builder<T> {
          * @param right the second double to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this ComparisonBuilder instance for method chaining
-         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
         public ComparisonBuilder compare(final double left, final double right, final double tolerance) {
             if (result == 0) {
@@ -5363,7 +5362,7 @@ public class Builder<T> {
          * @param <T> the type of objects being compared
          * @param left the first object to compare
          * @param right the second object to compare
-         * @param predicate the predicate to check equality,
+         * @param predicate the predicate to check equality.
          * @return this EquivalenceBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
@@ -5571,7 +5570,7 @@ public class Builder<T> {
          * @param right the second float to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this EquivalenceBuilder instance for method chaining
-         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
         public EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
             if (result) {
@@ -5628,7 +5627,7 @@ public class Builder<T> {
          * @param right the second double to compare
          * @param tolerance the maximum difference allowed for the values to be considered equal
          * @return this EquivalenceBuilder instance for method chaining
-         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+         * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
         public EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
             if (result) {
@@ -5740,7 +5739,7 @@ public class Builder<T> {
          *
          * @param <T> the type of the value
          * @param value the value to hash
-         * @param func the function to compute the hash code,
+         * @param func the function to compute the hash code.
          * @return this HashCodeBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code func} is {@code null}.
          */

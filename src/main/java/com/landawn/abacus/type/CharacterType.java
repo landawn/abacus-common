@@ -19,10 +19,13 @@ import java.sql.SQLException;
 
 /**
  * Type handler for {@link Character} (wrapper class) values.
- * This class provides database operations and type information for {@link Character} objects.
+ * This class provides database read operations and type information for {@link Character} objects.
  *
  * <p>When reading from a database, the column value is retrieved as a {@link String} and the first
- * character of that string is returned. An empty or {@code NULL} column value yields {@code null}.</p>
+ * character of that string is returned. An empty or SQL {@code NULL} column value yields {@code null}.</p>
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractCharacterType}.</p>
  *
  * @see AbstractCharacterType
  */

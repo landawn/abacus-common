@@ -18,9 +18,9 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.u.Nullable;
 
 /**
- * Generic type handler for {@link Nullable} wrapper objects from the {@code com.landawn.abacus.util.u}
- * package, providing serialization, deserialization, and database interaction capabilities for
- * {@code nullable} values of any type.
+ * Generic type handler for {@link Nullable} wrapper objects (a nested class of the
+ * {@code com.landawn.abacus.util.u} utility class), providing serialization, deserialization,
+ * and database interaction capabilities for {@code nullable} values of any type.
  * <p>
  * Unlike {@link com.landawn.abacus.util.u.Optional Optional} (handled by {@link OptionalType}),
  * a {@code Nullable} can carry {@code null} as a valid present value:

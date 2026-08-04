@@ -438,8 +438,8 @@ public final class FastJson {
      * @param len the number of bytes to read from the starting position
      * @param targetType the Class object representing the target type
      * @return the deserialized object of type T, or {@code null} if the JSON represents null
-     * @throws IllegalArgumentException if {@code len} is negative (in addition to the shared
-     *         {@code null}-argument contract described in the class documentation)
+     * @throws IllegalArgumentException if {@code len} is negative (in addition to the shared {@code null}-argument
+     *         contract described in the class documentation).
      * @throws IndexOutOfBoundsException if {@code offset} is negative, or if {@code offset + len}
      *         is greater than {@code json.length}
      */

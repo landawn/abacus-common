@@ -20,11 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * {@code long}-valued result. This is the {@code int}-to-{@code long} primitive
  * specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link Throwables.IntToLongFunction} with
- * {@link RuntimeException} and {@link java.util.function.IntToLongFunction},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsLong(int)}.
  *
@@ -47,21 +42,6 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
     /**
      * Applies this function to the given argument.
      *
-     * <p>The function performs a transformation from an {@code int} value to a
-     * {@code long} value. The default implementation provided by {@link #DEFAULT}
-     * performs a widening primitive conversion which is lossless, but other
-     * implementations may apply arbitrary computations.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Preparing int values for operations that may produce results
-     *       exceeding the int range</li>
-     *   <li>Converting timestamps or IDs from int to long format</li>
-     *   <li>Ensuring compatibility with APIs that require long parameters</li>
-     *   <li>Preventing integer overflow in arithmetic operations by converting
-     *       to long before calculation</li>
-     * </ul>
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToLongFunction square = value -> (long) value * value;
@@ -73,8 +53,8 @@ public interface IntToLongFunction extends Throwables.IntToLongFunction<RuntimeE
      * IntStream.of(1, 2, 3).mapToLong(IntToLongFunction.DEFAULT).forEach(System.out::println);
      * }</pre>
      *
-     * @param value the function argument, an int value to be converted to long.
-     * @return the function result as a long value.
+     * @param value the {@code int} function argument
+     * @return the {@code long} function result
      */
     @Override
     long applyAsLong(int value);

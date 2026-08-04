@@ -2106,14 +2106,14 @@ public class NStringTest extends AbstractParserTest {
         assertEquals("aBC", Strings.uncapitalize("aBC"));
         assertEquals("aBC", Strings.uncapitalize("ABC"));
 
-        N.println(Strings.quoteEscaped("abc'\"def\\'\\\""));
-        assertEquals("abc\\'\\\"def\\'\\\"", Strings.quoteEscaped("abc'\"def\\'\\\""));
+        N.println(Strings.escapeQuotes("abc'\"def\\'\\\""));
+        assertEquals("abc\\'\\\"def\\'\\\"", Strings.escapeQuotes("abc'\"def\\'\\\""));
 
         {
             final char[] chs = { 0x9, 0x10, 0x99, 0x100, 0x101, 0x1000, 0x9000 };
             final String[] strs = { "\\u0009", "\\u0010", "\\u0099", "\\u0100", "\\u0101", "\\u1000", "\\u9000" };
             for (int i = 0; i < chs.length; i++) {
-                assertEquals(strs[i], Strings.unicodeEscaped(chs[i]));
+                assertEquals(strs[i], Strings.toUnicodeEscape(chs[i]));
             }
         }
 
@@ -4154,38 +4154,38 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_createNumber() throws Exception {
         N.println(Numbers.createInteger(null));
-        N.println(StrUtil.createInteger(""));
+        N.println(StrUtil.tryParseInteger(""));
         N.println(Numbers.createInteger("123"));
         N.println(Numbers.createInteger("0x123"));
         N.println(Numbers.createLong(null));
-        N.println(StrUtil.createLong(""));
+        N.println(StrUtil.tryParseLong(""));
         N.println(Numbers.createLong("123"));
         N.println(Numbers.createLong("123l"));
         N.println(Numbers.createLong("123L"));
         N.println(Numbers.createLong("0X123"));
         N.println(Numbers.createFloat(null));
-        N.println(StrUtil.createFloat(""));
+        N.println(StrUtil.tryParseFloat(""));
         N.println(Numbers.createFloat("123"));
         N.println(Numbers.createFloat("123.0139f"));
         N.println(Numbers.createDouble("123e139f"));
         N.println(Numbers.createDouble(null));
-        N.println(StrUtil.createDouble(""));
+        N.println(StrUtil.tryParseDouble(""));
         N.println(Numbers.createDouble("123"));
         N.println(Numbers.createDouble("123.0139d"));
         N.println(Numbers.createDouble("123e139d"));
 
         N.println(Numbers.createBigInteger(null));
-        N.println(StrUtil.createBigInteger(""));
+        N.println(StrUtil.tryParseBigInteger(""));
         N.println(Numbers.createBigInteger("123"));
         N.println(Numbers.createBigInteger("0X123"));
 
         N.println(Numbers.createBigDecimal(null));
-        N.println(StrUtil.createBigDecimal(""));
+        N.println(StrUtil.tryParseBigDecimal(""));
         N.println(Numbers.createBigDecimal("123"));
         N.println(Numbers.createBigDecimal("123.0139"));
 
         N.println(Numbers.createNumber(null));
-        N.println(StrUtil.createNumber(""));
+        N.println(StrUtil.tryParseNumber(""));
         N.println(Numbers.createNumber("123"));
         N.println(Numbers.createNumber("123l"));
         N.println(Numbers.createNumber("123.0139f"));

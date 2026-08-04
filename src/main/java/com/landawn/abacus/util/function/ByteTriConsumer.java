@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts three byte-valued arguments and returns no result.
+ * Represents an operation that accepts three {@code byte}-valued arguments and returns no result.
  * This is the three-arity specialization of {@link ByteConsumer} for byte values.
  * Unlike most other functional interfaces, {@code ByteTriConsumer} is expected to operate via side-effects.
  *
@@ -66,7 +66,7 @@ public interface ByteTriConsumer extends Throwables.ByteTriConsumer<RuntimeExcep
      * @param after the operation to perform after this operation.
      * @return a composed {@code ByteTriConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ByteTriConsumer andThen(final ByteTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

@@ -367,7 +367,7 @@ public final class MutableShort extends Number implements Comparable<MutableShor
     }
 
     /**
-     * Returns the current value and then adds the specified delta.
+     * Returns the current value and then adds the specified delta to it.
      *
      * <p><b>Note:</b> Short overflow will wrap around.</p>
      *

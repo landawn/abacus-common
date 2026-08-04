@@ -36,13 +36,13 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Enum types.
- * This class provides serialization, deserialization, and database operations for Java Enum types.
+ * Type handler for Java {@link Enum} types.
+ * This class provides serialization, deserialization, and database operations for enum constants.
  * It supports name (string), ordinal (numeric), and code (numeric, via an inherited or directly declared
  * public {@code int code()} method, or a public {@code int intValue()} method when {@code code()} is absent)
  * representations of enums, and handles custom JSON/XML field names through annotations.
  *
- * <p>EnumType instances are typically obtained through the TypeFactory and support conversion
+ * <p>{@code EnumType} instances are typically obtained through {@link TypeFactory} and support conversion
  * between enum values and their string/numeric representations. The configured representation controls
  * JDBC persistence and streaming JSON/XML output; {@link #stringOf(Enum)} itself returns the constant name
  * unless a JSON value accessor is configured.</p>
@@ -79,7 +79,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param className the fully qualified class name of the enum type
      * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
      *                           if {@code null}, defaults to {@code NAME}
-     * @throws IllegalArgumentException if numeric codes or JSON/XML names are ambiguous between constants
+     * @throws IllegalArgumentException if numeric codes or JSON/XML names are ambiguous between constants.
+     * @throws RuntimeException if {@code CODE} representation is configured but the enum class has no
+     *         public {@code int code()} or {@code int intValue()} method.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
     EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
@@ -216,7 +218,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param str the string to convert; may be {@code null} or empty
      * @return the enum value corresponding to the string, or {@code null} if input is null/empty
-     * @throws IllegalArgumentException if the string doesn't match any enum value
+     * @throws IllegalArgumentException if the string doesn't match any enum value.
      * @see #valueOf(Object)
      * @see #stringOf(Enum)
      */
@@ -262,7 +264,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param value the ordinal or code value
      * @return the enum constant for the specified value, or {@code null} if the value is {@code 0} and no constant maps to {@code 0}
-     * @throws IllegalArgumentException if no enum constant exists with the given value (and the value is not {@code 0})
+     * @throws IllegalArgumentException if no enum constant exists with the given value (and the value is not
+     *         {@code 0}).
      */
     public T valueOf(final int value) {
         final T result = numberEnum.get(value);
@@ -510,7 +513,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param clazz the class to resolve as an enum class
      * @return the enum class
-     * @throws IllegalArgumentException if {@code clazz} is not an enum and has no enclosing enum class
+     * @throws IllegalArgumentException if {@code clazz} is not an enum and has no enclosing enum class.
      */
     private static Class<?> getEnumClass(final Class<?> clazz) {
         if (clazz.isEnum()) {

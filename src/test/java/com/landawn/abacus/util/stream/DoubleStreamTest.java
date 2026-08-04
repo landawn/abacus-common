@@ -1160,34 +1160,34 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testTransformB() {
+    public void testTransformViaJdkStream() {
         DoubleStream stream = DoubleStream.of(3.0, 1.0, 2.0);
-        double[] result = stream.transformB(s -> s.sorted()).toArray();
+        double[] result = stream.transformViaJdkStream(s -> s.sorted()).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
     }
 
     @Test
-    public void testTransformBDeferred() {
+    public void testTransformViaJdkStreamDeferred() {
         DoubleStream stream = DoubleStream.of(3.0, 1.0, 2.0);
-        double[] result = stream.transformB(s -> s.sorted(), true).toArray();
+        double[] result = stream.transformViaJdkStream(s -> s.sorted(), true).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
     }
 
     @Test
-    public void testTransformB_TwoArg() {
-        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), false).toArray();
+    public void testTransformViaJdkStream_TwoArg() {
+        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformViaJdkStream(s -> s.sorted(), false).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
     }
 
     @Test
-    public void testTransformB_TwoArg_Deferred() {
-        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformB(s -> s.sorted(), true).toArray();
+    public void testTransformViaJdkStream_TwoArg_Deferred() {
+        double[] result = createDoubleStream(3.0, 1.0, 2.0).transformViaJdkStream(s -> s.sorted(), true).toArray();
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
     }
 
     @Test
-    public void testTransformB_HappyPath2() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).transformB(s -> s.map(x -> x * 2)).toArray();
+    public void testTransformViaJdkStream_HappyPath2() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).transformViaJdkStream(s -> s.map(x -> x * 2)).toArray();
         assertArrayEquals(new double[] { 2.0, 4.0, 6.0 }, result, 0.001);
     }
 
@@ -2777,19 +2777,19 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testStreamCreatedAfterTransformB() {
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).skip(1).count());
-        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).toArray(), 0.0);
-        assertArrayEquals(new double[] { 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(2.0, 4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).toList());
-        assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(d -> d * 2)).skip(1).toList());
-        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).count());
-        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).skip(1).count());
-        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).toArray(), 0.0);
-        assertArrayEquals(new double[] { 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
-        assertEquals(N.toList(2.0, 4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).toList());
-        assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(d -> d * 2)).skip(1).toList());
+    public void testStreamCreatedAfterTransformViaJdkStream() {
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).count());
+        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).toArray(), 0.0);
+        assertArrayEquals(new double[] { 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(2.0, 4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).toList());
+        assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toList());
+        assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).count());
+        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).toArray(), 0.0);
+        assertArrayEquals(new double[] { 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
+        assertEquals(N.toList(2.0, 4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).toList());
+        assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toList());
     }
 
     @Test

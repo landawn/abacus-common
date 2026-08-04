@@ -20,16 +20,15 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for JSON-wrapped types.
- * This type handler wraps an arbitrary Java type and ensures that values are always
- * serialized to and deserialized from JSON strings. It is primarily used when a field
- * or column should be stored as a JSON string in the database rather than as its
- * native type representation.
+ * Type handler for JSON-wrapped values of an arbitrary target type.
+ * This handler wraps another type and always serializes to / deserializes from JSON strings.
+ * It is primarily used when a field or column should be stored as a JSON string in the database
+ * rather than as its native type representation.
  *
  * <p>Special handling is provided for {@code "Map"} and {@code "List"} as short aliases
  * for {@code java.util.Map} and {@code java.util.List} respectively.</p>
  *
- * @param <T> the type of object this JSONType wraps and serializes
+ * @param <T> the type of object this JSON handler wraps and serializes
  */
 @SuppressWarnings("java:S2160")
 public class JSONType<T> extends AbstractType<T> {
@@ -46,7 +45,7 @@ public class JSONType<T> extends AbstractType<T> {
     /**
      * Package-private constructor for JSONType.
      * Creates a JSONType that wraps the specified class for JSON serialization and deserialization.
-     * The short aliases {@code "Map"} and {@code "List"} (case-insensitive) are recognized as
+     * The short aliases {@code "Map"} and {@code "List"} are recognized as
      * {@link java.util.Map} and {@link java.util.List} respectively; all other names must be
      * type names resolvable by {@link TypeFactory} — fully qualified class names or pool-registered
      * simple names such as {@code "UUID"}.

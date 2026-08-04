@@ -1288,7 +1288,7 @@ public final class Suppliers {
      * @param <T> the type of elements in the multiset
      * @param valueMapType the class of {@code Map} to use for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by the specified map type
-     * @throws IllegalArgumentException if {@code valueMapType} is {@code null} or cannot be used to create a map
+     * @throws IllegalArgumentException if {@code valueMapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
@@ -1301,7 +1301,7 @@ public final class Suppliers {
      * Returns a supplier that creates new Multiset instances with a custom map supplier.
      *
      * <p>Each call to the returned supplier creates a new Multiset wrapper and invokes
-     * {@code mapSupplier} exactly once for its backing map. A {@link NullPointerException} is thrown
+     * {@code mapSupplier} exactly once for its backing map. An {@link IllegalArgumentException} is thrown
      * if that invocation returns {@code null}. To obtain independent multisets, the caller-provided
      * supplier must return a fresh mutable map on every invocation.</p>
      *
@@ -1317,7 +1317,8 @@ public final class Suppliers {
      * @param <T> the type of elements in the multiset
      * @param mapSupplier supplier to create the backing {@code Map} used for storing element counts, must not be {@code null}
      * @return a supplier that creates new Multiset instances backed by maps from the given supplier
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if an invocation of
+     *         {@code mapSupplier} returns {@code null}.
      */
     public static <T> Supplier<Multiset<T>> ofMultiset(final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
@@ -1370,7 +1371,7 @@ public final class Suppliers {
      * @param <E> the type of mapped values
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified Map type
-     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map
+     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
@@ -1397,7 +1398,8 @@ public final class Suppliers {
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @param valueType the Class object representing the List implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances with the specified types
-     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map or list
+     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map
+     *         or list.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
@@ -1415,7 +1417,7 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates ListMultimaps using custom suppliers for both the backing Map
      * and the List instances used for values. The map supplier is invoked exactly once for each created
-     * multimap; the value supplier is invoked lazily for each new key. A {@link NullPointerException} is
+     * multimap; the value supplier is invoked lazily for each new key. An {@link IllegalArgumentException} is
      * thrown when either supplier is invoked and returns {@code null}. To obtain independent multimaps,
      * the caller-provided suppliers must return fresh mutable instances.</p>
      *
@@ -1434,8 +1436,8 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the List instances for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}
-     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
+     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
+     *         supplier returns {@code null}.
      */
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
             final java.util.function.Supplier<? extends List<E>> valueSupplier) throws IllegalArgumentException {
@@ -1491,7 +1493,7 @@ public final class Suppliers {
      * @param <E> the type of mapped values
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified Map type
-     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map
+     * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings("rawtypes")
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
@@ -1518,7 +1520,8 @@ public final class Suppliers {
      * @param mapType the Class object representing the Map implementation to use, must not be {@code null}
      * @param valueType the Class object representing the Set implementation to use for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances with the specified types
-     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map or set
+     * @throws IllegalArgumentException if either class is {@code null} or cannot be used to create the requested map
+     *         or set.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
@@ -1536,7 +1539,7 @@ public final class Suppliers {
      *
      * <p>The returned supplier creates SetMultimaps using custom suppliers for both the backing Map
      * and the Set instances used for values. The map supplier is invoked exactly once for each created
-     * multimap; the value supplier is invoked lazily for each new key. A {@link NullPointerException} is
+     * multimap; the value supplier is invoked lazily for each new key. An {@link IllegalArgumentException} is
      * thrown when either supplier is invoked and returns {@code null}. To obtain independent multimaps,
      * the caller-provided suppliers must return fresh mutable instances.</p>
      *
@@ -1555,8 +1558,8 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Set instances for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}
-     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
+     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
+     *         supplier returns {@code null}.
      */
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final java.util.function.Supplier<? extends Set<E>> valueSupplier) throws IllegalArgumentException {
@@ -1574,7 +1577,7 @@ public final class Suppliers {
      *
      * <p>This is the most general multimap supplier, allowing any Collection type for values.
      * The map supplier is invoked exactly once for each created multimap; the value supplier is
-     * invoked lazily for each new key. A {@link NullPointerException} is thrown when either supplier
+     * invoked lazily for each new key. An {@link IllegalArgumentException} is thrown when either supplier
      * is invoked and returns {@code null}. To obtain independent multimaps, the caller-provided
      * suppliers must return fresh mutable instances.</p>
      *
@@ -1594,8 +1597,8 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Collection instances for values, must not be {@code null}
      * @return a Supplier that creates new Multimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}
-     * @throws IllegalArgumentException if any of {@code mapSupplier}, {@code valueSupplier} is {@code null}.
+     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
+     *         supplier returns {@code null}.
      */
     public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
             final java.util.function.Supplier<? extends V> valueSupplier) throws IllegalArgumentException {
@@ -1667,8 +1670,9 @@ public final class Suppliers {
      * @param <T> the element type of the collection
      * @param targetType the Class object representing the desired Collection implementation
      * @return a Supplier that creates mutable collections according to the mappings above
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Collection class, is an unsupported abstract class,
-     *         has no usable no-argument construction path, or has no suitable fallback implementation
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Collection class, is an
+     *         unsupported abstract class, has no usable no-argument construction path, or has no suitable fallback
+     *         implementation.
      * @see #registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
@@ -1784,8 +1788,9 @@ public final class Suppliers {
      * @param <V> the type of mapped values
      * @param targetType the Class object representing the desired Map implementation
      * @return a Supplier that creates mutable maps according to the mappings above
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Map class, is an unsupported abstract class,
-     *         has no usable no-argument construction path, or has no suitable fallback implementation
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Map class, is an unsupported
+     *         abstract class, has no usable no-argument construction path, or has no suitable fallback
+     *         implementation.
      * @see #registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
@@ -1871,9 +1876,8 @@ public final class Suppliers {
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
-     * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Collection class,
-     *         or {@code targetClass} is a built-in class
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if either argument is {@code null}, if {@code targetClass} is not a
+     *         Collection class, or if {@code targetClass} is a built-in class.
      * @see #ofCollection(Class)
      */
     @SuppressWarnings("rawtypes")
@@ -1916,9 +1920,8 @@ public final class Suppliers {
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
      * @return {@code true} if the registration was successful, {@code false} if a supplier was already cached or registered for this class
-     * @throws IllegalArgumentException if either argument is {@code null}, {@code targetClass} is not a Map class,
-     *         or {@code targetClass} is a built-in class
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if either argument is {@code null}, if {@code targetClass} is not a Map
+     *         class, or if {@code targetClass} is a built-in class.
      * @see #ofMap(Class)
      */
     @SuppressWarnings("rawtypes")

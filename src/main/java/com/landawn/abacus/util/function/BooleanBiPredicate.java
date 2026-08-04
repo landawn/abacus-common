@@ -19,7 +19,7 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents a predicate (boolean-valued function) of two {@code boolean}-valued arguments.
- * This is the primitive type specialization of {@link BiPredicate} for {@code boolean}.
+ * This is the primitive type specialization of {@link java.util.function.BiPredicate} for {@code boolean}.
  *
  * <p>This is a functional interface whose functional method is {@link #test(boolean, boolean)}.
  *
@@ -65,8 +65,8 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      * boolean result = xor.test(true, false);   // Returns true
      * }</pre>
      *
-     * @param a the first input argument ({@code boolean} value)
-     * @param b the second input argument ({@code boolean} value)
+     * @param a the first input argument
+     * @param b the second input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
@@ -104,7 +104,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BooleanBiPredicate and(final BooleanBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -129,7 +129,7 @@ public interface BooleanBiPredicate extends Throwables.BooleanBiPredicate<Runtim
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BooleanBiPredicate or(final BooleanBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

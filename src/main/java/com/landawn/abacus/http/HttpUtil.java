@@ -546,7 +546,7 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept header value from HttpHeaders.
-     * Looks for both "Accept" and "accept" keys.
+     * Performs a case-insensitive lookup of the "Accept" header name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -639,7 +639,7 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Encoding header value from HttpHeaders.
-     * Looks for both "Accept-Encoding" and "accept-encoding" keys.
+     * Performs a case-insensitive lookup of the "Accept-Encoding" header name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -732,7 +732,7 @@ public final class HttpUtil {
 
     /**
      * Gets the Accept-Charset header value from HttpHeaders.
-     * Looks for both "Accept-Charset" and "accept-charset" keys.
+     * Performs a case-insensitive lookup of the "Accept-Charset" header name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1040,7 +1040,7 @@ public final class HttpUtil {
      * @param <DC> The deserialization config type
      * @param contentFormat The content format
      * @return The parser for the content format, or the default JSON parser if {@code contentFormat} is {@code null}
-     * @throws IllegalArgumentException if the content format is not supported
+     * @throws IllegalArgumentException if the content format is not supported.
      */
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
         if (contentFormat == null) {

@@ -380,7 +380,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param n the number of elements to skip
      * @return a new {@code ObjListIterator} that skips the first {@code n} elements
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #limit(long)
      */
     public ObjListIterator<T> skip(final long n) throws IllegalArgumentException {
@@ -510,7 +510,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param count the maximum number of positions the cursor may advance beyond its position at wrapper creation
      * @return a new {@code ObjListIterator} with the specified upper cursor boundary
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      * @see #skip(long)
      */
     public ObjListIterator<T> limit(final long count) throws IllegalArgumentException {
@@ -604,7 +604,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> iter = ObjListIterator.of(Arrays.asList(null, null, "found", "next"));
-     * Optional<String> first = iter.firstNonNull();   // returns Optional.of("found")
+     * u.Optional<String> first = iter.firstNonNull();   // returns Optional.of("found")
      * }</pre>
      *
      * @return an {@code Optional} containing the first {@code non-null} element,

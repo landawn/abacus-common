@@ -316,8 +316,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds, or if the header row contains
-     *                                   duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
+     *         or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -343,8 +343,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the stream, or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds, or if the header row contains
-     *                                   duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
+     *         or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -368,8 +368,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds, or if the header row contains
-     *                                   duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
+     *         or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -402,8 +402,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in the workbook, or if the
-     *                                   header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
+     *         the workbook, or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -429,8 +429,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in the workbook, or if the
-     *                                   header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
+     *         the workbook, or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -454,8 +454,8 @@ public final class ExcelUtil {
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in the workbook, or if the
-     *                                  header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
+     *         the workbook, or if the header row contains duplicate non-blank column names.
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
@@ -684,7 +684,8 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
+     *         workbook.
      */
     public static <T> List<T> readRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
@@ -714,7 +715,8 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
+     *         workbook.
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
@@ -739,7 +741,8 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
+     *         workbook.
      */
     public static <T> List<T> readRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
@@ -790,7 +793,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static Stream<Row> streamRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow) {
         InputStream is = null;
@@ -831,7 +834,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs while reading the stream or if the content is not a valid Excel stream
-     * @throws IllegalArgumentException if the sheet index is out of bounds
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow) {
         return streamFromSource(excelInputStream, false, sheetIndex, null, skipFirstRow);
@@ -847,7 +850,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static Stream<Row> streamRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow) {
         return streamRowsFromSheet(excelPath.toFile(), sheetIndex, skipFirstRow);
@@ -881,7 +884,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static Stream<Row> streamRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow) {
         InputStream is = null;
@@ -918,7 +921,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow) {
         return streamFromSource(excelInputStream, false, -1, sheetName, skipFirstRow);
@@ -934,7 +937,7 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static Stream<Row> streamRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow) {
         return streamRowsFromSheet(excelPath.toFile(), sheetName, skipFirstRow);
@@ -1122,7 +1125,7 @@ public final class ExcelUtil {
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}
+     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) throws IllegalArgumentException {
@@ -1206,7 +1209,7 @@ public final class ExcelUtil {
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputExcelPath the path to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}
+     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath) throws IllegalArgumentException {
@@ -1303,7 +1306,7 @@ public final class ExcelUtil {
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}
+     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile)
             throws IllegalArgumentException {
@@ -1385,7 +1388,7 @@ public final class ExcelUtil {
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputExcelPath the path to write the Excel data to (will be created or overwritten).
      * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}
+     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath)
             throws IllegalArgumentException {
@@ -1492,7 +1495,7 @@ public final class ExcelUtil {
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
      * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
      * @throws UncheckedIOException if an I/O error occurs while opening or closing the CSV output file (write-phase errors surface as {@code UncheckedException})
-     * @throws IllegalArgumentException if the sheet index is out of bounds
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final File outputCsvFile) {
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
@@ -1527,7 +1530,7 @@ public final class ExcelUtil {
      * @param outputCsvFile the CSV file to write to (will be created or overwritten)
      * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
      * @throws UncheckedIOException if an I/O error occurs while opening or closing the CSV output file (write-phase errors surface as {@code UncheckedException})
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static void exportSheetToCsv(final File excelFile, final String sheetName, final File outputCsvFile) {
         try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
@@ -1566,7 +1569,7 @@ public final class ExcelUtil {
      * @param csvHeaders custom headers for the CSV file; {@code null} or empty preserves the original Excel rows.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
      * @throws UncheckedException if an I/O error occurs during conversion or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds
+     * @throws IllegalArgumentException if the sheet index is out of bounds.
      */
     public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
@@ -1608,7 +1611,7 @@ public final class ExcelUtil {
      * @param csvHeaders custom headers for the CSV file; {@code null} or empty preserves the original Excel rows.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
      * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook
+     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
      */
     public static void exportSheetToCsv(final File excelFile, final String sheetName, final List<String> csvHeaders, final Writer outputWriter) {
         try (InputStream is = new FileInputStream(excelFile); //
@@ -1854,7 +1857,7 @@ public final class ExcelUtil {
          * @param cellSeparator the string to use as separator between cell values
          * @param cellMapper custom function to convert each cell to a string
          * @return a Function that converts Row to delimited String
-         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}
+         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}.
          */
         public static Function<Row, String> toDelimitedString(final String cellSeparator, final Function<Cell, String> cellMapper)
                 throws IllegalArgumentException {
@@ -1906,7 +1909,7 @@ public final class ExcelUtil {
          * @param <T> the type of objects to extract from cells
          * @param cellMapper function to convert each cell to type T
          * @return a Function that converts Row to List&lt;T&gt;
-         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}
+         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}.
          */
         public static <T> Function<Row, List<T>> toList(final Function<Cell, T> cellMapper) throws IllegalArgumentException {
             N.checkArgNotNull(cellMapper, cs.cellMapper);
@@ -2032,7 +2035,7 @@ public final class ExcelUtil {
          *
          * @param cellMapper function to convert each cell to the desired output type
          * @return a TriConsumer that extracts row data using the cell mapper
-         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}
+         * @throws IllegalArgumentException if {@code cellMapper} is {@code null}.
          */
         public static TriConsumer<String[], Row, Object[]> create(final Function<Cell, ?> cellMapper) throws IllegalArgumentException {
             N.checkArgNotNull(cellMapper, cs.cellMapper);
@@ -2266,7 +2269,7 @@ public final class ExcelUtil {
          *
          * @param colSplit the number of columns to freeze from the left (0 for none)
          * @param rowSplit the number of rows to freeze from the top (0 for none)
-         * @throws IllegalArgumentException if either split is negative
+         * @throws IllegalArgumentException if either split is negative.
          */
         public FreezePane {
             N.checkArgNotNegative(colSplit, "colSplit");

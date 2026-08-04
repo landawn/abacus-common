@@ -18,50 +18,32 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * A functional interface that represents an operation that accepts two short-valued
- * arguments and returns no result. This is the primitive type specialization of
- * {@link java.util.function.BiConsumer} for {@code short}.
- *
- * <p>The JDK itself has no two-argument primitive specialization of {@link java.util.function.BiConsumer}
- * for any type (only single-argument forms like {@link java.util.function.IntConsumer} and object+primitive
- * forms like {@link java.util.function.ObjIntConsumer}); this project fills that gap for all eight primitive
- * types, and this interface is the {@code short} member of that family, offering better type safety and
- * performance than the boxed generic {@code BiConsumer<Short, Short>}.
+ * Represents an operation that accepts two {@code short}-valued arguments and returns no result.
+ * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code short}.
+ * Unlike most other functional interfaces, {@code ShortBiConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(short, short)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.BiConsumer
- * @see IntBiConsumer
- * @see LongBiConsumer
- * @see DoubleBiConsumer
+ * @see ShortConsumer
  */
 @FunctionalInterface
 public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeException> { //NOSONAR
     /**
-     * Performs this operation on the given short arguments.
-     *
-     * <p>This method consumes two short values, performing some side-effect operation
-     * without returning any result. Common use cases include accumulating values,
-     * updating state based on two short parameters, or performing operations where
-     * memory efficiency is important and values fit within the short range
-     * (-32,768 to 32,767).
+     * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBiConsumer maxTracker = (a, b) -> {
-     *     short max = (short) Math.max(a, b);
-     *     System.out.println("Maximum: " + max);
-     * };
+     * ShortBiConsumer rangeChecker = (min, max) ->
+     *     System.out.println("Range: [" + min + ", " + max + "]");
+     * rangeChecker.accept((short) 10, (short) 100);   // Prints: Range: [10, 100]
      *
-     * ShortBiConsumer coordinateProcessor = (x, y) -> {
-     *     processPoint(x, y);
-     *     updateDisplay(x, y);
-     * };
-     *
-     * maxTracker.accept((short) 100, (short) 200);   // Prints "Maximum: 200"
-     * coordinateProcessor.accept((short) 10, (short) 20);
+     * Map<Short, Short> shortMap = new HashMap<>();
+     * ShortBiConsumer mapPutter = (key, value) -> shortMap.put(key, value);
+     * mapPutter.accept((short) 1, (short) 42);
      * }</pre>
      *
      * @param a the first input argument
@@ -71,34 +53,21 @@ public interface ShortBiConsumer extends Throwables.ShortBiConsumer<RuntimeExcep
     void accept(short a, short b);
 
     /**
-     * Returns a composed {@code ShortBiConsumer} that performs, in sequence, this
-     * operation followed by the {@code after} operation. If performing either
-     * operation throws an exception, it is relayed to the caller of the
-     * composed operation. If performing this operation throws an exception,
-     * the {@code after} operation will not be performed.
-     *
-     * <p>This method allows for chaining multiple consumers together, where each
-     * consumer receives the same two short input arguments. This is useful for
-     * performing multiple independent operations on the same pair of values.
+     * Returns a composed {@code ShortBiConsumer} that performs, in sequence, this operation followed by the {@code after} operation.
+     * If performing either operation throws an exception, it is relayed to the caller of the composed operation.
+     * If performing this operation throws an exception, the {@code after} operation will not be performed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBiConsumer printSum = (a, b) ->
-     *     System.out.println("Sum: " + (a + b));
-     * ShortBiConsumer printProduct = (a, b) ->
-     *     System.out.println("Product: " + (a * b));
-     *
-     * ShortBiConsumer combined = printSum.andThen(printProduct);
-     * combined.accept((short) 5, (short) 3);
-     * // Output:
-     * // Sum: 8
-     * // Product: 15
+     * ShortBiConsumer logger = (a, b) -> System.out.println("Values: " + a + ", " + b);
+     * ShortBiConsumer validator = (a, b) -> { if (a < 0 || b < 0) throw new IllegalArgumentException(); };
+     * ShortBiConsumer combined = logger.andThen(validator);
+     * combined.accept((short) 5, (short) 10);   // Logs then validates
      * }</pre>
      *
      * @param after the operation to perform after this operation.
-     * @return a composed {@code ShortBiConsumer} that performs in sequence this
-     *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @return a composed {@code ShortBiConsumer} that performs in sequence this operation followed by the {@code after} operation
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ShortBiConsumer andThen(final ShortBiConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

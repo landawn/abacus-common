@@ -174,7 +174,7 @@ public final class PoolFactory { //NOSONAR
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
@@ -243,7 +243,7 @@ public final class PoolFactory { //NOSONAR
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with full configuration
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
@@ -362,7 +362,7 @@ public final class PoolFactory { //NOSONAR
      * @param maxMemorySize the maximum total memory in bytes the pool can use
      * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
@@ -436,7 +436,7 @@ public final class PoolFactory { //NOSONAR
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
      * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with full configuration
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}
+     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,

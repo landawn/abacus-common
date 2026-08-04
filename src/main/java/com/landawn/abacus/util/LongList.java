@@ -351,7 +351,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public LongList(final int initialCapacity) throws IllegalArgumentException {
@@ -532,7 +532,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endExclusive the ending value (exclusive)
      * @return a new LongList containing the ascending sequence, or an empty list if
      *         {@code startInclusive >= endExclusive}
-     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}.
      */
     public static LongList range(final long startInclusive, final long endExclusive) {
         return of(Array.range(startInclusive, endExclusive));
@@ -555,7 +555,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds
+     *         {@code Integer.MAX_VALUE}.
      */
     public static LongList range(final long startInclusive, final long endExclusive, final long by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -580,7 +581,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endInclusive the ending value (inclusive)
      * @return a new LongList containing the ascending sequence, or an empty list if
      *         {@code startInclusive > endInclusive}
-     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}.
      */
     public static LongList rangeClosed(final long startInclusive, final long endInclusive) {
         return of(Array.rangeClosed(startInclusive, endInclusive));
@@ -604,7 +605,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new LongList containing the sequence of values
-     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds {@code Integer.MAX_VALUE}
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds
+     *         {@code Integer.MAX_VALUE}.
      */
     public static LongList rangeClosed(final long startInclusive, final long endInclusive, final long by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -623,7 +625,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param element the long value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new LongList containing the repeated elements
-     * @throws IllegalArgumentException if len is negative
+     * @throws IllegalArgumentException if len is negative.
      */
     public static LongList repeat(final long element, final int len) {
         return of(Array.repeat(element, len));
@@ -1742,7 +1744,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param b the list to find common elements with this list
      * @return a new LongList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #intersection(long[])
      * @see #difference(LongList)
      * @see #symmetricDifference(LongList)
@@ -2631,7 +2633,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * </p>
      *
      * @param rnd the source of randomness to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2718,7 +2720,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param step the step size for selecting elements (must not be zero)
      * @return a new {@code LongList} containing elements from the specified range at the specified intervals
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @throws IllegalArgumentException if {@code step} is zero
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(long[], int, int, int)
      */
     @Override
@@ -2754,7 +2756,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return a list of {@code LongList} instances, each containing a subsequence of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code chunkSize} is not positive
+     * @throws IllegalArgumentException if {@code chunkSize} is not positive.
      */
     @Override
     public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -2936,7 +2938,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new collection of the desired type,
      *                given the size of the range
      * @return a collection containing the elements in the specified range
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */
@@ -2956,7 +2958,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *
@@ -2965,7 +2967,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new {@code Multiset} instance,
      *                given the size of the range
      * @return a {@code Multiset} containing the elements in the specified range with their counts
-     * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
      */

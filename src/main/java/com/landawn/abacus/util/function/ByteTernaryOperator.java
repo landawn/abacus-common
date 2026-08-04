@@ -29,8 +29,7 @@ import com.landawn.abacus.util.Throwables;
 @FunctionalInterface
 public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given byte operands.
-     * This method performs a ternary operation on three byte values and returns a byte result.
+     * Applies this operator to the given operands.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -41,10 +40,10 @@ public interface ByteTernaryOperator extends Throwables.ByteTernaryOperator<Runt
      * byte max = maxOfThree.applyAsByte((byte) 5, (byte) 15, (byte) 10);   // Returns 15
      * }</pre>
      *
-     * @param a the first byte operand
-     * @param b the second byte operand
-     * @param c the third byte operand
-     * @return the byte result of applying this operator to the three operands
+     * @param a the first operand
+     * @param b the second operand
+     * @param c the third operand
+     * @return the operator result
      */
     @Override
     byte applyAsByte(byte a, byte b, byte c);

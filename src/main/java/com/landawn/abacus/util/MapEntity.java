@@ -37,8 +37,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * (e.g., "EntityName.propertyName"). When using canonical names, the entity name
  * prefix is automatically handled.</p>
  *
- * <p><strong>Note:</strong> This object is used to store the properties' values of an object.
- * It should not set or get values for another object's property.</p>
+ * <p><strong>Note:</strong> This object is used to store the property values of a single object.
+ * It should not be used to set or get property values of another object.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

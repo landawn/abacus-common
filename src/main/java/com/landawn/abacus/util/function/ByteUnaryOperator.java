@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation on a single byte-valued operand that produces a byte-valued result.
+ * Represents an operation on a single {@code byte}-valued operand that produces a {@code byte}-valued result.
  * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code byte}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsByte(byte)}.
@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given byte operand.
+     * Applies this operator to the given operand.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39,8 +39,8 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * byte result = doubler.applyAsByte((byte) 5);   // Returns 10
      * }</pre>
      *
-     * @param operand the byte operand
-     * @return the byte result of applying this operator to the operand
+     * @param operand the operand
+     * @return the operator result
      */
     @Override
     byte applyAsByte(byte operand);
@@ -61,7 +61,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(ByteUnaryOperator)
      */
     default ByteUnaryOperator compose(final ByteUnaryOperator before) throws IllegalArgumentException {
@@ -86,7 +86,7 @@ public interface ByteUnaryOperator extends Throwables.ByteUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(ByteUnaryOperator)
      */
     default ByteUnaryOperator andThen(final ByteUnaryOperator after) throws IllegalArgumentException {

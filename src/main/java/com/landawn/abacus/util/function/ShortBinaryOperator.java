@@ -16,48 +16,26 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * A functional interface that represents an operation upon two short-valued operands
- * and producing a short-valued result. This is the primitive type specialization of
- * {@link java.util.function.BinaryOperator} for {@code short}.
- *
- * <p>This is a specialization of {@link ShortBiFunction} for the case where the operands
- * and the result are all of the same primitive type {@code short}. Unlike the JDK which
- * only provides BinaryOperator specializations for int, long, and double, this interface
- * extends support to short primitives.
+ * Represents an operation upon two {@code short} operands and producing a {@code short} result.
+ * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code short}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short, short)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.BinaryOperator
- * @see java.util.function.IntBinaryOperator
- * @see java.util.function.LongBinaryOperator
- * @see java.util.function.DoubleBinaryOperator
  * @see ShortUnaryOperator
+ * @see ShortTernaryOperator
  */
 @FunctionalInterface
 public interface ShortBinaryOperator extends Throwables.ShortBinaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given short operands.
-     *
-     * <p>This method takes two short values as operands and produces a short result.
-     * When an operator is supplied to a parallel reduction that requires associativity,
-     * callers must choose an associative implementation; associativity is not required by this interface itself.
-     * Common implementations include arithmetic operations (add, multiply, min, max),
-     * bitwise operations (and, or, xor), and other binary operations on short values.
-     *
-     * <p>Note that due to Java's type promotion rules, arithmetic operations on shorts
-     * are promoted to int, so explicit casting back to short is often required.
+     * Applies this operator to the given operands.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ShortBinaryOperator add = (a, b) -> (short) (a + b);
-     * ShortBinaryOperator max = (a, b) -> (short) Math.max(a, b);
-     * ShortBinaryOperator bitwiseAnd = (a, b) -> (short) (a & b);
-     *
-     * short sum = add.applyAsShort((short) 100, (short) 200);               // Returns 300
-     * short maximum = max.applyAsShort((short) -50, (short) 75);            // Returns 75
-     * short result = bitwiseAnd.applyAsShort((short) 0xFF, (short) 0x0F);   // Returns 0x0F
+     * ShortBinaryOperator adder = (a, b) -> (short) (a + b);
+     * short result = adder.applyAsShort((short) 5, (short) 3);   // Returns 8
      * }</pre>
      *
      * @param a the first operand

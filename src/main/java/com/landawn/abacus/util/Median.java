@@ -358,7 +358,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(char...)
@@ -471,7 +471,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(byte...)
@@ -584,7 +584,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(short...)
@@ -698,7 +698,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(int...)
@@ -812,7 +812,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(long...)
@@ -928,7 +928,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(float...)
@@ -1047,7 +1047,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(double...)
@@ -1163,7 +1163,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(Comparable[])
@@ -1206,8 +1206,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if {@code cmp} is
+     *         {@code null}.
      * @see #of(Object[], int, int, Comparator)
      * @see #of(Comparable[])
      * @see N#median(Object[], Comparator)
@@ -1258,10 +1258,9 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
      * @see N#median(Object[], int, int, Comparator)
@@ -1396,8 +1395,8 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if {@code cmp} is
+     *         {@code null}.
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
      * @see N#median(Collection, Comparator)
@@ -1498,7 +1497,7 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection
      * @see #of(Collection)
@@ -1549,10 +1548,9 @@ public final class Median {
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if
-     *                                  {@code toIndex - fromIndex} is less than 1.
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the size of the collection
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      * @see N#median(Collection, int, int, Comparator)

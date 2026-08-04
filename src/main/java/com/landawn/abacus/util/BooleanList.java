@@ -320,7 +320,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public BooleanList(final int initialCapacity) throws IllegalArgumentException {
@@ -495,7 +495,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param element the boolean value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new BooleanList containing the repeated elements
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      */
     public static BooleanList repeat(final boolean element, final int len) {
         return of(Array.repeat(element, len));
@@ -919,7 +919,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeIf(b -> b);   // removes all true values, list is now [false, false]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed;
+     * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed; {@code false} otherwise
      * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
@@ -1368,7 +1368,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, true, false, true]
      * }</pre>
      *
-     * @param operator the operator to apply to each element;
+     * @param operator the operator to apply to each element.
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
     public void replaceAll(final BooleanUnaryOperator operator) throws IllegalArgumentException {
@@ -1392,7 +1392,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // list is now [false, false, false, false], modified is true
      * }</pre>
      *
-     * @param predicate the predicate to test each element;
+     * @param predicate the predicate to test each element.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} otherwise
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
@@ -1463,7 +1463,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * More formally, returns {@code true} if and only if this list contains
      * at least one element {@code e} such that {@code e == valueToFind}.
      *
-     * <p>This method performs a linear search through the list.
+     * <p>This method performs a linear search through the list.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1988,7 +1988,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * empty.forEach(b -> trueCount[0]++);   // action not invoked; trueCount[0] unchanged
      * }</pre>
      *
-     * @param action the action to be performed for each element;
+     * @param action the action to be performed for each element.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final BooleanConsumer action) throws IllegalArgumentException {
@@ -2020,7 +2020,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
      *                from {@code fromIndex} down to and including index 0
-     * @param action the action to be performed for each element;
+     * @param action the action to be performed for each element.
      * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
      *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
      *         {@code max(fromIndex, toIndex) > size()})
@@ -2250,7 +2250,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * the source of randomness is fair.
      *
      * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2321,7 +2321,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *             negative for backward sampling
      * @return a new {@code BooleanList} containing the sampled elements
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if {@code step} is zero
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(boolean[], int, int, int)
      */
     @Override
@@ -2351,7 +2351,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return a list of {@code BooleanList} objects, each containing a chunk of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
      *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code chunkSize <= 0}
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<BooleanList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {

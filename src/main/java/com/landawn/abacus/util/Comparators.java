@@ -1677,7 +1677,7 @@ public final class Comparators {
      *
      * @param cmp the comparator to use for comparing array elements; must not be {@code null}
      * @return a comparator that performs lexicographic comparison of Object arrays
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}
+     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static Comparator<Object[]> comparingObjArray(final Comparator<?> cmp) throws IllegalArgumentException {
@@ -2224,7 +2224,7 @@ public final class Comparators {
      * @param <T> the type of beans to compare
      * @param propNamesToCompare collection of property names to compare in order
      * @return a comparator that compares beans by the specified properties
-     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null}
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null}.
      * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
@@ -2586,7 +2586,8 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a {@link Comparable} key
      * and comparing in reverse order, with special {@code null} handling. If either object being
      * compared is {@code null}, it is treated as the minimum value (nulls first). The extracted
-     * keys are compared using reverse natural ordering.
+     * keys are compared using reverse natural ordering, with {@code null} keys considered less
+     * than {@code non-null} keys.
      *
      * <p>This method is useful when you need reverse ordering but want to ensure that
      * {@code null} objects appear at the beginning of the sorted collection.</p>
@@ -2620,7 +2621,8 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a {@link Comparable} key
      * and comparing in reverse order, with special {@code null} handling. If either object being
      * compared is {@code null}, it is treated as the maximum value (nulls last). The extracted
-     * keys are compared using reverse natural ordering.
+     * keys are compared using reverse natural ordering, with {@code null} keys considered greater
+     * than {@code non-null} keys.
      *
      * <p>This method is useful when you need reverse ordering but want to ensure that
      * {@code null} objects appear at the end of the sorted collection.</p>

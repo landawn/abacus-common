@@ -89,7 +89,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BooleanTriPredicate and(final BooleanTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -114,7 +114,7 @@ public interface BooleanTriPredicate extends Throwables.BooleanTriPredicate<Runt
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default BooleanTriPredicate or(final BooleanTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

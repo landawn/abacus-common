@@ -27,13 +27,13 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * containing elements of potentially different types. The serialization format is a JSON array:
  * {@code [t1, t2, t3, t4, t5, t6, t7]}.
  *
- * @param <T1> the type of the first element
- * @param <T2> the type of the second element
- * @param <T3> the type of the third element
- * @param <T4> the type of the fourth element
- * @param <T5> the type of the fifth element
- * @param <T6> the type of the sixth element
- * @param <T7> the type of the seventh element
+ * @param <T1> the type of the first element in the tuple
+ * @param <T2> the type of the second element in the tuple
+ * @param <T3> the type of the third element in the tuple
+ * @param <T4> the type of the fourth element in the tuple
+ * @param <T5> the type of the fifth element in the tuple
+ * @param <T6> the type of the sixth element in the tuple
+ * @param <T7> the type of the seventh element in the tuple
  */
 @SuppressWarnings("java:S2160")
 public class Tuple7Type<T1, T2, T3, T4, T5, T6, T7> extends AbstractTupleType<Tuple7<T1, T2, T3, T4, T5, T6, T7>> {

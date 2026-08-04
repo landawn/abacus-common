@@ -31,6 +31,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -419,8 +420,10 @@ public final class Futures {
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when both input futures are done.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException,
-     *                         or TimeoutException, the exception is wrapped in a RuntimeException and thrown.
+     * @throws RuntimeException wrapping any exception thrown by the zip function that the corresponding {@code get}
+     *                         method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
      * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Future, Future, Throwables.BiFunction, Throwables.Function)
      * @see #combine(Future, Future, Throwables.BiFunction)
@@ -525,9 +528,12 @@ public final class Futures {
      *                              (_1: future1, _2: future2, _3: timeout value, _4: TimeUnit)
      *
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
-     *                         ExecutionException, or TimeoutException.
-     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
+     * @throws RuntimeException wrapping any exception thrown by either zip function that the corresponding
+     *                         {@code get} method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
+     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is
+     *         {@code null}.
      * @see #compose(Future, Future, Throwables.BiFunction)
      * @see Tuple4
      * @see TimeUnit
@@ -617,7 +623,10 @@ public final class Futures {
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when all three input futures are done.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
+     * @throws RuntimeException wrapping any exception thrown by the zip function that the corresponding {@code get}
+     *                         method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
      * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Future, Future, Future, Throwables.TriFunction, Throwables.Function)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
@@ -733,9 +742,12 @@ public final class Futures {
      *                              (_1: future1, _2: future2, _3: future3, _4: timeout value, _5: TimeUnit)
      *
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
-     *                         ExecutionException, or TimeoutException.
-     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
+     * @throws RuntimeException wrapping any exception thrown by either zip function that the corresponding
+     *                         {@code get} method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
+     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is
+     *         {@code null}.
      * @see #compose(Future, Future, Future, Throwables.TriFunction)
      * @see Tuple5
      * @see TimeUnit
@@ -853,7 +865,10 @@ public final class Futures {
      * @return a lazy {@code ContinuableFuture} whose {@code get()} invokes the supplied zip function;
      *         the function decides whether and how to wait for the inputs, while {@code isDone()} is
      *         {@code true} only when all input futures are done.
-     * @throws RuntimeException if the zip function throws an exception other than InterruptedException, ExecutionException, or TimeoutException.
+     * @throws RuntimeException wrapping any exception thrown by the zip function that the corresponding {@code get}
+     *                         method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
      * @throws IllegalArgumentException if {@code zipFunctionForGet} is {@code null}.
      * @see #compose(Collection, Throwables.Function, Throwables.Function)
      * @see #combine(Collection, Throwables.Function)
@@ -994,10 +1009,12 @@ public final class Futures {
      * @param zipFunctionTimeoutGet the function for get(timeout, unit) operations. Receives a Tuple3 containing:
      *                              (_1: futures collection, _2: timeout value, _3: TimeUnit).
      * @return a ContinuableFuture with custom logic for both regular and timeout operations.
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
-     * @throws RuntimeException if either zip function throws an exception other than InterruptedException,
-     *                         ExecutionException, or TimeoutException.
-     * @throws IllegalArgumentException if any of {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or if any of
+     *         {@code zipFunctionForGet}, {@code zipFunctionTimeoutGet} is {@code null}.
+     * @throws RuntimeException wrapping any exception thrown by either zip function that the corresponding
+     *                         {@code get} method does not rethrow directly; only {@code InterruptedException} and
+     *                         {@code ExecutionException} (plus {@code TimeoutException} from
+     *                         {@code get(timeout, unit)}) are rethrown as-is.
      * @see #compose(Collection, Throwables.Function)
      * @see Tuple3
      * @see TimeUnit
@@ -1013,6 +1030,7 @@ public final class Futures {
         final Throwables.Function<? super FC, ? extends R, Exception> zipFunctionForGetToUse = (Throwables.Function<? super FC, ? extends R, Exception>) zipFunctionForGet;
 
         final Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception> zipFunctionTimeoutGetToUse = (Throwables.Function<? super Tuple3<FC, Long, TimeUnit>, ? extends R, Exception>) zipFunctionTimeoutGet;
+        final AtomicBoolean cancelled = new AtomicBoolean();
 
         return ContinuableFuture.wrap(new Future<>() {
             @Override
@@ -1036,22 +1054,26 @@ public final class Futures {
                     throw exception;
                 }
 
+                if (res) {
+                    cancelled.set(true);
+                }
+
                 return res;
             }
 
             @Override
             public boolean isCancelled() {
-                for (final Future<?> future : cfs) {
-                    if (future.isCancelled()) {
-                        return true;
-                    }
-                }
-
-                return false;
+                // A compose function may ignore cancelled inputs and still return successfully, so
+                // cancellation is a property of this composite's successful cancel(...) call.
+                return cancelled.get();
             }
 
             @Override
             public boolean isDone() {
+                if (cancelled.get()) {
+                    return true;
+                }
+
                 for (final Future<?> future : cfs) {
                     if (!future.isDone()) {
                         return false;
@@ -1063,6 +1085,10 @@ public final class Futures {
 
             @Override
             public R get() throws InterruptedException, ExecutionException {
+                if (cancelled.get()) {
+                    throw new CancellationException();
+                }
+
                 try {
                     return zipFunctionForGetToUse.apply(cfs);
                 } catch (final InterruptedException | ExecutionException e) {
@@ -1074,6 +1100,10 @@ public final class Futures {
 
             @Override
             public R get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                if (cancelled.get()) {
+                    throw new CancellationException();
+                }
+
                 final Tuple3<FC, Long, TimeUnit> t = Tuple.of(cfs, timeout, unit);
 
                 try {
@@ -1466,8 +1496,7 @@ public final class Futures {
      *         for all input futures and may throw {@link InterruptedException} or
      *         {@link ExecutionException}; if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or if {@code action} is {@code null}.
      * @see #combine(Future, Future, Throwables.BiFunction)
      * @see #combine(Future, Future, Future, Throwables.TriFunction)
      */
@@ -1593,13 +1622,20 @@ public final class Futures {
 
             @Override
             public boolean isCancelled() {
+                // Future contract: isCancelled() implies isDone(). Report cancelled only when every
+                // constituent is done and at least one was cancelled (composite cannot succeed).
+                boolean sawCancelled = false;
+
                 for (final Future<?> future : futures) {
+                    if (!future.isDone()) {
+                        return false;
+                    }
                     if (future.isCancelled()) {
-                        return true;
+                        sawCancelled = true;
                     }
                 }
 
-                return false;
+                return sawCancelled;
             }
 
             @Override
@@ -2017,8 +2053,8 @@ public final class Futures {
      *         throws the future's failure wrapped in a {@link RuntimeException}; once the total
      *         timeout elapses, {@code next()} throws a {@link RuntimeException} wrapping a
      *         {@link TimeoutException}.
-     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive,
-     *         or {@code unit} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not
+     *         positive, or {@code unit} is {@code null}.
      * @see #iterate(Collection)
      * @see #iterate(Collection, long, TimeUnit, Function)
      */
@@ -2084,7 +2120,8 @@ public final class Futures {
      *                      {@code null}.
      * @return an {@code ObjIterator} that yields transformed results in completion order
      *         (first-finished, first-out).
-     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or if {@code resultHandler} is
+     *         {@code null}.
      * @see #iterate(Collection)
      * @see #iterate(Collection, long, TimeUnit, Function)
      */
@@ -2140,7 +2177,8 @@ public final class Futures {
      *         (first-finished, first-out) with timeout enforcement. Once the total timeout
      *         elapses, a final {@code Result} carrying a {@link TimeoutException} is passed to
      *         {@code resultHandler}.
-     * @throws IllegalArgumentException if {@code resultHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not
+     *         positive, {@code unit} is {@code null}, or {@code resultHandler} is {@code null}.
      * @see #iterate(Collection, Function)
      * @see #iterate(Collection, long, TimeUnit)
      */

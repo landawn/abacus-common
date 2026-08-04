@@ -865,8 +865,8 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a Map where each key from {@code keys} is associated with the corresponding value from {@code values};
      *         an empty map (from {@code mapSupplier.apply(0)}) if either input is {@code null} or empty.
-     * @throws IllegalArgumentException if any of {@code mergeFunction}, {@code mapSupplier} is {@code null},
-     *         or if {@code mapSupplier} returns {@code null}.
+     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapSupplier} is {@code null}, or if
+     *         {@code mapSupplier} returns {@code null}.
      * @see N#zip(Iterable, Iterable, BiFunction)
      * @see Iterators#zip(Iterator, Iterator, BiFunction)
      */
@@ -1312,7 +1312,7 @@ public final class Maps {
      * @param defaultValue the default value to return if the path cannot be resolved or resolves to {@code null}; must not be {@code null}
      * @return the resolved string value, or {@code defaultValue} if the path cannot be
      *         resolved or resolves to {@code null}
-     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}
+     * @throws IllegalArgumentException if {@code defaultValue} is {@code null}.
      * @see #getAsStringOrDefaultIfAbsent(Map, Object, String)
      * @see #getByPathAsString(Map, String)
      */
@@ -1354,7 +1354,7 @@ public final class Maps {
      * @param targetType the target type to convert the value to; must not be {@code null}
      * @return an {@code Optional<T>} containing the resolved and converted value, or empty if
      *         the path cannot be resolved or resolves to {@code null}
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @see #getAs(Map, Object, Class)
      * @see #getByPathAsOrDefaultIfAbsent(Map, String, Object, Class)
      * @see #getByPathAsInt(Map, String)
@@ -1682,7 +1682,7 @@ public final class Maps {
      * @param key the key whose associated value is to be returned
      * @param defaultValueSupplier supplies the value to return if the key is absent
      * @return the mapped value, or the value supplied by {@code defaultValueSupplier} if absent
-     * @throws IllegalArgumentException if {@code defaultValueSupplier} returns {@code null}.
+     * @throws IllegalArgumentException if {@code defaultValueSupplier} is {@code null} or returns {@code null}.
      */
     public static <K, V> V getOrDefaultIfAbsent(final Map<K, ? extends V> map, final K key, final Supplier<? extends V> defaultValueSupplier)
             throws IllegalArgumentException {
@@ -2072,7 +2072,7 @@ public final class Maps {
      * Returns the mapped boolean value wrapped in {@code OptionalBoolean}.
      * Returns {@code OptionalBoolean.empty()} if the map is {@code null}/empty, the key is absent,
      * or the mapped value is {@code null}. Non-{@code null} values that are not {@link Boolean}
-     * are converted with {@link Strings#parseBoolean(String)}.
+     * are converted with {@link Boolean#parseBoolean(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2106,14 +2106,14 @@ public final class Maps {
         } else if (val instanceof Boolean) {
             return OptionalBoolean.of((Boolean) val);
         } else {
-            return OptionalBoolean.of(Strings.parseBoolean(N.toString(val)));
+            return OptionalBoolean.of(Boolean.parseBoolean(N.toString(val)));
         }
     }
 
     /**
      * Returns the mapped boolean value, or {@code defaultValue} if the map is {@code null}/empty,
      * the key is absent, or the mapped value is {@code null}.
-     * Non-{@code null} values that are not {@link Boolean} are converted with {@link Strings#parseBoolean(String)}.
+     * Non-{@code null} values that are not {@link Boolean} are converted with {@link Boolean#parseBoolean(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2144,7 +2144,7 @@ public final class Maps {
         } else if (val instanceof Boolean) {
             return (Boolean) val;
         } else {
-            return Strings.parseBoolean(N.toString(val));
+            return Boolean.parseBoolean(N.toString(val));
         }
     }
 
@@ -3592,8 +3592,8 @@ public final class Maps {
      * A {@code null} result removes the key.
      * @return the new value associated with the key, or {@code null} if the key was removed (because
      *         {@code mergeFunction} returned {@code null}).
-     * @throws IllegalArgumentException if {@code map} or {@code value} is {@code null}.
-     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code map} or {@code value} is {@code null}, or if {@code mergeFunction}
+     *         is {@code null}.
      * @see Map#merge(Object, Object, BiFunction)
      */
     @MayReturnNull
@@ -4261,8 +4261,8 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a new map (created by {@code mapSupplier}) containing only the entries that match the predicate;
      *         an empty map (from {@code mapSupplier.apply(0)}) if {@code map} is {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
-     * @throws IllegalArgumentException if any of {@code predicate}, {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} or {@code mapSupplier} is {@code null}, or if
+     *         {@code mapSupplier} returns {@code null}.
      * @see #filter(Map, BiPredicate)
      */
     public static <K, V, M extends Map<K, V>> M filter(final Map<K, V> map, final BiPredicate<? super K, ? super V> predicate,
@@ -4620,8 +4620,8 @@ public final class Maps {
      *
      * @param map the map to be flattened.
      * @return a new map which is the flattened version of the input map.
-     * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure
-     *         is encountered, or two input paths produce the same flattened key.
+     * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure is
+     *         encountered, or two input paths produce the same flattened key.
      */
     public static Map<String, Object> flatten(final Map<String, Object> map) {
         return flatten(map, IntFunctions.ofMap());
@@ -4651,11 +4651,11 @@ public final class Maps {
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the map to be flattened.
      * @param mapSupplier a function that creates a new Map instance given an expected size;
-     *        and must return a distinct map on every invocation.
+     *        it must return a distinct map on every invocation.
      * @return a new map which is the flattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
-     * @throws IllegalArgumentException if a key (at any level) is {@code null}, a cyclic map structure
-     *         is encountered, or two input paths produce the same flattened key.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, or if a key (at any level) is
+     *         {@code null}, a cyclic map structure is encountered, or two input paths produce the same flattened
+     *         key.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -4690,10 +4690,9 @@ public final class Maps {
      * @param delimiter the non-empty delimiter to be used when concatenating keys.
      * @param mapSupplier a function that creates a new Map instance given an expected size
      * @return a new map which is the flattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}.
-     * @throws IllegalArgumentException if {@code delimiter} is {@code null} or empty, a key (at any level)
-     *         is {@code null}, a cyclic map structure is encountered, or two input paths produce the same
-     *         flattened key.
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, or if {@code delimiter} is
+     *         {@code null} or empty, a key (at any level) is {@code null}, a cyclic map structure is encountered, or
+     *         two input paths produce the same flattened key.
      */
     public static <M extends Map<String, Object>> M flatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -4782,8 +4781,8 @@ public final class Maps {
      *
      * @param map the flattened map to be unflattened.
      * @return a new map which is the unflattened version of the input map.
-     * @throws IllegalArgumentException if a key is {@code null} or flat keys conflict (for example,
-     *         both {@code "a"} and {@code "a.b"} are present).
+     * @throws IllegalArgumentException if a key is {@code null} or flat keys conflict (for example, both {@code "a"}
+     *         and {@code "a.b"} are present).
      */
     public static Map<String, Object> unflatten(final Map<String, Object> map) {
         return unflatten(map, IntFunctions.ofMap());
@@ -4809,10 +4808,10 @@ public final class Maps {
      * @param <M> the type of the map to be returned. It extends the Map with String keys and Object values.
      * @param map the flattened map to be unflattened.
      * @param mapSupplier a function that creates a new Map instance given an expected size;
-     *        and must return a distinct map on every invocation.
+     *        it must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, a key is {@code null},
-     *         or flat keys conflict (for example, both {@code "a"} and {@code "a.b"} are present).
+     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, a key is {@code null}, or flat
+     *         keys conflict (for example, both {@code "a"} and {@code "a.b"} are present).
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -4842,12 +4841,12 @@ public final class Maps {
      * @param map the flattened map to be unflattened.
      * @param delimiter the non-empty delimiter that was used in the flattening process to concatenate keys.
      * @param mapSupplier a function that creates a new Map instance given an expected size;
-     *        and must return a distinct map on every invocation.
+     *        it must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map. Keys without the delimiter
      *         are copied as-is; no error is raised when the delimiter is absent.
      * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, {@code delimiter} is
-     *         {@code null} or empty, a key is {@code null}, or flat keys conflict (for example, both
-     *         {@code "a"} and {@code "a.b"} are present).
+     *         {@code null} or empty, a key is {@code null}, or flat keys conflict (for example, both {@code "a"} and
+     *         {@code "a.b"} are present).
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -5059,11 +5058,8 @@ public final class Maps {
      *
      * Maps.replaceKeys(data, k -> k.split("_")[0], (v1, v2) -> v1 + ", " + v2);
      * // data now contains: {user="John, Jane", admin="Bob"}
-     * // Keep only the first value on collision
      * // Use (existing, incoming) -> existing to keep the first value on a collision.
-     * // Keep only the last value on collision
      * // Use (existing, incoming) -> incoming to keep the last value on a collision.
-     * // Remove entries that would collide (mergeFunction returns null)
      * // Return null from the merger to remove the collided entry.
      * }</pre>
      *

@@ -27,11 +27,12 @@ import com.landawn.abacus.util.ImmutableSortedSet;
 import com.landawn.abacus.util.SK;
 
 /**
- * Type handler for ImmutableSet objects.
- * This class provides serialization and deserialization capabilities for ImmutableSet instances,
- * delegating most operations to the underlying Set type handler while ensuring immutability.
+ * Type handler for {@link ImmutableSet} objects.
+ * This class provides serialization and deserialization for {@code ImmutableSet} instances,
+ * delegating most operations to the underlying {@link Set} type handler while ensuring immutability.
  *
  * @param <E> the element type of the immutable set
+ * @see ImmutableSet
  */
 @SuppressWarnings("java:S2160")
 public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {

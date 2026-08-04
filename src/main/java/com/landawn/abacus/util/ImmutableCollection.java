@@ -78,8 +78,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * backed by the provided Collection.
      *
      * <p><b>Warning:</b> Changes to the specified Collection will be reflected in the ImmutableCollection.
-     * This method does not create a defensive copy. For a {@code true} immutable copy, use the specific
-     * immutable collection type's copyOf method (e.g., {@link ImmutableList#copyOf}).</p>
+     * This method does not create a defensive copy. For a truly independent immutable copy, use the specific
+     * immutable collection type's {@code copyOf} method (e.g., {@link ImmutableList#copyOf}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

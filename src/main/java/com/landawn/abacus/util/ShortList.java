@@ -353,7 +353,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public ShortList(final int initialCapacity) throws IllegalArgumentException {
@@ -533,7 +533,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Creates a ShortList containing a sequence of short values from startInclusive (inclusive) to
      * endExclusive (exclusive), incrementing by the specified step value. The step can be positive
-     * or negative. If the step would not reach endExclusive from startInclusive, an empty list is returned.
+     * or negative. If startInclusive equals endExclusive, or the step direction is inconsistent with
+     * the range (e.g., a positive step with endExclusive less than startInclusive), an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -547,7 +548,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new ShortList containing the sequence of values
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ShortList range(final short startInclusive, final short endExclusive, final short by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -588,7 +589,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new ShortList containing the sequence of values including both endpoints
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -607,7 +608,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param element the short value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new ShortList containing the element repeated len times
-     * @throws IllegalArgumentException if len is negative
+     * @throws IllegalArgumentException if len is negative.
      */
     public static ShortList repeat(final short element, final int len) {
         return of(Array.repeat(element, len));
@@ -1421,7 +1422,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.replaceAll(e -> (short) (e + 1));   // list is now [3, 5, 7]
      * }</pre>
      *
-     * @param operator the operator to apply to each element;
+     * @param operator the operator to apply to each element
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @see #replaceAll(short, short)
      * @see #replaceIf(ShortPredicate, short)
@@ -1445,7 +1446,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.replaceIf(e -> e > 100, (short) 0);                   // returns false; list is unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test each element;
+     * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced; {@code false} otherwise
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
@@ -1685,7 +1686,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param b the list to find common elements with this list
      * @return a new ShortList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #intersection(short[])
      * @see #difference(ShortList)
      * @see #symmetricDifference(ShortList)
@@ -2203,7 +2204,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * new ShortList().forEach(e -> sum[0]++);   // no-op on empty list; sum[0] stays 6
      * }</pre>
      *
-     * @param action the action to be performed for each element;
+     * @param action the action to be performed for each element
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ShortConsumer action) throws IllegalArgumentException {
@@ -2497,7 +2498,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * assuming the provided Random instance produces uniformly distributed values.</p>
      *
      * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2568,7 +2569,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param step the stride between selected indices; must not be zero
      * @return a new ShortList containing the selected elements
      * @throws IndexOutOfBoundsException if the effective range is invalid
-     * @throws IllegalArgumentException if {@code step} is zero
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(short[], int, int, int)
      */
     @Override
@@ -2596,7 +2597,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param chunkSize the desired size of each subsequence. Must be positive.
      * @return a List of ShortList instances containing the split subsequences
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if {@code chunkSize <= 0}
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<ShortList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {

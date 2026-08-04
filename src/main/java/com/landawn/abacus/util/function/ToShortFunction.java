@@ -23,10 +23,6 @@ import com.landawn.abacus.util.Throwables;
  * class in java.util.function package, as Java only provides int, long, and double specializations.
  * This interface fills that gap for short primitive type operations.
  *
- * <p>This interface extends the Throwables.ToShortFunction, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -49,9 +45,8 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      */
     ToShortFunction<Short> UNBOX = value -> value == null ? 0 : value;
     /**
-     * A predefined ToShortFunction instance that converts any Number object to a primitive short.
-     * Returns 0 if the input is {@code null}, otherwise calls the shortValue() method on the Number object.
-     * This function can handle various Number subclasses including Integer, Long, Double, Float, BigDecimal, etc.
+     * A predefined {@code ToShortFunction} that converts any {@link Number} to a primitive {@code short}.
+     * Returns {@code 0} if the input is {@code null}; otherwise returns {@link Number#shortValue()}.
      *
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the short range (-32,768 to 32,767).

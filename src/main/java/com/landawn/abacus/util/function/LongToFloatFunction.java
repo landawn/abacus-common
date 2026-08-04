@@ -52,21 +52,8 @@ public interface LongToFloatFunction {
     /**
      * Applies this function to the given argument.
      *
-     * <p>Converts a long value to a float value according to the function's implementation.
-     * The specific conversion logic depends on the implementation, but common use cases include:
-     * <ul>
-     *   <li>Simple type conversion (casting)</li>
-     *   <li>Mathematical transformations with float precision</li>
-     *   <li>Scaling operations where float precision is sufficient</li>
-     *   <li>Custom business logic requiring float output</li>
-     * </ul>
-     *
-     * <p>Important: When converting from long to float, be aware that float has only
-     * 24 bits of precision for the significand, which means that long values requiring
-     * more than 24 bits of precision will lose accuracy in the conversion.
-     *
      * @param value the {@code long} function argument
-     * @return the {@code float} result of applying this function to the argument
+     * @return the {@code float} function result
      */
     float applyAsFloat(long value);
 }

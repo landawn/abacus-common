@@ -992,7 +992,11 @@ abstract class AbstractByteStream extends ByteStream {
      * @return a new ByteStream backed by the transformed array
      */
     private ByteStream lazyLoad(final UnaryOperator<byte[]> op, final boolean sorted) {
-        return ByteStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(ByteIterator.defer(() -> {
+            final byte[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? ByteIterator.empty() : ByteIterator.of(a);
+        }), sorted);
     }
 
     @Override

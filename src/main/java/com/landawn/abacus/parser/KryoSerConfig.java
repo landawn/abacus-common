@@ -20,15 +20,16 @@ import com.landawn.abacus.util.N;
 /**
  * Configuration class for Kryo serialization settings.
  *
- * <p>This class extends {@link SerializationConfig} to provide Kryo-specific
- * serialization options such as whether to write class information.</p>
+ * <p>This class extends {@link SerializationConfig} and adds the Kryo-specific
+ * {@link #setWriteClass(boolean)} option. <b>{@link KryoParser} only applies {@code writeClass};</b>
+ * inherited settings such as {@link #setExclusion(Exclusion)}, {@link #setSkipTransientField(boolean)},
+ * and ignored property names are accepted for API consistency with other parsers but are not used by
+ * the Kryo serializer (Kryo serializes the full object graph through its own field model).</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * KryoSerConfig config = new KryoSerConfig()
- *     .setWriteClass(true)
- *     .setExclusion(Exclusion.NULL)
- *     .setSkipTransientField(true);
+ *     .setWriteClass(true);
  * }</pre>
  *
  * @see SerializationConfig
@@ -47,14 +48,13 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
      * <p>Default settings:</p>
      * <ul>
      *   <li>{@code writeClass}: {@code false}</li>
-     *   <li>Inherits defaults from {@link SerializationConfig}</li>
+     *   <li>Inherits defaults from {@link SerializationConfig} (not applied by {@link KryoParser})</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerConfig config = new KryoSerConfig()
-     *     .setWriteClass(true)
-     *     .setSkipTransientField(true);
+     *     .setWriteClass(true);
      * }</pre>
      *
      */
@@ -80,7 +80,11 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
     }
 
     /**
-     * Sets whether class information should be written during serialization.
+     * Sets whether class metadata should be written with the object during serialization.
+     *
+     * <p>When {@code true} (or when the object is {@code null}), {@link KryoParser} writes both
+     * class and object so the stream can be read without supplying a target class. When {@code false}
+     * (default), only the object is written and deserialization must supply the target type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -162,8 +166,7 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerConfig config = KryoSerConfig.create()
-     *     .setWriteClass(true)
-     *     .setExclusion(Exclusion.NULL);
+     *     .setWriteClass(true);
      * }</pre>
      *
      * @return a new {@code KryoSerConfig} instance

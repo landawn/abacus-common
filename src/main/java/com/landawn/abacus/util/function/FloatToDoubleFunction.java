@@ -38,11 +38,7 @@ public interface FloatToDoubleFunction extends Throwables.FloatToDoubleFunction<
     FloatToDoubleFunction DEFAULT = value -> value;
 
     /**
-     * Applies this function to the given float argument.
-     *
-     * <p>The implementation should define how the float value is transformed into a double value.
-     * Common implementations include widening conversion, mathematical transformations,
-     * or value mapping.</p>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

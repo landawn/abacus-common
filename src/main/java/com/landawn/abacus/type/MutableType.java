@@ -17,7 +17,7 @@ package com.landawn.abacus.type;
 import com.landawn.abacus.util.Mutable;
 
 /**
- * Abstract base class for type handlers that work with mutable objects implementing {@link Mutable}.
+ * The abstract base class for type handlers that work with mutable objects implementing {@link Mutable}.
  * This class extends {@link AbstractType} to provide a common foundation for type converters
  * and serializers that deal with mutable value objects (objects whose state can be modified
  * after creation).

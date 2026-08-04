@@ -26,9 +26,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(long, Object)}.
  *
- * <p>The interface extends {@code Throwables.LongObjPredicate} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @param <T> the type of the object argument to the predicate
@@ -102,7 +99,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongObjPredicate<T> and(final LongObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -133,7 +130,7 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default LongObjPredicate<T> or(final LongObjPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

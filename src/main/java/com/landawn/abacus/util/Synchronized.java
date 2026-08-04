@@ -60,7 +60,7 @@ public final class Synchronized<T> {
      * Constructs a new {@code Synchronized} instance wrapping the given mutex.
      *
      * @param mutex the object to synchronize on; must not be {@code null}
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}.
      */
     Synchronized(final T mutex) {
         N.checkArgNotNull(mutex);
@@ -119,9 +119,8 @@ public final class Synchronized<T> {
      * @param <E> the type of exception that the command might throw.
      * @param mutex the object to synchronize on.
      * @param cmd the runnable command to execute.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code cmd} is {@code null}.
      * @throws E if the command throws an exception of type E.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
     public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -158,9 +157,8 @@ public final class Synchronized<T> {
      * @param mutex the object to synchronize on.
      * @param cmd the callable command to execute.
      * @return the result of the callable command.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code cmd} is {@code null}.
      * @throws E if the callable throws an exception of type E.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      */
     public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -191,9 +189,9 @@ public final class Synchronized<T> {
      * @param mutex the object to synchronize on and pass to the predicate.
      * @param predicate the predicate to test.
      * @return the boolean result of the predicate.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code predicate} is
+     *         {@code null}.
      * @throws E if the predicate throws an exception of type E.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <T, E extends Throwable> boolean test(final T mutex, final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -227,9 +225,9 @@ public final class Synchronized<T> {
      * @param u the additional argument to pass as second argument to the predicate.
      * @param predicate the bi-predicate to test.
      * @return the boolean result of the bi-predicate.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code predicate} is
+     *         {@code null}.
      * @throws E if the predicate throws an exception of type E.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     public static <T, U, E extends Throwable> boolean test(final T mutex, final U u, final Throwables.BiPredicate<? super T, ? super U, E> predicate)
             throws IllegalArgumentException, E {
@@ -259,9 +257,8 @@ public final class Synchronized<T> {
      * @param <E> the type of exception that the consumer might throw.
      * @param mutex the object to synchronize on and pass to the consumer.
      * @param consumer the consumer to execute.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception of type E.
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     public static <T, E extends Throwable> void accept(final T mutex, final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex);
@@ -292,9 +289,8 @@ public final class Synchronized<T> {
      * @param mutex the object to synchronize on and pass as first argument to the consumer.
      * @param u the additional argument to pass as second argument to the consumer.
      * @param consumer the bi-consumer to execute.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception of type E.
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
      */
     public static <T, U, E extends Throwable> void accept(final T mutex, final U u, final Throwables.BiConsumer<? super T, ? super U, E> consumer)
             throws IllegalArgumentException, E {
@@ -326,9 +322,8 @@ public final class Synchronized<T> {
      * @param mutex the object to synchronize on and pass to the function.
      * @param function the function to apply.
      * @return the result of applying the function.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code function} is {@code null}.
      * @throws E if the function throws an exception of type E.
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException, E {
@@ -364,9 +359,8 @@ public final class Synchronized<T> {
      * @param u the additional argument to pass as second argument to the function.
      * @param function the bi-function to apply.
      * @return the result of applying the bi-function.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code function} is {@code null}.
      * @throws E if the function throws an exception of type E.
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> function)
             throws IllegalArgumentException, E {

@@ -155,8 +155,8 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system,
-     *         or contains a double-quote character on Windows
+     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
+     *         a double-quote character on Windows.
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path) throws IOException {
@@ -187,8 +187,8 @@ final class FileSystemUtil {
      * @return the amount of free space in kilobytes
      * @throws IOException if an error occurs when finding the free space, or the command exceeds a
      *         positive {@code timeout}
-     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system,
-     *         or contains a double-quote character on Windows
+     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
+     *         a double-quote character on Windows.
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
      */
     public static long freeSpaceKb(final String path, final long timeout) throws IOException {
@@ -252,8 +252,8 @@ final class FileSystemUtil {
      * FileSystemUtil.freeSpaceKb("/volume");   // uses a *nix path
      * }</pre>
      *
-     * The free space is calculated via the command line.
-     * It uses 'dir /a /-c' on Windows and <i>df</i> on *nix.
+     * <p>The free space is calculated via the command line.
+     * It uses 'dir /a /-c' on Windows and <i>df</i> on *nix.</p>
      *
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param os the operating system code
@@ -262,7 +262,7 @@ final class FileSystemUtil {
      *  is zero or less
      * @return the amount of free space in kilobytes if {@code kb} is {@code true}; otherwise in bytes on Windows, or in the df command's default block units on Unix
      * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if {@code path} is {@code null}
+     * @throws IllegalArgumentException if {@code path} is {@code null}.
      * @throws IllegalStateException if the operating system is unsupported, or if an error
      *         occurred during initialization of the OS detection
      */
@@ -293,7 +293,7 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free disk space in bytes
-     * @throws IllegalArgumentException if {@code path} contains a double-quote character
+     * @throws IllegalArgumentException if {@code path} contains a double-quote character.
      * @throws IOException if the path cannot be normalized, an error occurs, or the command exceeds
      *         a positive {@code timeout}
      */
@@ -398,7 +398,7 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free space in kilobytes if {@code kb} is {@code true}, otherwise in the df command's default block units
-     * @throws IllegalArgumentException if the path is empty
+     * @throws IllegalArgumentException if the path is empty.
      * @throws IOException if an error occurs
      */
     long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout) throws IOException {

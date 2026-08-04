@@ -211,7 +211,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * @param mapInstanceType the Map implementation class to use (must not be {@code null})
      * @return {@code this} instance for method chaining
-     * @throws IllegalArgumentException if {@code mapInstanceType} is {@code null}
+     * @throws IllegalArgumentException if {@code mapInstanceType} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public JsonDeserConfig setMapInstanceType(final Class<? extends Map> mapInstanceType) throws IllegalArgumentException {
@@ -262,7 +262,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * @param propName the local property or map-key name under which the JSON array appears (dotted paths are not resolved)
      * @param handler the handler invoked for each element of a JSON array property (first parameter is the Collection being populated, second is the current element)
      * @return {@code this} instance for method chaining
-     * @throws IllegalArgumentException if {@code propName} is empty or {@code handler} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is empty or {@code handler} is {@code null}.
      */
     public JsonDeserConfig setPropHandler(final String propName, final BiConsumer<? super Collection<Object>, ?> handler) throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, cs.propName);
@@ -295,7 +295,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * @param propName the property name (must not be empty)
      * @return the handler for the property, or {@code null} if not set
-     * @throws IllegalArgumentException if {@code propName} is empty
+     * @throws IllegalArgumentException if {@code propName} is empty.
      * @see #setPropHandler(String, BiConsumer)
      */
     public BiConsumer<? super Collection<Object>, ?> getPropHandler(final String propName) { //NOSONAR

@@ -27,12 +27,13 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Indexed objects.
- * Indexed represents a value paired with an index, useful for maintaining position information
+ * Type handler for {@link Indexed} objects.
+ * An {@code Indexed} value pairs a payload with an index, useful for maintaining position information
  * during stream operations or when processing collections. This class provides serialization
- * and deserialization capabilities for Indexed instances.
+ * and deserialization for {@code Indexed} instances.
  *
- * @param <T> the type of value stored in the Indexed container
+ * @param <T> the type of value stored in the {@code Indexed} container
+ * @see Indexed
  */
 @SuppressWarnings("java:S2160")
 public class IndexedType<T> extends AbstractType<Indexed<T>> {
@@ -135,7 +136,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
      * @return the deserialized indexed value
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly two elements
+     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly two elements.
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)
      */

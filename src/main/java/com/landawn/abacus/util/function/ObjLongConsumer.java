@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * and a long-valued argument, and returns no result. This is a specialization of BiConsumer
  * for the case where the second argument is a primitive long.
  *
- * <p>This interface extends both {@link Throwables.ObjLongConsumer} and
- * {@link java.util.function.ObjLongConsumer}, providing compatibility with the standard
- * Java functional interfaces while adding exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, long)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -38,11 +34,6 @@ import com.landawn.abacus.util.cs;
 public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, RuntimeException>, java.util.function.ObjLongConsumer<T> { //NOSONAR
     /**
      * Performs this operation on the given arguments.
-     *
-     * <p>This method consumes an object of type T and a long value, performing some
-     * side-effect operation without returning any result. Common use cases include
-     * timestamp operations, ID assignments, size or count updates, or any operation
-     * where a long parameter modifies the state of an object.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -57,8 +48,8 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * addToList.accept(values, 1000L);
      * }</pre>
      *
-     * @param t the first input argument of type T
-     * @param value the second input argument, a primitive long value
+     * @param t the first input argument
+     * @param value the second input argument
      */
     @Override
     void accept(T t, long value);
@@ -69,10 +60,6 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * operation throws an exception, it is relayed to the caller of the
      * composed operation. If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
-     *
-     * <p>This method allows for chaining multiple consumers together, where each
-     * consumer receives the same input arguments. This is useful for performing
-     * multiple independent operations on the same data.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -89,7 +76,7 @@ public interface ObjLongConsumer<T> extends Throwables.ObjLongConsumer<T, Runtim
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjLongConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjLongConsumer<T> andThen(final ObjLongConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

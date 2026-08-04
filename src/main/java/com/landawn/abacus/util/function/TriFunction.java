@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a function that accepts three arguments and produces a result.
  * This is the three-arity specialization of {@link java.util.function.Function}.
  *
- * <p>This interface extends the Throwables.TriFunction, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(Object, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -88,7 +84,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * @param <V> the type of output of the after function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the after function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> TriFunction<A, B, C, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);
@@ -108,7 +104,7 @@ public interface TriFunction<A, B, C, R> extends Throwables.TriFunction<A, B, C,
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.TriFunction}
-     * @return this function viewed as a {@code Throwables.TriFunction} by unchecked cast
+     * @return a {@code Throwables.TriFunction} view of this function
      */
     default <E extends Throwable> Throwables.TriFunction<A, B, C, R, E> toThrowable() {
         return (Throwables.TriFunction<A, B, C, R, E>) this;

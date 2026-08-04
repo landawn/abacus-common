@@ -163,24 +163,13 @@ public final class Charsets {
     }
 
     /**
-     * Returns a charset object for the named charset, utilizing an internal cache for improved performance.
+     * Returns a charset object for the named charset.
      *
-     * <p>This method provides efficient access to charset instances by maintaining an internal cache.
-     * The cache is pre-populated with all standard charsets ({@code US-ASCII}, {@code ISO-8859-1},
-     * {@code UTF-8}, {@code UTF-16}, {@code UTF-16BE}, {@code UTF-16LE}). When a charset is requested:</p>
-     * <ol>
-     *   <li>The method first checks the internal cache for an existing instance</li>
-     *   <li>If found, the cached instance is returned immediately</li>
-     *   <li>If not found, a new charset is created via {@link Charset#forName(String)}</li>
-     *   <li>The newly created charset is cached for future requests</li>
-     * </ol>
-     *
-     * <p>This caching mechanism significantly improves performance compared to repeatedly calling
-     * {@code Charset.forName()} directly, especially in scenarios where the same charset is accessed
-     * frequently. The underlying cache is backed by a concurrent map, so concurrent access is safe;
-     * however, the cache population is not performed as a single atomic operation, so
-     * {@link Charset#forName(String)} may be invoked more than once for the same name when the same
-     * uncached charset is requested concurrently.</p>
+     * <p>Results for standard charsets ({@code US-ASCII}, {@code ISO-8859-1}, {@code UTF-8},
+     * {@code UTF-16}, {@code UTF-16BE}, {@code UTF-16LE}) and previously resolved names are reused.
+     * Unresolved names are looked up via {@link Charset#forName(String)} and then retained for later
+     * calls. Concurrent callers may race to resolve the same uncached name more than once; the
+     * returned charset for a given name is still a usable equivalent instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -201,7 +190,7 @@ public final class Charsets {
      *                    (e.g., {@code "UTF-8"}) or an alias (e.g., {@code "utf8"}); must not be {@code null}
      * @return a charset object for the named charset, either from cache or newly created
      * @throws IllegalArgumentException if {@code charsetName} is {@code null} (propagated from
-     *         {@link Charset#forName(String)})
+     *         {@link Charset#forName(String)}).
      * @throws IllegalCharsetNameException if the given charset name is illegal (as defined by
      *         {@link Charset#forName(String)})
      * @throws UnsupportedCharsetException if no support for the named charset is available

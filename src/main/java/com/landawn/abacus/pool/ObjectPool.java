@@ -104,7 +104,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element);
@@ -133,7 +133,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param element the object to be added to the pool, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null
+     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
      */
     boolean add(E element, boolean autoDestroyOnFailedToAdd);
@@ -158,7 +158,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if successful; {@code false} if the timeout elapsed before space was
      *         available, the element was already (or became) expired, or the memory measure rejected the element
-     * @throws IllegalArgumentException if the element or unit is null
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -183,7 +183,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
-     * @throws IllegalArgumentException if the element or unit is null
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -246,7 +246,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return an object from the pool, or {@code null} if the timeout elapsed before an object was available
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
+     * @throws IllegalArgumentException if the unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull

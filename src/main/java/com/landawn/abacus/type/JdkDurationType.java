@@ -29,9 +29,12 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for java.time.Duration.
- * This class provides serialization, deserialization, and database access capabilities for Duration instances.
- * Durations are stored and transmitted as milliseconds for compatibility and efficiency.
+ * Type handler for JDK {@link java.time.Duration} values.
+ * This class provides serialization, deserialization, and database access for {@code Duration} instances.
+ * Durations are stored and transmitted as millisecond counts for compatibility and efficiency.
+ *
+ * @see java.time.Duration
+ * @see DurationType
  */
 public class JdkDurationType extends AbstractType<Duration> {
 
@@ -39,8 +42,8 @@ public class JdkDurationType extends AbstractType<Duration> {
     public static final String DURATION = "JdkDuration";
 
     /**
-     * Package-private constructor for JdkDurationType.
-     * This constructor is called by the TypeFactory to create Duration type instances.
+     * Package-private constructor for {@code JdkDurationType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     JdkDurationType() {
         super(DURATION);
@@ -88,8 +91,8 @@ public class JdkDurationType extends AbstractType<Duration> {
      * <p><b>&#9888;&#65039;</b> Sub-millisecond precision is not preserved: for example, {@code Duration.ofNanos(1)}
      * serializes as {@code "0"}.</p>
      *
-     * @param x the Duration to convert to string
-     * @return the string representation of milliseconds, or {@code null} if the input is null
+     * @param x the {@code Duration} to convert to string
+     * @return the string representation of milliseconds, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

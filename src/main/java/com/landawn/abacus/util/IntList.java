@@ -304,7 +304,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     @Serial
     private static final long serialVersionUID = 8661773953226671696L;
 
-    /** Shared random number generator used by {@link #random(int)}. */
+    /** Shared random number generator used by the {@link #random(int)} and {@link #random(int, int, int)} factory methods. */
     static final Random RAND = new SecureRandom();
 
     /**
@@ -346,7 +346,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public IntList(final int initialCapacity) throws IllegalArgumentException {
@@ -543,7 +543,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new IntList containing the sequence of integers
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static IntList range(final int startInclusive, final int endExclusive, final int by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -592,7 +592,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new IntList containing the sequence of integers
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static IntList rangeClosed(final int startInclusive, final int endInclusive, final int by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -612,7 +612,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param element the int value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new IntList containing the repeated elements
-     * @throws IllegalArgumentException if len is negative
+     * @throws IllegalArgumentException if len is negative.
      */
     public static IntList repeat(final int element, final int len) {
         return of(Array.repeat(element, len));
@@ -662,7 +662,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endExclusive the upper bound (exclusive) for the random values
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new IntList containing random values within the specified range
-     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}.
      * @throws NegativeArraySizeException if {@code len} is negative
      * @see Random#nextInt(int)
      */
@@ -2625,7 +2625,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * @param rnd the source of randomness to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2722,7 +2722,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *             negative values select elements in reverse direction
      * @return a new IntList containing the selected elements
      * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if step is zero
+     * @throws IllegalArgumentException if step is zero.
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -2757,7 +2757,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param chunkSize the desired size of each chunk. Must be greater than 0
      * @return a List containing the IntList chunks
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if chunkSize &lt;= 0
+     * @throws IllegalArgumentException if chunkSize &lt;= 0.
      */
     @Override
     public List<IntList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -2993,7 +2993,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
     }
 
     /**
-     * Returns a Multiset containing all elements from specified range converted to their boxed type.
+     * Returns a Multiset containing all elements from the specified range converted to their boxed type.
      * The type of Multiset returned is determined by the provided supplier function.
      * A Multiset is a collection that allows duplicate elements and provides occurrence counting.
      *

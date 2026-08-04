@@ -42,10 +42,7 @@ public interface FloatToLongFunction extends Throwables.FloatToLongFunction<Runt
     FloatToLongFunction DEFAULT = value -> (long) value;
 
     /**
-     * Applies this function to the given float argument.
-     *
-     * <p>The implementation should define how the float value is transformed into a long value.
-     * Common implementations include truncation, rounding, or custom mapping logic.</p>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

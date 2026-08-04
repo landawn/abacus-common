@@ -27,7 +27,10 @@ import com.landawn.abacus.util.Numbers;
  * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
  * a {@code null} result returns {@code null}, an {@link Integer} result is returned directly,
  * any other {@link Number} is narrowed via {@link Number#intValue()}, and
- * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toInt(String)}.
+ * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toInt(String)}.</p>
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractIntegerType}.</p>
  *
  * @see AbstractIntegerType
  */

@@ -20,10 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that produces a double-valued result. This is the
  * double-producing primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both the Throwables.ToDoubleFunction and the standard Java
- * ToDoubleFunction, providing compatibility with both the abacus-common framework's error handling
- * mechanisms and the standard Java functional interfaces.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -46,10 +42,8 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      */
     ToDoubleFunction<Double> UNBOX = value -> value == null ? 0 : value;
     /**
-     * A predefined ToDoubleFunction instance that converts any Number object to a primitive double.
-     * Returns 0.0 if the input is {@code null}, otherwise uses the Numbers.toDouble utility method to
-     * perform the conversion. This function can handle various Number subclasses including
-     * Integer, Long, Float, BigDecimal, etc.
+     * A predefined {@code ToDoubleFunction} that converts any {@link Number} to a primitive {@code double}.
+     * Returns {@code 0.0} if the input is {@code null}; otherwise converts via {@link Numbers#toDouble(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -810,7 +810,8 @@ public final class Iterators {
      * @param c the collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
      * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
      * @return an {@code ObjIterator} that repeats each element until {@code size} elements have been produced.
-     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when
+     *         {@code size > 0}.
      * @see #repeatElements(Iterable, long)
      * @see #cycleToSize(Collection, long)
      * @see N#repeatElementsToSize(Collection, int)
@@ -1077,7 +1078,8 @@ public final class Iterators {
      * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
      * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
      * @return an {@code ObjIterator} that cycles through the collection until {@code size} elements have been produced.
-     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when {@code size > 0}.
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code c} is empty or {@code null} when
+     *         {@code size > 0}.
      * @see #cycle(Iterable)
      * @see #cycle(Iterable, long)
      * @see #repeatElementsToSize(Collection, long)
@@ -2138,7 +2140,7 @@ public final class Iterators {
              * Performs the given action for each remaining pair of elements from this concatenated iterator.
              *
              * @param action the action to perform on each remaining pair; must not be {@code null}
-             * @throws IllegalArgumentException if {@code action} is {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) throws IllegalArgumentException {
@@ -2157,7 +2159,7 @@ public final class Iterators {
              * @param <E> the type of exception the action may throw
              * @param action the action to perform on each remaining pair; must not be {@code null}
              * @throws E if the action throws an exception
-             * @throws IllegalArgumentException if {@code action} is {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E, IllegalArgumentException {
@@ -2174,7 +2176,7 @@ public final class Iterators {
              * @param <R> the type of elements returned by the mapped iterator
              * @param mapper the function to apply to each pair; must not be {@code null}
              * @return an iterator of mapped results
-             * @throws IllegalArgumentException if {@code mapper} is {@code null}
+             * @throws IllegalArgumentException if {@code mapper} is {@code null}.
              */
             @Override
             public <R> ObjIterator<R> map(final BiFunction<? super A, ? super B, ? extends R> mapper) throws IllegalArgumentException {
@@ -2273,7 +2275,7 @@ public final class Iterators {
              * Performs the given action for each remaining triple of elements from this concatenated iterator.
              *
              * @param action the action to perform on each remaining triple; must not be {@code null}
-             * @throws IllegalArgumentException if {@code action} is {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
             public void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action) throws IllegalArgumentException {
@@ -2290,7 +2292,7 @@ public final class Iterators {
              * @param <E> the type of exception the action may throw
              * @param action the action to perform on each remaining triple; must not be {@code null}
              * @throws E if the action throws an exception
-             * @throws IllegalArgumentException if {@code action} is {@code null}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -2308,7 +2310,7 @@ public final class Iterators {
              * @param <R> the type of elements returned by the mapped iterator
              * @param mapper the function to apply to each triple; must not be {@code null}
              * @return an iterator of mapped results
-             * @throws IllegalArgumentException if {@code mapper} is {@code null}
+             * @throws IllegalArgumentException if {@code mapper} is {@code null}.
              */
             @Override
             public <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper) throws IllegalArgumentException {
@@ -2554,7 +2556,7 @@ public final class Iterators {
 
     /**
      * Merges two sorted Iterators into a single ObjIterator, which will iterate over the elements of each Iterator in a sorted order.
-     * The elements in the Iterators should implement Comparable interface.
+     * The elements in the Iterators should implement the {@code Comparable} interface.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2564,7 +2566,7 @@ public final class Iterators {
      * // result => 1, 2, 3, 4, 5, 6
      * }</pre>
      *
-     * @param <T> the type of elements in the Iterators, which should implement Comparable interface.
+     * @param <T> the type of elements in the Iterators, which should implement the {@code Comparable} interface.
      * @param sortedA the first Iterator to be merged. It should be in non-descending order.
      * @param sortedB the second Iterator to be merged. It should be in non-descending order.
      * @return an ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
@@ -2602,7 +2604,7 @@ public final class Iterators {
 
     /**
      * Merges two sorted Iterable objects into a single ObjIterator, which will iterate over the elements of each Iterable in a sorted order.
-     * The elements in the Iterable objects should implement Comparable interface.
+     * The elements in the Iterable objects should implement the {@code Comparable} interface.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2612,7 +2614,7 @@ public final class Iterators {
      * // Iterates through: 1, 2, 3, 4, 5, 6, 7, 8
      * }</pre>
      *
-     * @param <T> the type of elements in the Iterable objects, which should implement Comparable interface.
+     * @param <T> the type of elements in the Iterable objects, which should implement the {@code Comparable} interface.
      * @param sortedA the first Iterable object to be merged. It should be in non-descending order.
      * @param sortedB the second Iterable object to be merged. It should be in non-descending order.
      * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
@@ -2828,7 +2830,7 @@ public final class Iterators {
      * Zips two Iterators into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine two Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
+     * The resulting elements are determined by the provided BiFunction {@code zipFunction}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2842,12 +2844,12 @@ public final class Iterators {
      * @param <A> the type of elements in the first Iterator.
      * @param <B> the type of elements in the second Iterator.
      * @param <R> the type of elements in the resulting ObjIterator.
-     * @param a the first Iterator to be zipped.
-     * @param b the second Iterator to be zipped.
+     * @param a the first Iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param b the second Iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
      * @param zipFunction a BiFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until both input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @return an ObjIterator that will iterate over the elements created by {@code zipFunction}. The resulting iterator continues until both input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, BiFunction)
      */
@@ -2879,7 +2881,7 @@ public final class Iterators {
      * Zips two Iterable objects into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine two Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided BiFunction <i>zipFunction</i>.
+     * The resulting elements are determined by the provided BiFunction {@code zipFunction}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2893,12 +2895,12 @@ public final class Iterators {
      * @param <A> the type of elements in the first Iterable.
      * @param <B> the type of elements in the second Iterable.
      * @param <R> the type of elements in the resulting ObjIterator.
-     * @param a the first Iterable to be zipped.
-     * @param b the second Iterable to be zipped.
+     * @param a the first Iterable to be zipped, or {@code null} which is treated as empty.
+     * @param b the second Iterable to be zipped, or {@code null} which is treated as empty.
      * @param valueForNoneA the default value to be used when the first Iterable is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
      * @param zipFunction a BiFunction that takes an element from each Iterable and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until both inputs are exhausted, substituting the corresponding default value for an exhausted input.
+     * @return an ObjIterator that will iterate over the elements created by {@code zipFunction}. The resulting iterator continues until both inputs are exhausted, substituting the corresponding default value for an exhausted input.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterable, Iterable, BiFunction)
      */
@@ -2916,7 +2918,7 @@ public final class Iterators {
      * Zips three Iterators into a single ObjIterator, using default values when one iterator is exhausted.
      * This method can be used to combine three Iterators into one, which will iterate over the elements of each Iterator in parallel.
      * When one iterator is exhausted, the provided default values are used.
-     * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
+     * The resulting elements are determined by the provided TriFunction {@code zipFunction}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2933,14 +2935,14 @@ public final class Iterators {
      * @param <B> the type of elements in the second Iterator.
      * @param <C> the type of elements in the third Iterator.
      * @param <R> the type of elements in the resulting ObjIterator.
-     * @param a the first Iterator to be zipped.
-     * @param b the second Iterator to be zipped.
-     * @param c the third Iterator to be zipped.
+     * @param a the first Iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param b the second Iterator to be zipped, or {@code null} which is treated as an empty iterator.
+     * @param c the third Iterator to be zipped, or {@code null} which is treated as an empty iterator.
      * @param valueForNoneA the default value to be used when the first Iterator is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterator is exhausted.
      * @param valueForNoneC the default value to be used when the third Iterator is exhausted.
      * @param zipFunction a TriFunction that takes an element from each Iterator and returns a new element for the resulting ObjIterator.
-     * @return an ObjIterator that will iterate over the elements created by <i>zipFunction</i>. The resulting iterator continues until all input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
+     * @return an ObjIterator that will iterate over the elements created by {@code zipFunction}. The resulting iterator continues until all input iterators are exhausted, substituting the corresponding default value for an exhausted iterator.
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Iterator, Iterator, Iterator, TriFunction)
      */
@@ -4493,9 +4495,9 @@ public final class Iterators {
      * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
+     *         is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
@@ -4527,10 +4529,10 @@ public final class Iterators {
      * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
+     *         {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
@@ -4564,9 +4566,9 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
+     *         is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer)} instead.
      */
@@ -4607,10 +4609,10 @@ public final class Iterators {
      * @param queueSize the size of the queue to hold the processing records. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
+     *         {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
@@ -4656,9 +4658,9 @@ public final class Iterators {
      * @param options the slicing and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} value is ignored.
      * @param elementConsumer the action to perform for each selected element.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
+     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
+     *         or if {@code elementConsumer} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
@@ -4679,7 +4681,7 @@ public final class Iterators {
      * a single iterator has only one source to read.</p>
      *
      * <p>{@code onComplete} is invoked at most once, after all selected elements have been processed successfully.
-     * If {@code elementConsumer} throws, {@code onComplete} is not invoked. A {@code null} {@code onComplete} is ignored.</p>
+     * If {@code elementConsumer} throws, {@code onComplete} is not invoked.</p>
      *
      * <p>This is the readable alternative to the positional numeric overloads (for example
      * {@link #forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)}): each tuning knob is named on the
@@ -4707,10 +4709,10 @@ public final class Iterators {
      *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} value is ignored.
      * @param elementConsumer the action to perform for each selected element.
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
+     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
+     *         or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
@@ -4811,9 +4813,9 @@ public final class Iterators {
      * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
+     *         is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
@@ -4851,10 +4853,10 @@ public final class Iterators {
      * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
+     *         {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
@@ -4897,9 +4899,9 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
+     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is
+     *         negative, or if {@code elementConsumer} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
      */
@@ -4948,10 +4950,10 @@ public final class Iterators {
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
-     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
+     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is
+     *         negative, or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
@@ -4993,9 +4995,10 @@ public final class Iterators {
      * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
      * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
+     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum},
+     *         {@code processThreadNum}, or {@code queueSize} is negative, or if {@code elementConsumer} is
+     *         {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
      */
@@ -5041,11 +5044,12 @@ public final class Iterators {
      * @param queueSize the size of the queue to hold elements between reading and processing. Use {@code 0} for a default calculated size.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is negative.
+     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum},
+     *         {@code processThreadNum}, or {@code queueSize} is negative, or if any of {@code elementConsumer},
+     *         {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
      * @throws Error if the {@code elementConsumer} throws an error.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
      */
@@ -5207,9 +5211,9 @@ public final class Iterators {
      * @param options the slicing, reading and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread reading and processing).
      * @param elementConsumer the action to perform for each selected element.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
+     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
+     *         or if {@code elementConsumer} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
@@ -5228,10 +5232,10 @@ public final class Iterators {
      * <p>Each iterator is consumed by this terminal operation. The combined iterator stream is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed
      * to {@code elementConsumer}. A {@code null} or empty {@code iterators} collection has no elements to process,
-     * but {@code onComplete} is still invoked if it is non-{@code null}.</p>
+     * but {@code onComplete} is still invoked.</p>
      *
      * <p>{@code onComplete} is invoked at most once, after all selected elements have been processed successfully.
-     * If {@code elementConsumer} throws, {@code onComplete} is not invoked. A {@code null} {@code onComplete} is ignored.</p>
+     * If {@code elementConsumer} throws, {@code onComplete} is not invoked.</p>
      *
      * <p>This is the readable alternative to the positional numeric overloads (for example
      * {@link #forEach(Collection, long, long, int, int, int, Throwables.Consumer, Throwables.Runnable)}): each tuning knob is named on the
@@ -5264,10 +5268,10 @@ public final class Iterators {
      *        {@link IterateOptions} (no slicing, caller-thread reading and processing).
      * @param elementConsumer the action to perform for each selected element.
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative.
+     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
+     *         or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */

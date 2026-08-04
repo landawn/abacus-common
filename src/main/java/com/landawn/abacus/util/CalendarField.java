@@ -181,8 +181,7 @@ public enum CalendarField {
      * Returns the CalendarField enum constant corresponding to the given Calendar field value.
      *
      * <p>This method provides a way to convert from Calendar field constants to
-     * the corresponding CalendarField enum values. It uses an internal lookup map
-     * for efficient conversion.</p>
+     * the corresponding CalendarField enum values.</p>
      *
      * <p>Supported field values include:</p>
      * <ul>
@@ -214,9 +213,8 @@ public enum CalendarField {
      *
      * @param intValue the Calendar field constant value to convert
      * @return the corresponding CalendarField enum constant, never {@code null}
-     * @throws IllegalArgumentException if no CalendarField maps to the given value
-     *         (e.g., unsupported Calendar constants like {@link Calendar#HOUR},
-     *         {@link Calendar#AM_PM}, {@link Calendar#DAY_OF_WEEK}, etc.)
+     * @throws IllegalArgumentException if no CalendarField maps to the given value (e.g., unsupported Calendar
+     *         constants like {@link Calendar#HOUR}, {@link Calendar#AM_PM}, {@link Calendar#DAY_OF_WEEK}, etc.).
      * @see Calendar
      * @see #value()
      * @see #valueOf(int)
@@ -249,7 +247,7 @@ public enum CalendarField {
      *
      * @param intValue the Calendar field constant value to convert
      * @return the corresponding CalendarField enum constant, never {@code null}
-     * @throws IllegalArgumentException if no CalendarField maps to the given value
+     * @throws IllegalArgumentException if no CalendarField maps to the given value.
      * @deprecated Use {@link #of(int)} instead for better naming consistency
      * @see #of(int)
      */

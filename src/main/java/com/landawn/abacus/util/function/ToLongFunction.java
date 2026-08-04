@@ -19,10 +19,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that produces a long-valued result. This is the
  * long-producing primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both the Throwables.ToLongFunction and the standard Java
- * ToLongFunction, providing compatibility with both the abacus-common framework's error handling
- * mechanisms and the standard Java functional interfaces.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsLong(Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -45,9 +41,8 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      */
     ToLongFunction<Long> UNBOX = value -> value == null ? 0 : value;
     /**
-     * A predefined ToLongFunction instance that converts any Number object to a primitive long.
-     * Returns 0L if the input is {@code null}, otherwise calls the longValue() method on the Number object.
-     * This function can handle various Number subclasses including Integer, Double, Float, BigDecimal, etc.
+     * A predefined {@code ToLongFunction} that converts any {@link Number} to a primitive {@code long}.
+     * Returns {@code 0L} if the input is {@code null}; otherwise returns {@link Number#longValue()}.
      *
      * <p>Note: This conversion may result in loss of precision for floating-point numbers or
      * overflow for numbers outside the long range.

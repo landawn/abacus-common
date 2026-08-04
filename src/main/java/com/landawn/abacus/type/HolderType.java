@@ -18,9 +18,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
 /**
- * Generic type handler for {@link Holder} wrapper objects from the {@code com.landawn.abacus.util}
- * package, providing serialization, deserialization, and database interaction capabilities for
- * Holder values of any type.
+ * Type handler for {@link Holder} wrapper objects, providing serialization, deserialization, and
+ * database interaction for held values of any type.
  * <p>
  * A {@code Holder} is a plain mutable single-value container, not an optional wrapper; the JDK's
  * {@code java.util.Optional<T>} is handled by {@link JdkOptionalType} instead.
@@ -213,18 +212,19 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Holder<String>> type = TypeFactory.getType("Holder<String>");
-     * ResultSet rs = Mockito.mock(ResultSet.class);
-     * Mockito.when(rs.getString(1)).thenReturn("Alice");
-     *
-     * Holder<String> name = type.get(rs, 1);
-     * if (!name.isNull()) {
-     *     System.out.println("Name: " + name.value());
+     * try (ResultSet rs = stmt.executeQuery()) {
+     *     if (rs.next()) {
+     *         Holder<String> name = type.get(rs, 1);
+     *         if (!name.isNull()) {
+     *             System.out.println("Name: " + name.value());
+     *         }
+     *     }
      * }
      * }</pre>
      *
-     * @param rs the ResultSet to read from
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return a Holder containing the retrieved value, or a Holder holding {@code null} if the value is SQL NULL
+     * @param rs the {@link ResultSet} to read from
+     * @param columnIndex the 1-based column index to retrieve the value from
+     * @return a {@code Holder} containing the retrieved value, or a {@code Holder} holding {@code null} if the value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override

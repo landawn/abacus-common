@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation on a single char-valued operand that produces a char-valued result.
+ * Represents an operation on a single {@code char}-valued operand that produces a {@code char}-valued result.
  * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code char}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsChar(char)}.
@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeException> { //NOSONAR
     /**
-     * Applies this operator to the given char operand.
+     * Applies this operator to the given operand.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -42,8 +42,8 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * char next = nextChar.applyAsChar('A');   // Returns 'B'
      * }</pre>
      *
-     * @param operand the char operand
-     * @return the char result of applying this operator to the operand
+     * @param operand the operand
+     * @return the operator result
      */
     @Override
     char applyAsChar(char operand);
@@ -64,7 +64,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then
      *         applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(CharUnaryOperator)
      */
     default CharUnaryOperator compose(final CharUnaryOperator before) throws IllegalArgumentException {
@@ -89,7 +89,7 @@ public interface CharUnaryOperator extends Throwables.CharUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the
      *         {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(CharUnaryOperator)
      */
     default CharUnaryOperator andThen(final CharUnaryOperator after) throws IllegalArgumentException {

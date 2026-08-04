@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a function that accepts an {@code int}-valued argument and produces a result.
  * This is the {@code int}-consuming primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link java.util.function.IntFunction} and
- * {@link Throwables.IntFunction}, providing compatibility with the standard Java functional
- * interfaces while also supporting the Throwables framework.
- *
  * <p>This is a functional interface whose functional method is {@link #apply(int)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -82,7 +78,7 @@ public interface IntFunction<R> extends Throwables.IntFunction<R, RuntimeExcepti
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> IntFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

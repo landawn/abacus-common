@@ -23,44 +23,34 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for {@code Long[]} arrays, providing serialization and deserialization support.
- * Arrays are represented as bracket-enclosed, comma-separated lists (e.g., {@code [1, 2, 3]}).
- * Null elements within the array are serialized as the literal string {@code "null"}.
+ * Type handler for boxed-long array ({@code Long[]}) values.
+ * This class provides serialization, deserialization, and output operations for {@code Long[]} arrays.
+ *
+ * <p>The canonical string format is a bracket-enclosed, comma-separated list where {@code null} elements
+ * are written as the literal {@code null} (e.g., {@code [1, null, 3, 42]}).
+ *
+ * @see ObjectArrayType
  */
 public final class LongArrayType extends ObjectArrayType<Long> {
 
     /**
-     * Package-private constructor for LongArrayType.
-     * This constructor is called by the TypeFactory to create Long[] type instances.
+     * Package-private constructor for {@code LongArrayType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     LongArrayType() {
         super(Long[].class);
     }
 
     /**
-     * Converts a Long array to its string representation.
-     * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * {@code null} elements in the array are represented as the literal string {@code "null"}.
+     * Converts a {@code Long[]} to its canonical string representation.
+     * The output is a bracket-enclosed, comma-separated list; {@code null} elements appear as {@code null}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     *
-     * Long[] array = {1L, 2L, 3L};
-     * String result = type.stringOf(array);
-     * // Returns: "[1, 2, 3]"
-     *
-     * Long[] withNull = {1L, null, 3L};
-     * result = type.stringOf(withNull);
-     * // Returns: "[1, null, 3]"
-     *
-     * Long[] empty = {};
-     * result = type.stringOf(empty);
-     * // Returns: "[]"
-     *
-     * result = type.stringOf(null);
-     * // Returns: null
-     * }</pre>
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code [1, null, 3, 42]} for {@code new Long[]{1L, null, 3L, 42L}}</li>
+     *   <li>{@code []} for an empty array</li>
+     *   <li>{@code null} if the input is {@code null}</li>
+     * </ul>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -68,9 +58,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
-     * @param x the Long array to convert
-     * @return the serialized array representation
-     *         or {@code null} if the input array is {@code null}, or {@code "[]"} if the array is empty
+     * @param x the {@code Long[]} to convert; may be {@code null}
+     * @return the string representation, or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
@@ -86,42 +75,22 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
-     * Parses a string to create a Long array.
-     * The string should be in the format "[value1, value2, ...]" where each value is either a long number or "null".
-     * The method handles:
+     * Parses a string representation back into a {@code Long[]} array.
+     * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
+     * The literal {@code null} (4 characters) is converted to a {@code null} array element.
+     *
+     * <p>Special cases:
      * <ul>
-     *   <li>{@code null}, empty, or blank input returns {@code null}</li>
-     *   <li>{@code "[]"} returns an empty {@code Long[]} array</li>
-     *   <li>Values of {@code "null"} (case-sensitive, exactly 4 characters) are converted to {@code null} elements</li>
-     *   <li>Other values are parsed as {@code Long} objects</li>
+     *   <li>{@code null}, blank, or empty string returns {@code null}</li>
+     *   <li>{@code "[]"} returns an empty array</li>
      * </ul>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     *
-     * Long[] result = type.valueOf("[1, 2, 3]");
-     * // Returns: Long[] {1L, 2L, 3L}
-     *
-     * result = type.valueOf("[1, null, 3]");
-     * // Returns: Long[] {1L, null, 3L}
-     *
-     * result = type.valueOf("[]");
-     * // Returns: empty Long array
-     *
-     * result = type.valueOf(null);
-     * // Returns: null
-     *
-     * result = type.valueOf("");
-     * // Returns: null
-     * }</pre>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse
-     * @return the parsed Long array, or {@code null} if the input is {@code null}, empty, or blank
+     * @param str the string to parse; may be {@code null}
+     * @return the parsed {@code Long[]}, or {@code null} if {@code str} is {@code null} or blank
      * @throws NumberFormatException if any non-{@code null} value cannot be parsed as a {@code Long}
      * @see #valueOf(Object)
      * @see #stringOf(Long[])
@@ -152,39 +121,17 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
-     * Appends the string representation of a Long array to an Appendable.
-     * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * A {@code null} array is represented as the literal string {@code "null"}, and each
-     * {@code null} element is also represented as the literal string {@code "null"}.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     * StringBuilder sb = new StringBuilder();
-     *
-     * Long[] array = {1L, 2L, 3L};
-     * type.appendTo(sb, array);
-     * // sb contains: "[1, 2, 3]"
-     *
-     * sb.setLength(0);
-     * Long[] withNull = {1L, null, 3L};
-     * type.appendTo(sb, withNull);
-     * // sb contains: "[1, null, 3]"
-     *
-     * sb.setLength(0);
-     * type.appendTo(sb, null);
-     * // sb contains: "null"
-     * }</pre>
-     *
+     * Appends a {@code Long[]} to an {@link Appendable}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; {@code non-null} values use {@link Long#toString()}.
+     * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * <b>appendTo vs. serializeTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
+     * {@code Long[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
-     * @param appendable the Appendable to write to
-     * @param x the Long array to append
-     * @throws IOException if an I/O error occurs while appending
+     * @param appendable the {@link Appendable} to write to
+     * @param x          the {@code Long[]} to append; may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -219,46 +166,22 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     }
 
     /**
-     * Writes the character representation of a Long array to a CharacterWriter.
-     * The array is formatted as a comma-separated list of values enclosed in square brackets.
-     * This method is optimized for character-based writing and may be more efficient than appendTo
-     * for certain output scenarios.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long[]> type = TypeFactory.getType(Long[].class);
-     * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
-     * BufferedJsonWriter writer2 = Objectory.createBufferedJsonWriter();
-     * JsonXmlSerConfig<?> config = null;
-     * try {
-     *     Long[] array = {100L, 200L, 300L};
-     *     type.serializeTo(writer, array, config);
-     *     String result = writer.toString();
-     *     // result: "[100, 200, 300]"
-     *
-     *     type.serializeTo(writer2, null, config);
-     *     String result2 = writer2.toString();
-     *     // result2: "null"
-     * } finally {
-     *     Objectory.recycle(writer);
-     *     Objectory.recycle(writer2);
-     * }
-     * }</pre>
-     *
+     * Writes a {@code Long[]} to a {@link CharacterWriter}.
+     * The output format is a bracket-enclosed, comma-separated list.
+     * Null elements are written as {@code null}; {@code non-null} values use the writer's optimized
+     * long-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
-     * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
-     * and is invoked by the JSON/XML serializers.
+     * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
+     * elements directly to the {@code CharacterWriter}. The supplied serialization config is forwarded to the
+     * long element type, including its {@code writeNullNumberAsZero} setting.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
+     * {@code Long[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.
      *
-     * @param writer the CharacterWriter to write to
-     * @param x the Long array to write
-     * @param config the serialization configuration forwarded to each element; may be {@code null}
-     * @throws IOException if an I/O error occurs while writing
+     * @param writer the {@link CharacterWriter} to write to
+     * @param x      the {@code Long[]} to write; may be {@code null}
+     * @param config serialization configuration forwarded to each element; may be {@code null}
+     * @throws IOException if an I/O error occurs during writing
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Long[] x, final JsonXmlSerConfig<?> config) throws IOException {

@@ -148,7 +148,7 @@ public class BlobInputStreamType extends InputStreamType {
 
     /**
      * Converts a {@link java.sql.Blob} to an {@link java.io.InputStream} for reading its binary content.
-     * Returns null if {@code blob} is null; otherwise opens its binary stream.
+     * Returns {@code null} if {@code blob} is {@code null}; otherwise opens its binary stream.
      * Closing the returned stream closes the delegate and calls {@link Blob#free()}.
      * This method therefore assumes ownership of a non-null {@code blob}; callers must not rely
      * on that locator remaining usable after the returned stream is closed.

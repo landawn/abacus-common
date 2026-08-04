@@ -88,7 +88,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
      * }</pre>
      *
      * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
-     * @throws IllegalArgumentException if the initial capacity is negative
+     * @throws IllegalArgumentException if the initial capacity is negative.
      */
     public SpinedBuffer(final int initialCapacity) throws IllegalArgumentException {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity); //NOSONAR
@@ -289,7 +289,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * }</pre>
          *
          * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
-         * @throws IllegalArgumentException if the initial capacity is negative
+         * @throws IllegalArgumentException if the initial capacity is negative.
          */
         public OfInt(final int initialCapacity) throws IllegalArgumentException {
             N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -489,7 +489,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * }</pre>
          *
          * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
-         * @throws IllegalArgumentException if the initial capacity is negative
+         * @throws IllegalArgumentException if the initial capacity is negative.
          */
         public OfLong(final int initialCapacity) throws IllegalArgumentException {
             N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
@@ -689,7 +689,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          * }</pre>
          *
          * @param initialCapacity the size of the first chunk; {@code 0} selects the default capacity
-         * @throws IllegalArgumentException if the initial capacity is negative
+         * @throws IllegalArgumentException if the initial capacity is negative.
          */
         public OfDouble(final int initialCapacity) throws IllegalArgumentException {
             N.checkArgNotNegative(initialCapacity, cs.initialCapacity);

@@ -346,7 +346,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void trace(final Supplier<String> supplier) throws IllegalArgumentException {
@@ -367,7 +367,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -390,7 +390,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void trace(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
@@ -684,7 +684,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void debug(final Supplier<String> supplier) throws IllegalArgumentException {
@@ -705,7 +705,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -728,7 +728,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void debug(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1023,7 +1023,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void info(final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1044,7 +1044,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @deprecated Use {@link #info(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -1067,7 +1067,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void info(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1362,7 +1362,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void warn(final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1383,7 +1383,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -1406,7 +1406,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void warn(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1705,7 +1705,7 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void error(final Supplier<String> supplier) throws IllegalArgumentException {
@@ -1726,7 +1726,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @deprecated Use {@link #error(Throwable, Supplier)} instead
      */
     @Deprecated
@@ -1749,7 +1749,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
     public void error(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {

@@ -571,8 +571,8 @@ public final class Splitter {
      *
      * @param delimiter the Pattern to use as a delimiter for splitting, not {@code null}.
      * @return a new Splitter instance configured with the specified pattern delimiter.
-     * @throws IllegalArgumentException if the specified delimiter is {@code null}, or if the
-     *         pattern can match an empty string.
+     * @throws IllegalArgumentException if the specified delimiter is {@code null}, or if the pattern can match an
+     *         empty string.
      * @see #pattern(CharSequence)
      * @see #with(CharSequence)
      */
@@ -675,8 +675,8 @@ public final class Splitter {
      *
      * @param delimiterRegex the regular expression to use as a delimiter for splitting, not {@code null} or empty.
      * @return a new Splitter instance configured with the compiled pattern delimiter.
-     * @throws IllegalArgumentException if the specified delimiter regex is {@code null} or empty,
-     *         or if the resulting pattern can match an empty string.
+     * @throws IllegalArgumentException if the specified delimiter regex is {@code null} or empty, or if the resulting
+     *         pattern can match an empty string.
      * @see #with(Pattern)
      * @see #with(CharSequence)
      */
@@ -896,7 +896,7 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the split results.
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
      * @see #split(CharSequence)
      * @see #split(CharSequence, Class, Supplier)
      */
@@ -998,8 +998,7 @@ public final class Splitter {
      * @param targetType the Class representing the type to convert each substring to.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null} or returns {@code null}.
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Class<? extends T> targetType, final Supplier<? extends C> supplier)
             throws IllegalArgumentException {
@@ -1071,8 +1070,7 @@ public final class Splitter {
      * @param targetType the Type instance used for converting strings to the target type.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null} or returns {@code null}.
      */
     public <T, C extends Collection<T>> C split(final CharSequence source, final Type<? extends T> targetType, final Supplier<? extends C> supplier)
             throws IllegalArgumentException {
@@ -1618,8 +1616,8 @@ public final class Splitter {
          * @param entryDelimiter the Pattern that separates entries (key-value pairs), not {@code null}.
          * @param keyValueDelimiter the Pattern that separates keys from values, not {@code null}.
          * @return a new MapSplitter instance with the specified pattern delimiters.
-         * @throws IllegalArgumentException if either delimiter is {@code null}, or if either
-         *         pattern can match an empty string.
+         * @throws IllegalArgumentException if either delimiter is {@code null}, or if either pattern can match an
+         *         empty string.
          * @see #with(CharSequence, CharSequence)
          * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(Pattern)
@@ -1643,8 +1641,8 @@ public final class Splitter {
          * @param entryDelimiterRegex the regular expression that separates entries, not {@code null} or empty.
          * @param keyValueDelimiterRegex the regular expression that separates keys from values, not {@code null} or empty.
          * @return a new MapSplitter instance with the compiled pattern delimiters.
-         * @throws IllegalArgumentException if either regex is {@code null} or empty, or if
-         *         the compiled patterns can match an empty string.
+         * @throws IllegalArgumentException if either regex is {@code null} or empty, or if the compiled patterns can
+         *         match an empty string.
          * @see #with(Pattern, Pattern)
          * @see #with(CharSequence, CharSequence)
          * @see Splitter#pattern(CharSequence)
@@ -1917,7 +1915,8 @@ public final class Splitter {
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the parsed key-value pairs
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or if any
+         *         entry string cannot be properly parsed into a key-value pair.
          */
         public <M extends Map<String, String>> M split(final CharSequence source, final Supplier<? extends M> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
@@ -1948,8 +1947,8 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to, not {@code null}
          * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
-         *         string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry string cannot be
+         *         properly parsed into a key-value pair.
          * @see #split(CharSequence)
          * @see #split(CharSequence, Type, Type)
          * @see #split(CharSequence, Class, Class, Supplier)
@@ -1985,8 +1984,8 @@ public final class Splitter {
          * @param keyType the Type instance used for converting strings to keys, not {@code null}
          * @param valueType the Type instance used for converting strings to values, not {@code null}
          * @return a LinkedHashMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
-         *         string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry string cannot be
+         *         properly parsed into a key-value pair.
          * @see #split(CharSequence, Class, Class)
          * @see #split(CharSequence, Type, Type, Supplier)
          */
@@ -2023,8 +2022,9 @@ public final class Splitter {
          * @param valueType the Class representing the type to convert values to
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
-         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}, if {@code supplier}
+         *         is {@code null} or returns {@code null}, or if any entry string cannot be properly parsed into a
+         *         key-value pair.
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Class<K> keyType, final Class<V> valueType,
                 final Supplier<? extends M> supplier) throws IllegalArgumentException {
@@ -2063,8 +2063,9 @@ public final class Splitter {
          * @param valueType the Type instance used for converting strings to values
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
-         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}
-         * @throws IllegalArgumentException if {@code supplier} returns {@code null}
+         * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}, if {@code supplier}
+         *         is {@code null} or returns {@code null}, or if any entry string cannot be properly parsed into a
+         *         key-value pair.
          */
         public <K, V, M extends Map<K, V>> M split(final CharSequence source, final Type<K> keyType, final Type<V> valueType,
                 final Supplier<? extends M> supplier) throws IllegalArgumentException {
@@ -2101,8 +2102,8 @@ public final class Splitter {
          * @param <M> the type of Map to populate
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param output the Map to add the parsed key-value pairs to
-         * @throws IllegalArgumentException if output is {@code null}, or if any entry string
-         *         cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if output is {@code null}, or if any entry string cannot be properly
+         *         parsed into a key-value pair.
          */
         public <M extends Map<String, String>> void split(final CharSequence source, final M output) throws IllegalArgumentException {
             N.checkArgNotNull(output, cs.output);
@@ -2154,8 +2155,8 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to
          * @param valueType the Class representing the type to convert values to
          * @param output the Map to add the converted key-value pairs to
-         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null},
-         *         or if any entry string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null}, or if any entry string
+         *         cannot be properly parsed into a key-value pair.
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Class<K> keyType, final Class<V> valueType, final M output)
                 throws IllegalArgumentException {
@@ -2192,8 +2193,8 @@ public final class Splitter {
          * @param keyType the Type instance used for converting strings to keys
          * @param valueType the Type instance used for converting strings to values
          * @param output the Map to add the converted key-value pairs to
-         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null},
-         *         or if any entry string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if keyType, valueType, or output is {@code null}, or if any entry string
+         *         cannot be properly parsed into a key-value pair.
          */
         public <K, V, M extends Map<K, V>> void split(final CharSequence source, final Type<K> keyType, final Type<V> valueType, final M output)
                 throws IllegalArgumentException {
@@ -2243,7 +2244,7 @@ public final class Splitter {
          *
          * @param source the CharSequence to split into a map; may be {@code null}
          * @return an ImmutableMap containing the parsed key-value pairs
-         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair.
          * @see #split(CharSequence)
          * @see #splitToImmutableMap(CharSequence, Class, Class)
          */
@@ -2270,8 +2271,8 @@ public final class Splitter {
          * @param keyType the Class representing the type to convert keys to, not {@code null}
          * @param valueType the Class representing the type to convert values to, not {@code null}
          * @return an ImmutableMap containing the parsed and converted key-value pairs
-         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry
-         *         string cannot be properly parsed into a key-value pair
+         * @throws IllegalArgumentException if keyType or valueType is {@code null}, or if any entry string cannot be
+         *         properly parsed into a key-value pair.
          * @see #splitToImmutableMap(CharSequence)
          * @see #split(CharSequence, Class, Class)
          */
@@ -2299,8 +2300,8 @@ public final class Splitter {
          *
          * @param source the CharSequence to split into entries; may be {@code null}
          * @return a Stream of Map.Entry objects containing the parsed key-value pairs; returns an empty stream if source is {@code null}
-         * @throws IllegalArgumentException if any entry string cannot be properly
-         *         parsed into a key-value pair during iteration
+         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair during
+         *         iteration.
          * @see #split(CharSequence)
          * @see #splitToEntryStream(CharSequence)
          */
@@ -2372,8 +2373,8 @@ public final class Splitter {
          *
          * @param source the CharSequence to split into entries; may be {@code null}
          * @return an EntryStream containing the parsed key-value pairs; returns an empty EntryStream if source is {@code null}
-         * @throws IllegalArgumentException if any entry string cannot be properly
-         *         parsed into a key-value pair during iteration
+         * @throws IllegalArgumentException if any entry string cannot be properly parsed into a key-value pair during
+         *         iteration.
          * @see #splitToStream(CharSequence)
          */
         public EntryStream<String, String> splitToEntryStream(final CharSequence source) {

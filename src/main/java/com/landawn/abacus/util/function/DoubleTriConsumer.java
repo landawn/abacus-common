@@ -24,9 +24,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(double, double, double)}.</p>
  *
- * <p>This interface extends {@link Throwables.DoubleTriConsumer} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Consumer
@@ -36,18 +33,8 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeException> { //NOSONAR
     /**
-     * Performs this operation on the given three double arguments.
-     *
-     * <p>This method is expected to operate via side-effects, such as modifying external state,
-     * printing output, or updating data structures. The specific behavior depends on the implementation.</p>
-     *
-     * <p>Common use cases include:</p>
-     * <ul>
-     *   <li>Processing three-dimensional coordinates (x, y, z)</li>
-     *   <li>Handling RGB color values</li>
-     *   <li>Performing calculations with three related double values</li>
-     *   <li>Logging or recording three related measurements</li>
-     * </ul>
+     * Performs this operation on the given arguments.
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -87,7 +74,7 @@ public interface DoubleTriConsumer extends Throwables.DoubleTriConsumer<RuntimeE
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default DoubleTriConsumer andThen(final DoubleTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

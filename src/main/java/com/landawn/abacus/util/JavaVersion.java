@@ -478,7 +478,7 @@ public enum JavaVersion {
      *
      * @param nom the Java version string (e.g., "1.8", "11")
      * @return the corresponding {@code JavaVersion} enum constant
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, or unrecognized
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or unrecognized.
      */
     // helper for static importing
     static JavaVersion getJavaVersion(final String nom) {
@@ -511,8 +511,8 @@ public enum JavaVersion {
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
      * @return the corresponding JavaVersion enum constant, or {@link #JAVA_RECENT} for versions &gt; 39
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, or does not correspond
-     *         to any known Java version and cannot be interpreted as a version number greater than 39
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or does not correspond to any
+     *         known Java version and cannot be interpreted as a version number greater than 39.
      */
     static JavaVersion get(final String versionStr) {
         if (Strings.isEmpty(versionStr)) {
@@ -652,8 +652,8 @@ public enum JavaVersion {
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1"); must not be {@code null} or empty
      * @return the corresponding JavaVersion enum constant, never {@code null}; versions above 39 yield {@link #JAVA_RECENT}
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, or cannot be parsed as a
-     *         known Java version or a numeric version greater than 39
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or cannot be parsed as a known
+     *         Java version or a numeric version greater than 39.
      */
     public static JavaVersion of(final String versionStr) {
         if (Strings.isEmpty(versionStr)) {
@@ -707,9 +707,11 @@ public enum JavaVersion {
     }
 
     /**
-     * Gets the Java Version from the system or 99.0 if the {@code java.specification.version} system property is not set.
+     * Gets the Java version from the {@code java.specification.version} system property,
+     * or {@code 99.0} if the property is not set, cannot be read, or does not parse to a positive number.
      *
-     * @return the value of {@code java.specification.version} system property or 99.0 if it is not set.
+     * @return the float value of the {@code java.specification.version} system property,
+     *         or {@code 99.0} if it is not set, unreadable, or not a positive number.
      */
     private static float maxVersion() {
         final float v;
@@ -743,8 +745,8 @@ public enum JavaVersion {
      * @param value the version string to convert
      * @return the float representation of the version, or {@code -1} if the string contains a dot
      *         but cannot be split into at least two components
-     * @throws IllegalArgumentException if the numeric portion of the version string cannot be parsed,
-     *         wrapping the underlying {@link NumberFormatException}
+     * @throws IllegalArgumentException if the numeric portion of the version string cannot be parsed, wrapping the
+     *         underlying {@link NumberFormatException}.
      */
     private static float toFloatVersion(final String value) {
         try {

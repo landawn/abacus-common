@@ -1585,7 +1585,7 @@ public final class XmlMappers {
          * }</pre>
          *
          * @param obj the object to serialize
-         * @param prettyFormat {@code true} to enable pretty printing with indentation
+         * @param prettyFormat {@code true} to enable pretty printing with indentation, {@code false} for compact output
          * @return the XML string representation of the object
          * @throws RuntimeException if serialization fails
          */
@@ -2034,7 +2034,7 @@ public final class XmlMappers {
          * }</pre>
          *
          * @param <T> the type of the object to return
-         * @param xml the InputStream containing XML data
+         * @param xml the input stream containing XML data
          * @param targetType the type reference describing the target type, can be the {@code Type} of {@code Bean/Array/Collection/Map}
          * @return the deserialized object
          * @throws RuntimeException if deserialization fails

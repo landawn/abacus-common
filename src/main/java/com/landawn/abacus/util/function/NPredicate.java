@@ -62,20 +62,8 @@ import com.landawn.abacus.util.cs;
 public interface NPredicate<T> {
     /**
      * Evaluates this predicate on the given arguments.
-     *
-     * <p>The varargs parameter allows this method to accept any number of arguments
-     * of type T, including zero arguments (empty array), and produces a boolean result.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Validating multiple values against a condition</li>
-     *   <li>Checking if all/any/none of the arguments meet certain criteria</li>
-     *   <li>Implementing complex multi-argument validation rules</li>
-     *   <li>Testing relationships between multiple values</li>
-     * </ul>
-     *
-     * <p>Note: The {@code @SuppressWarnings("unchecked")} annotation suppresses the
-     * declaration-site generic-varargs warning for this method.
+     * The varargs parameter may contain any number of arguments of type {@code T},
+     * including zero (empty array).
      *
      * @param args the input arguments as a varargs array
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
@@ -140,7 +128,7 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default NPredicate<T> and(final NPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -180,7 +168,7 @@ public interface NPredicate<T> {
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default NPredicate<T> or(final NPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

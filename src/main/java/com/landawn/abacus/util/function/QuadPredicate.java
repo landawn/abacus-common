@@ -23,10 +23,6 @@ import com.landawn.abacus.util.cs;
  * A functional interface that represents a predicate (boolean-valued function) of four arguments.
  * This is the four-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface generalizes the standard Java functional predicate interfaces to support
- * predicates with four parameters, which is useful for complex conditional logic that
- * requires multiple inputs to determine a boolean result.
- *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -43,10 +39,6 @@ import com.landawn.abacus.util.cs;
 public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B, C, D, RuntimeException> { //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
-     *
-     * <p>This method tests whether the four input arguments satisfy the condition
-     * represented by this predicate. It should return {@code true} if the input
-     * arguments match the predicate's criteria, {@code false} otherwise.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -78,10 +70,6 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     *
-     * <p>The returned predicate will return {@code true} when this predicate returns
-     * {@code false}, and vice versa. This is useful for inverting complex conditions
-     * without having to rewrite the logic.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -126,7 +114,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default QuadPredicate<A, B, C, D> and(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -160,7 +148,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default QuadPredicate<A, B, C, D> or(final QuadPredicate<? super A, ? super B, ? super C, ? super D> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -180,7 +168,7 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.QuadPredicate}
-     * @return this predicate viewed as a {@code Throwables.QuadPredicate} by unchecked cast
+     * @return a {@code Throwables.QuadPredicate} view of this predicate
      */
     default <E extends Throwable> Throwables.QuadPredicate<A, B, C, D, E> toThrowable() {
         return (Throwables.QuadPredicate<A, B, C, D, E>) this;

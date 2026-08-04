@@ -16,15 +16,15 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation upon three short-valued operands and producing a short-valued result.
- * This is the primitive type specialization of ternary operator for {@code short}.
+ * Represents an operation upon three {@code short}-valued operands and producing a {@code short}-valued result.
+ * This is the three-arity primitive type specialization analogous to {@link ShortBinaryOperator}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short, short, short)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
- * @see java.util.function.BinaryOperator
  * @see ShortBinaryOperator
+ * @see ShortUnaryOperator
  */
 @FunctionalInterface
 public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<RuntimeException> { //NOSONAR
@@ -48,10 +48,10 @@ public interface ShortTernaryOperator extends Throwables.ShortTernaryOperator<Ru
      * short result3 = clamp.applyAsShort((short) 150, (short) 0, (short) 100);   // returns 100
      * }</pre>
      *
-     * @param a the first operand
-     * @param b the second operand
-     * @param c the third operand
-     * @return the operator result as a short value
+     * @param a the first {@code short} operand
+     * @param b the second {@code short} operand
+     * @param c the third {@code short} operand
+     * @return the {@code short}-valued result of applying this operator to the three operands
      */
     @Override
     short applyAsShort(short a, short b, short c);

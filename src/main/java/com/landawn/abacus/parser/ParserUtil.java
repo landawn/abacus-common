@@ -519,7 +519,7 @@ public final class ParserUtil {
      * @param field the field to check for naming annotations
      * @return an array of JSON name tags, indexed by {@link NamingPolicy#ordinal()}; every entry holds the
      *         custom name when one is configured, otherwise the policy-converted property name
-     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
+     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
     static JsonNameTag[] getJsonNameTags(final String propName, final Field field) {
         final String jsonXmlFieldName = getCustomFieldName(field);
@@ -543,7 +543,7 @@ public final class ParserUtil {
      *
      * @param field the field to inspect (may be {@code null})
      * @return the custom field name, or {@code null} if none is specified
-     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
+     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
     private static String getCustomFieldName(final Field field) {
         String jsonXmlFieldName = null;
@@ -602,7 +602,7 @@ public final class ParserUtil {
      * @param isBean whether this represents a bean type
      * @return an array of XML name tags, indexed by {@link NamingPolicy#ordinal()}; every entry holds the
      *         custom name when one is configured, otherwise the policy-converted property name
-     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace
+     * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
     static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) {
         final String jsonXmlFieldName = getCustomFieldName(field);
@@ -821,7 +821,7 @@ public final class ParserUtil {
      *
      * @param beanType the java type of the bean class to get information for
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class is not a bean class (no properties)
+     * @throws IllegalArgumentException if the class is not a bean class (no properties).
      * @see BeanInfo
      */
     public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
@@ -851,7 +851,7 @@ public final class ParserUtil {
      *
      * @param beanClass the class to get bean information for
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class is not a bean class (no properties)
+     * @throws IllegalArgumentException if the class is not a bean class (no properties).
      * @see BeanInfo
      */
     public static BeanInfo getBeanInfo(final Class<?> beanClass) {
@@ -1603,7 +1603,7 @@ public final class ParserUtil {
          * @param obj the object to get the property value from
          * @param propName the property name (supports nested paths)
          * @return the property value, or the type's default value if an intermediate object in a nested path is {@code null}
-         * @throws IllegalArgumentException if no getter method is found for the property
+         * @throws IllegalArgumentException if no getter method is found for the property.
          */
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(final Object obj, final String propName) {
@@ -1649,7 +1649,7 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name
          * @param propValue the value to set
-         * @throws IllegalArgumentException if no setter method is found for {@code propName}
+         * @throws IllegalArgumentException if no setter method is found for {@code propName}.
          */
         public void setPropValue(final Object obj, final String propName, final Object propValue) {
             setPropValue(obj, propName, propValue, false);
@@ -1673,7 +1673,7 @@ public final class ParserUtil {
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false
+         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false.
          */
         @SuppressWarnings("rawtypes")
         public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty) {
@@ -1753,6 +1753,7 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
+         * @throws IllegalArgumentException if no setter method is found for the property.
          */
         public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) {
             setPropValue(obj, propInfoFromOtherBean, propValue, false);
@@ -1777,7 +1778,7 @@ public final class ParserUtil {
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false
+         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false.
          */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
@@ -4044,7 +4045,7 @@ public final class ParserUtil {
          *
          * @param dateFormat the property's date format pattern, or {@code "long"} for epoch milliseconds
          * @param timeZone the property's time zone
-         * @throws IllegalArgumentException if {@code dateFormat} is neither {@code "long"} nor a valid Joda pattern
+         * @throws IllegalArgumentException if {@code dateFormat} is neither {@code "long"} nor a valid Joda pattern.
          */
         JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) {
             dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);

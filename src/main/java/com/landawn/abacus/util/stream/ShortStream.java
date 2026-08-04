@@ -886,7 +886,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 1, (short) 3, (short) 5, (short) 10, (short) 11)
      *       .collapse((first, last, next) -> (next - first) <= 10 && (next - last) <= 3,
      *                 (a, b) -> (short) (a + b))
-     *       .toArray();   // collects groups with flexible criteria
+     *       .toArray();   // returns [(short) 9, (short) 21]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -1100,7 +1100,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param n the number of top elements to return
      * @return a new stream containing the top n elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     @SequentialOnly
     @IntermediateOp
@@ -1129,8 +1129,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param comparator a comparator to compare elements
      * @return a new stream containing the top n elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}
+     * @throws IllegalArgumentException if {@code n} is negative, or if {@code comparator} is {@code null}.
      */
     @SequentialOnly
     @IntermediateOp
@@ -2063,7 +2062,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalShort} containing the k-th largest element, or an empty {@code OptionalShort} if the stream is empty or contains fewer than {@code k} elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code k} is not positive
+     * @throws IllegalArgumentException if {@code k} is not positive.
      */
     @SequentialOnly
     @TerminalOp
@@ -2232,12 +2231,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short)1, (short)2, (short)3)
      *            .zipWith(ShortStream.of((short)10, (short)20, (short)30, (short)40),
      *                     (a, b) -> (short)(a + b))
-     *            .toArray();   // returns [(short)11, (short)22, (short)33]
+     *            .toArray();   // returns [11, 22, 33]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param b the ShortStream to be combined with the current ShortStream. Must be {@code non-null}.
+     * @param b the ShortStream to be combined with the current ShortStream. Must be {@code non-null}. Will be closed along with this stream.
      * @param zipFunction a ShortBinaryOperator that determines the combination of elements in the combined ShortStream.
      * @return a new ShortStream that is the result of combining the current ShortStream with the given ShortStream
      * @throws IllegalStateException if the stream is already closed
@@ -2259,7 +2258,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short)1, (short)2, (short)3)
      *            .zipWith(ShortStream.of((short)10, (short)20), ShortStream.of((short)100, (short)200),
      *                     (a, b, c) -> (short)(a + b + c))
-     *            .toArray();   // returns [(short)111, (short)222]
+     *            .toArray();   // returns [111, 222]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2286,7 +2285,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * <pre>{@code
      * ShortStream.of((short)1, (short)2, (short)3)
      *            .zipWith(ShortStream.of((short)10), (short)0, (short)0, (a, b) -> (short)(a + b))
-     *            .toArray();   // returns [(short)11, (short)2, (short)3]
+     *            .toArray();   // returns [11, 2, 3]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2315,7 +2314,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *            .zipWith(ShortStream.of((short)10), ShortStream.of((short)100),
      *                     (short)0, (short)0, (short)0,
      *                     (a, b, c) -> (short)(a + b + c))
-     *            .toArray();   // returns [(short)111, (short)2, (short)3]
+     *            .toArray();   // returns [111, 2, 3]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2494,7 +2493,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * @param supplier the supplier that provides the ShortStream
      * @return a new ShortStream supplied by the given supplier
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Stream#defer(Supplier)
      */
     public static ShortStream defer(final Supplier<ShortStream> supplier) throws IllegalArgumentException {
@@ -3106,7 +3105,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.range((short) 0, (short) 10, (short) 2)
      *     .toArray();   // returns [0, 2, 4, 6, 8]
      *
-     * // Countdown from 10 to 1 (exclusive)
+     * // Countdown from 10 to 0 (exclusive)
      * ShortStream.range((short) 10, (short) 0, (short) -2)
      *     .toArray();   // returns [10, 8, 6, 4, 2]
      *
@@ -3122,7 +3121,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param endExclusive the exclusive upper bound
      * @param by the amount to increment by at each step (can be negative)
      * @return a sequential ShortStream for the range of short elements
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ShortStream range(final short startInclusive, final short endExclusive, final short by) {
         if (by == 0) {
@@ -3302,7 +3301,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param endInclusive the inclusive upper bound
      * @param by the amount to increment by at each step (can be negative)
      * @return a sequential ShortStream for the range of short elements
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ShortStream rangeClosed(final short startInclusive, final short endInclusive, final short by) {
         if (by == 0) {
@@ -3400,7 +3399,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param element the element to be repeated
      * @param n the number of times to repeat the element
      * @return a ShortStream consisting of n copies of the specified element
-     * @throws IllegalArgumentException if n is negative
+     * @throws IllegalArgumentException if n is negative.
      */
     public static ShortStream repeat(final short element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -3517,7 +3516,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param next a ShortSupplier that provides the next short in the iteration
      * @return a ShortStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code next} is {@code null}.
      * @see Stream#iterate(BooleanSupplier, Supplier)
      */
     public static ShortStream iterate(final BooleanSupplier hasNext, final ShortSupplier next) throws IllegalArgumentException {
@@ -3577,7 +3576,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param hasNext a BooleanSupplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
      * @return a ShortStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}.
      * @see Stream#iterate(Object, BooleanSupplier, java.util.function.UnaryOperator)
      */
     public static ShortStream iterate(final short init, final BooleanSupplier hasNext, final ShortUnaryOperator f) throws IllegalArgumentException {
@@ -3646,7 +3645,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param hasNext predicate to determine if the stream should continue; tested on init for the first element and on subsequent generated values
      * @param f a function to apply to the previous element to generate the next element
      * @return a ShortStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}.
      * @see Stream#iterate(Object, java.util.function.Predicate, java.util.function.UnaryOperator)
      */
     public static ShortStream iterate(final short init, final ShortPredicate hasNext, final ShortUnaryOperator f) throws IllegalArgumentException {
@@ -3714,7 +3713,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param init the initial value
      * @param f a function to apply to the previous element to generate the next element
      * @return an infinite ShortStream of elements generated by the iteration
-     * @throws IllegalArgumentException if {@code f} is {@code null}
+     * @throws IllegalArgumentException if {@code f} is {@code null}.
      * @see Stream#iterate(Object, java.util.function.UnaryOperator)
      */
     public static ShortStream iterate(final short init, final ShortUnaryOperator f) throws IllegalArgumentException {
@@ -3769,7 +3768,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * @param s the ShortSupplier that provides the elements of the stream
      * @return an infinite ShortStream generated by the given supplier
-     * @throws IllegalArgumentException if {@code s} is {@code null}
+     * @throws IllegalArgumentException if {@code s} is {@code null}.
      * @see Stream#generate(Supplier)
      */
     public static ShortStream generate(final ShortSupplier s) throws IllegalArgumentException {
@@ -4071,7 +4070,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param b the second short array; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Object[], Object[], BiFunction)
      */
     public static ShortStream zip(final short[] a, final short[] b, final ShortBinaryOperator zipFunction) throws IllegalArgumentException {
@@ -4120,7 +4119,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param c the third short array; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Object[], Object[], Object[], TriFunction)
      */
     public static ShortStream zip(final short[] a, final short[] b, final short[] c, final ShortTernaryOperator zipFunction) throws IllegalArgumentException {
@@ -4167,7 +4166,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param b the second ShortIterator; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Iterator, Iterator, BiFunction)
      */
     public static ShortStream zip(final ShortIterator a, final ShortIterator b, final ShortBinaryOperator zipFunction) throws IllegalArgumentException {
@@ -4208,7 +4207,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param c the third ShortIterator; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Iterator, Iterator, Iterator, TriFunction)
      */
     public static ShortStream zip(final ShortIterator a, final ShortIterator b, final ShortIterator c, final ShortTernaryOperator zipFunction)
@@ -4250,7 +4249,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param b the second ShortStream; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortBinaryOperator zipFunction) throws IllegalArgumentException {
@@ -4279,7 +4278,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param c the third ShortStream; {@code null} is treated as empty
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortStream c, final ShortTernaryOperator zipFunction)
@@ -4307,7 +4306,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param streams the collection of ShortStreams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param zipFunction the function to combine elements from all the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, Function)
      */
     public static ShortStream zip(final Collection<? extends ShortStream> streams, final ShortNFunction<Short> zipFunction) throws IllegalArgumentException {
@@ -4337,7 +4336,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneB the default value to use if the second array is shorter
      * @param zipFunction the function to combine elements from both arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      */
     public static ShortStream zip(final short[] a, final short[] b, final short valueForNoneA, final short valueForNoneB, final ShortBinaryOperator zipFunction)
@@ -4394,7 +4393,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneC the default value to use if the third array is shorter
      * @param zipFunction the function to combine elements from all three arrays.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Object[], Object[], Object[], Object, Object, Object, TriFunction)
      */
     public static ShortStream zip(final short[] a, final short[] b, final short[] c, final short valueForNoneA, final short valueForNoneB,
@@ -4449,7 +4448,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneB the default value to use if the second iterator is shorter
      * @param zipFunction the function to combine elements from both iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
     public static ShortStream zip(final ShortIterator a, final ShortIterator b, final short valueForNoneA, final short valueForNoneB,
@@ -4499,7 +4498,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneC the default value to use if the third iterator is shorter
      * @param zipFunction the function to combine elements from all three iterators.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Iterator, Iterator, Iterator, Object, Object, Object, TriFunction)
      */
     public static ShortStream zip(final ShortIterator a, final ShortIterator b, final ShortIterator c, final short valueForNoneA, final short valueForNoneB,
@@ -4551,7 +4550,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneB the default value to use if the second stream is shorter
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final short valueForNoneA, final short valueForNoneB,
@@ -4585,7 +4584,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueForNoneC the default value to use if the third stream is shorter
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortStream c, final short valueForNoneA, final short valueForNoneB,
@@ -4617,7 +4616,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valuesForNone the array of default values to use for streams that run out of values. Must be non-null
      * @param zipFunction the function to combine elements from all the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}
+     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, List, Function)
      */
     public static ShortStream zip(final Collection<? extends ShortStream> streams, final short[] valuesForNone, final ShortNFunction<Short> zipFunction)
@@ -4652,7 +4651,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the two input arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Object[], Object[], BiFunction)
      */
     public static ShortStream merge(final short[] a, final short[] b, final ShortBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
@@ -4712,7 +4711,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the three input arrays
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Object[], Object[], Object[], BiFunction)
      */
     public static ShortStream merge(final short[] a, final short[] b, final short[] c, final ShortBiFunction<MergeResult> nextSelector)
@@ -4741,7 +4740,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the two input iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Iterator, Iterator, BiFunction)
      */
     public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortBiFunction<MergeResult> nextSelector)
@@ -4830,7 +4829,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the three input iterators
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Iterator, Iterator, Iterator, BiFunction)
      */
     public static ShortStream merge(final ShortIterator a, final ShortIterator b, final ShortIterator c, final ShortBiFunction<MergeResult> nextSelector)
@@ -4866,7 +4865,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the two input streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
     public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
@@ -4896,7 +4895,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the three input streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortStream c, final ShortBiFunction<MergeResult> nextSelector)
@@ -4928,7 +4927,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ShortStream containing the merged elements from the input streams
-     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see Stream#merge(Collection, BiFunction)
      */
     public static ShortStream merge(final Collection<? extends ShortStream> streams, final ShortBiFunction<MergeResult> nextSelector)

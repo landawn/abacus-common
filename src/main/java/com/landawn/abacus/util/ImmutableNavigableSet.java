@@ -427,7 +427,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * NavigableSet will be visible through the returned ImmutableNavigableSet, which violates the
-     * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Collection)} for a truly independent immutable copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -669,7 +669,9 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws ClassCastException if {@code fromElement} and {@code toElement} cannot be compared to one another using this set's comparator
      * @throws NullPointerException if {@code fromElement} or {@code toElement} is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set itself has a restricted range, and {@code fromElement} or {@code toElement} lies outside the bounds of the range
+     * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set
+     *         itself has a restricted range, and {@code fromElement} or {@code toElement} lies outside the bounds of
+     *         the range.
      */
     @Override
     public ImmutableNavigableSet<E> subSet(final E fromElement, final boolean fromInclusive, final E toElement, final boolean toInclusive) {
@@ -693,7 +695,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws ClassCastException if {@code toElement} is not compatible with this set's comparator
      * @throws NullPointerException if {@code toElement} is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside
+     *         the bounds of the range.
      */
     @Override
     public ImmutableNavigableSet<E> headSet(final E toElement, final boolean inclusive) {
@@ -717,7 +720,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws ClassCastException if {@code fromElement} is not compatible with this set's comparator
      * @throws NullPointerException if {@code fromElement} is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies
+     *         outside the bounds of the range.
      */
     @Override
     public ImmutableNavigableSet<E> tailSet(final E fromElement, final boolean inclusive) {

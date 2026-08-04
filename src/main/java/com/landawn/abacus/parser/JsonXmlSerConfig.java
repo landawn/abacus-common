@@ -139,7 +139,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * @param charQuotation the character to use ({@code '}, {@code "}, or {@code 0})
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if an unsupported character is provided
+     * @throws IllegalArgumentException if an unsupported character is provided.
      */
     public C setCharQuotation(final char charQuotation) {
         if (charQuotation == SK.CHAR_ZERO || charQuotation == SK._SINGLE_QUOTE || charQuotation == SK._DOUBLE_QUOTE) {
@@ -181,7 +181,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * @param stringQuotation the character to use ({@code '}, {@code "}, or {@code 0})
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if an unsupported character is provided
+     * @throws IllegalArgumentException if an unsupported character is provided.
      */
     public C setStringQuotation(final char stringQuotation) {
         if (stringQuotation == SK.CHAR_ZERO || stringQuotation == SK._SINGLE_QUOTE || stringQuotation == SK._DOUBLE_QUOTE) {

@@ -89,8 +89,8 @@ public enum IOCase {
      * @param name the name of the {@code IOCase} constant; one of "Sensitive", "Insensitive",
      *             or "System" (case-sensitive)
      * @return the {@code IOCase} constant matching the given name
-     * @throws IllegalArgumentException if {@code name} does not match any constant (including
-     *         when {@code name} is {@code null})
+     * @throws IllegalArgumentException if {@code name} does not match any constant (including when {@code name} is
+     *         {@code null}).
      * @see #getName()
      */
     public static IOCase forName(final String name) {
@@ -171,7 +171,7 @@ public enum IOCase {
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
      * @return negative if str1 &lt; str2, zero if str1 equals str2, positive if str1 &gt; str2
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public int checkCompareTo(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
@@ -195,7 +195,7 @@ public enum IOCase {
      * @param str1 the first string to compare, not null
      * @param str2 the second string to compare, not null
      * @return {@code true} if the strings are equal according to the case rule
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public boolean checkEquals(final String str1, final String str2) {
         if (str1 == null || str2 == null) {
@@ -219,7 +219,7 @@ public enum IOCase {
      * @param str the string to check, not null
      * @param start the prefix to look for, not null
      * @return {@code true} if str starts with the prefix according to the case rule
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public boolean checkStartsWith(final String str, final String start) {
         if (str == null || start == null) {
@@ -244,7 +244,7 @@ public enum IOCase {
      * @param str the string to check, not null
      * @param end the suffix to look for, not null
      * @return {@code true} if str ends with the suffix according to the case rule
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public boolean checkEndsWith(final String str, final String end) {
         if (str == null || end == null) {
@@ -274,7 +274,7 @@ public enum IOCase {
      * @param search the string to search for, not null
      * @return the index of the first occurrence of {@code search} in {@code str} at or after
      *         {@code strStartIndex}, or {@code -1} if not found
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public int checkIndexOf(final String str, final int strStartIndex, final String search) {
         if (str == null || search == null) {
@@ -313,7 +313,7 @@ public enum IOCase {
      *                      rather than an exception
      * @param search the string to match against, not null
      * @return {@code true} if the region matches according to the case rule
-     * @throws IllegalArgumentException if either string is null
+     * @throws IllegalArgumentException if either string is null.
      */
     public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
         if (str == null || search == null) {

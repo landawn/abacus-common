@@ -1044,7 +1044,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param middleSupplier a function that provides the second output collection; always called with a size hint of {@code 0}
      * @param rightSupplier a function that provides the third output collection; always called with a size hint of {@code 0}
      * @return a {@code Triple} containing the three output collections
-     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier},
+     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
      */
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip(
             final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
@@ -1082,7 +1083,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param middleSupplier a function that provides the second output collection
      * @param rightSupplier a function that provides the third output collection
      * @return a {@code Triple} containing the three output collections
-     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier},
+     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
      */
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip(
             final Iterable<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
@@ -1153,8 +1155,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * }</pre>
      *
      * @param action the action to be performed for each remaining triple, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}, including when this
-     *         iterator has no remaining elements
+     * @throws IllegalArgumentException if {@code action} is {@code null}, including when this iterator has no
+     *         remaining elements.
      */
     public abstract void forEachRemaining(final TriConsumer<? super A, ? super B, ? super C> action);
 
@@ -1175,8 +1177,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each remaining triple, must not be {@code null}
-     * @throws IllegalArgumentException if {@code action} is {@code null}, including when this
-     *         iterator has no remaining elements
+     * @throws IllegalArgumentException if {@code action} is {@code null}, including when this iterator has no
+     *         remaining elements.
      * @throws E if the action throws an exception
      */
     public abstract <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action) throws E; // NOSONAR
@@ -1206,7 +1208,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param n the number of triples to skip from the beginning, must be non-negative
      * @return a new TriIterator that begins after skipping {@code n} triples, or this iterator if {@code n} is 0
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public TriIterator<A, B, C> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1328,7 +1330,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param count the maximum number of triples to include, must be non-negative
      * @return a new TriIterator limited to {@code count} triples, or an empty iterator if {@code count} is 0
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public TriIterator<A, B, C> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -1610,8 +1612,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <R> the type of elements in the resulting ObjIterator
      * @param mapper the function to apply to each triple of elements, must not be {@code null}
      * @return an {@code ObjIterator} containing the elements produced by applying {@code mapper} to each triple
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}, including when this
-     *         iterator has no remaining elements
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}, including when this iterator has no
+     *         remaining elements.
      */
     public abstract <R> ObjIterator<R> map(final TriFunction<? super A, ? super B, ? super C, ? extends R> mapper);
 
@@ -1700,7 +1702,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Triple} whose left, middle, and right lists contain all first, second, and third components, respectively
-     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call to it returns {@code null}.
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1744,8 +1746,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param middleSupplier a supplier that provides the collection for second components; must return a {@code non-null} collection
      * @param rightSupplier a supplier that provides the collection for third components; must return a {@code non-null} collection
      * @return a {@code Triple} whose left, middle, and right collections contain all first, second, and third components, respectively
-     * @throws IllegalArgumentException if any supplier returns {@code null}
-     * @throws IllegalArgumentException if any of {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any supplier returns {@code null}, or if any of {@code leftSupplier},
+     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
      * @see #unzipToLists(Supplier)
      * @see #unzipToSets(Supplier)
      */
@@ -1792,7 +1794,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Triple} whose left, middle, and right sets contain the distinct first, second, and third components, respectively
-     * @throws IllegalArgumentException if any call to {@code supplier} returns {@code null}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call to it returns {@code null}.
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })

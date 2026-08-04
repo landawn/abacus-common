@@ -20,7 +20,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * Enumeration representing various status states for entities, services, processes, and operations.
  * Each status has an associated numeric code for efficient storage and comparison.
  *
- * <p>This enum provides a comprehensive set of status values commonly used in applications:
+ * <p>This enum provides a comprehensive set of status values commonly used in applications:</p>
  * <ul>
  *   <li>General account/service/object statuses (ACTIVE, SUSPENDED, EXPIRED, etc.)</li>
  *   <li>Running statuses (STARTED, RUNNING, PAUSED, STOPPED)</li>
@@ -31,7 +31,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * </ul>
  *
  * <p>The status codes are designed to be stored efficiently in databases and provide
- * fast lookups through the {@link #fromCode(int)} method.
+ * fast lookups through the {@link #fromCode(int)} method.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code

@@ -78,7 +78,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * }</pre>
      *
      * @param initCapacity the initial capacity of the buffer
-     * @throws IllegalArgumentException if initCapacity is negative
+     * @throws IllegalArgumentException if initCapacity is negative.
      */
     public ByteArrayOutputStream(final int initCapacity) {
         if (initCapacity < 0) {

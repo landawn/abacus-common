@@ -30,10 +30,10 @@ import com.landawn.abacus.util.stream.EntryStream;
  * A lookup table that stores prefix (a list of keys of type {@code K}) -&gt; value mappings.
  *
  * <p>For example, if the table maps {@code [a, b]} prefix to a value "foo", when you search by
- * {@code [a, b, c]}, it will find the {@code [a, b] -> foo} mapping.
+ * {@code [a, b, c]}, it will find the {@code [a, b] -> foo} mapping.</p>
  *
  * <p>Conceptually it's a "Trie" except it searches by a list of key prefixes instead of string
- * prefixes.
+ * prefixes.</p>
  *
  * <p>Instances are immutable and are created through a {@link Builder} obtained from
  * {@link #builder()}.
@@ -80,7 +80,7 @@ public final class PrefixSearchTable<K, V> {
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
      *         {@code compoundKey}; an empty {@code Optional} if no non-empty prefix is present
-     * @throws IllegalArgumentException if {@code compoundKey} is empty
+     * @throws IllegalArgumentException if {@code compoundKey} is empty.
      * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
      *         {@code null}
      * @see #getAll(List)
@@ -113,7 +113,7 @@ public final class PrefixSearchTable<K, V> {
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
      *         (as an immutable snapshot) with its mapped value, in ascending order of
      *         prefix length; empty if no non-empty prefix is present
-     * @throws IllegalArgumentException if {@code compoundKey} is empty (thrown eagerly by this method)
+     * @throws IllegalArgumentException if {@code compoundKey} is empty (thrown eagerly by this method).
      * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
      *         {@code null} (thrown eagerly by this method)
      * @see #get(List)
@@ -249,8 +249,8 @@ public final class PrefixSearchTable<K, V> {
          * @param compoundKey the non-empty compound key to add
          * @param value the non-{@code null} value to associate with the compound key
          * @return this builder
-         * @throws IllegalArgumentException if {@code compoundKey} is empty, or it has already been mapped to a
-         *     value that is not equal to {@code value}
+         * @throws IllegalArgumentException if {@code compoundKey} is empty, or it has already been mapped to a value
+         *         that is not equal to {@code value}.
          * @throws NullPointerException if {@code compoundKey} is {@code null}, any key element is {@code null},
          *     or {@code value} is {@code null}
          */
@@ -274,7 +274,7 @@ public final class PrefixSearchTable<K, V> {
          * Adds all mappings from {@code mappings} into this builder.
          * Each entry's key becomes the compound key and its value becomes the associated value.
          *
-         * <p>A {@code null} or empty {@code mappings} map is treated as a no-op; no entry is added.
+         * <p>A {@code null} or empty {@code mappings} map is treated as a no-op; no entry is added.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -290,7 +290,7 @@ public final class PrefixSearchTable<K, V> {
          * @param mappings the mappings to add; an empty compound key, or a {@code null} compound key
          *     element or value within an entry, is not permitted
          * @return this builder
-         * @throws IllegalArgumentException if any compound key is empty or conflicts with an existing mapping
+         * @throws IllegalArgumentException if any compound key is empty or conflicts with an existing mapping.
          * @throws NullPointerException if any compound key element or value within an entry is {@code null}
          */
         public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) {

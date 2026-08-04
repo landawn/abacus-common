@@ -19,11 +19,12 @@ import java.util.function.Supplier;
 
 /**
  * A thread-safe lazy initialization wrapper that defers object creation until the first access.
- * This class implements the double-checked locking pattern to ensure thread-safe lazy initialization
- * while minimizing synchronization overhead after initialization.
+ * Successful initialization is performed only once, even under concurrent access; after that,
+ * subsequent calls to {@link #get()} return the cached value without synchronization.
  *
- * <p>The initialization is performed only once, even in multi-threaded environments. Once initialized,
- * subsequent calls to {@link #get()} return the cached value without synchronization.</p>
+ * <p>If the supplier throws, initialization is not considered complete and a later {@code get()}
+ * retries. Re-entering {@code get()} from within the supplier fails with
+ * {@link IllegalStateException}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -84,14 +85,19 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * The supplier reference is released after successful initialization so captured construction state can
      * be reclaimed even while this initializer remains reachable.
      *
-     * <p>This method is thread-safe and uses double-checked locking to ensure that, in the absence of
-     * exceptions, the supplier is invoked exactly once even under concurrent access.</p>
+     * <p>This method is thread-safe. In the absence of exceptions and recursive re-entry, the supplier
+     * is invoked exactly once even under concurrent access.</p>
      *
      * <p><b>Exception handling:</b> If the supplier throws an unchecked exception during initialization,
      * the initialization state is <em>not</em> marked as completed and the exception is propagated to the
      * caller. Subsequent calls to {@code get()} will retry the initialization by invoking the supplier
      * again. If the supplier consistently throws, every call will throw; once it succeeds, the result
      * is cached and no further invocations occur.</p>
+     *
+     * <p><b>Recursive initialization:</b> If the supplier (directly or indirectly) calls {@code get()}
+     * on this same initializer while initialization is in progress, an {@link IllegalStateException}
+     * is thrown. That failure is not cached; a later call may retry once the recursive attempt has
+     * unwound.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -101,6 +107,8 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * }</pre>
      *
      * @return the lazily initialized value (may be {@code null} if the supplier returns {@code null})
+     * @throws IllegalStateException if {@code get()} is re-entered on this initializer while its
+     *         supplier is still running
      * @throws RuntimeException if the supplier throws an unchecked exception during initialization
      */
     @Override

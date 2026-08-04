@@ -143,8 +143,8 @@ public class NClobReaderType extends ReaderType {
     /**
      * Extracts a character {@link Reader} from an {@link NClob}.
      * This is a package-private utility used by both {@code get} overloads.
-     * Closing the returned reader closes the delegate and calls {@link NClob#free()}.
-     * This method therefore assumes ownership of a non-null {@code clob}.
+     * Closing the returned reader closes the delegate and calls {@link NClob#free()},
+     * so this method takes ownership of the {@code clob} when it is non-null.
      *
      * @param clob the {@link NClob} to read from; may be {@code null}
      * @return a {@link Reader} for the NCLOB's character stream,

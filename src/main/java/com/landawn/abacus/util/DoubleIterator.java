@@ -392,7 +392,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code DoubleIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public DoubleIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -451,7 +451,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @param count the maximum number of elements to iterate; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code DoubleIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public DoubleIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -549,7 +549,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // array = [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty array
-     * double[] empty = DoubleIterator.empty().toArray();   // returns empty.length == 0
+     * double[] empty = DoubleIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return a {@code double} array containing all remaining elements; an empty array if there are none
@@ -572,7 +572,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // list contains [1.0, 2.0, 3.0, 4.0, 5.0]
      *
      * // Empty iterator returns empty list
-     * DoubleList empty = DoubleIterator.empty().toList();   // returns empty.size() == 0
+     * DoubleList empty = DoubleIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return a {@link DoubleList} containing all remaining elements; an empty list if there are none
@@ -641,7 +641,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta

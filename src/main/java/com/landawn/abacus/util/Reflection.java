@@ -134,7 +134,7 @@ public final class Reflection<T> {
      * @param <T> the type of the class
      * @param clsName the fully qualified name of the class; must not be {@code null}
      * @return a Reflection instance for the specified class
-     * @throws IllegalArgumentException if the class with the given name cannot be located
+     * @throws IllegalArgumentException if the class with the given name cannot be located.
      * @throws NullPointerException if {@code clsName} is {@code null}
      * @see ClassUtil#forName(String)
      */
@@ -154,7 +154,7 @@ public final class Reflection<T> {
      * @param <T> the type of the class
      * @param cls the class to reflect upon; must not be {@code null}
      * @return a Reflection instance for the specified class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     public static <T> Reflection<T> on(final Class<T> cls) {
         N.checkArgNotNull(cls, cs.cls);
@@ -429,7 +429,8 @@ public final class Reflection<T> {
      *        elements may be {@code null} to match any reference type at that position
      * @return the Constructor object matching the parameter types
      * @throws SecurityException if a security manager denies access to the constructor
-     * @throws RuntimeException if no compatible constructor is found
+     * @throws RuntimeException if no compatible constructor is found, or if multiple compatible
+     *         constructors are equally applicable (ambiguous)
      */
     private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException {
         final Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.get(cls);
@@ -501,7 +502,8 @@ public final class Reflection<T> {
      *        elements may be {@code null} to match any reference type at that position
      * @return the Method object matching the name and parameter types
      * @throws SecurityException if a security manager denies access to the method
-     * @throws RuntimeException if no compatible method is found
+     * @throws RuntimeException if no compatible method is found, or if multiple compatible
+     *         methods are equally applicable (ambiguous)
      */
     private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException {
         final Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.get(cls);
@@ -604,6 +606,13 @@ public final class Reflection<T> {
      * phase, parameter types are compared for specificity, including the primitive widening order.
      * Duplicate signatures (typically an override visible through both hierarchy searches)
      * retain the first executable supplied by the caller.
+     *
+     * @param <E> the executable type (constructor or method)
+     * @param compatibleExecutables the compatible overloads to select from
+     * @param argTypes the runtime argument types used to compare specificity
+     * @param description a description of the target executable, used in the ambiguity error message
+     * @return the unique most-specific executable, or {@code null} if {@code compatibleExecutables} is empty
+     * @throws RuntimeException if no unique most-specific executable exists (ambiguous overloads)
      */
     private <E extends Executable> E selectMostSpecific(final List<E> compatibleExecutables, final Class<?>[] argTypes, final String description) {
         if (compatibleExecutables.isEmpty()) {
@@ -660,6 +669,10 @@ public final class Reflection<T> {
      * Returns {@code 0} for strict (reference-widening) invocation and {@code 1} when
      * unboxing and/or primitive widening is required. The supplied types have already
      * been checked for compatibility.
+     *
+     * @param paramTypes the declared parameter types of the executable
+     * @param argTypes the runtime argument types; entries may be {@code null}
+     * @return {@code 0} if all arguments are strictly compatible, {@code 1} otherwise
      */
     private int conversionPhase(final Class<?>[] paramTypes, final Class<?>[] argTypes) {
         for (int i = 0; i < paramTypes.length; i++) {
@@ -741,6 +754,10 @@ public final class Reflection<T> {
 
     /**
      * Tests the identity and widening primitive conversions accepted by reflective invocation.
+     *
+     * @param sourceType the primitive type of the argument
+     * @param targetType the primitive type of the parameter
+     * @return {@code true} if {@code sourceType} is identical to, or widens to, {@code targetType}
      */
     private boolean isWideningPrimitiveConversion(final Class<?> sourceType, final Class<?> targetType) {
         if (sourceType == targetType) {

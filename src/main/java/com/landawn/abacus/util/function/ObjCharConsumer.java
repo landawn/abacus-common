@@ -24,9 +24,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #accept(Object, char)}.
  *
- * <p>The interface extends {@code Throwables.ObjCharConsumer} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjCharConsumer<StringBuilder> appendChar = (sb, ch) -> sb.append(ch);
@@ -85,7 +82,7 @@ public interface ObjCharConsumer<T> extends Throwables.ObjCharConsumer<T, Runtim
      * @param after the operation to perform after this operation.
      * @return a composed {@code ObjCharConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ObjCharConsumer<T> andThen(final ObjCharConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

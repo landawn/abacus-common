@@ -65,7 +65,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * }</pre>
      *
      * @param os the output stream to write compressed data to; must not be {@code null}
-     * @throws IllegalArgumentException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}.
      */
     public LZ4BlockOutputStream(final OutputStream os) {
         N.checkArgNotNull(os, cs.os);
@@ -93,8 +93,8 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @param os the output stream to write compressed data to; must not be {@code null}
      * @param blockSize the maximum number of bytes to compress at once, must be
      *        between 64 and 32 MB (inclusive)
-     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code blockSize}
-     *         is less than 64 or greater than 32 MB
+     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code blockSize} is less than 64 or
+     *         greater than 32 MB.
      */
     public LZ4BlockOutputStream(final OutputStream os, final int blockSize) {
         N.checkArgNotNull(os, cs.os);
@@ -158,7 +158,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @param len the number of bytes to write
      * @throws IOException if an I/O error occurs
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative or
      *         {@code off + len} is greater than {@code b.length}
      * @throws IllegalStateException if this stream has already been finished or closed

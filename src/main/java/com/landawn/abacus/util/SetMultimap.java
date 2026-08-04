@@ -48,7 +48,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>Graph adjacency lists with unique neighbor sets</li>
  * </ul>
  *
- * <p><b>Usage example:</b>
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
  * SetMultimap<String, String> userRoles = N.newSetMultimap();
  * userRoles.put("alice", "admin");
@@ -742,7 +742,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map is {@code null}, contains a {@code null} or empty value,
-     *         or if the runtime type of its first value cannot be instantiated with a no-argument construction path
+     *         or if the runtime type of its first value cannot be instantiated with a no-argument construction path.
      * @see #wrap(Map, Supplier)
      */
     @SuppressWarnings("rawtypes")

@@ -153,7 +153,8 @@ public interface Paginated<T> extends Iterable<T> {
      *
      * @param pageNum the 0-based page number to retrieve
      * @return the data contained in the specified page
-     * @throws IllegalArgumentException if {@code pageNum} is negative or greater than or equal to {@link #totalPages()}
+     * @throws IllegalArgumentException if {@code pageNum} is negative or greater than or equal to
+     *         {@link #totalPages()}.
      */
     T getPage(int pageNum);
 

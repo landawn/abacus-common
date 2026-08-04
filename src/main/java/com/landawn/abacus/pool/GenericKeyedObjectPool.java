@@ -142,7 +142,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param evictionPolicy the policy to use for selecting entries to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -174,7 +174,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure
+     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) {
@@ -277,7 +277,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or value is null.
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -295,6 +295,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         boolean valueStored = false;
         E removedValue = null;
         List<DestroyTask<K, E>> pendingDestroys = null;
+        boolean rePoolingSameInstance = false;
+        long sameInstanceMemorySubtracted = 0L;
 
         lock.lock();
 
@@ -311,7 +313,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             // Identity guard: get() does not remove the mapping, so the documented "put it back"
             // pattern re-puts the SAME instance - destroying it would close a live resource and
             // re-pool the corpse.
-            final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
+            rePoolingSameInstance = oldValue != null && oldValue == value;
 
             if (oldValue != null && oldValue != value) {
                 pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
@@ -325,13 +327,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                     if (oldMemorySize >= 0) {
                         totalDataSize.addAndGet(-oldMemorySize); //NOSONAR
+                        sameInstanceMemorySubtracted = oldMemorySize;
                     } else {
                         logger.warn("Memory measure returned negative size for key/value: " + oldMemorySize);
+                        return false;
                     }
                 } catch (final Exception ex) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Error measuring memory size during put (same-instance re-pool): " + ExceptionUtil.getErrorMessage(ex, true));
                     }
+
+                    return false;
                 }
             }
 
@@ -416,10 +422,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             return true;
         } finally {
-            // Mirror timed put: if we freed a same-key slot up-front but never stored the new value,
-            // wake notFull waiters so capacity is not silently withheld.
+            // Same-instance re-pool can fail after pool.remove (e.g. sizeOf returns negative, mid-flight
+            // expiry). Restore the mapping so the instance is not orphaned (neither pooled nor destroyed).
             try {
-                if (removedValue != null && !valueStored) {
+                if (rePoolingSameInstance && !valueStored && removedValue != null) {
+                    pool.put(key, removedValue);
+                    if (sameInstanceMemorySubtracted > 0) {
+                        totalDataSize.addAndGet(sameInstanceMemorySubtracted);
+                    }
+                } else if (removedValue != null && !valueStored) {
+                    // Freed a different-key slot up-front but never stored the new value — wake notFull waiters.
                     notFull.signalAll();
                 }
             } finally {
@@ -438,13 +450,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * <p>This is a convenience method that wraps {@link #put(Object, Poolable)} and optionally
      * destroys the element if the put operation fails. The destruction occurs in a finally block
-     * to ensure cleanup even if an exception is thrown.</p>
+     * to ensure cleanup even if an exception is thrown, unless the same instance remains associated
+     * with the key after a failed replacement attempt.</p>
      *
      * @param key the key with which the specified value is to be associated
      * @param value the value to be associated with the specified key
-     * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} when put fails
+     * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} when put fails,
+     *        unless the same instance remains associated with the key
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null
+     * @throws IllegalArgumentException if the key or value is null.
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
@@ -454,7 +468,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         try {
             success = put(key, value);
         } finally {
-            if (autoDestroyOnFailedToPut && !success && value != null) {
+            if (autoDestroyOnFailedToPut && !success && value != null && !containsSameMapping(key, value)) {
                 value.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
@@ -474,7 +488,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param timeout the maximum time to wait for a slot
      * @param unit the time unit of the timeout, must not be {@code null}
      * @return {@code true} if the value was added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key, value, or unit is null
+     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -502,6 +516,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         E oldValue = null;
         boolean valueStored = false;
         List<DestroyTask<K, E>> pendingDestroys = null;
+        boolean rePoolingSameInstance = false;
+        long sameInstanceMemorySubtracted = 0L;
 
         lock.lock();
 
@@ -517,7 +533,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             // Identity guard: get() does not remove the mapping, so the documented "put it back"
             // pattern re-puts the SAME instance - destroying it would close a live resource.
-            final boolean rePoolingSameInstance = oldValue != null && oldValue == value;
+            rePoolingSameInstance = oldValue != null && oldValue == value;
 
             if (oldValue != null && oldValue != value) {
                 pendingDestroys = appendPendingDestroy(pendingDestroys, key, oldValue, Caller.REMOVE_REPLACE_CLEAR);
@@ -530,13 +546,17 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                     if (oldMemorySize >= 0) {
                         totalDataSize.addAndGet(-oldMemorySize); //NOSONAR
+                        sameInstanceMemorySubtracted = oldMemorySize;
                     } else {
                         logger.warn("Memory measure returned negative size for key/value: " + oldMemorySize);
+                        return false;
                     }
                 } catch (final Exception ex) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Error measuring memory size during put (same-instance re-pool): " + ExceptionUtil.getErrorMessage(ex, true));
                     }
+
+                    return false;
                 }
             }
 
@@ -621,13 +641,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 nanos = notFull.awaitNanos(nanos);
             }
         } finally {
-            // If an existing same-key mapping was removed up-front (freeing a slot) but the new value
-            // was never stored (early bail, timeout, or exception), the net effect is a freed slot.
-            // Wake a put(...) waiter parked on notFull so the slot is not silently withheld. Signalled
-            // under the still-held lock, before unlock. (The success path leaves the slot count net-zero
-            // and instead signals notEmpty.)
+            // Same-instance re-pool can fail after pool.remove (e.g. sizeOf returns negative, mid-flight
+            // expiry, timeout). Restore the mapping so the instance is not orphaned. For a different
+            // replacement that failed after detach, free the slot and wake notFull waiters.
             try {
-                if (oldValue != null && !valueStored) {
+                if (rePoolingSameInstance && !valueStored && oldValue != null) {
+                    pool.put(key, oldValue);
+                    if (sameInstanceMemorySubtracted > 0) {
+                        totalDataSize.addAndGet(sameInstanceMemorySubtracted);
+                    }
+                } else if (oldValue != null && !valueStored) {
                     notFull.signalAll();
                 }
             } finally {
@@ -648,9 +671,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param value the value, must not be {@code null}
      * @param timeout the maximum time to wait for a slot
      * @param unit the time unit of the timeout, must not be {@code null}
-     * @param autoDestroyOnFailedToPut if {@code true}, calls value.destroy(PUT_ADD_FAILURE) if put fails
+     * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} if put fails,
+     *        unless the same instance remains associated with the key
      * @return {@code true} if the value was added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key, value, or unit is null
+     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
@@ -662,7 +686,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         try {
             success = put(key, value, timeout, unit);
         } finally {
-            if (autoDestroyOnFailedToPut && !success && value != null) {
+            if (autoDestroyOnFailedToPut && !success && value != null && !containsSameMapping(key, value)) {
                 value.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
@@ -766,7 +790,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param unit the time unit of the timeout, must not be {@code null}
      * @return the element associated with the key, or {@code null} if the timeout elapsed
      * @throws IllegalStateException if the pool has been closed
-     * @throws IllegalArgumentException if the unit is null
+     * @throws IllegalArgumentException if the unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull
@@ -1207,6 +1231,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         lock.lock();
         try {
             return new HashMap<>(pool);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private boolean containsSameMapping(final K key, final E value) {
+        lock.lock();
+
+        try {
+            return pool.get(key) == value;
         } finally {
             lock.unlock();
         }

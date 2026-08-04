@@ -31,7 +31,7 @@ import com.landawn.abacus.util.N;
 public class TimeType extends AbstractDateType<Time> {
 
     /**
-     * The type name identifier for Time type.
+     * The type name identifier for Time type, equal to the simple class name {@code "Time"}.
      */
     public static final String TIME = Time.class.getSimpleName();
 

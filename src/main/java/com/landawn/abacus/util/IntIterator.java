@@ -347,7 +347,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @return the next element in the iteration as a boxed Integer
      * @throws NoSuchElementException if the iteration has no more elements
-     * @deprecated Use {@link #nextInt()} to avoid boxing overhead
+     * @deprecated use {@link #nextInt()} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
@@ -371,11 +371,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     public abstract int nextInt();
 
     /**
-     * Skips the specified number of elements in this iterator.
-     *
-     * <p>If n is 0, returns this iterator unchanged. If n is greater than or equal to
-     * the number of remaining elements, all elements will be skipped and the returned
-     * iterator will be empty.</p>
+     * Returns a new {@code IntIterator} that skips the first {@code n} elements.
+     * If {@code n} is greater than the number of remaining elements, all elements are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -391,7 +388,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param n the number of elements to skip; must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code IntIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public IntIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -436,10 +433,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     }
 
     /**
-     * Limits this iterator to return at most the specified number of elements.
-     *
-     * <p>If count is 0, returns an empty iterator. If count is greater than or equal to
-     * the number of remaining elements, all remaining elements will be included.</p>
+     * Returns a new {@code IntIterator} that will iterate over at most {@code count} elements.
+     * If {@code count} is 0, an empty iterator is returned. If {@code count} exceeds the number
+     * of remaining elements, all remaining elements are included.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -455,7 +451,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @param count the maximum number of elements to return; must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code IntIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public IntIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -552,7 +548,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // array = [1, 2, 3, 4, 5]
      *
      * // Empty iterator returns empty array
-     * int[] empty = IntIterator.empty().toArray();   // returns empty.length == 0
+     * int[] empty = IntIterator.empty().toArray();   // empty.length == 0
      * }</pre>
      *
      * @return an {@code int} array containing all remaining elements; an empty array if there are none
@@ -575,7 +571,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // list contains [1, 2, 3]
      *
      * // Empty iterator returns empty list
-     * IntList empty = IntIterator.empty().toList();   // returns empty.size() == 0
+     * IntList empty = IntIterator.empty().toList();   // empty.size() == 0
      * }</pre>
      *
      * @return an {@link IntList} containing all remaining elements; an empty list if there are none
@@ -639,7 +635,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedInt} elements with indices starting at {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta

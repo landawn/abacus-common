@@ -23,9 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(Object, int, int)}.
  *
- * <p>The interface extends {@code Throwables.ObjBiIntPredicate} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ObjBiIntPredicate<String> isSubstringValid = (str, start, end) ->
@@ -52,21 +49,9 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
     /**
      * Evaluates this predicate on the given arguments.
      *
-     * <p>This method takes an object of type T and two int values, then evaluates them
-     * to produce a boolean result.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Validating array or collection bounds with start/end indices</li>
-     *   <li>Checking if coordinates are valid in two-dimensional data structures</li>
-     *   <li>Testing if a range is valid for a given object</li>
-     *   <li>Verifying business rules involving an object and two numeric parameters</li>
-     *   <li>Implementing access control based on object state and numeric conditions</li>
-     * </ul>
-     *
      * @param t the object input argument
-     * @param i the first int input argument (often used as start index, row, or x-coordinate)
-     * @param j the second int input argument (often used as end index, column, or y-coordinate)
+     * @param i the first int input argument
+     * @param j the second int input argument
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @Override
@@ -74,9 +59,6 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     *
-     * <p>The returned predicate will return {@code true} when this predicate returns {@code false},
-     * and {@code false} when this predicate returns {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -117,7 +99,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjBiIntPredicate<T> and(final ObjBiIntPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -150,7 +132,7 @@ public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, Ru
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjBiIntPredicate<T> or(final ObjBiIntPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

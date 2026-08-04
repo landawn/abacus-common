@@ -94,10 +94,9 @@ public final class WebUtil {
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent HttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
-     *                                  start with "curl", contains an unclosed quote, or
-     *                                  contains no URL, or if a request/data option has a missing
-     *                                  or unsupported argument
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't start with "curl",
+     *         contains an unclosed quote, or contains no URL, or if a request/data option has a missing or
+     *         unsupported argument.
      * @see #curlToOkHttpRequestCode(String)
      */
     public static String curlToHttpRequestCode(final String curl) {
@@ -274,10 +273,9 @@ public final class WebUtil {
      *             and must start with "curl" (case-insensitive)
      * @return Java code string for creating an equivalent OkHttpRequest, formatted
      *         with proper indentation and line separators
-     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't
-     *                                  start with "curl", contains an unclosed quote, or
-     *                                  contains no URL, or if a request/data option has a missing
-     *                                  or unsupported argument
+     * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't start with "curl",
+     *         contains an unclosed quote, or contains no URL, or if a request/data option has a missing or
+     *         unsupported argument.
      * @see #curlToHttpRequestCode(String)
      */
     public static String curlToOkHttpRequestCode(final String curl) {
@@ -668,7 +666,7 @@ public final class WebUtil {
      * @param logHandler consumer that receives the generated cURL command string
      *                   for each request.
      * @return an OkHttpRequest configured with cURL logging interceptor
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if {@code logHandler} is {@code null}.
      * @see #createCurlLoggingOkHttpRequest(String, char, Consumer)
      * @see CurlInterceptor
      * @see <a href="https://github.com/mrmike/Ok2Curl">Ok2Curl - OkHttp to cURL converter</a>
@@ -724,7 +722,7 @@ public final class WebUtil {
      *                   for each request.
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if {@code logHandler} is {@code null}.
      * @see #createCurlLoggingOkHttpRequest(String, Consumer)
      * @see CurlInterceptor
      */
@@ -797,9 +795,9 @@ public final class WebUtil {
      * @param quoteChar the character to use for quoting values in the cURL command,
      *                  typically single quote (') or double quote (")
      * @return a formatted cURL command string with line separators, ready for execution
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null} or {@code url} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null} or {@code url} is {@code null} or empty.
      * @see HttpHeaders#valueOf(Object)
-     * @see Strings#quoteEscaped(String, char)
+     * @see Strings#escapeQuotes(String, char)
      */
     public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
             final char quoteChar) throws IllegalArgumentException {
@@ -868,7 +866,7 @@ public final class WebUtil {
      * {@code '} is rewritten as {@code '\''} (close quote, escaped quote, reopen quote). Inside
      * double quotes the shell still expands {@code $}, {@code `} and processes {@code \}, so those
      * (and {@code "}) are backslash-escaped. For any other quote character it falls back to
-     * {@link Strings#quoteEscaped(String, char)}.</p>
+     * {@link Strings#escapeQuotes(String, char)}.</p>
      *
      * @param str the value to escape; may be {@code null} or empty (returned unchanged)
      * @param quoteChar the quote character used to wrap the value in the cURL command
@@ -900,7 +898,7 @@ public final class WebUtil {
                 Objectory.recycle(sb);
             }
         } else {
-            return Strings.quoteEscaped(str, quoteChar);
+            return Strings.escapeQuotes(str, quoteChar);
         }
     }
 

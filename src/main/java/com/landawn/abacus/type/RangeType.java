@@ -30,8 +30,9 @@ import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
 /**
- * Type handler for Range objects containing comparable values.
- * This class handles serialization and deserialization of Range instances.
+ * Type handler for {@link Range} objects containing comparable values.
+ * This class handles serialization and deserialization of range bounds in bracket notation
+ * (for example {@code [1, 10]} for a closed range and {@code (1, 10)} for an open range).
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -223,7 +224,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *
      * @param str the string to parse
      * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
-     * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints
+     * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints.
      * @see #valueOf(Object)
      * @see #stringOf(Range)
      */

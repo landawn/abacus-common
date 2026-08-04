@@ -1004,7 +1004,11 @@ abstract class AbstractShortStream extends ShortStream {
      * @return a new ShortStream backed by the transformed array
      */
     private ShortStream lazyLoad(final UnaryOperator<short[]> op, final boolean sorted) {
-        return ShortStream.defer(() -> newStream(op.apply(toArrayForIntermediateOp()), sorted)).onClose(this::close);
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(ShortIterator.defer(() -> {
+            final short[] a = op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? ShortIterator.empty() : ShortIterator.of(a);
+        }), sorted);
     }
 
     @Override

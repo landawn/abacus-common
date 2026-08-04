@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts two char-valued arguments and returns no result.
+ * Represents an operation that accepts two {@code char}-valued arguments and returns no result.
  * This is the primitive type specialization of {@link java.util.function.BiConsumer} for {@code char}.
  * Unlike most other functional interfaces, {@code CharBiConsumer} is expected to operate via side-effects.
  *
@@ -32,7 +32,7 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeException> { //NOSONAR
     /**
-     * Performs this operation on the given char arguments.
+     * Performs this operation on the given arguments.
      * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
@@ -46,8 +46,8 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * appender.accept('H', 'i');
      * }</pre>
      *
-     * @param a the first char input argument
-     * @param b the second char input argument
+     * @param a the first input argument
+     * @param b the second input argument
      */
     @Override
     void accept(char a, char b);
@@ -69,7 +69,7 @@ public interface CharBiConsumer extends Throwables.CharBiConsumer<RuntimeExcepti
      * @param after the operation to perform after this operation.
      * @return a composed {@code CharBiConsumer} that performs in sequence this operation
      *         followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default CharBiConsumer andThen(final CharBiConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

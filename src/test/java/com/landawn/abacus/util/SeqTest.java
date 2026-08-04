@@ -10557,11 +10557,11 @@ public class SeqTest extends AbstractTest {
 
         assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
-        }).transformB(s -> s.map(e -> e * 2)).println());
+        }).transformViaStream(s -> s.map(e -> e * 2)).println());
 
         assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
-        }).transformB(s -> s.map(e -> e * 2), false).println());
+        }).transformViaStream(s -> s.map(e -> e * 2), false).println());
 
         assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
             throw new SQLException("TheXyzSQLException");
@@ -10570,7 +10570,7 @@ public class SeqTest extends AbstractTest {
         try {
             Seq.<Integer, SQLException> of(1, 2, 3).peek(e -> {
                 throw new SQLException("TheXyzSQLException");
-            }).transformB(s -> s.map(e -> e * 2)).println();
+            }).transformViaStream(s -> s.map(e -> e * 2)).println();
         } catch (final SQLException e) {
             assertEquals("TheXyzSQLException", e.getMessage());
         }
@@ -10578,7 +10578,7 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_transform2() throws Exception {
-        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
+        assertThrows(SQLException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new SQLException("TheXyzSQLException");
         }))).println());
 
@@ -10587,7 +10587,7 @@ public class SeqTest extends AbstractTest {
         }))).println());
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new SQLException("TheXyzSQLException");
             }))).println();
         } catch (final SQLException e) {
@@ -10605,7 +10605,7 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void test_transform3() throws Exception {
-        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
+        assertThrows(IOException.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
             throw new IOException("TheXyzIOException");
         }))).println());
 
@@ -10614,7 +10614,7 @@ public class SeqTest extends AbstractTest {
         }))).println());
 
         try {
-            Seq.<Integer, SQLException> of(1, 2, 3).transformB(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
+            Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(s -> s.map(e -> e * 2).peek(Fn.cc(e -> {
                 throw new IOException("TheXyzIOException");
             }))).println();
         } catch (final Exception e) {
@@ -10669,20 +10669,20 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testTransformB() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3).transformB(seq -> seq.map(x -> x * 2)).toList();
+    public void testTransformViaStream() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3).transformViaStream(seq -> seq.map(x -> x * 2)).toList();
         assertEquals(Arrays.asList(2, 4, 6), result);
     }
 
     @Test
-    public void test_transformB_streamToStream() throws Exception {
+    public void test_transformViaStream_streamToStream() throws Exception {
         Seq<Integer, Exception> original = Seq.of(1, 2, 3);
-        Seq<String, Exception> transformed = original.transformB(s -> s.map(String::valueOf).append("endB"));
+        Seq<String, Exception> transformed = original.transformViaStream(s -> s.map(String::valueOf).append("endB"));
         assertEquals(Arrays.asList("1", "2", "3", "endB"), drainWithException(transformed));
     }
 
     @Test
-    public void test_transformB_streamToStream_deferred() throws Exception {
+    public void test_transformViaStream_streamToStream_deferred() throws Exception {
         AtomicBoolean transferCalled = new AtomicBoolean(false);
         Function<Stream<Integer>, Stream<String>> transferFunc = stream -> {
             transferCalled.set(true);
@@ -10691,83 +10691,83 @@ public class SeqTest extends AbstractTest {
 
         Seq<Integer, Exception> original = Seq.of(1, 2, 3);
 
-        assertFalse(transferCalled.get(), "Transfer function should not be called yet for deferred transformB");
+        assertFalse(transferCalled.get(), "Transfer function should not be called yet for deferred transformViaStream");
     }
 
 
     @Test
-    public void testTransformB_WithFilter() throws Exception {
+    public void testTransformViaStream_WithFilter() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
 
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.filter(n -> n % 2 == 0), false);
+        Seq<Integer, Exception> result = seq.transformViaStream(stream -> stream.filter(n -> n % 2 == 0), false);
 
         List<Integer> list = result.toList();
         assertEquals(Arrays.asList(2, 4), list);
     }
 
     @Test
-    public void testTransformB_WithFlatMap() throws Exception {
+    public void testTransformViaStream_WithFlatMap() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.flatMap(n -> Stream.of(n, n * 10)), false);
+        Seq<Integer, Exception> result = seq.transformViaStream(stream -> stream.flatMap(n -> Stream.of(n, n * 10)), false);
 
         List<Integer> list = result.toList();
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), list);
     }
 
     @Test
-    public void testTransformB_ReturningEmptyStream() throws Exception {
+    public void testTransformViaStream_ReturningEmptyStream() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
-        Seq<Integer, Exception> result = seq.transformB(stream -> Stream.empty(), false);
+        Seq<Integer, Exception> result = seq.transformViaStream(stream -> Stream.empty(), false);
 
         assertTrue(result.toList().isEmpty());
     }
 
     @Test
-    public void testTransformB_ReturningNull() throws Exception {
+    public void testTransformViaStream_ReturningNull() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
-        Seq<Integer, Exception> result = seq.transformB(stream -> null, false);
+        Seq<Integer, Exception> result = seq.transformViaStream(stream -> null, false);
 
         assertTrue(result.toList().isEmpty());
     }
 
     @Test
-    public void testTransformB_ComplexTransformation() throws Exception {
+    public void testTransformViaStream_ComplexTransformation() throws Exception {
         Seq<String, Exception> seq = Seq.of("hello", "world", "java");
 
         Seq<Character, Exception> result = seq
-                .transformB(stream -> stream.filter(s -> s.length() > 4).flatMapArrayToChar(s -> s.toCharArray()).mapToObj(c -> c), false);
+                .transformViaStream(stream -> stream.filter(s -> s.length() > 4).flatMapArrayToChar(s -> s.toCharArray()).mapToObj(c -> c), false);
 
         List<Character> list = result.toList();
         assertEquals(Arrays.asList('h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'), list);
     }
 
     @Test
-    public void testTransformB_NullTransferFunction() throws Exception {
+    public void testTransformViaStream_NullTransferFunction() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            seq.transformB(null, false);
+            seq.transformViaStream(null, false);
         });
     }
 
     @Test
-    public void testTransformB_CalledOnClosedSequence() throws Exception {
+    public void testTransformViaStream_CalledOnClosedSequence() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
         seq.close();
 
         assertThrows(IllegalStateException.class, () -> {
-            seq.transformB(stream -> stream.map(n -> n * 2), false);
+            seq.transformViaStream(stream -> stream.map(n -> n * 2), false);
         });
     }
 
     @Test
-    public void testTransformB_DeferredExceptionPropagation() throws Exception {
+    public void testTransformViaStream_DeferredExceptionPropagation() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
 
-        Seq<Integer, Exception> result = seq.transformB(stream -> stream.map(n -> {
+        Seq<Integer, Exception> result = seq.transformViaStream(stream -> stream.map(n -> {
             if (n == 2)
                 throw new RuntimeException("Test exception");
             return n;
@@ -10780,11 +10780,11 @@ public class SeqTest extends AbstractTest {
  
 
     @Test
-    public void testTransformBImmediate() throws Exception {
+    public void testTransformViaStreamImmediate() throws Exception {
         List<String> data = Arrays.asList("a", "b", "c");
         Seq<String, Exception> seq = Seq.of(data);
 
-        Seq<String, Exception> transformed = seq.transformB(stream -> stream.map(String::toUpperCase), false);
+        Seq<String, Exception> transformed = seq.transformViaStream(stream -> stream.map(String::toUpperCase), false);
 
         List<String> result = transformed.toList();
         assertEquals(Arrays.asList("A", "B", "C"), result);

@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.N;
 
 /**
- * Type handler for {@link Boolean} (boxed wrapper) values.
+ * Type handler for {@link Boolean} (wrapper class) values.
  * Provides JDBC read operations for {@code Boolean} objects, supporting {@code null} values
  * (SQL NULL maps to Java {@code null}).
  *

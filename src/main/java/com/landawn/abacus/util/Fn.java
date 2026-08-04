@@ -659,7 +659,8 @@ public final class Fn {
      * @return a new supplier that caches the result of the delegate supplier for the specified
      *         duration. The returned supplier's {@code get()} method will return cached values
      *         within the expiration window and fetch fresh values when the cache expires
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, {@code duration} is not positive,
+     *         or {@code unit} is {@code null}.
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
@@ -762,7 +763,8 @@ public final class Fn {
      *         duration. The returned supplier's {@code get()} method will return cached values
      *         within the expiration window and fetch fresh values when the cache expires
      * @throws NullPointerException if {@code duration} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code duration} is not
+     *         positive when converted to milliseconds.
      * @see #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)
      * @see Duration
      */
@@ -1201,7 +1203,7 @@ public final class Fn {
      *
      * @param service the ExecutorService to shut down
      * @return a Runnable that shuts down the service when executed
-     * @throws IllegalArgumentException if {@code service} is {@code null}
+     * @throws IllegalArgumentException if {@code service} is {@code null}.
      * @see ExecutorService#shutdown()
      */
     public static Runnable shutdown(final ExecutorService service) throws IllegalArgumentException {
@@ -1241,8 +1243,8 @@ public final class Fn {
      * @param terminationTimeout the maximum time to wait for termination
      * @param timeUnit the time unit of the timeout argument
      * @return a Runnable that shuts down the service and waits for termination
-     * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}, or
-     *         if {@code terminationTimeout} is negative
+     * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}, or if
+     *         {@code terminationTimeout} is negative.
      * @see ExecutorService#shutdown()
      * @see ExecutorService#awaitTermination(long, TimeUnit)
      */
@@ -1455,7 +1457,7 @@ public final class Fn {
      * @param <T> the type of the input
      * @param permitsPerSecond the rate limit in permits per second
      * @return a stateful Consumer that rate-limits execution
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is not positive or is NaN
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is not positive or is NaN.
      * @see RateLimiter#acquire()
      * @see RateLimiter#create(double)
      */
@@ -1477,7 +1479,7 @@ public final class Fn {
      * @param <T> the type of the input
      * @param rateLimiter the RateLimiter to use for rate limiting
      * @return a stateful Consumer that rate-limits execution
-     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}
+     * @throws IllegalArgumentException if {@code rateLimiter} is {@code null}.
      * @see RateLimiter#acquire()
      */
     @Stateful
@@ -1517,7 +1519,7 @@ public final class Fn {
      * @param <U> the type of the second input
      * @param separator the separator to use between the two values
      * @return a BiConsumer that prints both inputs with separator
-     * @throws IllegalArgumentException if separator is null
+     * @throws IllegalArgumentException if separator is null.
      * @see N#println(Object)
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) throws IllegalArgumentException {
@@ -2421,7 +2423,7 @@ public final class Fn {
      * @param <U> the target type
      * @param clazz the class to cast to
      * @return a Function that performs type casting
-     * @throws IllegalArgumentException if clazz is null
+     * @throws IllegalArgumentException if clazz is null.
      * @see Class#cast(Object)
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
@@ -3125,7 +3127,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for collection membership
-     * @throws IllegalArgumentException if c is null
+     * @throws IllegalArgumentException if c is null.
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
@@ -3150,7 +3152,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for non-membership in a collection
-     * @throws IllegalArgumentException if c is null
+     * @throws IllegalArgumentException if c is null.
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
@@ -3175,7 +3177,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param clazz the class to test instance membership
      * @return a Predicate that tests if objects are instances of clazz
-     * @throws IllegalArgumentException if clazz is null
+     * @throws IllegalArgumentException if clazz is null.
      * @see Class#isInstance(Object)
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
@@ -3197,7 +3199,7 @@ public final class Fn {
      *
      * @param clazz the superclass to test against
      * @return a Predicate that tests if classes are subtypes of clazz
-     * @throws IllegalArgumentException if clazz is null
+     * @throws IllegalArgumentException if clazz is null.
      * @see Class#isAssignableFrom(Class)
      */
     public static Predicate<Class<?>> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
@@ -3219,7 +3221,7 @@ public final class Fn {
      *
      * @param prefix the prefix to test for
      * @return a Predicate that tests if strings start with prefix; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if prefix is null
+     * @throws IllegalArgumentException if prefix is null.
      * @see String#startsWith(String)
      */
     public static Predicate<String> startsWith(final String prefix) throws IllegalArgumentException {
@@ -3241,7 +3243,7 @@ public final class Fn {
      *
      * @param suffix the suffix to test for
      * @return a Predicate that tests if strings end with suffix; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if suffix is null
+     * @throws IllegalArgumentException if suffix is null.
      * @see String#endsWith(String)
      */
     public static Predicate<String> endsWith(final String suffix) throws IllegalArgumentException {
@@ -3263,7 +3265,7 @@ public final class Fn {
      *
      * @param valueToFind the substring to search for
      * @return a Predicate that tests if strings contain the substring; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if valueToFind is null
+     * @throws IllegalArgumentException if valueToFind is null.
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> contains(final String valueToFind) throws IllegalArgumentException {
@@ -3285,7 +3287,7 @@ public final class Fn {
      *
      * @param prefix the prefix to test against
      * @return a Predicate that tests if strings don't start with prefix; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if prefix is null
+     * @throws IllegalArgumentException if prefix is null.
      * @see String#startsWith(String)
      */
     public static Predicate<String> notStartsWith(final String prefix) throws IllegalArgumentException {
@@ -3307,7 +3309,7 @@ public final class Fn {
      *
      * @param suffix the suffix to test against
      * @return a Predicate that tests if strings don't end with suffix; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if suffix is null
+     * @throws IllegalArgumentException if suffix is null.
      * @see String#endsWith(String)
      */
     public static Predicate<String> notEndsWith(final String suffix) throws IllegalArgumentException {
@@ -3329,7 +3331,7 @@ public final class Fn {
      *
      * @param str the substring to test against
      * @return a Predicate that tests if strings don't contain the substring; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if str is null
+     * @throws IllegalArgumentException if str is null.
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> notContains(final String str) throws IllegalArgumentException {
@@ -3351,7 +3353,7 @@ public final class Fn {
      * @param pattern the Pattern to match against
      * @return a Predicate that tests if CharSequences contain a match for the pattern (a partial match is
      *         enough); a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if pattern is null
+     * @throws IllegalArgumentException if pattern is null.
      * @see Pattern#matcher(CharSequence)
      * @see Matcher#find()
      */
@@ -3643,7 +3645,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} only if all predicates return true
-     * @throws IllegalArgumentException if the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -3723,7 +3725,7 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} only if all bi-predicates return true
-     * @throws IllegalArgumentException if the list is {@code null} or empty
+     * @throws IllegalArgumentException if the list is {@code null} or empty.
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -3845,7 +3847,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} if any predicate returns true
-     * @throws IllegalArgumentException if the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the collection is {@code null} or empty.
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -3925,7 +3927,7 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} if any bi-predicate returns true
-     * @throws IllegalArgumentException if the list is {@code null} or empty
+     * @throws IllegalArgumentException if the list is {@code null} or empty.
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
@@ -4316,7 +4318,8 @@ public final class Fn {
      * @param consumerForTrue the consumer to invoke when predicate is {@code true}
      * @param consumerForFalse the consumer to invoke when predicate is {@code false}
      * @return a Consumer that conditionally processes values
-     * @throws IllegalArgumentException if any of {@code predicate}, {@code consumerForTrue}, {@code consumerForFalse} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code predicate}, {@code consumerForTrue},
+     *         {@code consumerForFalse} is {@code null}.
      * @see #acceptIf(java.util.function.Predicate, java.util.function.Consumer)
      */
     @Beta
@@ -4485,7 +4488,8 @@ public final class Fn {
      * @param mapperD the fourth mapper
      * @param defaultValue the default value to return if the input or any intermediate step is null
      * @return a Function with null-safe chaining
-     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC}, {@code mapperD} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
+     *         {@code mapperD} is {@code null}.
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -4580,7 +4584,8 @@ public final class Fn {
      * @param mapperC the third mapper
      * @param supplier the supplier for the default value
      * @return a Function with null-safe chaining
-     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
+     *         {@code supplier} is {@code null}.
      */
     public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
@@ -4631,7 +4636,8 @@ public final class Fn {
      * @param mapperD the fourth mapper
      * @param supplier the supplier for the default value
      * @return a Function with null-safe chaining
-     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC}, {@code mapperD}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
+     *         {@code mapperD}, {@code supplier} is {@code null}.
      */
     public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
             final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
@@ -4757,9 +4763,10 @@ public final class Fn {
     }
 
     /**
-     * Returns a Function that flattens a Map with Collection values into a List of Maps.
-     * Each output Map contains one key-value pair from the original Map, where values are taken
-     * from the corresponding index in each collection.
+     * Returns a Function that transposes a Map with Collection values into a List of Maps.
+     * Each output Map contains, for every key, the element at the same index in that key's
+     * collection: the first map holds the first elements of all collections, the second map
+     * holds the second elements, and so on.
      *
      * <p>This transformation is useful for converting columnar data (where each key maps to a collection
      * of values) into row-based data (where each map represents a row with values from the same index).
@@ -4777,7 +4784,7 @@ public final class Fn {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @return a Function that flattens Maps with Collection values
+     * @return a Function that transposes Maps with Collection values
      * @see Maps#transpose(Map)
      */
     @Beta
@@ -5039,7 +5046,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param count the maximum number of elements to accept (must be non-negative)
      * @return a stateful Predicate that limits elements
-     * @throws IllegalArgumentException if count is negative
+     * @throws IllegalArgumentException if count is negative.
      * @see #limitThenFilter(int, java.util.function.Predicate)
      * @see #filterThenLimit(java.util.function.Predicate, int)
      */
@@ -5166,8 +5173,7 @@ public final class Fn {
      * @param limit the maximum number of elements to test (must be non-negative)
      * @param predicate the predicate to apply to elements within the limit
      * @return a stateful {@code Predicate} that tests at most <i>limit</i> elements using the provided predicate
-     * @throws IllegalArgumentException if {@code limit} is negative
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
      * @see #filterThenLimit(java.util.function.Predicate, int)
      */
     @Beta
@@ -5206,8 +5212,7 @@ public final class Fn {
      * @param limit the maximum number of element pairs that can pass the bi-predicate
      * @param predicate the bi-predicate to test element pairs after checking the limit
      * @return a stateful {@code BiPredicate} that admits at most {@code limit} invocations before testing them
-     * @throws IllegalArgumentException if {@code limit} is negative
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
      */
     @Beta
     @Stateful
@@ -5245,8 +5250,7 @@ public final class Fn {
      * @param predicate the predicate to test elements before applying the limit
      * @param limit the maximum number of elements that pass the predicate to allow through
      * @return a stateful {@code Predicate} that accepts at most {@code limit} matching invocations
-     * @throws IllegalArgumentException if {@code limit} is negative
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
      */
     @Beta
     @Stateful
@@ -5284,8 +5288,7 @@ public final class Fn {
      * @param predicate the bi-predicate to test element pairs before applying the limit
      * @param limit the maximum number of element pairs that pass the bi-predicate to allow through
      * @return a stateful {@code BiPredicate} that accepts at most {@code limit} matching invocations
-     * @throws IllegalArgumentException if {@code limit} is negative
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
      */
     @Beta
     @Stateful
@@ -5320,7 +5323,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param timeInMillis the time limit in milliseconds
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if timeInMillis is negative
+     * @throws IllegalArgumentException if timeInMillis is negative.
      */
     @Beta
     @Stateful
@@ -5356,7 +5359,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param duration the time limit as a Duration
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if duration is {@code null} or negative
+     * @throws IllegalArgumentException if duration is {@code null} or negative.
      */
     @Beta
     @Stateful
@@ -6896,7 +6899,7 @@ public final class Fn {
      * @param a the fixed value to use as the argument to the function
      * @param func the throwable function to apply with the fixed argument
      * @return a supplier that computes the result by applying the function to the argument
-     * @throws IllegalArgumentException if {@code func} is {@code null}
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see #ss(Throwables.Supplier)
      */
     @Beta
@@ -7671,8 +7674,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when testing values
      * @param predicate the predicate to be wrapped with synchronization
      * @return a predicate that delegates to the given predicate within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code predicate} is {@code null}.
      * @see #pp(Throwables.Predicate)
      * @see #p(Predicate)
      */
@@ -7705,8 +7707,7 @@ public final class Fn {
      * @param a the fixed value to use as the first argument to the bi-predicate
      * @param biPredicate the bi-predicate to apply with the fixed first argument
      * @return a synchronized predicate that applies the input as the second argument to the bi-predicate
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      * @see #sp(Object, java.util.function.Predicate)
      */
     @Beta
@@ -7738,8 +7739,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when testing values
      * @param biPredicate the bi-predicate to be wrapped with synchronization
      * @return a bi-predicate that delegates to the given bi-predicate within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      * @see #sp(Object, TriPredicate)
      */
     @Beta
@@ -7771,8 +7771,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when testing values
      * @param triPredicate the tri-predicate to be wrapped with synchronization
      * @return a tri-predicate that delegates to the given tri-predicate within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code triPredicate} is {@code null}.
      * @see #sp(Object, java.util.function.Predicate)
      * @see #sp(Object, java.util.function.BiPredicate)
      */
@@ -7803,8 +7802,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when accepting values
      * @param consumer the consumer to be wrapped with synchronization
      * @return a consumer that delegates to the given consumer within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code consumer} is {@code null}.
      * @see #cc(Throwables.Consumer)
      * @see #c(Consumer)
      */
@@ -7837,8 +7835,7 @@ public final class Fn {
      * @param a the fixed value to use as the first argument to the bi-consumer
      * @param biConsumer the bi-consumer to apply with the fixed first argument
      * @return a synchronized consumer that applies the input as the second argument to the bi-consumer
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
@@ -7869,8 +7866,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when accepting values
      * @param biConsumer the bi-consumer to be wrapped with synchronization
      * @return a bi-consumer that delegates to the given bi-consumer within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
@@ -7902,8 +7898,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when accepting values
      * @param triConsumer the tri-consumer to be wrapped with synchronization
      * @return a tri-consumer that delegates to the given tri-consumer within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code triConsumer} is {@code null}.
      * @see #sc(Object, java.util.function.Consumer)
      * @see #sc(Object, java.util.function.BiConsumer)
      */
@@ -7935,8 +7930,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param function the function to be wrapped with synchronization
      * @return a function that delegates to the given function within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code function} is {@code null}.
      * @see #ff(Throwables.Function)
      * @see #f(Function)
      */
@@ -7970,8 +7964,7 @@ public final class Fn {
      * @param a the fixed value to use as the first argument to the bi-function
      * @param biFunction the bi-function to apply with the fixed first argument
      * @return a synchronized function that applies the input as the second argument to the bi-function
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biFunction} is {@code null}.
      * @see #sf(Object, java.util.function.Function)
      */
     @Beta
@@ -8004,8 +7997,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param biFunction the bi-function to be wrapped with synchronization
      * @return a bi-function that delegates to the given bi-function within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biFunction} is {@code null}.
      * @see #sf(Object, java.util.function.Function)
      * @see #sf(Object, TriFunction)
      */
@@ -8040,8 +8032,7 @@ public final class Fn {
      * @param mutex the object to synchronize on when applying the function
      * @param triFunction the tri-function to be wrapped with synchronization
      * @return a tri-function that delegates to the given tri-function within a synchronized block on the mutex
-     * @throws IllegalArgumentException if {@code mutex} is {@code null}
-     * @throws IllegalArgumentException if {@code triFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code triFunction} is {@code null}.
      * @see #sf(Object, java.util.function.Function)
      * @see #sf(Object, java.util.function.BiFunction)
      */

@@ -144,7 +144,7 @@ public final class OkHttpRequest {
      * @param url the target URL as a string, or {@code null} when {@code httpUrl} is supplied
      * @param httpUrl the target URL as an OkHttp {@link HttpUrl}, or {@code null} when {@code url} is supplied
      * @param httpClient the OkHttp client used to execute this request
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty and {@code httpUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty and {@code httpUrl} is {@code null}.
      */
     OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
         N.checkArgument(!(Strings.isEmpty(url) && httpUrl == null), "'url' cannot be null or empty");
@@ -169,6 +169,7 @@ public final class OkHttpRequest {
      * @param url the URL string for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
      */
     public static OkHttpRequest create(final String url, final OkHttpClient httpClient) {
         return new OkHttpRequest(url, null, httpClient);
@@ -189,7 +190,7 @@ public final class OkHttpRequest {
      * @param url the URL object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
         return new OkHttpRequest(null, HttpUrl.get(url), httpClient);
@@ -210,6 +211,7 @@ public final class OkHttpRequest {
      * @param url the HttpUrl object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null}.
      */
     public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) {
         return new OkHttpRequest(null, url, httpClient);
@@ -223,12 +225,14 @@ public final class OkHttpRequest {
      * OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/users");
      * }</pre>
      *
-     * <p>Note: the URL string is not validated here. An {@link IllegalArgumentException} may be
-     * thrown later, when the request is executed, if it is not a valid HTTP or HTTPS URL. To
-     * validate up front, use {@link HttpUrl#parse(String)}, which returns {@code null} for invalid URLs.</p>
+     * <p>Note: only non-emptiness of {@code url} is checked here. Scheme/host validity is not
+     * verified at construction; an {@link IllegalArgumentException} may be thrown later, when the
+     * request is executed, if it is not a valid HTTP or HTTPS URL. To validate up front, use
+     * {@link HttpUrl#parse(String)}, which returns {@code null} for invalid URLs.</p>
      *
      * @param url the URL string for the request
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
      */
     public static OkHttpRequest url(final String url) {
         return create(url, DEFAULT_CLIENT);
@@ -266,6 +270,7 @@ public final class OkHttpRequest {
      *
      * @param url the HttpUrl object for the request
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null}.
      */
     public static OkHttpRequest url(final HttpUrl url) {
         return create(url, DEFAULT_CLIENT);
@@ -287,6 +292,7 @@ public final class OkHttpRequest {
      * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
      */
     public static OkHttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -314,6 +320,7 @@ public final class OkHttpRequest {
      * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
     public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -335,6 +342,7 @@ public final class OkHttpRequest {
      * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @return a new OkHttpRequest instance
+     * @throws IllegalArgumentException if {@code url} is {@code null}.
      */
     public static OkHttpRequest url(final HttpUrl url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
         return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
@@ -372,7 +380,7 @@ public final class OkHttpRequest {
      * @param connectTimeout The connection timeout in milliseconds. Must be non-negative and must fit
      *        in an {@code int}; {@code 0} disables the timeout.
      * @return This OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int}
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int}.
      */
     public OkHttpRequest connectTimeout(final long connectTimeout) {
         clientBuilder().connectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
@@ -394,7 +402,8 @@ public final class OkHttpRequest {
      *        be negative. {@link Duration#ZERO} disables the timeout.
      * @return This OkHttpRequest instance for method chaining
      * @throws NullPointerException if {@code connectTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int} number of milliseconds
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int} number
+     *         of milliseconds.
      */
     public OkHttpRequest connectTimeout(final Duration connectTimeout) {
         clientBuilder().connectTimeout(connectTimeout);
@@ -420,7 +429,7 @@ public final class OkHttpRequest {
      * @param readTimeout The read timeout in milliseconds. Must be non-negative and must fit in an
      *        {@code int}; {@code 0} disables the timeout.
      * @return This OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int}
+     * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int}.
      */
     public OkHttpRequest readTimeout(final long readTimeout) {
         clientBuilder().readTimeout(readTimeout, TimeUnit.MILLISECONDS);
@@ -442,7 +451,8 @@ public final class OkHttpRequest {
      *        negative. {@link Duration#ZERO} disables the timeout.
      * @return This OkHttpRequest instance for method chaining
      * @throws NullPointerException if {@code readTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int} number of milliseconds
+     * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int} number of
+     *         milliseconds.
      */
     public OkHttpRequest readTimeout(final Duration readTimeout) {
         clientBuilder().readTimeout(readTimeout);
@@ -966,7 +976,7 @@ public final class OkHttpRequest {
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if the provided object is not a bean class with getter/setter methods
+     * @throws IllegalArgumentException if the provided object is not a bean class with getter/setter methods.
      * @see FormBody.Builder
      */
     public OkHttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException {
@@ -1427,8 +1437,9 @@ public final class OkHttpRequest {
      * @return the deserialized response body, or {@code null} if {@code resultClass} is {@code Void.class}
      *         or the response carries no body. If {@code resultClass} is {@code Response.class}, the
      *         caller must close the returned response.
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or {@code resultClass} is the abacus
-     *                                  {@link HttpResponse} type (use OkHttp's {@code Response} class directly instead)
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or
+     *         {@code resultClass} is the abacus {@link HttpResponse} type (use OkHttp's {@code Response} class
+     *         directly instead).
      * @throws UncheckedIOException if the request could not be executed or the response indicates a non-2xx status
      */
     @Beta
@@ -1801,7 +1812,7 @@ public final class OkHttpRequest {
      *
      * @param executor the executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response when the request finishes; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncGet(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1846,7 +1857,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1889,7 +1900,7 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncPost(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1933,7 +1944,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -1976,7 +1987,7 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncPut(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2020,7 +2031,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2063,7 +2074,7 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncPatch(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2107,7 +2118,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2148,7 +2159,7 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncDelete(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2190,7 +2201,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2231,7 +2242,7 @@ public final class OkHttpRequest {
      *
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     public ContinuableFuture<Response> asyncHead(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
@@ -2275,7 +2286,7 @@ public final class OkHttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
@@ -2321,7 +2332,7 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
-     * @throws IllegalArgumentException if {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)

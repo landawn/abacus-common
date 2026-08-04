@@ -507,7 +507,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this MutableByte with another MutableByte for order.
+     * Compares this MutableByte to another MutableByte in ascending order.
      * Returns a negative integer, zero, or a positive integer as this object's value
      * is less than, equal to, or greater than the specified object's value.
      *

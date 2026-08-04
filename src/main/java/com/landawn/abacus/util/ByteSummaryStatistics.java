@@ -78,8 +78,8 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * @param max the maximum {@code byte} value
      * @param sum the sum of all values as a {@code long}
      * @throws IllegalArgumentException if {@code count} is negative; if a zero-count state does not use
-     *         {@link Byte#MAX_VALUE}, {@link Byte#MIN_VALUE}, and zero for min, max, and sum;
-     *         or if a non-empty state has {@code min} greater than {@code max}
+     *         {@link Byte#MAX_VALUE}, {@link Byte#MIN_VALUE}, and zero for min, max, and sum; or if a non-empty
+     *         state has {@code min} greater than {@code max}.
      */
     public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
         if (count < 0) {

@@ -191,7 +191,7 @@ public enum LockMode {
      *
      * @param intValue the integer value to convert to a LockMode
      * @return the corresponding LockMode
-     * @throws IllegalArgumentException if the intValue does not correspond to a valid LockMode
+     * @throws IllegalArgumentException if the intValue does not correspond to a valid LockMode.
      */
     public static LockMode of(final int intValue) {
         switch (intValue) {

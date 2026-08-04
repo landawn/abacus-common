@@ -3746,12 +3746,12 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testConstructorWithMapSupplier_null() {
-        assertThrows(NullPointerException.class, () -> new Multiset<>((Supplier<Map<String, ?>>) null));
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<>((Supplier<Map<String, ?>>) null));
     }
 
     @Test
     public void testConstructorWithMapSupplierReturningNull() {
-        assertThrows(NullPointerException.class, () -> new Multiset<String>((Supplier<Map<String, ?>>) () -> null));
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>((Supplier<Map<String, ?>>) () -> null));
     }
 
     @Test
@@ -3814,5 +3814,39 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testToMapSortedByOccurrencesRejectsNullComparatorWhenEmpty() {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().toMapSortedByOccurrences(null));
+    }
+
+    @Test
+    public void testRemoveAllOccurrencesOf_multisetSourceUsesDistinctKeys() {
+        // High counts must not force materializing every occurrence via Multiset.toArray().
+        final Multiset<String> target = Multiset.of("a", "a", "b", "c");
+        final Multiset<String> source = new Multiset<>();
+        source.setCount("a", 1_000_000);
+        source.setCount("c", 2_000_000);
+        source.setCount("z", 5_000_000);
+
+        assertTrue(target.removeAllOccurrencesOf(source));
+        assertEquals(0, target.getCount("a"));
+        assertEquals(1, target.getCount("b"));
+        assertEquals(0, target.getCount("c"));
+        assertEquals(1, target.size());
+    }
+
+    @Test
+    public void testMerge_rejectsNegativeValue() {
+        final Multiset<String> multiset = Multiset.of("a");
+        assertThrows(IllegalArgumentException.class, () -> multiset.merge("a", -1, (oldCount, value) -> oldCount + value));
+        assertThrows(IllegalArgumentException.class, () -> multiset.merge("missing", -5, (oldCount, value) -> value));
+        assertEquals(1, multiset.getCount("a"));
+    }
+
+    @Test
+    public void testToArray_rejectsUnrepresentableOccurrenceCountBeforeAllocation() {
+        final Multiset<String> multiset = new Multiset<>();
+        multiset.setCount("a", Integer.MAX_VALUE);
+        multiset.setCount("b", 1);
+
+        assertThrows(IllegalStateException.class, multiset::toArray);
+        assertThrows(IllegalStateException.class, () -> multiset.toArray(new String[0]));
     }
 }

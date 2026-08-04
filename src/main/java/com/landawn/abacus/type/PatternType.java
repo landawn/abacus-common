@@ -17,9 +17,9 @@ package com.landawn.abacus.type;
 import java.util.regex.Pattern;
 
 /**
- * Type handler for java.util.regex.Pattern objects, providing conversion between Pattern instances
- * and their string representations. This type allows for seamless serialization and deserialization
- * of regular expression patterns.
+ * Type handler for {@link java.util.regex.Pattern} objects, providing conversion between Pattern instances
+ * and their string representations (the pattern text only; compile flags are not preserved unless
+ * embedded in the pattern).
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -59,11 +59,10 @@ public class PatternType extends AbstractType<Pattern> {
     }
 
     /**
-     * Converts a Pattern object to its string representation.
-     * Returns the pattern string by calling toString() on the Pattern object.
+     * Converts a {@link Pattern} object to its string representation (the pattern text).
      * Returns {@code null} if the input Pattern is {@code null}.
      *
-     * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
+     * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.</p>
      * <p><b>&#9888;&#65039;</b> Pattern flags are not included in this representation. A pattern compiled with flags such as
      * {@link Pattern#CASE_INSENSITIVE} will be parsed back with default flags unless the flags are embedded directly
      * in the pattern text (for example, {@code "(?i)abc"}).</p>

@@ -24,10 +24,6 @@ import com.landawn.abacus.util.Throwables;
  * class in java.util.function package, as Java only provides int, long, and double specializations.
  * This interface fills that gap for float primitive type operations.
  *
- * <p>This interface extends the Throwables.ToFloatFunction, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to RuntimeException.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -50,10 +46,8 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      */
     ToFloatFunction<Float> UNBOX = value -> value == null ? 0 : value;
     /**
-     * A predefined ToFloatFunction instance that converts any Number object to a primitive float.
-     * Returns 0.0f if the input is {@code null}, otherwise uses the Numbers.toFloat utility method to
-     * perform the conversion. This function can handle various Number subclasses including
-     * Integer, Long, Double, BigDecimal, etc.
+     * A predefined {@code ToFloatFunction} that converts any {@link Number} to a primitive {@code float}.
+     * Returns {@code 0.0f} if the input is {@code null}; otherwise converts via {@link Numbers#toFloat(Object)}.
      *
      * <p>Note: This conversion may result in loss of precision, and values whose magnitude exceeds
      * the float range are converted to {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}.

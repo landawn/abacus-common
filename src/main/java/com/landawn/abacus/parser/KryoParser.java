@@ -451,7 +451,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null}.
      */
     @Override
     public <T> T deserialize(String source, KryoDeserConfig config, Type<? extends T> targetType) {
@@ -475,7 +475,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null}.
      */
     @Override
     public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws IllegalArgumentException {
@@ -942,7 +942,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @param type the class to register
-     * @throws IllegalArgumentException if type is {@code null}
+     * @throws IllegalArgumentException if type is {@code null}.
      */
     public void register(final Class<?> type) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -970,7 +970,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param type the class to register
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if type is {@code null} or {@code id} is negative
+     * @throws IllegalArgumentException if type is {@code null}, {@code id} is negative, or {@code id} is
+     *         already assigned to another class.
      */
     public void register(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -1001,7 +1002,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param type the class to register
      * @param serializer the custom serializer for this class
-     * @throws IllegalArgumentException if type or serializer is {@code null}
+     * @throws IllegalArgumentException if type or serializer is {@code null}.
      */
     public void register(final Class<?> type, final Serializer<?> serializer) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
@@ -1030,7 +1031,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param type the class to register
      * @param serializer the custom serializer for this class
      * @param id the non-negative unique ID for this class
-     * @throws IllegalArgumentException if type or serializer is {@code null}, or {@code id} is negative
+     * @throws IllegalArgumentException if type or serializer is {@code null}, {@code id} is negative, or
+     *         {@code id} is already assigned to another class.
      */
     public void register(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);

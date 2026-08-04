@@ -170,9 +170,9 @@ public final class TypeAttrParser {
      * @param attr the type attribute string to parse
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
-     * @throws IllegalArgumentException if the class name or a generic parameter at any nesting
-     *         level is empty, or if generic angle brackets, constructor parentheses, or quoted
-     *         constructor arguments are missing, unbalanced, out of order, or otherwise malformed
+     * @throws IllegalArgumentException if the class name or a generic parameter at any nesting level is empty, or if
+     *         generic angle brackets, constructor parentheses, or quoted constructor arguments are missing,
+     *         unbalanced, out of order, or otherwise malformed.
      * @throws NullPointerException if {@code attr} is {@code null}
      * @see #getClassName()
      * @see #getTypeParameters()
@@ -533,15 +533,15 @@ public final class TypeAttrParser {
      *
      * <p>All parsed type parameters and constructor parameters are passed to the constructor
      * as {@code String} values, so a matching constructor must accept {@code String} (or, in the
-     * fallback signature, a trailing {@code String[]}) arguments. If the class has no such
-     * parameters, the no-argument constructor is used.
+     * fallback signature, a trailing {@code String[]}) arguments. If the attribute string declares
+     * no type or constructor parameters, the no-argument constructor is used.
      *
      * @param <T> the type of object to create
      * @param cls the class to instantiate, or {@code null} to derive it from the class name
      *            in the attribute string
      * @param attr the type attribute string containing the class name and constructor parameters
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if no suitable constructor is found
+     * @throws IllegalArgumentException if no suitable constructor is found.
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)
      */
@@ -630,8 +630,8 @@ public final class TypeAttrParser {
      * @param args alternating {@code (Class, value)} pairs prepended to the parsed parameters;
      *             must have an even length, with every even-indexed element being a {@code Class}
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if {@code args} has an odd length, if an even-indexed
-     *         element of {@code args} is not a {@code Class}, or if no matching constructor is found
+     * @throws IllegalArgumentException if {@code args} has an odd length, if an even-indexed element of {@code args}
+     *         is not a {@code Class}, or if no matching constructor is found.
      * @throws NullPointerException if {@code attr} or {@code args} is {@code null}
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)

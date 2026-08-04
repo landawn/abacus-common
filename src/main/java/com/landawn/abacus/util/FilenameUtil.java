@@ -143,7 +143,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to normalize, {@code null} returns {@code null}
      * @return the normalized filename, or {@code null} if it is invalid (for example, a leading {@code ..} with no parent)
-     * @throws IllegalArgumentException if the filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      * @see IOUtil#simplifyPath(String)
      */
     @MayReturnNull
@@ -171,7 +171,7 @@ public final class FilenameUtil {
      * @param unixSeparator {@code true} if a unix separator should be used,
      *                      {@code false} if a windows separator should be used
      * @return the normalized filename, or {@code null} if it is invalid (for example, a leading {@code ..} with no parent)
-     * @throws IllegalArgumentException if the filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      * @see IOUtil#simplifyPath(String)
      */
     @MayReturnNull
@@ -201,7 +201,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to normalize, {@code null} returns {@code null}
      * @return the normalized filename without trailing separator, or {@code null} if it is invalid
-     * @throws IllegalArgumentException if the filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      */
     @MayReturnNull
     public static String normalizeNoEndSeparator(final String filename) {
@@ -221,7 +221,7 @@ public final class FilenameUtil {
      * @param unixSeparator {@code true} if a unix separator should be used,
      *                      {@code false} if a windows separator should be used
      * @return the normalized filename without trailing separator, or {@code null} if it is invalid
-     * @throws IllegalArgumentException if the filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      */
     @MayReturnNull
     public static String normalizeNoEndSeparator(final String filename, final boolean unixSeparator) {
@@ -346,7 +346,7 @@ public final class FilenameUtil {
      *        {@code null} unless {@code fullFilenameToAdd} already has an absolute/prefixed path
      * @param fullFilenameToAdd the filename (or path) to attach to the base, {@code null} returns {@code null}
      * @return the concatenated and normalized path, or {@code null} if the result is invalid
-     * @throws IllegalArgumentException if either argument contains a {@code null} byte
+     * @throws IllegalArgumentException if either argument contains a {@code null} byte.
      */
     @MayReturnNull
     public static String concat(final String basePath, final String fullFilenameToAdd) {
@@ -394,7 +394,7 @@ public final class FilenameUtil {
      * @param canonicalParent the file to consider as the parent, must not be {@code null}
      * @param canonicalChild the file to consider as the child, {@code null} returns {@code false}
      * @return {@code true} if the child is under the parent directory, {@code false} otherwise
-     * @throws IllegalArgumentException if canonicalParent is {@code null}
+     * @throws IllegalArgumentException if canonicalParent is {@code null}.
      */
     public static boolean directoryContains(final String canonicalParent, final String canonicalChild) {
 
@@ -629,7 +629,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to find the last extension separator in, {@code null} returns -1
      * @return the index of the last extension separator character, or -1 if there is no such character or if {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      */
     public static int indexOfExtension(final String filename) {
         if (filename == null) {
@@ -660,7 +660,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the prefix of the file, or {@code null} if the filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte.
      */
     @MayReturnNull
     public static String getPrefix(final String filename) {
@@ -696,7 +696,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the path of the file, an empty string if none exists, or {@code null} if the filename
      *         is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved path contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved path contains a {@code null} byte.
      * @see #getFullPath(String)
      */
     @MayReturnNull
@@ -718,7 +718,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the path of the file without trailing separator, an empty string if none exists,
      *         or {@code null} if the filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved path contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved path contains a {@code null} byte.
      * @see #getFullPathNoEndSeparator(String)
      */
     @MayReturnNull
@@ -760,7 +760,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the full path of the file, an empty string if none exists, or {@code null} if the
      *         filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved prefix contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved prefix contains a {@code null} byte.
      */
     @MayReturnNull
     public static String getFullPath(final String filename) {
@@ -782,7 +782,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the full path of the file without trailing separator, an empty string if none exists,
      *         or {@code null} if the filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte
+     * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte.
      * @see #getFullPath(String)
      */
     @MayReturnNull
@@ -837,7 +837,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the name of the file without the path, an empty string if the filename ends
      *         with a separator (no name part), or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      */
     @MayReturnNull
     public static String getName(final String filename) {
@@ -856,7 +856,7 @@ public final class FilenameUtil {
      * for poison-byte injection attacks, so its presence is rejected outright.</p>
      *
      * @param path the path to check, must not be {@code null}
-     * @throws IllegalArgumentException if {@code path} contains a {@code null} byte
+     * @throws IllegalArgumentException if {@code path} contains a {@code null} byte.
      */
     private static void failIfNullBytePresent(final String path) {
         final int len = path.length();
@@ -884,7 +884,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the name of the file without path or extension, an empty string if the filename
      *         ends with a separator (no name part), or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      * @see #getName(String)
      * @see #getExtension(String)
      * @see #removeExtension(String)
@@ -910,7 +910,7 @@ public final class FilenameUtil {
      * @param filename the filename to retrieve the extension of, {@code null} returns {@code null}
      * @return the extension of the file or an empty string if none exists,
      *         or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte
+     * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      * @see #getBaseName(String)
      * @see #removeExtension(String)
      */
@@ -947,7 +947,7 @@ public final class FilenameUtil {
      *
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the filename minus the extension, or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      * @see #getBaseName(String)
      * @see #getExtension(String)
      */
@@ -987,7 +987,8 @@ public final class FilenameUtil {
      * @param filename the filename to modify, {@code null} returns {@code null}
      * @param extension the new extension (with or without a leading dot); {@code null} or empty removes the extension
      * @return the filename with the new extension, or {@code null} if the filename is {@code null}
-     * @throws IllegalArgumentException if {@code filename} is non-null and the supplied filename or new extension contains {@code null} bytes
+     * @throws IllegalArgumentException if {@code filename} is non-null and the supplied filename or new extension
+     *         contains {@code null} bytes.
      * @see #removeExtension(String)
      * @see #getExtension(String)
      */
@@ -1126,7 +1127,8 @@ public final class FilenameUtil {
      * @param normalized whether to normalize the filenames before comparison
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
      * @return {@code true} if the filenames are equal; two {@code null} values are considered equal
-     * @throws IllegalArgumentException if normalization produces an invalid result (when {@code normalized} is {@code true})
+     * @throws IllegalArgumentException if normalization produces an invalid result (when {@code normalized} is
+     *         {@code true}).
      */
     public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) {
         if (filename1 == null || filename2 == null) {
@@ -1164,7 +1166,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code false}
      * @param extension the extension to check for, {@code null} or empty checks for no extension
      * @return {@code true} if the filename has the specified extension
-     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
     public static boolean isExtension(final String filename, final String extension) {
         if (filename == null) {
@@ -1194,7 +1196,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code false}
      * @param extensions the extensions to check for, {@code null} or empty array checks for no extension
      * @return {@code true} if the filename has one of the specified extensions
-     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
     public static boolean isExtension(final String filename, final String[] extensions) {
         if (filename == null) {
@@ -1229,7 +1231,7 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code false}
      * @param extensions the extensions to check for, {@code null} or empty collection checks for no extension
      * @return {@code true} if the filename has one of the specified extensions
-     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes
+     * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
     public static boolean isExtension(final String filename, final Collection<String> extensions) {
         if (filename == null) {

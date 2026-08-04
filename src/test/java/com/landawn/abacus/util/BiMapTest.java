@@ -744,8 +744,8 @@ public class BiMapTest extends AbstractTest {
 
     @Test
     public void testConstructorRejectsNullSuppliersAndNullResults() {
-        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>((Supplier<Map<String, Integer>>) null, HashMap::new));
-        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, (Supplier<Map<Integer, String>>) null));
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>((Supplier<Map<String, Integer>>) null, HashMap::new));
+        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, (Supplier<Map<Integer, String>>) null));
         assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
         assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
     }

@@ -1404,44 +1404,44 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
-    public void testTransformB_withDeferred() {
-        long[] result = LongStream.of(1L, 2L, 3L, 4L).transformB(s -> s.map(x -> x * 2).sorted(), false).toArray();
+    public void testTransformViaJdkStream_withDeferred() {
+        long[] result = LongStream.of(1L, 2L, 3L, 4L).transformViaJdkStream(s -> s.map(x -> x * 2).sorted(), false).toArray();
         assertArrayEquals(new long[] { 2L, 4L, 6L, 8L }, result);
     }
 
     @Test
-    public void testTransformB() {
-        long[] result = createLongStream(1L, 2L, 3L).transformB(s -> s.map(n -> n * 2)).toArray();
+    public void testTransformViaJdkStream() {
+        long[] result = createLongStream(1L, 2L, 3L).transformViaJdkStream(s -> s.map(n -> n * 2)).toArray();
         assertArrayEquals(new long[] { 2L, 4L, 6L }, result);
     }
 
     @Test
-    public void testTransformBWithDeferred() {
-        long[] result = createLongStream(1L, 2L, 3L).transformB(s -> s.map(n -> n * 2), true).toArray();
+    public void testTransformViaJdkStreamWithDeferred() {
+        long[] result = createLongStream(1L, 2L, 3L).transformViaJdkStream(s -> s.map(n -> n * 2), true).toArray();
         assertArrayEquals(new long[] { 2L, 4L, 6L }, result);
     }
 
     @Test
-    public void testTransformB_TwoArg() {
-        long[] result = createLongStream(3L, 1L, 2L).transformB(s -> s.sorted(), false).toArray();
+    public void testTransformViaJdkStream_TwoArg() {
+        long[] result = createLongStream(3L, 1L, 2L).transformViaJdkStream(s -> s.sorted(), false).toArray();
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
     }
 
     @Test
-    public void testTransformB_TwoArg_Deferred() {
-        long[] result = createLongStream(3L, 1L, 2L).transformB(s -> s.sorted(), true).toArray();
+    public void testTransformViaJdkStream_TwoArg_Deferred() {
+        long[] result = createLongStream(3L, 1L, 2L).transformViaJdkStream(s -> s.sorted(), true).toArray();
         assertArrayEquals(new long[] { 1, 2, 3 }, result);
     }
 
     @Test
-    public void testTransformB_HappyPath2() {
-        long[] result = LongStream.of(1, 2, 3).transformB(s -> s.map(x -> x * 2)).toArray();
+    public void testTransformViaJdkStream_HappyPath2() {
+        long[] result = LongStream.of(1, 2, 3).transformViaJdkStream(s -> s.map(x -> x * 2)).toArray();
         assertArrayEquals(new long[] { 2, 4, 6 }, result);
     }
 
     @Test
-    public void testTransformB_singleArg() {
-        long[] result = LongStream.of(1L, 2L, 3L, 4L).transformB(s -> s.map(x -> x * 2).sorted()).toArray();
+    public void testTransformViaJdkStream_singleArg() {
+        long[] result = LongStream.of(1L, 2L, 3L, 4L).transformViaJdkStream(s -> s.map(x -> x * 2).sorted()).toArray();
         assertArrayEquals(new long[] { 2L, 4L, 6L, 8L }, result);
     }
 

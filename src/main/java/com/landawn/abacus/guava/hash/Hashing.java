@@ -144,7 +144,7 @@ public final class Hashing {
      *                    hash code should have (the actual number of bits may be higher;
      *                    currently 32 bits, or the next multiple of 128 bits)
      * @return a hash function that produces hash codes of length {@code minimumBits} or greater
-     * @throws IllegalArgumentException if {@code minimumBits} is not positive
+     * @throws IllegalArgumentException if {@code minimumBits} is not positive.
      * @see #murmur3_128()
      * @see #murmur3_32()
      * @see #sha256()
@@ -397,8 +397,8 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-MD5 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing
-     *                                  this MAC (e.g., wrong algorithm)
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., wrong
+     *         algorithm).
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacMd5(final Key key) {
@@ -419,7 +419,7 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-MD5 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacMd5(final byte[] key) {
@@ -439,7 +439,7 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA1 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha1(final Key key) {
@@ -458,7 +458,7 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA1 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha1(final byte[] key) {
@@ -479,7 +479,7 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA256 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha256(final Key key) {
@@ -499,7 +499,7 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA256 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha256(final byte[] key) {
@@ -520,7 +520,7 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA512 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha512(final Key key) {
@@ -541,7 +541,7 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA512 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty
+     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
     public static HashFunction hmacSha512(final byte[] key) {
@@ -710,9 +710,8 @@ public final class Hashing {
      *
      * @param hashFunctions an iterable of hash functions to concatenate (must not be empty)
      * @return a hash function that concatenates the results of all input functions
-     * @throws IllegalArgumentException if {@code hashFunctions} is empty, or if any element is
-     *                                  {@code null} or is not a {@code HashFunction} obtained from
-     *                                  the factory methods of this class
+     * @throws IllegalArgumentException if {@code hashFunctions} is empty, or if any element is {@code null} or is not
+     *         a {@code HashFunction} obtained from the factory methods of this class.
      */
     public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
@@ -744,7 +743,7 @@ public final class Hashing {
      * @param first the first hash code to combine
      * @param second the second hash code to combine
      * @return a hash code combining the input hash codes in order
-     * @throws IllegalArgumentException if the hash codes have different bit lengths
+     * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineOrdered(Iterable)
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second) {
@@ -767,7 +766,7 @@ public final class Hashing {
      * @param second the second hash code to combine
      * @param third the third hash code to combine
      * @return a hash code combining the input hash codes in order
-     * @throws IllegalArgumentException if the hash codes have different bit lengths
+     * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineOrdered(Iterable)
      */
     public static HashCode combineOrdered(final HashCode first, final HashCode second, final HashCode third) {
@@ -795,8 +794,8 @@ public final class Hashing {
      *
      * @param hashCodes an iterable of hash codes to combine
      * @return a hash code combining all input hash codes in order
-     * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes
-     *                                  do not all have the same bit length
+     * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes do not all have the same
+     *         bit length.
      */
     public static HashCode combineOrdered(final Iterable<HashCode> hashCodes) {
         return com.google.common.hash.Hashing.combineOrdered(hashCodes);
@@ -817,7 +816,7 @@ public final class Hashing {
      * @param first the first hash code to combine
      * @param second the second hash code to combine
      * @return a hash code combining the input hash codes without regard to order
-     * @throws IllegalArgumentException if the hash codes have different bit lengths
+     * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineUnordered(Iterable)
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second) {
@@ -840,7 +839,7 @@ public final class Hashing {
      * @param second the second hash code to combine
      * @param third the third hash code to combine
      * @return a hash code combining the input hash codes without regard to order
-     * @throws IllegalArgumentException if the hash codes have different bit lengths
+     * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineUnordered(Iterable)
      */
     public static HashCode combineUnordered(final HashCode first, final HashCode second, final HashCode third) {
@@ -869,8 +868,8 @@ public final class Hashing {
      *
      * @param hashCodes an iterable of hash codes to combine
      * @return a hash code combining all input hash codes without regard to order
-     * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes
-     *                                  do not all have the same bit length
+     * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes do not all have the same
+     *         bit length.
      */
     public static HashCode combineUnordered(final Iterable<HashCode> hashCodes) {
         return com.google.common.hash.Hashing.combineUnordered(hashCodes);
@@ -906,7 +905,7 @@ public final class Hashing {
      * @param hashCode the hash code to assign to a bucket
      * @param buckets the number of buckets available (must be positive)
      * @return a bucket index in the range {@code [0, buckets)}
-     * @throws IllegalArgumentException if {@code buckets} is not positive
+     * @throws IllegalArgumentException if {@code buckets} is not positive.
      * @see <a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent hashing on Wikipedia</a>
      */
     public static int consistentHash(final HashCode hashCode, final int buckets) {
@@ -933,7 +932,7 @@ public final class Hashing {
      * @param input the input value to assign to a bucket
      * @param buckets the number of buckets available (must be positive)
      * @return a bucket index in the range {@code [0, buckets)}
-     * @throws IllegalArgumentException if {@code buckets} is not positive
+     * @throws IllegalArgumentException if {@code buckets} is not positive.
      * @see #consistentHash(HashCode, int)
      */
     public static int consistentHash(final long input, final int buckets) {

@@ -175,7 +175,7 @@ public interface Type<T> {
      * @param javaType the Java reflection type
      * @return the corresponding Type instance (never {@code null}; unrecognized types resolve to a
      *         generic {@link Object}-backed handler rather than failing)
-     * @throws IllegalArgumentException if {@code javaType} is {@code null}
+     * @throws IllegalArgumentException if {@code javaType} is {@code null}.
      */
     static <T> Type<T> of(final java.lang.reflect.Type javaType) {
         return TypeFactory.getType(javaType);
@@ -197,7 +197,7 @@ public interface Type<T> {
      * @param <T> the Java type represented by the returned {@code Type} instance
      * @param typeRef the type reference
      * @return the corresponding Type instance (never {@code null})
-     * @throws IllegalArgumentException if {@code typeRef} is {@code null}
+     * @throws IllegalArgumentException if {@code typeRef} is {@code null}.
      */
     static <T> Type<T> of(final TypeReference<T> typeRef) {
         return N.checkArgNotNull(typeRef, cs.typeRef).type();
@@ -223,7 +223,7 @@ public interface Type<T> {
      * @param cls the class
      * @return the corresponding Type instance (never {@code null}; unrecognized classes resolve to a
      *         generic {@link Object}-backed handler or a bean handler rather than failing)
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     static <T> Type<T> of(final Class<? extends T> cls) {
         return TypeFactory.getType(cls);
@@ -249,7 +249,7 @@ public interface Type<T> {
      * @param typeName the type name string; must not be {@code null} or empty
      * @return the corresponding Type instance (never {@code null}; unrecognized names resolve to a
      *         generic {@link Object}-backed handler rather than failing)
-     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty.
      */
     static <T> Type<T> of(final String typeName) {
         return TypeFactory.getType(typeName);
@@ -876,7 +876,7 @@ public interface Type<T> {
     /**
      * Checks if this is a primitive type (int, long, double, etc.).
      *
-     * @return {@code true} if this is a primitive type
+     * @return {@code true} if this is a primitive type, {@code false} otherwise
      */
     default boolean isPrimitive() {
         return false; // Default implementation, can be overridden by specific types
@@ -885,7 +885,7 @@ public interface Type<T> {
     /**
      * Checks if this is a primitive wrapper type (Integer, Long, Double, etc.).
      *
-     * @return {@code true} if this is a primitive wrapper type
+     * @return {@code true} if this is a primitive wrapper type, {@code false} otherwise
      */
     default boolean isPrimitiveWrapper() {
         return false; // Default implementation, can be overridden by specific types
@@ -894,7 +894,7 @@ public interface Type<T> {
     /**
      * Checks if this is a primitive list type (IntList, LongList, etc.).
      *
-     * @return {@code true} if this is a primitive list type
+     * @return {@code true} if this is a primitive list type, {@code false} otherwise
      */
     default boolean isPrimitiveList() {
         return false; // Default implementation, can be overridden by specific types
@@ -921,7 +921,7 @@ public interface Type<T> {
     /**
      * Checks if this is a number type (numeric primitive or wrapper).
      *
-     * @return {@code true} if this is a number type
+     * @return {@code true} if this is a number type, {@code false} otherwise
      */
     default boolean isNumber() {
         return false; // Default implementation, can be overridden by specific types
@@ -1049,7 +1049,7 @@ public interface Type<T> {
     /**
      * Checks if this type represents a byte array (byte[]).
      *
-     * @return {@code true} if this is a byte array type
+     * @return {@code true} if this is a byte array type, {@code false} otherwise
      */
     default boolean isPrimitiveByteArray() {
         return false; // Default implementation, can be overridden by specific types
@@ -1112,7 +1112,7 @@ public interface Type<T> {
     /**
      * Checks if this type represents a Bean (POJO with properties).
      *
-     * @return {@code true} if this is a Bean type
+     * @return {@code true} if this is a Bean type, {@code false} otherwise
      */
     default boolean isBean() {
         return false; // Default implementation, can be overridden by specific types
@@ -1224,7 +1224,7 @@ public interface Type<T> {
      * return {@code false}. The base class {@link AbstractType} no longer overrides this method,
      * so the interface default and the base-class behavior agree.</p>
      *
-     * @return {@code true} if this type is directly serializable to a string
+     * @return {@code true} if this type is directly serializable to a string, {@code false} otherwise
      */
     default boolean isSerializable() {
         return true; // Default implementation, can be overridden by specific types
@@ -1233,7 +1233,7 @@ public interface Type<T> {
     /**
      * Checks if this type represents optional or {@code nullable} values.
      *
-     * @return {@code true} if this is an optional or {@code nullable} type
+     * @return {@code true} if this is an optional or {@code nullable} type, {@code false} otherwise
      */
     default boolean isOptionalOrNullable() {
         return false; // Default implementation, can be overridden by specific types

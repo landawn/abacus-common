@@ -1774,6 +1774,29 @@ public class RowDatasetTest extends TestBase {
     }
 
     @Test
+    public void testDivideColumn_clearsReusableOutputBufferBetweenRows() {
+        // Pre-fix: a shared Object[] was reused without clearing, so slots not written on a later
+        // row leaked values from the previous row.
+        List<String> names = N.toList("raw");
+        List<List<Object>> cols = new ArrayList<>();
+        cols.add(new ArrayList<>(N.toList("a-b", "x")));
+        RowDataset ds = new RowDataset(names, cols);
+        ds.divideColumn("raw", Arrays.asList("left", "right"), (String val, Object[] output) -> {
+            if (val.contains("-")) {
+                String[] parts = val.split("-", 2);
+                output[0] = parts[0];
+                output[1] = parts[1];
+            } else {
+                output[0] = val; // deliberately leave output[1] unset
+            }
+        });
+        assertEquals("a", ds.get(0, 0));
+        assertEquals("b", ds.get(0, 1));
+        assertEquals("x", ds.get(1, 0));
+        assertNull(ds.get(1, 1), "unwritten output slot must not retain previous row value");
+    }
+
+    @Test
     public void testDivideColumnWithTuple2() {
         final RowDataset dataset = createThreeRowScoreDataset();
         dataset.addColumn("pair", Arrays.asList("X|Y", "A|B", "M|N"));

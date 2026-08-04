@@ -340,8 +340,8 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
-     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape (fewer than 4 hex digits, or
+     *         non-hex digits, after <code>&#92;u</code>).
      * @see #escapeJava(String)
      */
     public static String unescapeJava(final String input) {
@@ -365,8 +365,8 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
-     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape (fewer than 4 hex digits, or
+     *         non-hex digits, after <code>&#92;u</code>).
      * @see #escapeEcmaScript(String)
      * @see #unescapeJava(String)
      */
@@ -394,8 +394,8 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if the input contains a malformed Unicode escape
-     *         (fewer than 4 hex digits, or non-hex digits, after <code>&#92;u</code>)
+     * @throws IllegalArgumentException if the input contains a malformed Unicode escape (fewer than 4 hex digits, or
+     *         non-hex digits, after <code>&#92;u</code>).
      * @see #escapeJson(String)
      * @see #unescapeJava(String)
      */
@@ -487,7 +487,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
      * @see #escapeHtml4(String)
      */
     public static String unescapeHtml4(final String input) {
@@ -515,7 +515,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
      * @see #escapeHtml3(String)
      * @see #unescapeHtml4(String)
      */
@@ -621,7 +621,7 @@ public final class EscapeUtil {
      *
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
-     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point
+     * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
      */
@@ -795,7 +795,7 @@ public final class EscapeUtil {
          *
          * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
          * @param out the Writer to translate the text to; must not be {@code null}
-         * @throws IllegalArgumentException if {@code out} is {@code null}
+         * @throws IllegalArgumentException if {@code out} is {@code null}.
          * @throws IOException if and only if the Writer produces an IOException
          */
         public final void translate(final CharSequence input, final Writer out) throws IOException {
@@ -1137,8 +1137,8 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized unicode escape, or {@code 0} if no escape is found
-         * @throws IllegalArgumentException if a {@code \\u} prefix is found but is not followed by
-         *         four valid hex digits, or if the sequence ends prematurely
+         * @throws IllegalArgumentException if a {@code \\u} prefix is found but is not followed by four valid hex
+         *         digits, or if the sequence ends prematurely.
          * @throws IOException if writing translated output fails
          */
         @Override
@@ -1443,8 +1443,8 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized numeric entity, or {@code 0} if no entity is found
-         * @throws IllegalArgumentException if a numeric entity is missing its trailing {@code ;} and
-         *         this unescaper was constructed with {@link OPTION#errorIfNoSemiColon}
+         * @throws IllegalArgumentException if a numeric entity is missing its trailing {@code;} and this unescaper
+         *         was constructed with {@link OPTION#errorIfNoSemiColon}.
          * @throws IOException if writing translated output fails
          */
         @Override

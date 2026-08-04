@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts a variable number of char-valued arguments and produces a result.
+ * Represents a function that accepts a variable number of {@code char}-valued arguments and produces a result.
  * This is a functional interface designed to process char arrays of any length and return a value.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(char...)}.
@@ -75,7 +75,7 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default <V> CharNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {

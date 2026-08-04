@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts three char-valued arguments and produces a result.
+ * Represents a function that accepts three {@code char}-valued arguments and produces a result.
  * This is the three-arity specialization of {@link CharFunction}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(char, char, char)}.
@@ -36,8 +36,6 @@ import com.landawn.abacus.util.cs;
 public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given char arguments.
-     * This method takes three char values as input and produces a result of type R.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharTriFunction<String> concat = (c1, c2, c3) -> "" + c1 + c2 + c3;
@@ -73,7 +71,7 @@ public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, Runtim
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> CharTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

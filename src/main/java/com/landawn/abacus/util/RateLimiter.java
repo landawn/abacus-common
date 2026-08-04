@@ -60,7 +60,7 @@ import com.landawn.abacus.util.SmoothRateLimiter.SmoothWarmingUp;
  *
  * <p>As another example, imagine that we produce a stream of data, and we want to cap it at 5 kB per
  * second. This could be accomplished by requiring a permit per byte, and specifying a rate of 5000
- * permits per second: <pre>   {@code
+ * permits per second: <pre>{@code
  * RateLimiter rateLimiter = RateLimiter.create(5000.0);   // rate = 5000 permits per second
  * Consumer<byte[]> networkSender = bytes -> System.out.println("Sending " + bytes.length + " bytes");
  * byte[] packet = "payload".getBytes(StandardCharsets.UTF_8);
@@ -117,7 +117,7 @@ public abstract class RateLimiter {
      * @param permitsPerSecond the rate of the returned {@code RateLimiter}, measured in how many
      *     permits become available per second, must be positive and not NaN
      * @return a newly created {@code RateLimiter} with the specified rate
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN.
      */
     public static RateLimiter create(final double permitsPerSecond) throws IllegalArgumentException {
         /*
@@ -188,8 +188,8 @@ public abstract class RateLimiter {
      *     before reaching its stable (maximum) rate, must be non-negative
      * @param unit the time unit of the warmupPeriod argument, must not be null
      * @return a newly created {@code RateLimiter} with the specified rate and warmup period
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, or
-     *     {@code warmupPeriod} is negative
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, or {@code warmupPeriod}
+     *         is negative.
      * @throws NullPointerException if {@code unit} is {@code null}
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
@@ -275,7 +275,7 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @param permitsPerSecond the new stable rate of this {@code RateLimiter}, must be positive and not NaN
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN.
      * @see #getRate()
      * @see #create(double)
      */
@@ -407,7 +407,7 @@ public abstract class RateLimiter {
      *
      * @param permits the number of permits to acquire, must be positive
      * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
-     * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @throws IllegalArgumentException if the requested number of permits is negative or zero.
      * @see #acquire()
      * @see #tryAcquire()
      * @see #tryAcquire(int)
@@ -492,7 +492,7 @@ public abstract class RateLimiter {
      *
      * @param permits the number of permits to acquire, must be positive
      * @return {@code true} if the permits were acquired, {@code false} otherwise
-     * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @throws IllegalArgumentException if the requested number of permits is negative or zero.
      * @see #tryAcquire()
      * @see #tryAcquire(long, TimeUnit)
      * @see #tryAcquire(int, long, TimeUnit)
@@ -567,7 +567,7 @@ public abstract class RateLimiter {
      * @param timeout the maximum time to wait for the permits. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
-     * @throws IllegalArgumentException if the requested number of permits is negative or zero
+     * @throws IllegalArgumentException if the requested number of permits is negative or zero.
      * @throws NullPointerException if {@code unit} is {@code null}
      * @see #tryAcquire()
      * @see #tryAcquire(int)

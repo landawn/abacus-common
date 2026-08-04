@@ -239,7 +239,7 @@ public final class CodeGenerationUtil {
      *
      * @param entityClass the entity class that contributes bean property names; must not be {@code null}
      * @return generated Java source that declares the inner interface and constants
-     * @throws IllegalArgumentException if {@code entityClass} is {@code null}
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}.
      * @see #generatePropNameTableClass(Class, String)
      */
     @Beta
@@ -259,8 +259,8 @@ public final class CodeGenerationUtil {
      * @param entityClass the entity class that contributes bean property names; must not be {@code null}
      * @param propNameTableClassName interface name for generated constants; must be a valid Java identifier
      * @return generated Java source that declares the inner interface and constants
-     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or
-     *         {@code propNameTableClassName} is not a valid Java identifier
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or {@code propNameTableClassName} is
+     *         not a valid Java identifier.
      * @see #generatePropNameTableClass(Class, String, String)
      */
     @Beta
@@ -285,8 +285,8 @@ public final class CodeGenerationUtil {
      * @param propNameTableClassName interface name for generated constants; must be a valid Java identifier
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source that declares the inner interface and constants
-     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or
-     *         {@code propNameTableClassName} is not a valid Java identifier
+     * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or {@code propNameTableClassName} is
+     *         not a valid Java identifier.
      * @throws RuntimeException if writing the modified source file fails
      */
     @Beta
@@ -408,7 +408,7 @@ public final class CodeGenerationUtil {
      *
      * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
      * @return generated Java source for the standalone property-name table
-     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty.
      * @see #generatePropNameTableClasses(Collection, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses) {
@@ -427,7 +427,8 @@ public final class CodeGenerationUtil {
      * @param entityClasses entity classes that contribute bean property names; must not be {@code null} or empty
      * @param propNameTableClassName top-level interface name to generate; must be a valid Java identifier
      * @return generated Java source for the standalone property-name table
-     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or {@code propNameTableClassName} is not a valid Java identifier
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, or
+     *         {@code propNameTableClassName} is not a valid Java identifier.
      * @see #generatePropNameTableClasses(Collection, String, String, String)
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName) {
@@ -449,8 +450,8 @@ public final class CodeGenerationUtil {
      *        uses the first entity's package; otherwise it must be a valid dot-separated Java package name
      * @param srcDir source root directory; if {@code null} or empty, source is not written
      * @return generated Java source for the standalone property-name table
-     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, the class name is not a valid Java identifier,
-     *         or the package name is not a valid Java package name
+     * @throws IllegalArgumentException if {@code entityClasses} is {@code null} or empty, the class name is not a
+     *         valid Java identifier, or the package name is not a valid Java package name.
      * @throws RuntimeException if writing the generated file fails
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName,
@@ -486,11 +487,12 @@ public final class CodeGenerationUtil {
      * @param codeConfig full generation configuration; must not be {@code null} and must supply a
      *        non-empty {@code entityClasses} collection and a non-empty {@code className}
      * @return generated Java source for the property-name table class
-     * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses}
-     *         is {@code null} or empty, its class/package/converted property names are not valid Java names, or
-     *         generated interface/field names collide, {@code extendedInterfaces} contains a non-interface
-     *         or duplicate type, {@code generateClassPropNameList} is enabled while the entities have duplicate
-     *         simple class names, or no usable entity class remains after filtering out interfaces and Lombok builder classes
+     * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses} is
+     *         {@code null} or empty, its class/package/converted property names are not valid Java names, or
+     *         generated interface/field names collide, {@code extendedInterfaces} contains a non-interface or
+     *         duplicate type, {@code generateClassPropNameList} is enabled while the entities have duplicate simple
+     *         class names, or no usable entity class remains after filtering out interfaces and Lombok builder
+     *         classes.
      * @throws RuntimeException if writing to file fails when {@code srcDir} is configured
      */
     public static String generatePropNameTableClasses(final PropNameTableCodeConfig codeConfig) throws IllegalArgumentException {

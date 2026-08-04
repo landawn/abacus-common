@@ -124,7 +124,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     /**
      * Constructs an IteratorFloatStream from a FloatIterator with sorting and close handlers.
      * This is the primary constructor that all other constructors delegate to. The sorted flag
-     * allows optimization of operations like max(), kthLargest(), and distinct() when elements are
+     * allows optimization of operations like min(), max(), and distinct() when elements are
      * known to be in natural ascending order.
      *
      * <p><b>Usage Examples:</b></p>

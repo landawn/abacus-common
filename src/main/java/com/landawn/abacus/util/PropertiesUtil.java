@@ -1354,8 +1354,8 @@ public final class PropertiesUtil {
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the file to which the properties will be stored, encoded as UTF-8. The file is created if it does not already exist.
      * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
-     *         or if nested {@code Properties} instances contain a reference cycle
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
+     *         name, or if nested {@code Properties} instances contain a reference cycle.
      * @throws UncheckedIOException if an I/O error occurs while writing to the file
      * @see #storeToXml(Properties, String, boolean, OutputStream)
      * @see #storeToXml(Properties, String, boolean, Writer)
@@ -1405,8 +1405,8 @@ public final class PropertiesUtil {
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the OutputStream to which the properties will be stored, encoded as UTF-8. The stream is flushed but not closed.
      * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
-     *         or if nested {@code Properties} instances contain a reference cycle
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
+     *         name, or if nested {@code Properties} instances contain a reference cycle.
      * @throws UncheckedIOException if an I/O error occurs while writing to the stream
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(InputStream)
@@ -1445,8 +1445,8 @@ public final class PropertiesUtil {
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
      * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element name,
-     *         or if nested {@code Properties} instances contain a reference cycle
+     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
+     *         name, or if nested {@code Properties} instances contain a reference cycle.
      * @throws UncheckedIOException if an I/O error occurs while writing to the writer
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(Reader)
@@ -1628,8 +1628,9 @@ public final class PropertiesUtil {
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
-     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
+     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
+     *         name as an enclosing class.
      * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1660,8 +1661,9 @@ public final class PropertiesUtil {
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
-     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
+     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
+     *         name as an enclosing class.
      * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1701,8 +1703,9 @@ public final class PropertiesUtil {
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
-     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
+     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
+     *         name as an enclosing class.
      * @throws RuntimeException if XML parsing or file I/O fails
      */
     public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
@@ -1735,8 +1738,9 @@ public final class PropertiesUtil {
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class. If {@code null}, uses the normalized and capitalized root element name.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling property names are duplicated,
-     *         an unsupported type is declared, or a nested class would have the same name as an enclosing class
+     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
+     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
+     *         name as an enclosing class.
      * @throws RuntimeException if XML parsing or file I/O fails
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")

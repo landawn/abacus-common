@@ -884,4 +884,58 @@ public class AsyncExecutorTest extends TestBase {
         Assertions.assertTrue(executor.isTerminated());
     }
 
+    @Test
+    public void testExecute_finallyFailureDoesNotMaskCommandFailure() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(1, 1, 60L, TimeUnit.SECONDS);
+        try {
+            ContinuableFuture<Void> future = executor.execute(() -> {
+                throw new IllegalStateException("primary");
+            }, () -> {
+                throw new IllegalArgumentException("cleanup");
+            });
+
+            try {
+                future.get();
+                Assertions.fail("expected ExecutionException");
+            } catch (java.util.concurrent.ExecutionException e) {
+                Throwable cause = e.getCause();
+                Assertions.assertTrue(cause instanceof IllegalStateException, "primary command failure must surface, got: " + cause);
+                Assertions.assertEquals("primary", cause.getMessage());
+                boolean sawCleanup = false;
+                for (Throwable s : cause.getSuppressed()) {
+                    if (s instanceof IllegalArgumentException && "cleanup".equals(s.getMessage())) {
+                        sawCleanup = true;
+                    }
+                }
+                Assertions.assertTrue(sawCleanup, "cleanup failure should be suppressed on the primary exception");
+            }
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    public void testExecute_finallyFailureDoesNotMaskCommandError() throws Exception {
+        AsyncExecutor executor = new AsyncExecutor(1, 1, 60L, TimeUnit.SECONDS);
+        try {
+            final AssertionError primary = new AssertionError("primary");
+            ContinuableFuture<Void> future = executor.execute(() -> {
+                throw primary;
+            }, () -> {
+                throw new IllegalArgumentException("cleanup");
+            });
+
+            try {
+                future.get();
+                Assertions.fail("expected ExecutionException");
+            } catch (java.util.concurrent.ExecutionException e) {
+                Assertions.assertSame(primary, e.getCause());
+                Assertions.assertEquals(1, primary.getSuppressed().length);
+                Assertions.assertEquals("cleanup", primary.getSuppressed()[0].getMessage());
+            }
+        } finally {
+            executor.shutdown();
+        }
+    }
+
 }

@@ -543,7 +543,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param beanType the bean type to extract property type information from; may be {@code null} to clear the setting
      * @return this configuration instance for method chaining
-     * @throws IllegalArgumentException if the specified type is not a valid bean type
+     * @throws IllegalArgumentException if the specified type is not a valid bean type.
      */
     public C setValueTypesByBeanClass(final java.lang.reflect.Type beanType) throws IllegalArgumentException {
         if (beanType == null) {

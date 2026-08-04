@@ -87,7 +87,7 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      *
      * @param base64String the Base64-encoded string to decode; may be {@code null} or empty
      * @return the decoded byte array; an empty byte array if the input is {@code null} or empty
-     * @throws IllegalArgumentException if {@code base64String} contains characters outside the Base64 alphabet
+     * @throws IllegalArgumentException if {@code base64String} contains characters outside the Base64 alphabet.
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */

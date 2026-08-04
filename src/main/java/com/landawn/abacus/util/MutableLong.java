@@ -364,7 +364,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     }
 
     /**
-     * Adds the specified delta to the current value and then returns the new value.
+     * Adds the specified delta to the current value and then returns it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -456,7 +456,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //-----------------------------------------------------------------------
 
     /**
-     * Compares this MutableLong to another MutableLong numerically.
+     * Compares this MutableLong to another MutableLong in ascending order.
      * Returns a negative value if this value is less than the other, zero if equal,
      * or a positive value if this value is greater than the other.
      *
@@ -523,7 +523,7 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
     //-----------------------------------------------------------------------
 
     /**
-     * Returns the string representation of this MutableLong's value.
+     * Returns the String representation of this MutableLong's value.
      * The returned string is produced by calling {@link N#stringOf(long)} on the wrapped value.
      *
      * <p><b>Usage Examples:</b></p>

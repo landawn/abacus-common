@@ -80,19 +80,28 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Converts an object to an {@link OffsetDateTime}.
-     * If the object is a Number, it's treated as epoch milliseconds.
-     * Otherwise, the object is converted to string and parsed.
+     * An {@code OffsetDateTime} is returned unchanged. A {@link Number}, {@link java.util.Date}, or
+     * {@link java.util.Calendar} is converted from epoch milliseconds in the default zone. Any
+     * other non-null object is converted to a string and parsed by {@link #valueOf(String)}.
      *
      * @param obj the object to convert
      * @return the OffsetDateTime value, or {@code null} if the input is null
      */
     @Override
     public OffsetDateTime valueOf(final Object obj) {
-        if (obj instanceof Number) {
+        if (obj == null) {
+            return null;
+        } else if (obj instanceof OffsetDateTime offsetDateTime) {
+            return offsetDateTime;
+        } else if (obj instanceof Number) {
             return OffsetDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Date date) {
+            return OffsetDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar cal) {
+            return OffsetDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), DEFAULT_ZONE_ID);
         }
 
-        return obj == null ? null : valueOf(N.stringOf(obj));
+        return valueOf(N.stringOf(obj));
     }
 
     /**

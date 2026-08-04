@@ -112,7 +112,7 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ByteBiPredicate and(final ByteBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -137,7 +137,7 @@ public interface ByteBiPredicate extends Throwables.ByteBiPredicate<RuntimeExcep
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ByteBiPredicate or(final ByteBiPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

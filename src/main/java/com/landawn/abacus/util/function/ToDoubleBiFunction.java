@@ -19,10 +19,6 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that accepts two arguments and produces a double-valued result.
  * This is the double-producing primitive specialization for {@link java.util.function.BiFunction}.
  *
- * <p>This interface extends both the Throwables.ToDoubleBiFunction and the standard Java
- * ToDoubleBiFunction, providing compatibility with both the abacus-common framework's error handling
- * mechanisms and the standard Java functional interfaces.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>

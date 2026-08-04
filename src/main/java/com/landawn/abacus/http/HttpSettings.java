@@ -170,7 +170,7 @@ public final class HttpSettings {
      *
      * @param connectTimeout the connection timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative
+     * @throws IllegalArgumentException if {@code connectTimeout} is negative.
      */
     public HttpSettings setConnectTimeout(final long connectTimeout) throws IllegalArgumentException {
         N.checkArgNotNegative(connectTimeout, cs.connectTimeout);
@@ -215,7 +215,7 @@ public final class HttpSettings {
      *
      * @param readTimeout the read timeout in milliseconds (0 = not set; the client-level default applies)
      * @return this HttpSettings instance for method chaining
-     * @throws IllegalArgumentException if {@code readTimeout} is negative
+     * @throws IllegalArgumentException if {@code readTimeout} is negative.
      */
     public HttpSettings setReadTimeout(final long readTimeout) throws IllegalArgumentException {
         N.checkArgNotNegative(readTimeout, cs.readTimeout);
@@ -616,14 +616,14 @@ public final class HttpSettings {
 
     /**
      * Sets the Content-Encoding header.
-     * Common content encodings include:
-     * <ul>
-     *   <li>gzip</li>
-     *   <li>deflate</li>
-     *   <li>br (Brotli)</li>
-     *   <li>lz4</li>
-     *   <li>snappy</li>
-     * </ul>
+     *
+     * <p>This method only writes the header; it does not validate that the value is one the client can
+     * encode or decode. When the request/response path resolves a {@link ContentFormat} from headers,
+     * abacus auto-wraps streams for {@code gzip}, {@code lz4}, and {@code snappy} (both directions),
+     * and for {@code br} (Brotli) on the <em>response</em> path only. A Brotli request body fails at
+     * wrap time because there is no bundled encoder. Other values such as {@code deflate} are sent as
+     * raw header text and are not auto-wrapped by {@link HttpUtil#wrapOutputStream} /
+     * {@link HttpUtil#wrapInputStream}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -632,6 +632,9 @@ public final class HttpSettings {
      *
      * @param contentEncoding the Content-Encoding header value
      * @return this HttpSettings instance for method chaining
+     * @see ContentFormat
+     * @see HttpUtil#wrapOutputStream(java.io.OutputStream, ContentFormat)
+     * @see HttpUtil#wrapInputStream(java.io.InputStream, ContentFormat)
      */
     public HttpSettings setContentEncoding(final String contentEncoding) {
         header(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
@@ -672,7 +675,7 @@ public final class HttpSettings {
      * @param name the header name (must not be {@code null})
      * @param value the header value
      * @return this HttpSettings instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @see HttpHeaders
      */
     public HttpSettings header(final String name, final Object value) {
@@ -698,7 +701,7 @@ public final class HttpSettings {
      * @param name2 the second header name
      * @param value2 the second header value
      * @return this HttpSettings instance for method chaining
-     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}
+     * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}.
      * @see HttpHeaders
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) {
@@ -730,7 +733,7 @@ public final class HttpSettings {
      * @param name3 the third header name
      * @param value3 the third header value
      * @return this HttpSettings instance for method chaining
-     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}
+     * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}.
      * @see HttpHeaders
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
@@ -765,7 +768,7 @@ public final class HttpSettings {
      * @param headers a map containing header names and values to merge in; must not be {@code null}
      * @return this HttpSettings instance for method chaining
      * @throws NullPointerException if {@code headers} is {@code null}
-     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}
+     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}.
      * @see HttpHeaders
      * @see #setHeaders(HttpHeaders)
      */

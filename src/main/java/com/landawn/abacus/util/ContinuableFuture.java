@@ -2670,6 +2670,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param delay the delay duration before the next action is executed; values &lt;= 0 mean no delay.
      * @param unit the time unit of the delay parameter; must not be {@code null} when {@code delay > 0}.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
+     * @throws IllegalArgumentException if {@code delay > 0} and {@code unit} is {@code null}.
      */
     @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
@@ -2764,13 +2765,25 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public boolean isDone() {
-                final boolean done = future.isDone();
-
-                if (done) {
-                    startDelayIfNeeded();
+                // The delay stage is not complete until the post-completion delay has elapsed.
+                // Returning future.isDone() alone would make get()/getNow() block while isDone()
+                // was already true, which violates the Future contract.
+                if (!future.isDone()) {
+                    return false;
                 }
 
-                return done;
+                startDelayIfNeeded();
+
+                if (isDelayed) {
+                    return true;
+                }
+
+                if (System.nanoTime() - delayStartTimeInNanos >= delayInNanos) {
+                    isDelayed = true;
+                    return true;
+                }
+
+                return false;
             }
 
             @Override

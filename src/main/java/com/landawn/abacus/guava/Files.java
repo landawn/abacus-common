@@ -1230,9 +1230,9 @@ public abstract class Files { //NOSONAR
      * directory, no exception will be thrown and the returned stream will contain a single
      * element: that path.
      *
-     * <p>{@link DirectoryIteratorException} may be thrown when consuming the stream
-     * created by this traverser if an {@link IOException} is thrown by a call to {@link
-     * #listFiles(Path)}.
+     * <p>{@link DirectoryIteratorException} may be thrown while consuming the stream
+     * created by this traverser if an {@link IOException} occurs while reading a
+     * directory's contents.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

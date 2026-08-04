@@ -64,7 +64,7 @@ public interface BooleanTriConsumer extends Throwables.BooleanTriConsumer<Runtim
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code BooleanTriConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default BooleanTriConsumer andThen(final BooleanTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

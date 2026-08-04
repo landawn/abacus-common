@@ -22,11 +22,6 @@ import com.landawn.abacus.util.cs;
  * an {@code int}-valued result. This is the primitive type specialization of
  * {@link java.util.function.UnaryOperator} for {@code int}.
  *
- * <p>This interface extends both {@link Throwables.IntUnaryOperator} with
- * {@link RuntimeException} and {@link java.util.function.IntUnaryOperator},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #applyAsInt(int)}.
  *
@@ -87,7 +82,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.IntUnaryOperator)
      */
     @Override
@@ -118,7 +113,7 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(java.util.function.IntUnaryOperator)
      */
     @Override

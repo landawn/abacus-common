@@ -223,7 +223,8 @@ import java.math.BigInteger;
  * <p><b>Common Anti-Patterns to Avoid:</b>
  * <ul>
  *   <li>Converting to {@code double} for arithmetic and back to {@code Fraction} (loses precision)</li>
- *   <li>Using {@code new Fraction()} constructor directly instead of static factory methods</li>
+ *   <li>Attempting to use the {@code new Fraction(...)} constructor directly instead of the static
+ *   {@code of(...)} factory methods (the constructor is private)</li>
  *   <li>Ignoring potential overflow in arithmetic operations with large values</li>
  *   <li>Creating multiple fraction instances for the same logical value</li>
  *   <li>Using {@code Fraction} for very large numbers without considering integer limits</li>
@@ -666,7 +667,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param str the string to parse, must not be {@code null}
      * @return a new fraction instance
-     * @throws IllegalArgumentException if {@code str} is {@code null}
+     * @throws IllegalArgumentException if {@code str} is {@code null}.
      * @throws NumberFormatException if the string is not in a recognized format, or if
      *         an integer component is out of range, or if the decimal form cannot be parsed
      * @throws ArithmeticException if the parsed fraction is invalid (e.g. a zero denominator or a
@@ -1365,7 +1366,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param fraction the fraction to add to this fraction (must not be {@code null})
      * @return the sum; it is in reduced form when both operands are in reduced form
-     * @throws IllegalArgumentException if the fraction parameter is {@code null}
+     * @throws IllegalArgumentException if the fraction parameter is {@code null}.
      * @throws ArithmeticException if the calculation results in integer overflow
      */
     public Fraction add(final Fraction fraction) {
@@ -1397,7 +1398,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param fraction the fraction to subtract from this fraction (must not be {@code null})
      * @return the difference; it is in reduced form when both operands are in reduced form
-     * @throws IllegalArgumentException if the fraction parameter is {@code null}
+     * @throws IllegalArgumentException if the fraction parameter is {@code null}.
      * @throws ArithmeticException if the calculation results in integer overflow
      */
     public Fraction subtract(final Fraction fraction) {
@@ -1410,7 +1411,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param fraction the fraction to add or subtract, must not be {@code null}
      * @param isAdd {@code true} to add, {@code false} to subtract
      * @return a {@code Fraction} instance with the resulting values
-     * @throws IllegalArgumentException if {@code fraction} is {@code null}
+     * @throws IllegalArgumentException if {@code fraction} is {@code null}.
      * @throws ArithmeticException if the resulting numerator or denominator cannot be represented in an {@code int}
      */
     private Fraction addSub(final Fraction fraction, final boolean isAdd) {
@@ -1477,7 +1478,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param fraction the fraction to multiply by (must not be {@code null})
      * @return a new {@code Fraction} instance with the product in reduced form
-     * @throws IllegalArgumentException if the fraction parameter is {@code null}
+     * @throws IllegalArgumentException if the fraction parameter is {@code null}.
      * @throws ArithmeticException if the calculation results in integer overflow
      */
     public Fraction multipliedBy(final Fraction fraction) {
@@ -1515,7 +1516,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * @param fraction the fraction to divide by (must not be {@code null} or zero)
      * @return a new {@code Fraction} instance with the quotient
-     * @throws IllegalArgumentException if the fraction parameter is {@code null}
+     * @throws IllegalArgumentException if the fraction parameter is {@code null}.
      * @throws ArithmeticException if the divisor fraction is zero or if the
      *         calculation results in integer overflow
      */

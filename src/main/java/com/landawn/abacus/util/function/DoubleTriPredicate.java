@@ -23,9 +23,6 @@ import com.landawn.abacus.util.cs;
  *
  * <p>This is a functional interface whose functional method is {@link #test(double, double, double)}.</p>
  *
- * <p>This interface extends {@link Throwables.DoubleTriPredicate} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
- *
  * <p>The interface provides two predefined constants:</p>
  * <ul>
  *   <li>{@link #ALWAYS_TRUE} - A predicate that always returns {@code true}</li>
@@ -110,7 +107,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default DoubleTriPredicate and(final DoubleTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -137,7 +134,7 @@ public interface DoubleTriPredicate extends Throwables.DoubleTriPredicate<Runtim
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default DoubleTriPredicate or(final DoubleTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

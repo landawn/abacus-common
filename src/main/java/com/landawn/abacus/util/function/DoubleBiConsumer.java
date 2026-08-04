@@ -68,7 +68,7 @@ public interface DoubleBiConsumer extends Throwables.DoubleBiConsumer<RuntimeExc
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleBiConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default DoubleBiConsumer andThen(final DoubleBiConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

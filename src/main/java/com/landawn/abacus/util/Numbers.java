@@ -65,7 +65,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <li><b>Number Validation:</b> Range checking, finite validation, mathematical integer detection</li>
  *   <li><b>Type Conversions:</b> Safe conversions between numeric types with overflow detection</li>
  *   <li><b>BigInteger/BigDecimal Support:</b> Arbitrary precision arithmetic operations</li>
- *   <li><b>Hyperbolic Functions:</b> asinh, acosh, atanh mathematical functions</li>
+ *   <li><b>Inverse Hyperbolic Functions:</b> asinh, acosh, atanh (inverse hyperbolic sine, cosine, and tangent)</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
  * </ul>
  *
@@ -76,7 +76,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <li><b>Comparison Operations:</b> fuzzy equality, tolerance-based comparisons</li>
  *   <li><b>Validation Operations:</b> finite checking, mathematical integer detection</li>
  *   <li><b>Conversion Operations:</b> safe type conversions with overflow handling</li>
- *   <li><b>Hyperbolic Functions:</b> inverse hyperbolic sine, cosine, and tangent</li>
+ *   <li><b>Inverse Hyperbolic Functions:</b> inverse hyperbolic sine, cosine, and tangent</li>
  *   <li><b>Statistical Operations:</b> mean calculations for arrays and varargs</li>
  *   <li><b>Precision Arithmetic:</b> arbitrary precision operations with BigInteger/BigDecimal</li>
  * </ul>
@@ -150,7 +150,7 @@ import com.landawn.abacus.util.Strings.StrUtil;
  *   <li><b>Factorial:</b> {@code Numbers.factorialToLong()}, {@code Numbers.factorialToDouble()}, {@code Numbers.factorialToBigInteger()}</li>
  *   <li><b>Binomial:</b> {@code Numbers.binomial()}, {@code Numbers.binomialToLong()}, {@code Numbers.binomialToBigInteger()}</li>
  *   <li><b>Mean:</b> {@code Numbers.mean()} for various numeric types and arrays</li>
- *   <li><b>Hyperbolic:</b> {@code Numbers.asinh()}, {@code Numbers.acosh()}, {@code Numbers.atanh()}</li>
+ *   <li><b>Inverse Hyperbolic:</b> {@code Numbers.asinh()}, {@code Numbers.acosh()}, {@code Numbers.atanh()}</li>
  * </ul>
  *
  * <p><b>Comparison and Validation:</b>
@@ -1281,7 +1281,7 @@ public final class Numbers {
      * @param x the int value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the int value formatted according to the provided decimal format
-     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(double, String)
      * @see #format(Integer, String)
      * @see java.text.DecimalFormat#format(long)
@@ -1316,7 +1316,7 @@ public final class Numbers {
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the Integer value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}
-     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(int, String)
      * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(long)
@@ -1352,7 +1352,7 @@ public final class Numbers {
      * @param x the long value to be formatted
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the long value formatted according to the provided decimal format
-     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(double, String)
      * @see #format(Long, String)
      * @see java.text.DecimalFormat#format(long)
@@ -1387,7 +1387,7 @@ public final class Numbers {
      * @param decimalFormat the decimal format pattern to be used for formatting (must not be null)
      * @return a string representation of the Long value formatted according to the provided decimal format,
      *         or {@code null} if {@code x} is {@code null}
-     * @throws IllegalArgumentException if the decimalFormat is {@code null}
+     * @throws IllegalArgumentException if the decimalFormat is {@code null}.
      * @see #format(long, String)
      * @see #format(Integer, String)
      * @see java.text.DecimalFormat#format(long)
@@ -3320,7 +3320,7 @@ public final class Numbers {
      *
      * @param value the {@code String} to convert, may be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
-     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number
+     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number.
      */
     public static BigDecimal toScaledBigDecimal(final String value) {
         return toScaledBigDecimal(value, INTEGER_TWO, RoundingMode.HALF_EVEN);
@@ -3344,7 +3344,7 @@ public final class Numbers {
      * @param roundingMode the rounding mode to use; must not be {@code null}.
      * @return the scaled, with appropriate rounding, {@code BigDecimal}.
      * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
-     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number
+     * @throws NumberFormatException if {@code value} is empty/blank or not a valid number.
      */
     public static BigDecimal toScaledBigDecimal(final String value, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException {
         N.checkArgNotNull(roundingMode);
@@ -3440,7 +3440,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid integer
      * @see #isCreatable(String)
      * @see Integer#decode(String)
-     * @see StrUtil#createInteger(String)
+     * @see StrUtil#tryParseInteger(String)
      */
     @MayReturnNull
     public static Integer createInteger(final String str) throws NumberFormatException {
@@ -3515,7 +3515,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid long
      * @see #isCreatable(String)
      * @see Long#decode(String)
-     * @see StrUtil#createLong(String)
+     * @see StrUtil#tryParseLong(String)
      */
     @MayReturnNull
     public static Long createLong(final String str) throws NumberFormatException {
@@ -3591,7 +3591,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid float
      * @see #isCreatable(String)
      * @see Float#valueOf(String)
-     * @see StrUtil#createFloat(String)
+     * @see StrUtil#tryParseFloat(String)
      */
     @MayReturnNull
     public static Float createFloat(final String str) throws NumberFormatException {
@@ -3657,7 +3657,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or cannot be parsed as a valid double
      * @see #isCreatable(String)
      * @see Double#valueOf(String)
-     * @see StrUtil#createDouble(String)
+     * @see StrUtil#tryParseDouble(String)
      */
     @MayReturnNull
     public static Double createDouble(final String str) throws NumberFormatException {
@@ -3731,7 +3731,7 @@ public final class Numbers {
      * @see #isCreatable(String)
      * @see BigInteger#BigInteger(String, int)
      * @see Long#decode(String)
-     * @see StrUtil#createBigInteger(String)
+     * @see StrUtil#tryParseBigInteger(String)
      */
     @MayReturnNull
     public static BigInteger createBigInteger(final String str) throws NumberFormatException {
@@ -3739,7 +3739,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForisCreatable(str)) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigInteger.");
         }
 
@@ -3836,7 +3836,7 @@ public final class Numbers {
      * @throws NumberFormatException if the string is empty or not a valid BigDecimal representation
      * @see #isCreatable(String)
      * @see BigDecimal#BigDecimal(String)
-     * @see StrUtil#createBigDecimal(String)
+     * @see StrUtil#tryParseBigDecimal(String)
      */
     @MayReturnNull
     public static BigDecimal createBigDecimal(final String str) throws NumberFormatException {
@@ -3845,7 +3845,7 @@ public final class Numbers {
         }
 
         // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
-        if (!quickCheckForisCreatable(str)) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid BigDecimal.");
         }
 
@@ -3853,7 +3853,7 @@ public final class Numbers {
     }
 
     /**
-     * Converts a {@code String} to a java.lang.Number.
+     * Converts a {@code String} to a {@code Number}.
      *
      * <p>If the string starts with {@code 0x} or {@code -0x} (lower or upper case)
      * or {@code #} or {@code -#}, it will be interpreted as a hexadecimal
@@ -3953,7 +3953,7 @@ public final class Numbers {
      * @see #createBigInteger(String)
      * @see #createBigDecimal(String)
      * @see Long#decode(String)
-     * @see StrUtil#createNumber(String)
+     * @see StrUtil#tryParseNumber(String)
      */
     @SuppressFBWarnings({ "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT" })
     @MayReturnNull
@@ -3962,7 +3962,7 @@ public final class Numbers {
             return null;
         }
 
-        if (!quickCheckForisCreatable(str)) {
+        if (!quickCheckForIsCreatable(str)) {
             throw new NumberFormatException(str + " is not a valid number.");
         }
 
@@ -4356,7 +4356,7 @@ public final class Numbers {
      * @param str the string to pre-check; may be {@code null}
      * @return {@code false} if {@code str} is definitely not numeric, {@code true} if full parsing is needed
      */
-    static boolean quickCheckForisCreatable(final String str) {
+    static boolean quickCheckForIsCreatable(final String str) {
         if (Strings.isEmpty(str)) {
             return false;
         }
@@ -4451,7 +4451,7 @@ public final class Numbers {
      *
      * <p>The {@link Strings} class provides a parallel family of string-number predicates operating from the
      * {@code Strings} side, each with a Unicode-aware and an ASCII-only flavor: {@link Strings#isNumeric(CharSequence)}
-     * (digit characters only), {@link Strings#isInteger(String)} (optional sign followed by digits) and
+     * (digit characters only), {@link Strings#isAsciiInteger(String)} (optional sign followed by digits) and
      * {@link Strings#isAsciiNumber(String)} (a numeric literal with decimal point and exponent). See those methods for
      * a side-by-side comparison table.</p>
      *
@@ -4461,11 +4461,11 @@ public final class Numbers {
      * @see #isDigits(String)
      * @see #createNumber(String)
      * @see Strings#isNumeric(CharSequence)
-     * @see Strings#isInteger(String)
+     * @see Strings#isAsciiInteger(String)
      * @see Strings#isAsciiNumber(String)
      */
     public static boolean isCreatable(final String str) {
-        if (!quickCheckForisCreatable(str)) {
+        if (!quickCheckForIsCreatable(str)) {
             return false;
         }
 
@@ -4672,7 +4672,7 @@ public final class Numbers {
      *
      * <p>The {@link Strings} class provides a parallel family of string-number predicates operating from the
      * {@code Strings} side, each with a Unicode-aware and an ASCII-only flavor: {@link Strings#isNumeric(CharSequence)}
-     * (digit characters only), {@link Strings#isInteger(String)} (optional sign followed by digits) and
+     * (digit characters only), {@link Strings#isAsciiInteger(String)} (optional sign followed by digits) and
      * {@link Strings#isAsciiNumber(String)} (a numeric literal with decimal point and exponent). See those methods for
      * a side-by-side comparison table.</p>
      *
@@ -4681,7 +4681,6 @@ public final class Numbers {
      * @see #isCreatable(String)
      * @see #isDigits(String)
      * @see Strings#isNumeric(CharSequence)
-     * @see Strings#isInteger(String)
      * @see Strings#isAsciiNumber(String)
      * @see Strings#isAsciiInteger(String)
      */
@@ -4750,7 +4749,7 @@ public final class Numbers {
      *
      * @param n the number to test for primality; must be &gt;= 0
      * @return {@code true} if n is prime, {@code false} otherwise (0 and 1 return {@code false})
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #isPrime(long)
      */
     public static boolean isPrime(final int n) {
@@ -4779,7 +4778,7 @@ public final class Numbers {
      *
      * @param n the number to test for primality; must be &gt;= 0
      * @return {@code true} if n is prime, {@code false} otherwise (0 and 1 return {@code false})
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #isPrime(int)
      * @see BigInteger#isProbablePrime(int)
      */
@@ -4963,6 +4962,9 @@ public final class Numbers {
      *
      * @param x the double value to check
      * @return {@code true} if x is a power of two, {@code false} otherwise
+     * @see #isPowerOfTwo(int)
+     * @see #isPowerOfTwo(long)
+     * @see #isPowerOfTwo(BigInteger)
      */
     public static boolean isPowerOfTwo(final double x) {
         return x > 0.0 && isFinite(x) && isPowerOfTwo(getSignificand(x));
@@ -4998,7 +5000,7 @@ public final class Numbers {
      *
      * @param x the value to check
      * @return {@code true} if x is a power of two, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code x} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null}.
      * @see #isPowerOfTwo(int)
      * @see #isPowerOfTwo(long)
      * @see #isPowerOfTwo(double)
@@ -5050,7 +5052,7 @@ public final class Numbers {
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(long, RoundingMode)
@@ -5107,7 +5109,7 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of x, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -5204,8 +5206,8 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive and finite
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded to an int
-     * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is
-     *     infinite, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x <= 0.0}, {@code x} is NaN, or {@code x} is infinite, or if
+     *         {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -5277,7 +5279,8 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be {@code non-null} and positive
      * @param mode the rounding mode to apply
      * @return the base-2 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is
+     *         {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of two
      * @see #log2(int, RoundingMode)
@@ -5340,7 +5343,7 @@ public final class Numbers {
      * @param x the integer value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(long, RoundingMode)
@@ -5406,7 +5409,7 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x <= 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(int, RoundingMode)
@@ -5507,7 +5510,8 @@ public final class Numbers {
      * @param x the value to compute the logarithm of, must be {@code non-null} and positive
      * @param mode the rounding mode to apply
      * @return the base-10 logarithm of the specified value, rounded according to the specified rounding mode
-     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null} or {@code <= 0}, or if {@code mode} is
+     *         {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
      *     is not a power of ten
      * @see #log10(int, RoundingMode)
@@ -5603,9 +5607,9 @@ public final class Numbers {
      *
      * <p>This method computes integer exponentiation using an efficient O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
-     * {@code true} result, following standard Java overflow semantics (similar to multiplication overflow).
+     * {@code true} result, following standard Java overflow semantics (similar to multiplication overflow).</p>
      *
-     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
+     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5623,7 +5627,7 @@ public final class Numbers {
      * @param b the base integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @see #pow(long, int)
      * @see #powExact(int, int)
      * @see #saturatedPow(int, int)
@@ -5668,9 +5672,9 @@ public final class Numbers {
      * <p>This method computes long integer exponentiation using an efficient O(log k) algorithm.
      * If the result overflows, the returned value will be equal to the low-order bits of the
      * {@code true} result, specifically {@code BigInteger.valueOf(b).pow(k).longValue()}, following
-     * standard Java overflow semantics.
+     * standard Java overflow semantics.</p>
      *
-     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).
+     * <p>Special cases are optimized for common bases (0, 1, -1, 2, -2).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5688,7 +5692,7 @@ public final class Numbers {
      * @param b the base long integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power; if overflow occurs, returns the low-order bits
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @see #pow(int, int)
      * @see #powExact(long, int)
      * @see #saturatedPow(long, int)
@@ -5743,7 +5747,7 @@ public final class Numbers {
      *
      * @param x the value to compute the ceiling power of two for, must be positive
      * @return the smallest power of two greater than or equal to x
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      * @throws ArithmeticException if the next-higher power of two is not representable as an
      *         {@code int}, i.e., when {@code x > 2^30}
      * @see #ceilingPowerOfTwo(long)
@@ -5773,7 +5777,7 @@ public final class Numbers {
      *
      * @param x the value to compute the ceiling power of two for, must be positive
      * @return the smallest power of two greater than or equal to x
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      * @throws ArithmeticException if the next-higher power of two is not representable as a
      *         {@code long}, i.e., when {@code x > 2^62}
      * @see #ceilingPowerOfTwo(int)
@@ -5804,7 +5808,7 @@ public final class Numbers {
      *
      * @param x the BigInteger value (must be positive)
      * @return the smallest power of two greater than or equal to x
-     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}
+     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}.
      * @see #ceilingPowerOfTwo(int)
      * @see #ceilingPowerOfTwo(long)
      * @see #floorPowerOfTwo(BigInteger)
@@ -5827,7 +5831,7 @@ public final class Numbers {
      *
      * @param x the value to compute the floor power of two for, must be positive
      * @return the largest power of two less than or equal to x
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      * @see #floorPowerOfTwo(long)
      * @see #floorPowerOfTwo(BigInteger)
      * @see #ceilingPowerOfTwo(int)
@@ -5852,7 +5856,7 @@ public final class Numbers {
      *
      * @param x the value to compute the floor power of two for, must be positive
      * @return the largest power of two less than or equal to x
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      * @see #floorPowerOfTwo(int)
      * @see #floorPowerOfTwo(BigInteger)
      * @see #ceilingPowerOfTwo(long)
@@ -5881,7 +5885,7 @@ public final class Numbers {
      *
      * @param x the BigInteger value (must be positive)
      * @return the largest power of two less than or equal to x
-     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}
+     * @throws IllegalArgumentException if x is not positive, or if {@code x} is {@code null}.
      * @see #floorPowerOfTwo(int)
      * @see #floorPowerOfTwo(long)
      * @see #ceilingPowerOfTwo(BigInteger)
@@ -5911,7 +5915,7 @@ public final class Numbers {
      * @param x the value to compute the square root of; must be non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see #sqrt(long, RoundingMode)
@@ -5982,7 +5986,7 @@ public final class Numbers {
      * @param x the value to compute the square root of; must be non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x < 0}, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see #sqrt(int, RoundingMode)
@@ -6079,7 +6083,7 @@ public final class Numbers {
      * @param x the value to compute the square root of; must be {@code non-null} and non-negative
      * @param mode the rounding mode to apply
      * @return the integer square root of {@code x}, rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code x} is {@code null} or negative, or if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code x} is {@code null} or negative, or if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
      *         {@code x} is not a perfect square
      * @see RoundingMode
@@ -6183,7 +6187,7 @@ public final class Numbers {
      * Numbers.divide(-7, 3, RoundingMode.FLOOR);        // returns -3  (rounds toward negative infinity)
      * Numbers.divide(7, 3, RoundingMode.CEILING);       // returns 3   (rounds toward positive infinity)
      * Numbers.divide(7, 2, RoundingMode.HALF_UP);       // returns 4   (rounds to nearest, ties away from zero)
-     * Numbers.divide(8, 3, RoundingMode.HALF_EVEN);     // returns 3   (rounds to nearest, ties to even)
+     * Numbers.divide(9, 2, RoundingMode.HALF_EVEN);     // returns 4   (rounds to nearest, ties to even)
      * Numbers.divide(9, 3, RoundingMode.UNNECESSARY);   // returns 3   (exact division required)
      * }</pre>
      *
@@ -6191,7 +6195,7 @@ public final class Numbers {
      * @param q the divisor
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code q == 0}; if {@code p == Integer.MIN_VALUE && q == -1}
      *         (the quotient 2^31 overflows an int); or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
@@ -6274,7 +6278,7 @@ public final class Numbers {
      * Numbers.divide(-7L, 3L, RoundingMode.FLOOR);        // returns -3L  (rounds toward negative infinity)
      * Numbers.divide(7L, 3L, RoundingMode.CEILING);       // returns 3L   (rounds toward positive infinity)
      * Numbers.divide(7L, 2L, RoundingMode.HALF_UP);       // returns 4L   (rounds to nearest, ties away from zero)
-     * Numbers.divide(8L, 3L, RoundingMode.HALF_EVEN);     // returns 3L   (rounds to nearest, ties to even)
+     * Numbers.divide(9L, 2L, RoundingMode.HALF_EVEN);     // returns 4L   (rounds to nearest, ties to even)
      * Numbers.divide(9L, 3L, RoundingMode.UNNECESSARY);   // returns 3L   (exact division required)
      * }</pre>
      *
@@ -6282,7 +6286,7 @@ public final class Numbers {
      * @param q the divisor
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code q == 0}; if {@code p == Long.MIN_VALUE && q == -1}
      *         (the quotient 2^63 overflows a long); or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
@@ -6370,7 +6374,7 @@ public final class Numbers {
      * @param q the divisor
      * @param mode the rounding mode to apply
      * @return the result of {@code p / q} rounded according to the specified mode as a BigInteger
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @throws NullPointerException if {@code p} or {@code q} is {@code null}
      * @throws ArithmeticException if {@code q} is zero, or if {@code mode == UNNECESSARY} and {@code p}
      *         is not an integer multiple of {@code q}
@@ -6749,7 +6753,7 @@ public final class Numbers {
      * @param a the first value; must not be {@code null}
      * @param b the second value; must not be {@code null}
      * @return the greatest common divisor of the absolute values of {@code a} and {@code b}
-     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}
+     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}.
      * @see #gcd(int, int)
      * @see #gcd(long, long)
      * @see #lcm(BigInteger, BigInteger)
@@ -6782,7 +6786,7 @@ public final class Numbers {
      * @param b the second value; must not be {@code null}
      * @return the least common multiple of the absolute values of {@code a} and {@code b};
      *         returns {@code 0} if either is zero
-     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}
+     * @throws IllegalArgumentException if {@code a} or {@code b} is {@code null}.
      * @see #lcm(int, int)
      * @see #lcm(long, long)
      * @see #gcd(BigInteger, BigInteger)
@@ -6997,7 +7001,7 @@ public final class Numbers {
      * @param b the base integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code int} arithmetic
      * @see #pow(int, int)
      * @see #saturatedPow(int, int)
@@ -7064,7 +7068,7 @@ public final class Numbers {
      * @param b the base long integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed {@code long} arithmetic
      * @see #pow(long, int)
      * @see #saturatedPow(long, int)
@@ -7324,7 +7328,7 @@ public final class Numbers {
      * @param b the base integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power, or the appropriate bound if overflow would occur
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @see #pow(int, int)
      * @see #powExact(int, int)
      * @see #saturatedPow(long, int)
@@ -7400,7 +7404,7 @@ public final class Numbers {
      * @param b the base long integer
      * @param k the exponent; must be non-negative
      * @return {@code b} raised to the {@code k}th power, or the appropriate bound if overflow would occur
-     * @throws IllegalArgumentException if {@code k < 0}
+     * @throws IllegalArgumentException if {@code k < 0}.
      * @see #pow(long, int)
      * @see #powExact(long, int)
      * @see #saturatedPow(int, int)
@@ -7507,7 +7511,7 @@ public final class Numbers {
      * @param min the lower bound (inclusive)
      * @param max the upper bound (inclusive)
      * @return {@code value} constrained to {@code [min, max]}
-     * @throws IllegalArgumentException if {@code min > max}
+     * @throws IllegalArgumentException if {@code min > max}.
      * @see #clamp(long, long, long)
      * @see #clamp(float, float, float)
      * @see #clamp(double, double, double)
@@ -7535,7 +7539,7 @@ public final class Numbers {
      * @param min the lower bound (inclusive)
      * @param max the upper bound (inclusive)
      * @return {@code value} constrained to {@code [min, max]}
-     * @throws IllegalArgumentException if {@code min > max}
+     * @throws IllegalArgumentException if {@code min > max}.
      * @see #clamp(int, int, int)
      * @see #clamp(float, float, float)
      * @see #clamp(double, double, double)
@@ -7568,7 +7572,7 @@ public final class Numbers {
      * @param min the lower bound (inclusive); must not be {@code NaN}
      * @param max the upper bound (inclusive); must not be {@code NaN}
      * @return {@code value} constrained to {@code [min, max]}, or {@code NaN} if {@code value} is {@code NaN}
-     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}
+     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}.
      * @see #clamp(int, int, int)
      * @see #clamp(long, long, long)
      * @see #clamp(double, double, double)
@@ -7601,7 +7605,7 @@ public final class Numbers {
      * @param min the lower bound (inclusive); must not be {@code NaN}
      * @param max the upper bound (inclusive); must not be {@code NaN}
      * @return {@code value} constrained to {@code [min, max]}, or {@code NaN} if {@code value} is {@code NaN}
-     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}
+     * @throws IllegalArgumentException if {@code min > max} or either bound is {@code NaN}.
      * @see #clamp(int, int, int)
      * @see #clamp(long, long, long)
      * @see #clamp(float, float, float)
@@ -7634,7 +7638,7 @@ public final class Numbers {
      *
      * @param n the non-negative integer to compute the factorial of
      * @return {@code n!} if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
-     * @throws IllegalArgumentException if {@code n < 0}
+     * @throws IllegalArgumentException if {@code n < 0}.
      * @see #factorialToLong(int)
      * @see #factorialToDouble(int)
      * @see #factorialToBigInteger(int)
@@ -7667,7 +7671,7 @@ public final class Numbers {
      *
      * @param n the non-negative integer to compute the factorial of
      * @return {@code n!} if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
-     * @throws IllegalArgumentException if {@code n < 0}
+     * @throws IllegalArgumentException if {@code n < 0}.
      * @see #factorial(int)
      * @see #factorialToDouble(int)
      * @see #factorialToBigInteger(int)
@@ -7701,7 +7705,7 @@ public final class Numbers {
      *
      * @param n the non-negative integer to compute the factorial of
      * @return the factorial of n as a double, or positive infinity if the result exceeds Double.MAX_VALUE
-     * @throws IllegalArgumentException if {@code n < 0}
+     * @throws IllegalArgumentException if {@code n < 0}.
      * @see #factorial(int)
      * @see #factorialToLong(int)
      * @see #factorialToBigInteger(int)
@@ -7744,7 +7748,7 @@ public final class Numbers {
      *
      * @param n the non-negative integer to compute the factorial of
      * @return {@code n!} as a {@code BigInteger}
-     * @throws IllegalArgumentException if {@code n < 0}
+     * @throws IllegalArgumentException if {@code n < 0}.
      * @see #factorial(int)
      * @see #factorialToLong(int)
      * @see #factorialToDouble(int)
@@ -7757,7 +7761,9 @@ public final class Numbers {
             return BigInteger.valueOf(long_factorials[n]);
         }
 
-        final int approxSize = divide(n * log2(n, CEILING), Long.SIZE, CEILING);
+        // Use long multiplication: n * log2(n) overflows int for large n. The quotient fits in an
+        // int for every non-negative int n because log2(n) is at most 31 and the divisor is 64.
+        final int approxSize = (int) divide((long) n * log2(n, CEILING), Long.SIZE, CEILING);
         final ArrayList<BigInteger> bignums = new ArrayList<>(approxSize);
 
         // Start from the pre-computed maximum long factorial.
@@ -7861,7 +7867,7 @@ public final class Numbers {
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) if it fits in an {@code int}, otherwise {@code Integer.MAX_VALUE}
-     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}.
      * @see #binomialToLong(int, int)
      * @see #binomialToDouble(int, int)
      * @see #binomialToBigInteger(int, int)
@@ -7912,7 +7918,7 @@ public final class Numbers {
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) if it fits in a {@code long}, otherwise {@code Long.MAX_VALUE}
-     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}.
      * @see #binomial(int, int)
      * @see #binomialToDouble(int, int)
      * @see #binomialToBigInteger(int, int)
@@ -7998,7 +8004,7 @@ public final class Numbers {
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) as a {@code double}, or {@code Double.POSITIVE_INFINITY}
      *         if the true value exceeds {@code Double.MAX_VALUE}
-     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}.
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
      * @see #binomialToBigInteger(int, int)
@@ -8029,7 +8035,7 @@ public final class Numbers {
      * @param n the total number of items; must be non-negative
      * @param k the number of items to choose; must be non-negative and at most {@code n}
      * @return the binomial coefficient C(n, k) as a {@code BigInteger}
-     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
+     * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}.
      * @see #binomial(int, int)
      * @see #binomialToLong(int, int)
      * @see #binomialToDouble(int, int)
@@ -8097,7 +8103,7 @@ public final class Numbers {
      *
      * @param values a nonempty series of values
      * @return the arithmetic mean of the values
-     * @throws IllegalArgumentException if {@code values} is empty
+     * @throws IllegalArgumentException if {@code values} is empty.
      * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(long...)
      * @see #mean(double...)
@@ -8136,7 +8142,7 @@ public final class Numbers {
      * @param values a nonempty series of values, which will be converted to {@code double} values
      *     (this may cause loss of precision for longs of magnitude over 2^53 (slightly over 9e15))
      * @return the arithmetic mean of the values
-     * @throws IllegalArgumentException if {@code values} is empty
+     * @throws IllegalArgumentException if {@code values} is empty.
      * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(int...)
      * @see #mean(double...)
@@ -8177,7 +8183,8 @@ public final class Numbers {
      *
      * @param values a nonempty series of finite double values
      * @return the arithmetic mean of the values
-     * @throws IllegalArgumentException if {@code values} is empty or contains any non-finite values (NaN or infinite)
+     * @throws IllegalArgumentException if {@code values} is empty or contains any non-finite values (NaN or
+     *         infinite).
      * @throws NullPointerException if {@code values} is {@code null}
      * @see #mean(int...)
      * @see #mean(long...)
@@ -8210,7 +8217,7 @@ public final class Numbers {
      * @param x the value to round
      * @param mode the rounding mode to apply
      * @return {@code x} rounded to a mathematical integer
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @throws ArithmeticException if {@code x} is infinite or {@code NaN}, or if {@code mode} is
      *         {@link RoundingMode#UNNECESSARY} and {@code x} is not already a mathematical integer
      */
@@ -8382,7 +8389,7 @@ public final class Numbers {
      *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
      * @param roundingMode the rounding mode to use; must not be {@code null}
      * @return the rounded float value
-     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      * @throws NumberFormatException if {@code x} is NaN or infinite
      * @throws ArithmeticException if {@code roundingMode} is {@link RoundingMode#UNNECESSARY} but the value
      *         cannot be represented exactly at the requested {@code scale}
@@ -8417,7 +8424,7 @@ public final class Numbers {
      *     corresponding power of ten (as in {@link BigDecimal#setScale(int, RoundingMode)})
      * @param roundingMode the rounding mode to use; must not be {@code null}
      * @return the rounded double value
-     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}
+     * @throws IllegalArgumentException if {@code roundingMode} is {@code null}.
      * @throws NumberFormatException if {@code x} is NaN or infinite
      * @throws ArithmeticException if {@code roundingMode} is {@link RoundingMode#UNNECESSARY} but the value
      *         cannot be represented exactly at the requested {@code scale}
@@ -8522,7 +8529,8 @@ public final class Numbers {
      * @param x the float value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
      * @return the rounded float value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid {@link DecimalFormat} pattern
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid
+     *         {@link DecimalFormat} pattern.
      * @see java.text.DecimalFormat#format(double)
      * @see #toFloat(String)
      * @see #round(float, int)
@@ -8561,7 +8569,8 @@ public final class Numbers {
      * @param x the double value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} pattern to use for rounding
      * @return the rounded double value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid {@link DecimalFormat} pattern
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null} or is not a valid
+     *         {@link DecimalFormat} pattern.
      * @see java.text.DecimalFormat#format(double)
      * @see #toDouble(String)
      * @see #round(double, int)
@@ -8599,8 +8608,8 @@ public final class Numbers {
      * @param x the float value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded float value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces
-     *         for {@code x} cannot be parsed back by the same formatter
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces for
+     *         {@code x} cannot be parsed back by the same formatter.
      * @see java.text.DecimalFormat#format(double)
      * @see #round(float, String)
      * @see #round(float, int)
@@ -8649,8 +8658,8 @@ public final class Numbers {
      * @param x the double value to be rounded
      * @param decimalFormat the {@link java.text.DecimalFormat} instance to use for rounding
      * @return the rounded double value; {@code NaN} and infinite values are returned unchanged
-     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces
-     *         for {@code x} cannot be parsed back by the same formatter
+     * @throws IllegalArgumentException if {@code decimalFormat} is {@code null}, or if the text it produces for
+     *         {@code x} cannot be parsed back by the same formatter.
      * @see java.text.DecimalFormat#format(double)
      * @see #round(double, String)
      * @see #round(double, int)
@@ -8700,7 +8709,7 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @see #roundToLong(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
@@ -8736,7 +8745,7 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToBigInteger(double, RoundingMode)
      * @see RoundingMode
@@ -8769,7 +8778,7 @@ public final class Numbers {
      *     <li>{@code x} is not a mathematical integer and {@code mode} is
      *         {@link RoundingMode#UNNECESSARY}
      *     </ul>
-     * @throws IllegalArgumentException if {@code mode} is {@code null}
+     * @throws IllegalArgumentException if {@code mode} is {@code null}.
      * @see #roundToInt(double, RoundingMode)
      * @see #roundToLong(double, RoundingMode)
      * @see RoundingMode
@@ -8828,7 +8837,7 @@ public final class Numbers {
      * @param tolerance the maximum absolute difference allowed between the two values to consider them equal; must be non-negative
      * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
      *         or if both are NaN; {@code false} otherwise
-     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN.
      * @see #fuzzyEquals(double, double, double)
      * @see #fuzzyCompare(float, float, float)
      * @see Float#compare(float, float)
@@ -8880,7 +8889,7 @@ public final class Numbers {
      * @param tolerance the maximum absolute difference allowed between the two values to consider them equal; must be non-negative
      * @return {@code true} if the absolute difference between {@code a} and {@code b} is less than or equal to {@code tolerance},
      *         or if both are NaN; {@code false} otherwise
-     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN.
      * @see #fuzzyEquals(float, float, float)
      * @see #fuzzyCompare(double, double, double)
      * @see Double#compare(double, double)
@@ -8921,7 +8930,7 @@ public final class Numbers {
      * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
      * @return {@code 0} if {@code a} and {@code b} are fuzzily equal, a negative integer if {@code a} is less than {@code b},
      *         or a positive integer if {@code a} is greater than {@code b}
-     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN.
      * @see #fuzzyEquals(float, float, float)
      * @see #fuzzyCompare(double, double, double)
      */
@@ -8961,7 +8970,7 @@ public final class Numbers {
      * @param tolerance the maximum absolute difference allowed between the two values to consider them equal
      * @return {@code 0} if {@code a} and {@code b} are fuzzily equal, a negative integer if {@code a} is less than {@code b},
      *         or a positive integer if {@code a} is greater than {@code b}
-     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is {@code < 0} or NaN.
      * @see #fuzzyEquals(double, double, double)
      * @see #fuzzyCompare(float, float, float)
      */
@@ -9075,7 +9084,7 @@ public final class Numbers {
      *
      * @param d the value to take the significand of; must be finite
      * @return the significand of {@code d}
-     * @throws IllegalArgumentException if {@code d} is infinite or {@code NaN}
+     * @throws IllegalArgumentException if {@code d} is infinite or {@code NaN}.
      */
     static long getSignificand(final double d) {
         N.checkArgument(isFinite(d), "not a normal value");
@@ -9173,6 +9182,7 @@ public final class Numbers {
      *
      * @param value the value to check
      * @return the value if non-negative, or 0.0 if negative
+     * @throws IllegalArgumentException if {@code value} is {@code NaN}.
      */
     static double ensureNonNegative(final double value) {
         N.checkArgument(!isNaN(value));
@@ -9209,7 +9219,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      */
     static int checkPositive(final String role, final int x) {
         if (x <= 0) {
@@ -9224,7 +9234,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      */
     static long checkPositive(final String role, final long x) {
         if (x <= 0) {
@@ -9239,7 +9249,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check; must not be {@code null}
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x <= 0}
+     * @throws IllegalArgumentException if {@code x <= 0}.
      */
     static BigInteger checkPositive(final String role, final BigInteger x) {
         if (x.signum() <= 0) {
@@ -9254,7 +9264,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x < 0}
+     * @throws IllegalArgumentException if {@code x < 0}.
      */
     static int checkNonNegative(final String role, final int x) {
         if (x < 0) {
@@ -9269,7 +9279,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x < 0}
+     * @throws IllegalArgumentException if {@code x < 0}.
      */
     static long checkNonNegative(final String role, final long x) {
         if (x < 0) {
@@ -9284,7 +9294,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check; must not be {@code null}
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x < 0}
+     * @throws IllegalArgumentException if {@code x < 0}.
      */
     static BigInteger checkNonNegative(final String role, final BigInteger x) {
         if (x.signum() < 0) {
@@ -9299,7 +9309,7 @@ public final class Numbers {
      * @param role the parameter name to report in the exception message
      * @param x the value to check
      * @return {@code x}
-     * @throws IllegalArgumentException if {@code x < 0} or {@code x} is {@code NaN}
+     * @throws IllegalArgumentException if {@code x < 0} or {@code x} is {@code NaN}.
      */
     static double checkNonNegative(final String role, final double x) {
         if (!(x >= 0)) { // not x < 0, to work with NaN. //NOSONAR

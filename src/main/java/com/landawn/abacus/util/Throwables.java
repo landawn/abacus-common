@@ -1576,7 +1576,8 @@ public final class Throwables {
          * @param <A> the component type of the array
          * @param a the array into which the elements are to be stored, if it is big enough
          * @return an array containing all remaining elements
-         * @throws IllegalArgumentException if {@code a} is {@code null}; validation occurs before this iterator is consumed
+         * @throws IllegalArgumentException if {@code a} is {@code null}; validation occurs before this iterator is
+         *         consumed.
          * @throws E if an exception occurs while iterating through the elements
          */
         public <A> A[] toArray(final A[] a) throws E {
@@ -6939,6 +6940,7 @@ public final class Throwables {
          *
          * @return the lazily initialized value
          * @throws E if the supplier throws an exception during initialization
+         * @throws IllegalStateException if the value is accessed recursively from within its own initialization
          */
         @Override
         public T get() throws E {

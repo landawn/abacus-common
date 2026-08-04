@@ -20,8 +20,7 @@ package com.landawn.abacus.util;
  * <p>This type does not evaluate, execute, or sandbox scripts and must not be treated as
  * an execution or security API. It is retained as a non-instantiable public type for compatibility.
  *
- * <p>The class is declared {@code final} to prevent subclassing. The {@code //NOSONAR} comment
- * suppresses SonarQube warnings about the otherwise-empty class body.
+ * <p>The class is declared {@code final} to prevent subclassing.
  */
 public final class Script { //NOSONAR
 

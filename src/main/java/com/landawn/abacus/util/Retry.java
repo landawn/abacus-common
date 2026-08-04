@@ -97,8 +97,8 @@ public final class Retry<R> {
      * @param retryIntervalInMillis the interval in milliseconds to wait between retries. Must be non-negative. A value of 0 means no delay between retries.
      * @param retryCondition a predicate that tests the thrown exception. If it returns {@code true}, the operation will be retried.
      * @return a new {@code Retry<Void>} instance configured with the specified parameters.
-     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative.
-     * @throws IllegalArgumentException if {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative, or if
+     *         {@code retryCondition} is {@code null}.
      */
     public static Retry<Void> withFixedDelay(final int retryTimes, final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException {
@@ -138,8 +138,8 @@ public final class Retry<R> {
      *        returns {@code true} to retry. On success the exception argument is {@code null}; on failure
      *        the result argument is {@code null}. Must not be {@code null}.
      * @return a new {@code Retry<T>} instance configured with the specified parameters.
-     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative,
-     *         or if {@code retryCondition} is {@code null}.
+     * @throws IllegalArgumentException if {@code retryTimes} or {@code retryIntervalInMillis} is negative, or if
+     *         {@code retryCondition} is {@code null}.
      */
     public static <T> Retry<T> withFixedDelay(final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super T, ? super Exception> retryCondition) throws IllegalArgumentException {
@@ -177,7 +177,7 @@ public final class Retry<R> {
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
-     * @param cmd the runnable operation to execute;
+     * @param cmd the runnable operation to execute
      * @throws RuntimeException if a configured retry predicate throws a runtime exception; predicate
      *         failures are propagated immediately
      * @throws Exception the exception thrown by {@code cmd} if the retry condition is not satisfied,
@@ -259,7 +259,7 @@ public final class Retry<R> {
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *
-     * @param callable the callable operation to execute;
+     * @param callable the callable operation to execute
      * @return the result of the first invocation whose outcome does not satisfy the retry condition.
      * @throws RuntimeException if all retry attempts are exhausted and the final invocation returned
      *                          a result that still satisfies {@code retryCondition2},

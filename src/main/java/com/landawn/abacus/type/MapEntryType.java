@@ -150,7 +150,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param str the JSON string to parse; may be {@code null}, empty, or {@code "{}"}
      * @return the parsed {@code Map.Entry}, or {@code null} if the input is {@code null},
      *         empty, or an empty JSON object ({@code "{}"})
-     * @throws IllegalArgumentException if the JSON object contains more than one entry
+     * @throws IllegalArgumentException if the JSON object contains more than one entry.
      * @see #valueOf(Object)
      * @see #stringOf(Map.Entry)
      */
@@ -174,9 +174,8 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     }
 
     /**
-     * Appends the {@code toString()}-style string representation of a {@link Map.Entry} to an {@link Appendable}.
-     * The entry is formatted as a single {@code key:value} pair with the key and value
-     * rendered according to their respective type handlers.
+     * Appends the {@code toString()}-style string representation of a {@link Map.Entry} to an {@link Appendable},
+     * in the form {@code {key:value}}, with the key and value rendered according to their respective type handlers.
      * When the {@code Appendable} is a {@link java.io.Writer}, a buffered wrapper is used
      * for better I/O performance.
      * If the entry is {@code null}, the literal string {@code "null"} is appended.

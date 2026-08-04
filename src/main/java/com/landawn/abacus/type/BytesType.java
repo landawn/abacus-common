@@ -92,7 +92,7 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param str the Base64-encoded string to decode; may be {@code null}
      * @return the decoded byte array, or {@code null} if {@code str} is {@code null}
-     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet
+     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet.
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */

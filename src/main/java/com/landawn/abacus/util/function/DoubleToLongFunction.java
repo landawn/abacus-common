@@ -20,18 +20,12 @@ import com.landawn.abacus.util.Throwables;
  * Represents a function that accepts a double-valued argument and produces a long-valued result.
  * This is the {@code double}-to-{@code long} primitive specialization for {@link java.util.function.Function}.
  *
- * <p>This functional interface extends both {@link Throwables.DoubleToLongFunction} with {@link RuntimeException}
- * and {@link java.util.function.DoubleToLongFunction}, providing a bridge between the Throwables-based
- * exception handling and the standard Java functional interface.</p>
- *
- * <p>The interface provides a {@code DEFAULT} constant that performs a simple cast conversion
- * from double to long, truncating any decimal portion.</p>
+ * <p>This is a functional interface whose functional method is {@link #applyAsLong(double)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.Function
  * @see java.util.function.DoubleToLongFunction
- * @see Throwables.DoubleToLongFunction
  */
 @SuppressFBWarnings("NM_SAME_SIMPLE_NAME_AS_INTERFACE")
 @FunctionalInterface
@@ -49,15 +43,7 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
     DoubleToLongFunction DEFAULT = value -> (long) value;
 
     /**
-     * Applies this function to the given double-valued argument and returns a long result.
-     *
-     * <p>This method converts a double value to a long value according to the implementation's logic.
-     * The specific conversion behavior depends on the implementation, but typical uses include:</p>
-     * <ul>
-     *   <li>Simple casting (truncation)</li>
-     *   <li>Rounding to nearest integer</li>
-     *   <li>Custom conversion logic based on business rules</li>
-     * </ul>
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -68,8 +54,8 @@ public interface DoubleToLongFunction extends Throwables.DoubleToLongFunction<Ru
      * long result2 = rounder.applyAsLong(3.7);   // Returns 4L
      * }</pre>
      *
-     * @param value the double value to be converted to long
-     * @return the long result of applying this function to the input value
+     * @param value the double function argument
+     * @return the long function result
      */
     @Override
     long applyAsLong(double value);

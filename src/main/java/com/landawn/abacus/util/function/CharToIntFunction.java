@@ -14,7 +14,7 @@
 package com.landawn.abacus.util.function;
 
 /**
- * Represents a function that accepts a char-valued argument and produces an int-valued result.
+ * Represents a function that accepts a {@code char}-valued argument and produces an {@code int}-valued result.
  * This is the {@code char}-to-{@code int} primitive specialization for {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsInt(char)}.
@@ -41,8 +41,7 @@ public interface CharToIntFunction {
     CharToIntFunction DEFAULT = value -> value;
 
     /**
-     * Applies this function to the given char argument and returns an int result.
-     * This method performs a transformation from a char value to an int value.
+     * Applies this function to the given argument.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -53,8 +52,8 @@ public interface CharToIntFunction {
      * int value = digitValue.applyAsInt('7');   // Returns 7
      * }</pre>
      *
-     * @param value the char function argument
-     * @return the int function result, typically the UTF-16 code unit value of the char
+     * @param value the function argument
+     * @return the function result
      */
     int applyAsInt(char value);
 }

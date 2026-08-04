@@ -28,11 +28,11 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for Joda-Time DateTime objects.
+ * Type handler for Joda-Time {@link org.joda.time.DateTime} objects.
  * <p>
- * This class provides serialization, deserialization, and database access capabilities for
- * {@code org.joda.time.DateTime} instances. It supports multiple string formats including ISO 8601 formats
- * and provides database conversion using {@code java.sql.Timestamp}.
+ * This class provides serialization, deserialization, and database access for
+ * {@code DateTime} instances. It supports multiple string formats including ISO-8601
+ * and maps to the database via {@link java.sql.Timestamp}.
  *
  * @see org.joda.time.DateTime
  * @see AbstractJodaDateTimeType
@@ -43,8 +43,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
     public static final String JODA_DATE_TIME = "JodaDateTime";
 
     /**
-     * Package-private constructor for JodaDateTimeType.
-     * This constructor is called by the TypeFactory to create Joda DateTime type instances.
+     * Package-private constructor for {@code JodaDateTimeType}.
+     * Instances are created by the {@code TypeFactory}.
      */
     JodaDateTimeType() {
         super(JODA_DATE_TIME);
@@ -111,9 +111,9 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed Joda {@link DateTime}, or {@code null} if {@code str} is {@code null} or a null-datetime string
-     * @throws IllegalArgumentException if the string format is not recognized
+     * @throws IllegalArgumentException if the string format is not recognized.
      * @see #valueOf(Object)
-     * @see #stringOf(org.joda.time.base.AbstractInstant)
+     * @see #stringOf(org.joda.time.DateTime)
      */
     @Override
     public DateTime valueOf(final String str) {

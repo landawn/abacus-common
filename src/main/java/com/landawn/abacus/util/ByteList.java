@@ -329,7 +329,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param initialCapacity the initial capacity of the list. Must be non-negative.
-     * @throws IllegalArgumentException if the specified initial capacity is negative
+     * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
     public ByteList(final int initialCapacity) throws IllegalArgumentException {
@@ -555,7 +555,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param endExclusive the ending value (exclusive) of the sequence
      * @param by the step value between consecutive elements; must not be zero
      * @return a new ByteList containing the sequential values with the specified step
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ByteList range(final byte startInclusive, final byte endExclusive, final byte by) {
         return of(Array.range(startInclusive, endExclusive, by));
@@ -609,7 +609,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param endInclusive the ending value (inclusive) of the sequence
      * @param by the step value between consecutive elements; must not be zero
      * @return a new ByteList containing the sequential values with the specified step
-     * @throws IllegalArgumentException if by is zero
+     * @throws IllegalArgumentException if by is zero.
      */
     public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive, final byte by) {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
@@ -634,7 +634,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param element the byte value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new ByteList containing {@code len} copies of the specified element
-     * @throws IllegalArgumentException if {@code len} is negative
+     * @throws IllegalArgumentException if {@code len} is negative.
      */
     public static ByteList repeat(final byte element, final int len) {
         return of(Array.repeat(element, len));
@@ -1072,7 +1072,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
-     * @param p the predicate which returns {@code true} for elements to be removed;
+     * @param p the predicate which returns {@code true} for elements to be removed
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
@@ -1501,7 +1501,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [2, 4, 6]
      * }</pre>
      *
-     * @param operator the operator to apply to each element;
+     * @param operator the operator to apply to each element
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
     public void replaceAll(final ByteUnaryOperator operator) throws IllegalArgumentException {
@@ -1527,7 +1527,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 0, 3, 0, 5]
      * }</pre>
      *
-     * @param predicate the predicate to test each element;
+     * @param predicate the predicate to test each element
      * @param newValue the value to replace matching elements with
      * @return {@code true} if at least one element was replaced; {@code false} if no elements matched
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
@@ -1720,7 +1720,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param c the ByteList to check for common elements. Can be {@code null}.
      * @return {@code true} if the two lists have no elements in common,
-     *         {@code true} if either list is {@code null} or empty,
+     *         {@code true} if either list is empty,
      *         {@code false} otherwise
      */
     @Override
@@ -1781,7 +1781,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param b the list to intersect with this list. Can be {@code null}.
      * @return a new ByteList containing the intersection of the two lists.
-     *         Returns an empty list if either list is {@code null} or empty.
+     *         Returns an empty list if either list is empty.
      * @see #difference(ByteList)
      * @see #symmetricDifference(ByteList)
      */
@@ -2673,7 +2673,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
      */
     @Override
     public void shuffle(final Random rnd) throws IllegalArgumentException {
@@ -2781,7 +2781,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param step the step size (positive for forward, negative for backward)
      * @return a new ByteList containing the selected elements
      * @throws IndexOutOfBoundsException if the indices are out of range
-     * @throws IllegalArgumentException if step is 0
+     * @throws IllegalArgumentException if step is 0.
      * @see N#copyOfRange(byte[], int, int, int)
      */
     @Override
@@ -2819,7 +2819,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param chunkSize the desired size of each chunk (must be positive)
      * @return a List of ByteList objects, each containing a chunk of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code chunkSize <= 0}
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<ByteList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
@@ -2998,7 +2998,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param <C> the type of Collection to create
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Collection instance given the required size;
+     * @param supplier a function that creates a new Collection instance given the required size
      * @return a new Collection containing boxed elements from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
@@ -3025,7 +3025,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of elements to include
      * @param toIndex the ending index (exclusive) of elements to include
-     * @param supplier a function that creates a new Multiset instance given the required size;
+     * @param supplier a function that creates a new Multiset instance given the required size
      * @return a new Multiset containing elements from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.

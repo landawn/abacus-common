@@ -23,10 +23,6 @@ import com.landawn.abacus.util.cs;
  * {@link java.util.function.Consumer}. Unlike most other functional interfaces,
  * {@code IntTriConsumer} is expected to operate via side-effects.
  *
- * <p>This interface extends {@link Throwables.IntTriConsumer} with
- * {@link RuntimeException}, providing compatibility with the abacus-common framework's
- * exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is
  * {@link #accept(int, int, int)}.
  *
@@ -81,7 +77,7 @@ public interface IntTriConsumer extends Throwables.IntTriConsumer<RuntimeExcepti
      * @param after the operation to perform after this operation.
      * @return a composed {@code IntTriConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default IntTriConsumer andThen(final IntTriConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

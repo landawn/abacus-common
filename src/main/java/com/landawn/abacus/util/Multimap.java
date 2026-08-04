@@ -2168,11 +2168,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose value should be merged with the elements
      * @param elements the collection of elements to merge with existing values
      * @param remappingFunction the function that defines how to merge old and new collections
-     * @return the updated collection associated with the key, or {@code null} if the key was removed,
-     *         or {@code null} if the key was absent and {@code elements} is empty (nothing is stored)
-     * @throws IllegalArgumentException if {@code elements} is {@code null}
+     * @return the updated collection associated with the key, or {@code null} if the key was removed
+     *         by the remapping function, or if the key was absent and {@code elements} is empty (nothing is stored)
+     * @throws IllegalArgumentException if {@code elements} is {@code null}, or if {@code remappingFunction} is
+     *         {@code null}.
      * @throws IllegalStateException if the configured value collection rejects the merged replacement
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @see #merge(Object, Object, BiFunction)
      * @see #compute(Object, BiFunction)
      */
@@ -2248,9 +2248,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param e the element to merge with existing values
      * @param remappingFunction the function that defines how to merge the collection with the new element
      * @return the updated collection associated with the key, or {@code null} if the key was removed
-     * @throws IllegalArgumentException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}, or if {@code remappingFunction} is {@code null}.
      * @throws IllegalStateException if the configured value collection rejects the merged replacement
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @see #merge(Object, Collection, BiFunction)
      * @see #compute(Object, BiFunction)
      */

@@ -120,7 +120,7 @@ public class UUIDType extends AbstractType<UUID> {
      *
      * @param str the string to convert to a UUID
      * @return a UUID instance created from the string, or {@code null} if the string is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if the string is not in the correct UUID format
+     * @throws IllegalArgumentException if the string is not in the correct UUID format.
      * @see #valueOf(Object)
      * @see #stringOf(UUID)
      */

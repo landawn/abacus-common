@@ -1730,6 +1730,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
@@ -2108,6 +2109,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -3349,7 +3351,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     private Stream<T> lazyLoad(final UnaryOperator<Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
-        return Stream.defer(() -> newStream((T[]) op.apply(toArrayForIntermediateOp()), sorted, cmp)).onClose(this::close);
+        // Preserve sorted/comparator on the outer stream. Stream.defer(...) wraps the supplier as a
+        // plain unsorted iterator stream, which drops isSorted() and breaks sorted-aware ops (min/max
+        // short-circuit, top window, redundant sorted() elision, etc.).
+        return newStream(ObjIteratorEx.defer(() -> {
+            @SuppressWarnings("unchecked")
+            final T[] a = (T[]) op.apply(toArrayForIntermediateOp());
+            return a == null || a.length == 0 ? ObjIteratorEx.<T> empty() : ObjIteratorEx.of(a);
+        }), sorted, cmp);
     }
 
     @Override

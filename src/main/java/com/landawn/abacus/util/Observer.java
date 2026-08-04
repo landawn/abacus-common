@@ -170,7 +170,7 @@ public abstract class Observer<T> {
      * Creates a new Observer that uses the given dispatcher as the head of its chain.
      *
      * @param dispatcher the head dispatcher for this Observer's pipeline; must not be {@code null}
-     * @throws IllegalArgumentException if {@code dispatcher} is {@code null}
+     * @throws IllegalArgumentException if {@code dispatcher} is {@code null}.
      */
     protected Observer(final Dispatcher<Object> dispatcher) {
         this.dispatcher = N.checkArgNotNull(dispatcher, cs.dispatcher);
@@ -182,7 +182,6 @@ public abstract class Observer<T> {
      * @param action the action to invoke for each emitted item
      * @param onError the action to invoke when observation fails
      * @param onComplete the action to invoke when observation completes
-     * @throws IllegalArgumentException if any callback is {@code null}
      * @throws IllegalStateException if this observer has already been subscribed
      */
     @SuppressWarnings("unused")
@@ -209,7 +208,7 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param queue the {@code BlockingQueue} to complete
-     * @throws IllegalArgumentException if {@code queue} is {@code null}
+     * @throws IllegalArgumentException if {@code queue} is {@code null}.
      * @throws ClassCastException if the queue orders or otherwise restricts its elements and
      *         cannot accept the private completion marker
      * @throws RuntimeException if the current thread is interrupted while waiting to insert
@@ -249,7 +248,7 @@ public abstract class Observer<T> {
      * @param <T> the type of elements in the queue
      * @param queue the {@code BlockingQueue} to create an Observer from
      * @return a new Observer that emits elements from the queue
-     * @throws IllegalArgumentException if {@code queue} is {@code null}
+     * @throws IllegalArgumentException if {@code queue} is {@code null}.
      * @see #complete(BlockingQueue)
      */
     public static <T> Observer<T> of(final BlockingQueue<T> queue) throws IllegalArgumentException {
@@ -293,7 +292,7 @@ public abstract class Observer<T> {
      * @param <T> the type of elements in the iterator
      * @param iter the Iterator to create an Observer from
      * @return a new Observer that emits elements from the iterator
-     * @throws IllegalArgumentException if {@code iter} is {@code null}
+     * @throws IllegalArgumentException if {@code iter} is {@code null}.
      */
     public static <T> Observer<T> of(final Iterator<? extends T> iter) throws IllegalArgumentException {
         N.checkArgNotNull(iter, cs.iterator);
@@ -313,7 +312,7 @@ public abstract class Observer<T> {
      *
      * @param delayInMillis the delay in milliseconds before emitting
      * @return a new Observer that emits a single {@code 0L} after the delay and then completes
-     * @throws IllegalArgumentException if {@code delayInMillis} is negative
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative.
      * @see #timer(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
@@ -334,7 +333,7 @@ public abstract class Observer<T> {
      * @param delay the delay before emitting
      * @param unit the time unit of the delay
      * @return a new Observer that emits a single {@code 0L} after the delay and then completes
-     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
     public static Observer<Long> timer(final long delay, final TimeUnit unit) throws IllegalArgumentException {
@@ -358,7 +357,7 @@ public abstract class Observer<T> {
      * @param periodInMillis the period between emissions in milliseconds; the first value
      *        ({@code 0L}) is emitted immediately with no initial delay
      * @return a new Observer that emits sequential {@code Long} values periodically
-     * @throws IllegalArgumentException if {@code periodInMillis} is zero or negative
+     * @throws IllegalArgumentException if {@code periodInMillis} is zero or negative.
      * @see #interval(long, TimeUnit)
      * @see #interval(long, long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
@@ -381,8 +380,8 @@ public abstract class Observer<T> {
      * @param initialDelayInMillis the initial delay before the first emission in milliseconds
      * @param periodInMillis the period between subsequent emissions in milliseconds
      * @return a new Observer that emits sequential {@code Long} values periodically
-     * @throws IllegalArgumentException if {@code initialDelayInMillis} is negative or
-     *         {@code periodInMillis} is zero or negative
+     * @throws IllegalArgumentException if {@code initialDelayInMillis} is negative or {@code periodInMillis} is zero
+     *         or negative.
      * @see #interval(long, long, TimeUnit)
      * @see #interval(long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
@@ -405,8 +404,7 @@ public abstract class Observer<T> {
      *        immediately with no initial delay
      * @param unit the time unit of the period
      * @return a new Observer that emits sequential {@code Long} values periodically
-     * @throws IllegalArgumentException if {@code period} is zero or negative or {@code unit}
-     *         is {@code null}
+     * @throws IllegalArgumentException if {@code period} is zero or negative or {@code unit} is {@code null}.
      * @see #interval(long, long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
@@ -429,7 +427,7 @@ public abstract class Observer<T> {
      * @param period the period between subsequent emissions
      * @param unit the time unit for both delay and period
      * @return a new Observer that emits periodically
-     * @throws IllegalArgumentException if initialDelay is negative, period is non-positive, or unit is null
+     * @throws IllegalArgumentException if initialDelay is negative, period is non-positive, or unit is null.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
     public static Observer<Long> interval(final long initialDelay, final long period, final TimeUnit unit) throws IllegalArgumentException {
@@ -456,7 +454,7 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the debounce interval in milliseconds; if zero, this
      *        Observer is returned unchanged with no debounce applied
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #debounce(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
@@ -481,8 +479,7 @@ public abstract class Observer<T> {
      *        unchanged with no debounce applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
-     *         is {@code null}
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
     public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -644,7 +641,7 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the throttle window duration in milliseconds; if zero,
      *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #throttleFirst(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
@@ -668,8 +665,7 @@ public abstract class Observer<T> {
      *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
-     *         is {@code null}
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
     public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -753,7 +749,7 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the sampling window duration in milliseconds; if zero,
      *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #throttleLast(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
@@ -777,8 +773,7 @@ public abstract class Observer<T> {
      *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit}
-     *         is {@code null}
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
@@ -904,7 +899,7 @@ public abstract class Observer<T> {
      * @param delayInMillis the delay duration in milliseconds; if zero, this Observer is
      *        returned unchanged with no delay applied
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code delayInMillis} is negative
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative.
      * @see #delay(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
@@ -928,7 +923,7 @@ public abstract class Observer<T> {
      *        delay applied
      * @param unit the time unit of the delay
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
     public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
@@ -1050,7 +1045,7 @@ public abstract class Observer<T> {
      * @param n the number of items to skip; if zero, no items are skipped (a negative
      *        value is rejected as described below)
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public Observer<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -1085,7 +1080,7 @@ public abstract class Observer<T> {
      * @param maxSize the maximum number of items to emit; once this count is reached the
      *        upstream source is signaled to stop producing further items
      * @return this Observer instance for method chaining
-     * @throws IllegalArgumentException if {@code maxSize} is negative
+     * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
         N.checkArgNotNegative(maxSize, cs.maxSize);
@@ -1163,7 +1158,7 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param keyExtractor function to extract the key used to determine uniqueness; key
-     *        equality is based on {@code hashCode()} and {@code equals()};
+     *        equality is based on {@code hashCode()} and {@code equals()}
      * @return this Observer instance for method chaining
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #distinct()
@@ -1196,7 +1191,7 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param filter the predicate used to test each item; items for which the predicate returns
-     *               {@code true} are forwarded downstream;
+     *               {@code true} are forwarded downstream
      * @return this Observer instance for method chaining
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
@@ -1226,7 +1221,7 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param <R> the type of items emitted after transformation
-     * @param mapper the function to transform each item;
+     * @param mapper the function to transform each item
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         transformed items
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -1260,8 +1255,7 @@ public abstract class Observer<T> {
      *
      * @param <R> the type of items in the flattened sequence
      * @param mapper function that transforms each item into a collection; if it returns
-     *        {@code null} or an empty collection, no items are emitted for that input;
-     *
+     *        {@code null} or an empty collection, no items are emitted for that input
      * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
      *         flattened items
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -1303,8 +1297,7 @@ public abstract class Observer<T> {
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
      * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
-     * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit}
-     *         is {@code null}
+     * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit} is {@code null}.
      * @see #buffer(long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, java.util.concurrent.TimeUnit)</a>
      */
@@ -1328,8 +1321,8 @@ public abstract class Observer<T> {
      * @param unit the time unit of the timespan
      * @param count the maximum number of items per buffer
      * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
-     * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or
-     *         negative, or {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or negative, or {@code unit} is
+     *         {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#buffer(long, java.util.concurrent.TimeUnit, int)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
@@ -1471,8 +1464,8 @@ public abstract class Observer<T> {
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
      * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
-     * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or
-     *         negative, or {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or negative, or {@code unit}
+     *         is {@code null}.
      * @see #buffer(long, long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
@@ -1498,8 +1491,8 @@ public abstract class Observer<T> {
      * @param unit the time unit for both timespan and timeskip
      * @param count the maximum number of items per buffer
      * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
-     * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count}
-     *         is zero or negative, or {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count} is zero or negative,
+     *         or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
@@ -1756,7 +1749,7 @@ public abstract class Observer<T> {
      * @param action the action to perform on each item
      * @param onError the action to perform on error
      * @param onComplete the action to perform on completion
-     * @throws IllegalArgumentException if any callback is {@code null}
+     * @throws IllegalArgumentException if any callback is {@code null}.
      * @throws IllegalStateException if this Observer has already been subscribed
      */
     public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete);
@@ -1827,7 +1820,7 @@ public abstract class Observer<T> {
          * making it the new last element.
          *
          * @param downDispatcher the dispatcher to append; must not be {@code null}
-         * @throws IllegalArgumentException if {@code downDispatcher} is {@code null}
+         * @throws IllegalArgumentException if {@code downDispatcher} is {@code null}.
          */
         public void append(final Dispatcher<T> downDispatcher) {
             N.checkArgNotNull(downDispatcher, cs.downDispatcher);
@@ -1859,8 +1852,8 @@ public abstract class Observer<T> {
         /**
          * Constructs a terminal dispatcher with the given error and completion handlers.
          *
-         * @param onError the consumer to invoke when an error is signalled;
-         * @param onComplete the runnable to invoke when the stream completes;
+         * @param onError the consumer to invoke when an error is signalled
+         * @param onComplete the runnable to invoke when the stream completes
          */
         protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
 
@@ -1918,7 +1911,8 @@ public abstract class Observer<T> {
          * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the queue signals completion
-         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
+         *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -1988,7 +1982,8 @@ public abstract class Observer<T> {
          * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the iterator is exhausted
-         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
+         *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -2064,7 +2059,8 @@ public abstract class Observer<T> {
          * @param action the action to perform when the timer fires
          * @param onError the consumer invoked if an exception occurs during the scheduled emission
          * @param onComplete the runnable invoked immediately after the single emission
-         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
+         *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
@@ -2145,7 +2141,8 @@ public abstract class Observer<T> {
          * @param action the action to perform on each emission
          * @param onError the consumer invoked if an exception occurs during an emission
          * @param onComplete the runnable invoked when the interval is cancelled
-         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is {@code null}
+         * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
+         *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)

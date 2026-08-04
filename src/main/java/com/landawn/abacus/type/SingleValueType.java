@@ -121,9 +121,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param typeName the type name string (may include generic parameters)
      * @param typeClass the class of the type to handle
-     * @throws IllegalArgumentException if only one side of the {@code @JsonXmlValue}/{@code @JsonXmlCreator}
-     *                                  pair is present, if multiple annotated members are present for either role,
-     *                                  or if an annotated member violates its signature constraints
+     * @throws IllegalArgumentException if only one side of the {@code @JsonXmlValue} /{@code @JsonXmlCreator} pair is
+     *         present, if multiple annotated members are present for either role, or if an annotated member violates
+     *         its signature constraints.
      */
     @SuppressWarnings("null")
     protected SingleValueType(final String typeName, final Class<T> typeClass) {

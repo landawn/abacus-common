@@ -50,7 +50,7 @@ package com.landawn.abacus.util;
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang, Google Guava, and other
  * open source projects under the Apache License 2.0. Methods from these libraries may have been
- * modified for consistency, performance optimization, and null-safety enhancement.
+ * modified for consistency, performance optimization, and null-safety enhancement.</p>
  *
  * @see Math#min(double, double)
  * @see Math#max(double, double)
@@ -136,7 +136,7 @@ public final class IEEE754rUtil {
      *
      * @param array the array of values, must not be {@code null} or empty
      * @return the minimum value in the array according to IEEE-754r
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static float min(final float... array) {
         // Validates input
@@ -227,7 +227,7 @@ public final class IEEE754rUtil {
      *
      * @param array the array of values, must not be {@code null} or empty
      * @return the minimum value in the array according to IEEE-754r
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static double min(final double... array) {
         // Validates input
@@ -318,7 +318,7 @@ public final class IEEE754rUtil {
      *
      * @param array the array of values, must not be {@code null} or empty
      * @return the maximum value in the array according to IEEE-754r
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static float max(final float... array) {
         // Validates input
@@ -409,7 +409,7 @@ public final class IEEE754rUtil {
      *
      * @param array the array of values, must not be {@code null} or empty
      * @return the maximum value in the array according to IEEE-754r
-     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
     public static double max(final double... array) {
         // Validates input

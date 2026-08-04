@@ -58,9 +58,8 @@ public final class AddrUtil {
      * Splits a string containing whitespace or comma separated host or IP addresses
      * and port numbers into a List of server strings without parsing or validating them.
      *
-     * <p>This method performs basic string splitting and trimming operations using a regex pattern
-     * that matches one or more whitespace characters or commas as separators. The returned strings
-     * are trimmed of leading and trailing whitespace, and empty strings are omitted from the result.</p>
+     * <p>Separators are one or more whitespace characters or commas. Returned strings are trimmed
+     * of leading and trailing whitespace, and empty tokens are omitted from the result.</p>
      *
      * <p>The input string can be in any of the following formats:</p>
      * <ul>
@@ -83,7 +82,8 @@ public final class AddrUtil {
      *
      * @param servers the string containing server addresses separated by whitespace or commas
      * @return a non-empty list of trimmed server address strings
-     * @throws IllegalArgumentException if {@code servers} is {@code null}, empty, or results in an empty list after splitting and trimming
+     * @throws IllegalArgumentException if {@code servers} is {@code null}, empty, or results in an empty list after
+     *         splitting and trimming.
      */
     public static List<String> getServerList(final String servers) {
         final List<String> serverList = URL_SPLITTER.split(servers);
@@ -99,10 +99,9 @@ public final class AddrUtil {
      * Parses a string containing whitespace or comma separated host or IP addresses
      * and port numbers into a List of {@link InetSocketAddress} instances.
      *
-     * <p>This method first splits the input string using whitespace or comma separators,
-     * then parses each address string to extract the host and port. The parsing algorithm
-     * finds the last colon in each address string to separate the host from the port, which
-     * correctly handles IPv6 addresses that contain multiple colons.</p>
+     * <p>Each address is split into host and port at the last colon, which correctly handles
+     * IPv6 addresses that contain multiple colons. Bracketed IPv6 hosts of the form
+     * {@code "[::1]:port"} are accepted; the brackets are stripped from the host.</p>
      *
      * <p>This method supports various address formats including:</p>
      * <ul>
@@ -124,7 +123,8 @@ public final class AddrUtil {
      *
      * @param servers the string containing server addresses to parse; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the parsed addresses
-     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535)
+     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses
+     *         (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535).
      * @see #getAddressList(Collection)
      * @see #getServerList(String)
      */
@@ -212,7 +212,9 @@ public final class AddrUtil {
      *
      * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null}
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
-     * @throws IllegalArgumentException if {@code servers} is {@code null}, any server address is invalid (missing colon, invalid port number, empty host or port, or port out of valid range 0-65535), or if the collection results in an empty address list
+     * @throws IllegalArgumentException if {@code servers} is {@code null}, any server address is invalid (missing
+     *         colon, invalid port number, empty host or port, or port out of valid range 0-65535), or if the
+     *         collection results in an empty address list.
      * @see #getAddressList(String)
      * @see #getServerList(String)
      */
@@ -288,7 +290,7 @@ public final class AddrUtil {
      * @param url a {@link URL} from which the host and port are to be extracted; must not be {@code null}
      * @return an {@link InetSocketAddress} instance corresponding to the host and port of the URL
      * @throws NullPointerException if {@code url} is {@code null}
-     * @throws IllegalArgumentException if the URL has no usable port (resolved port is outside the range 0-65535)
+     * @throws IllegalArgumentException if the URL has no usable port (resolved port is outside the range 0-65535).
      * @see #getAddressList(Collection)
      */
     public static InetSocketAddress getAddressFromUrl(final URL url) {
@@ -321,7 +323,7 @@ public final class AddrUtil {
      * @param urls a collection of {@link URL} objects to be converted; may be {@code null} or empty
      * @return a list of {@link InetSocketAddress} instances corresponding to the URLs,
      *         or an empty list if the input collection is {@code null} or empty
-     * @throws IllegalArgumentException if any URL has no usable port (resolved port is outside the range 0-65535)
+     * @throws IllegalArgumentException if any URL has no usable port (resolved port is outside the range 0-65535).
      * @see #getAddressFromUrl(URL)
      */
     public static List<InetSocketAddress> getAddressListFromUrls(final Collection<URL> urls) {
@@ -343,7 +345,8 @@ public final class AddrUtil {
      *
      * @param url the URL from which to extract the port
      * @return the explicit port if specified, or the default port for the URL's protocol
-     * @throws IllegalArgumentException if neither an explicit port nor a default port is available (i.e., the resolved port is not in the range 0-65535)
+     * @throws IllegalArgumentException if neither an explicit port nor a default port is available (i.e., the
+     *         resolved port is not in the range 0-65535).
      */
     private static int getPort(final URL url) {
         int port = url.getPort();

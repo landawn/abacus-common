@@ -205,7 +205,8 @@ public final class DataSourceUtil {
      * @param rs the ResultSet to close; may be {@code null}
      * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      * @param closeConnection if {@code true}, also closes the Connection (requires {@code closeStatement} to be {@code true})
-     * @throws IllegalArgumentException if {@code closeStatement} is {@code false} while {@code closeConnection} is {@code true}
+     * @throws IllegalArgumentException if {@code closeStatement} is {@code false} while {@code closeConnection} is
+     *         {@code true}.
      * @throws UncheckedSQLException if a database access error occurs while retrieving or closing the resources;
      *         the first failure is preserved and later close failures are attached as suppressed exceptions
      */
@@ -547,7 +548,8 @@ public final class DataSourceUtil {
      * @param rs the ResultSet to close; may be {@code null}
      * @param closeStatement if {@code true}, also closes the Statement that created the ResultSet
      * @param closeConnection if {@code true}, also closes the Connection (requires {@code closeStatement} to be {@code true})
-     * @throws IllegalArgumentException if {@code closeStatement} is {@code false} while {@code closeConnection} is {@code true}
+     * @throws IllegalArgumentException if {@code closeStatement} is {@code false} while {@code closeConnection} is
+     *         {@code true}.
      */
     public static void closeQuietly(final ResultSet rs, final boolean closeStatement, final boolean closeConnection) throws IllegalArgumentException {
         if (closeConnection && !closeStatement) {

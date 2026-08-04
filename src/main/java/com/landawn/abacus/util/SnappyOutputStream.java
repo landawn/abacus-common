@@ -57,7 +57,7 @@ public final class SnappyOutputStream extends OutputStream {
      * }</pre>
      *
      * @param os the underlying output stream to write compressed data to; must not be {@code null}
-     * @throws IllegalArgumentException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}.
      */
     public SnappyOutputStream(final OutputStream os) {
         N.checkArgNotNull(os, cs.os);
@@ -81,8 +81,8 @@ public final class SnappyOutputStream extends OutputStream {
      *
      * @param os the underlying output stream to write compressed data to; must not be {@code null}
      * @param bufferSize the size of the compression buffer in bytes, from 1 KiB through 512 MiB inclusive
-     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code bufferSize} is outside
-     *         the supported range
+     * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code bufferSize} is outside the
+     *         supported range.
      */
     public SnappyOutputStream(final OutputStream os, final int bufferSize) {
         N.checkArgNotNull(os, cs.os);

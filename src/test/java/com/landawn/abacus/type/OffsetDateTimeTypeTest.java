@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +67,27 @@ public class OffsetDateTimeTypeTest extends TestBase {
     public void testValueOfWithNull() {
         assertNull(offsetDateTimeType.valueOf((String) null));
         assertNull(offsetDateTimeType.valueOf((Object) null));
+    }
+
+    @Test
+    public void testValueOf_Object_OffsetDateTime_identity() {
+        OffsetDateTime odt = OffsetDateTime.of(2023, 5, 15, 10, 30, 45, 123456789, ZoneOffset.UTC);
+        assertEquals(odt, offsetDateTimeType.valueOf((Object) odt));
+        assertEquals(123456789, offsetDateTimeType.valueOf((Object) odt).getNano());
+    }
+
+    @Test
+    public void testValueOf_Object_Date_and_Calendar() {
+        long millis = 1703502645123L;
+        OffsetDateTime fromDate = offsetDateTimeType.valueOf(new Date(millis));
+        assertNotNull(fromDate);
+        assertEquals(millis, fromDate.toInstant().toEpochMilli());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        OffsetDateTime fromCal = offsetDateTimeType.valueOf(cal);
+        assertNotNull(fromCal);
+        assertEquals(millis, fromCal.toInstant().toEpochMilli());
     }
 
     @Test

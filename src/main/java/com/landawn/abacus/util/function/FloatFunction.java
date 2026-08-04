@@ -45,29 +45,19 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
     FloatFunction<Float> BOX = value -> value;
 
     /**
-     * Applies this function to the given float-valued argument and produces a result.
+     * Applies this function to the given argument.
      *
-     * <p>This method converts a float value to a result of type {@code R} according to
-     * the implementation's logic.</p>
-     *
-     * <p>Common use cases include:</p>
-     * <ul>
-     *   <li>Converting float values to strings or other representations</li>
-     *   <li>Creating objects from float values</li>
-     *   <li>Categorizing float values (e.g., returning enum based on ranges)</li>
-     *   <li>Performing calculations and returning wrapped results</li>
-     *   <li>Looking up values in maps or tables based on float keys</li>
-     * </ul>
-     *
-     * <p>Example implementations:</p>
+     * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatFunction<String> formatter = value -> String.format("%.2f", value);
-     * FloatFunction<Boolean> isPositive = value -> value > 0;
-     * FloatFunction<Integer> round = value -> Math.round(value);
+     * String result = formatter.apply(3.14159f);   // Returns "3.14"
+     *
+     * FloatFunction<Integer> rounder = value -> Math.round(value);
+     * Integer rounded = rounder.apply(42.7f);   // Returns 43
      * }</pre>
      *
-     * @param value the float value to be processed
-     * @return the function result of type {@code R}
+     * @param value the float function argument
+     * @return the function result
      */
     @Override
     R apply(float value);
@@ -94,7 +84,7 @@ public interface FloatFunction<R> extends Throwables.FloatFunction<R, RuntimeExc
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> FloatFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

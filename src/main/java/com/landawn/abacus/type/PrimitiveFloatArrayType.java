@@ -115,7 +115,7 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -158,7 +158,8 @@ public final class PrimitiveFloatArrayType extends AbstractPrimitiveArrayType<fl
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return the parsed float array, or {@code null} if input is {@code null}, empty, or blank
+     * @return the parsed float array; {@code null} if input is {@code null}, empty, or blank;
+     *         or an empty array if input is {@code "[]"}
      * @throws NumberFormatException if any element in the string cannot be parsed as a float
      * @see #valueOf(Object)
      * @see #stringOf(float[])

@@ -18,8 +18,8 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts two char-valued arguments and produces a result.
- * This is the two-arity specialization of {@link CharFunction}.
+ * Represents a function that accepts two {@code char}-valued arguments and produces a result.
+ * This is the primitive type specialization of {@link java.util.function.BiFunction} for {@code char}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(char, char)}.
  *
@@ -29,25 +29,25 @@ import com.landawn.abacus.util.cs;
  *
  * @see java.util.function.BiFunction
  * @see CharFunction
+ * @see CharTriFunction
  */
 @FunctionalInterface
 public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeException> { //NOSONAR
     /**
-     * Applies this function to the given char arguments.
-     * This method takes two char values as input and produces a result of type R.
+     * Applies this function to the given arguments.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharBiFunction<String> concat = (c1, c2) -> "" + c1 + c2;
      * String result = concat.apply('H', 'i');   // Returns "Hi"
      *
-     * CharBiFunction<Integer> sumCodes = (c1, c2) -> (int)c1 + (int)c2;
+     * CharBiFunction<Integer> sumCodes = (c1, c2) -> (int) c1 + (int) c2;
      * int sum = sumCodes.apply('A', 'B');   // Returns sum of char codes
      * }</pre>
      *
-     * @param a the first char function argument
-     * @param b the second char function argument
-     * @return the function result of type R
+     * @param a the first function argument
+     * @param b the second function argument
+     * @return the function result
      */
     @Override
     R apply(char a, char b);
@@ -70,7 +70,7 @@ public interface CharBiFunction<R> extends Throwables.CharBiFunction<R, RuntimeE
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> CharBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

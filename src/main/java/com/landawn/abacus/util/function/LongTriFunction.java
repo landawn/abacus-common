@@ -19,12 +19,9 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts three long-valued arguments and produces a result.
- * This is the three-arity primitive specialization of {@code Function}.
+ * This is the three-arity primitive specialization of {@link java.util.function.Function}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(long, long, long)}.
- *
- * <p>The interface extends {@code Throwables.LongTriFunction} with {@code RuntimeException} as the exception type,
- * making it suitable for use in contexts where checked exceptions are not required.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -51,22 +48,10 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
     /**
      * Applies this function to the given arguments.
      *
-     * <p>This method takes three long values as input and produces a result of type R.
-     * The implementation defines how the three long values are processed to produce the result.
-     *
-     * <p>Common use cases include:
-     * <ul>
-     *   <li>Combining three values into a single object</li>
-     *   <li>Performing calculations and returning the result</li>
-     *   <li>Creating formatted strings from three numeric values</li>
-     *   <li>Looking up values based on three coordinates or indices</li>
-     *   <li>Business logic that requires three long parameters</li>
-     * </ul>
-     *
      * @param a the first {@code long} argument
      * @param b the second {@code long} argument
      * @param c the third {@code long} argument
-     * @return the function result of type {@code R}
+     * @return the function result
      */
     @Override
     R apply(long a, long b, long c);
@@ -94,7 +79,7 @@ public interface LongTriFunction<R> extends Throwables.LongTriFunction<R, Runtim
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then
      *         applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> LongTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

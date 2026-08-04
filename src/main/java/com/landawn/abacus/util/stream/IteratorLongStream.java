@@ -1470,8 +1470,8 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     /**
-     * Returns the arithmetic mean without allowing the running integral sum to overflow.
-     * A {@link BigInteger} accumulator is allocated only if addition overflows a {@code long}.
+     * Returns the arithmetic mean of the elements of this stream.
+     * The sum of the elements is computed without overflowing a {@code long}.
      *
      * @return an {@code OptionalDouble} containing the arithmetic mean, or an empty optional if this stream is empty
      * @throws IllegalStateException if this stream is already closed

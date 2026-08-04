@@ -28,7 +28,7 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 
 /**
- * Abstract base class shared by every {@code TupleNType} (Tuple1Type ... Tuple9Type).
+ * The abstract base class shared by every {@code TupleNType} ({@code Tuple1Type} ... {@code Tuple9Type}).
  * <p>
  * Concrete subclasses provide the type name, the Java {@link Class} of the wrapped tuple,
  * the per-element {@link Type} list, and a {@link #fromArray(Object[])} factory that
@@ -139,7 +139,8 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      *
      * @param str the JSON array string to deserialize, may be {@code null} or empty
      * @return a new tuple instance, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed value is not an array whose length exactly matches the tuple arity
+     * @throws IllegalArgumentException if the parsed value is not an array whose length exactly matches the tuple
+     *         arity.
      * @see #valueOf(Object)
      * @see #stringOf(Tuple)
      */
@@ -172,7 +173,7 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
     }
 
     /**
-     * Rebuild a typed tuple from its deserialized element array. Implementations should
+     * Rebuilds a typed tuple from its deserialized element array. Implementations should
      * cast each element from {@code converted[i]} to the element's declared type and call the
      * matching {@code Tuple.of(...)} factory.
      *

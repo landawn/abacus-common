@@ -21,10 +21,6 @@ import com.landawn.abacus.util.cs;
  * Represents a predicate (boolean-valued function) of three arguments. This is
  * the three-arity specialization of {@link java.util.function.Predicate}.
  *
- * <p>This interface extends {@code Throwables.TriPredicate}, providing compatibility
- * with the abacus-common framework's error handling mechanisms while limiting thrown exceptions
- * to {@code RuntimeException}.
- *
  * <p>This is a functional interface whose functional method is {@link #test(Object, Object, Object)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -103,7 +99,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this
      *         predicate and the other predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default TriPredicate<A, B, C> and(final TriPredicate<? super A, ? super B, ? super C> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -135,7 +131,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this
      *         predicate and the other predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default TriPredicate<A, B, C> or(final TriPredicate<? super A, ? super B, ? super C> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -155,7 +151,7 @@ public interface TriPredicate<A, B, C> extends Throwables.TriPredicate<A, B, C, 
      * }</pre>
      *
      * @param <E> the target exception type for compatibility with {@code Throwables.TriPredicate}
-     * @return this predicate viewed as a {@code Throwables.TriPredicate} by unchecked cast
+     * @return a {@code Throwables.TriPredicate} view of this predicate
      */
     default <E extends Throwable> Throwables.TriPredicate<A, B, C, E> toThrowable() {
         return (Throwables.TriPredicate<A, B, C, E>) this;

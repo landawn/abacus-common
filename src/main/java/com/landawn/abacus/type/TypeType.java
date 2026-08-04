@@ -115,7 +115,7 @@ public class TypeType extends AbstractType<Type> {
      * Returns {@code true} because {@code Type} instances are immutable — they represent
      * type metadata that does not change after creation.
      *
-     * @return {@code true}
+     * @return {@code true}, always
      */
     @Override
     public boolean isImmutable() {
@@ -123,7 +123,7 @@ public class TypeType extends AbstractType<Type> {
     }
 
     /**
-     * Returns the name of the given {@code Type} instance by calling {@link Type#name()},
+     * Returns the registered name of the given {@code Type} instance ({@link Type#name()}),
      * or {@code null} if the input is {@code null}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -160,7 +160,7 @@ public class TypeType extends AbstractType<Type> {
      *
      * @param str the type name string to convert to a {@code Type} instance
      * @return the {@code Type} instance corresponding to the type name, or {@code null} if the string is {@code null} or empty
-     * @throws IllegalArgumentException if the type name format is invalid
+     * @throws IllegalArgumentException if the type name format is invalid.
      * @see #valueOf(Object)
      * @see #stringOf(Type)
      */

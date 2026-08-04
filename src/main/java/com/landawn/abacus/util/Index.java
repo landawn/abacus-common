@@ -712,7 +712,7 @@ public final class Index {
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance at or after {@code fromIndex},
      *         or an empty OptionalInt if no value is found within tolerance, the array is {@code null}, or {@code fromIndex >= array.length}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #of(float[], float, int)
      * @see N#indexOf(float[], float, int, float)
      */
@@ -803,7 +803,7 @@ public final class Index {
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the first occurrence of a value within tolerance at or after {@code fromIndex},
      *         or an empty OptionalInt if no value is found within tolerance, the array is {@code null}, or {@code fromIndex >= array.length}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #of(double[], double, int)
      * @see N#indexOf(double[], double, int, double)
      */
@@ -1006,7 +1006,7 @@ public final class Index {
      * @param charValueToFind the character value (Unicode code point) to search for
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return an OptionalInt containing the zero-based index of the first occurrence of the character at or after {@code fromIndex},
-     *         or an empty OptionalInt if the character is not found, the string is {@code null}, or {@code fromIndex >= str.length()}
+     *         or an empty OptionalInt if the character is not found, the string is {@code null}, or {@code fromIndex >= source.length()}
      * @see #of(String, int)
      * @see Strings#indexOf(String, int, int)
      * @see String#indexOf(int, int)
@@ -2971,7 +2971,7 @@ public final class Index {
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #last(float[], float, int)
      * @see N#lastIndexOf(float[], float, int, float)
      */
@@ -3063,7 +3063,7 @@ public final class Index {
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if no value is found within tolerance or the array is {@code null}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #last(double[], double, int)
      * @see N#lastIndexOf(double[], double, int, double)
      */
@@ -3227,7 +3227,7 @@ public final class Index {
      * @param charValueToFind the character value (Unicode code point) to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
      * @return an OptionalInt containing the zero-based index of the last occurrence of the character at or before {@code startIndexFromBack},
-     *         or an empty OptionalInt if the character is not found or the string is {@code null}
+     *         or an empty OptionalInt if the character is not found, the string is {@code null}, or {@code startIndexFromBack < 0}
      * @see #last(String, int)
      * @see Strings#lastIndexOf(String, int, int)
      * @see String#lastIndexOf(int, int)
@@ -3332,7 +3332,7 @@ public final class Index {
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
      * @param startIndexFromBack the position to start the backwards search from (inclusive)
      * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case) at or before {@code startIndexFromBack},
-     *         or an empty OptionalInt if the substring is not found or either parameter is {@code null}
+     *         or an empty OptionalInt if the substring is not found, either parameter is {@code null}, or {@code startIndexFromBack < 0}
      * @see #lastOfIgnoreCase(String, String)
      * @see Strings#lastIndexOfIgnoreCase(String, String, int)
      */
@@ -5158,7 +5158,7 @@ public final class Index {
      * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN
      * @return a BitSet containing the zero-based indices of all values within the specified tolerance at or after {@code fromIndex};
      *         returns an empty BitSet if no values are found within tolerance, the array is {@code null} or empty, or {@code fromIndex >= array.length}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #allOf(float[], float, int)
      */
     public static BitSet allOf(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) {
@@ -5268,7 +5268,7 @@ public final class Index {
      * @param tolerance the tolerance within which matches will be found; must be non-negative and not NaN
      * @return a BitSet containing the zero-based indices of all values within the specified tolerance at or after {@code fromIndex};
      *         returns an empty BitSet if no values are found within tolerance, the array is {@code null} or empty, or {@code fromIndex >= array.length}
-     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN
+     * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #allOf(double[], double, int)
      */
     public static BitSet allOf(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) {
@@ -5542,14 +5542,14 @@ public final class Index {
      * <p><b>Null Handling:</b></p>
      * <ul>
      *   <li>If {@code source} is {@code null}, returns empty BitSet</li>
-     *   <li>If {@code predicate} is {@code null}, throws {@code NullPointerException}</li>
+     *   <li>If {@code predicate} is {@code null}, throws {@code IllegalArgumentException}</li>
      *   <li>Null elements in the collection are passed to the predicate</li>
      * </ul>
      *
      * <p><b>Common Mistakes:</b></p>
      * <pre>{@code
      * // DON'T: Pass null predicate
-     * Index.allOf(collection, null);   // throws NullPointerException!
+     * Index.allOf(collection, null);   // throws IllegalArgumentException!
      *
      * // DO: Provide valid predicate
      * Index.allOf(collection, Objects::nonNull);

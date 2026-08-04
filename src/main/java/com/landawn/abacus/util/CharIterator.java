@@ -404,7 +404,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param n the number of elements to skip, must be non-negative
      * @return this iterator unchanged if {@code n == 0}, otherwise a new {@code CharIterator}
      *         with the first {@code n} elements skipped
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public CharIterator skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -464,7 +464,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * @param count the maximum number of elements to return, must be non-negative
      * @return an empty iterator if {@code count == 0}, otherwise a new {@code CharIterator}
      *         limited to at most {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public CharIterator limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -669,7 +669,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      *
      * @param startIndex the starting index value, must not be negative
      * @return an {@code ObjIterator} of {@code IndexedChar} elements with indices starting from {@code startIndex}
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta

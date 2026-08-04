@@ -74,12 +74,12 @@ import com.landawn.abacus.util.function.ShortUnaryOperator;
  * <pre>{@code
  * short[] data = {1, 2, 3, 4, 5};
  * ShortStream stream = ShortStream.of(data);
- * short max = stream.max().orElse((short)0);
+ * short max = stream.max().orElse((short) 0);
  *
  * // Filtering and mapping
  * ShortStream evenDoubled = ShortStream.of(data)
  *     .filter(n -> n % 2 == 0)
- *     .map(n -> (short)(n * 2));
+ *     .map(n -> (short) (n * 2));
  *
  * // Statistical operations
  * ShortStream stats = ShortStream.of(data);

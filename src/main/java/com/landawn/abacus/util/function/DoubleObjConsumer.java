@@ -69,7 +69,7 @@ public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, Ru
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleObjConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default DoubleObjConsumer<T> andThen(final DoubleObjConsumer<? super T> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

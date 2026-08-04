@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a supplier of char-valued results. This is the char-producing
+ * Represents a supplier of {@code char}-valued results. This is the {@code char}-producing
  * primitive specialization of {@link java.util.function.Supplier}.
  *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
@@ -74,7 +74,7 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * char value = letterA.getAsChar();   // Returns 'A'
      * }</pre>
      *
-     * @return a char value
+     * @return a {@code char} value
      */
     @Override
     char getAsChar();

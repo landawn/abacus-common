@@ -20,11 +20,6 @@ import com.landawn.abacus.util.Throwables;
  * {@code double}-valued result. This is the {@code long}-to-{@code double} primitive
  * specialization for {@link java.util.function.Function}.
  *
- * <p>This interface extends both {@link Throwables.LongToDoubleFunction} with
- * {@link RuntimeException} and {@link java.util.function.LongToDoubleFunction},
- * providing compatibility with the Java standard library while supporting the
- * abacus-common framework's exception handling capabilities.
- *
  * <p>This is a functional interface whose functional method is {@link #applyAsDouble(long)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -54,17 +49,8 @@ public interface LongToDoubleFunction extends Throwables.LongToDoubleFunction<Ru
     /**
      * Applies this function to the given argument.
      *
-     * <p>Converts a long value to a double value according to the function's implementation.
-     * The specific conversion logic depends on the implementation, but common use cases include:
-     * <ul>
-     *   <li>Simple type conversion (casting)</li>
-     *   <li>Mathematical transformations (e.g., logarithm, square root)</li>
-     *   <li>Scaling operations (e.g., converting cents to dollars)</li>
-     *   <li>Custom business logic transformations</li>
-     * </ul>
-     *
      * @param value the {@code long} function argument
-     * @return the {@code double} result of applying this function to the argument
+     * @return the {@code double} function result
      */
     @Override
     double applyAsDouble(long value);

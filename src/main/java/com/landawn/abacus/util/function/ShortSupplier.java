@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a supplier of short-valued results. This is the short-producing
+ * Represents a supplier of {@code short}-valued results. This is the {@code short}-producing
  * primitive specialization of {@link java.util.function.Supplier}.
  *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
@@ -42,7 +42,7 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
     ShortSupplier RANDOM = () -> (short) Util.RAND_SHORT.nextInt();
 
     /**
-     * Gets a result as a short value.
+     * Gets a short result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -60,7 +60,7 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
      * short value4 = counter.getAsShort();   // returns 1
      * }</pre>
      *
-     * @return a short value
+     * @return a {@code short} value
      */
     @Override
     short getAsShort();

@@ -162,7 +162,7 @@ public class Properties<K, V> implements Map<K, V> {
      *         if the property is not found or its value is {@code null}, returns the default value of {@code targetType}
      *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
      * @throws ArithmeticException if a numeric value overflows the requested integer type
-     * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}
+     * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}.
      * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
      * @throws NullPointerException if {@code targetType} is {@code null}
      * @throws RuntimeException if another conversion error occurs
@@ -224,7 +224,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, converted to the specified target type;
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
      * @throws ArithmeticException if a found numeric value overflows the requested integer type
-     * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}
+     * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}.
      * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
      * @throws NullPointerException if {@code targetType} is {@code null} and a non-{@code null}
      *         stored value must be converted

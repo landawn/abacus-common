@@ -82,12 +82,11 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * @param min the minimum {@code float} value
      * @param max the maximum {@code float} value
      * @param sum the sum of all values as a {@code double}
-     * @throws IllegalArgumentException if {@code count} is negative, the empty state is not canonical,
-     *         {@code min} is greater than {@code max}, {@code min} and {@code max} disagree on being
-     *         {@code NaN}, or the {@code NaN} state of {@code sum} is unreachable for the given
-     *         {@code min} and {@code max}. A {@code NaN} {@code sum} is accepted when
-     *         {@code min} is {@code -Infinity} and {@code max} is {@code +Infinity}, since summing
-     *         opposite infinities produces exactly that state.
+     * @throws IllegalArgumentException if {@code count} is negative, the empty state is not canonical, {@code min} is
+     *         greater than {@code max}, {@code min} and {@code max} disagree on being {@code NaN}, or the
+     *         {@code NaN} state of {@code sum} is unreachable for the given {@code min} and {@code max}. A
+     *         {@code NaN} {@code sum} is accepted when {@code min} is {@code -Infinity} and {@code max} is
+     *         {@code +Infinity}, since summing opposite infinities produces exactly that state.
      */
     public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
         if (count < 0) {

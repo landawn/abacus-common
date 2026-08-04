@@ -36,9 +36,10 @@ import com.landawn.abacus.util.u.Optional;
  * for thread-safe operations.</p>
  *
  * <p><b>⚠️ IMPORTANT - Thread Safety:</b>
- * This class is thread-safe if and only if the contained objects and any custom comparators
- * are thread-safe. The Range itself is immutable, but thread safety depends on the mutability
- * and thread safety of the generic type {@code T}.</p>
+ * The Range itself is immutable and uses natural ordering via {@link Comparable}. It is
+ * thread-safe for concurrent reads when the endpoint values of type {@code T} are themselves
+ * thread-safe (or are not mutated after the range is created). There is no custom-comparator
+ * option; ordering always follows each element's {@code compareTo}.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -470,10 +471,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * }</pre>
      *
      * @param <U> the type of elements in the resulting range, must implement {@code Comparable}.
-     * @param mapper the function to apply to both endpoints, and must not return {@code null} values.
+     * @param mapper the function to apply to both endpoints; it must not be {@code null} and must not return
+     *        {@code null} for either endpoint.
      * @return a new {@code Range<U>} with transformed endpoints maintaining the same bound types.
-     * @throws IllegalArgumentException if the mapped lower endpoint is greater than the mapped upper endpoint.
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null} or returns {@code null} for either endpoint,
+     *         or if the mapped lower endpoint is greater than the mapped upper endpoint.
      * @see #boundType()
      */
     public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
@@ -797,7 +799,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param element the element to compare against this range, must not be null
      * @return {@code -1} if this range is entirely before the element, {@code 0} if the element
      *         is contained within this range, or {@code 1} if this range is entirely after the element
-     * @throws IllegalArgumentException if element is null
+     * @throws IllegalArgumentException if element is null.
      * @see #isBefore(Comparable)
      * @see #isAfter(Comparable)
      * @see #contains(Comparable)

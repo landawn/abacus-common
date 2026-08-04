@@ -63,12 +63,11 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Core State Model:</b>
  * <ul>
- *   <li><b>Success State:</b> {@code value != null, exception == null} - Operation completed successfully</li>
- *   <li><b>Success with Null:</b> {@code value == null, exception == null} - Operation succeeded but returned null</li>
- *   <li><b>Failure State:</b> {@code exception != null} - Operation failed with an exception (value ignored)</li>
- *   <li><b>Both Present:</b> {@code value != null, exception != null} - The exception determines
- *       success/failure operations, while conversion, equality, and string methods still retain
- *       and expose both references</li>
+ *   <li><b>Success:</b> {@code exception == null} - the operation completed successfully; {@code value}
+ *       may be {@code null}</li>
+ *   <li><b>Failure:</b> {@code exception != null} - success/failure methods treat the result as failed;
+ *       conversion, equality, and string methods still retain and expose both the value and the exception
+ *       when both were supplied</li>
  * </ul>
  *
  * <p><b>Generic Type Parameters:</b>
@@ -593,7 +592,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * @param exception the non-{@code null} exception representing the failure cause
      * @return a new {@code Result} instance representing a failed operation containing the specified exception;
      *         never returns {@code null}
-     * @throws IllegalArgumentException if {@code exception} is {@code null}
+     * @throws IllegalArgumentException if {@code exception} is {@code null}.
      * @see #success(Object)
      * @see #of(Object, Throwable)
      * @see #isFailure()

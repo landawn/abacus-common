@@ -1619,39 +1619,39 @@ public class IntStreamTest extends TestBase {
     }
 
     @Test
-    public void testTransformB() {
-        int[] result = createIntStream(3, 1, 2).transformB(s -> s.sorted()).toArray();
+    public void testTransformViaJdkStream() {
+        int[] result = createIntStream(3, 1, 2).transformViaJdkStream(s -> s.sorted()).toArray();
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
     }
 
     @Test
-    public void testTransformB_Deferred() {
-        int[] result = createIntStream(3, 1, 2).transformB(s -> s.sorted(), true).toArray();
+    public void testTransformViaJdkStream_Deferred() {
+        int[] result = createIntStream(3, 1, 2).transformViaJdkStream(s -> s.sorted(), true).toArray();
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
     }
 
     @Test
-    public void testTransformB_NotDeferred() {
-        int[] result = createIntStream(3, 1, 2).transformB(s -> s.map(x -> x * 2), false).toArray();
+    public void testTransformViaJdkStream_NotDeferred() {
+        int[] result = createIntStream(3, 1, 2).transformViaJdkStream(s -> s.map(x -> x * 2), false).toArray();
         assertArrayEquals(new int[] { 6, 2, 4 }, result);
     }
 
     @Test
-    public void testTransformB_HappyPath2() {
-        int[] result = IntStream.of(1, 2, 3).transformB(s -> s.map(x -> x * 2)).toArray();
+    public void testTransformViaJdkStream_HappyPath2() {
+        int[] result = IntStream.of(1, 2, 3).transformViaJdkStream(s -> s.map(x -> x * 2)).toArray();
         assertArrayEquals(new int[] { 2, 4, 6 }, result);
     }
 
-    // transformB(Function, boolean) - with deferred=true path
+    // transformViaJdkStream(Function, boolean) - with deferred=true path
     @Test
-    public void testTransformB_WithDeferred_True() {
-        int[] result = IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.filter(x -> x % 2 == 0), true).toArray();
+    public void testTransformViaJdkStream_WithDeferred_True() {
+        int[] result = IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.filter(x -> x % 2 == 0), true).toArray();
         assertArrayEquals(new int[] { 2, 4 }, result);
     }
 
     @Test
-    public void testTransformB_WithDeferred_False() {
-        int[] result = IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(x -> x * 3), false).toArray();
+    public void testTransformViaJdkStream_WithDeferred_False() {
+        int[] result = IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(x -> x * 3), false).toArray();
         assertArrayEquals(new int[] { 3, 6, 9, 12, 15 }, result);
     }
 
@@ -3628,35 +3628,35 @@ public class IntStreamTest extends TestBase {
     }
 
     @Test
-    public void testStreamCreatedAfterTransformB() {
-        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).count());
-        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).count());
-        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).toArray());
-        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).toList());
-        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
-        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).count());
-        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).count());
-        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).toArray());
-        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).toList());
-        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2)).skip(1).toList());
+    public void testStreamCreatedAfterTransformViaJdkStream() {
+        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).count());
+        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).count());
+        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).toArray());
+        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).toList());
+        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).count());
+        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).count());
+        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).toArray());
+        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2)).skip(1).toList());
     }
 
     @Test
-    public void testStreamCreatedAfterTransformBDeferred() {
-        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).count());
-        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).count());
-        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).toArray());
-        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).toList());
-        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
-        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).count());
-        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).count());
-        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toArray());
-        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).toList());
-        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformB(s -> s.map(i -> i * 2), true).skip(1).toList());
+    public void testStreamCreatedAfterTransformViaJdkStreamDeferred() {
+        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).count());
+        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).count());
+        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).toArray());
+        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toList());
+        assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).count());
+        assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).count());
+        assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).toArray());
+        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).toList());
+        assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toList());
     }
 
     @Test

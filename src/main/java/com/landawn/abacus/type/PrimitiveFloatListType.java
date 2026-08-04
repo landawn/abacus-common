@@ -126,7 +126,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Parses a string representation and creates a FloatList.
      * The string is first parsed as a float array, then wrapped in a FloatList.
-     * Returns {@code null} if the input string is {@code null} or blank.
+     * Returns {@code null} if the input string is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,7 +143,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or blank
+     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a float
      * @see #valueOf(Object)
      * @see #stringOf(FloatList)

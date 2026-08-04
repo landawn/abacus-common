@@ -20,9 +20,19 @@ import java.sql.SQLException;
 import com.landawn.abacus.util.Numbers;
 
 /**
- * Type handler for the {@link Long} wrapper type.
- * Provides serialization, deserialization, and JDBC integration for {@code Long} objects,
- * including flexible conversion from various numeric database types to {@code Long}.
+ * Type handler for {@link Long} (wrapper class) values.
+ * This class provides database read operations and type information for {@link Long} objects.
+ *
+ * <p>When reading from a database, the column value is retrieved via
+ * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
+ * a {@code null} result returns {@code null}, a {@link Long} result is returned directly,
+ * any other {@link Number} is narrowed via {@link Number#longValue()}, and
+ * non-numeric values are parsed via {@link com.landawn.abacus.util.Numbers#toLong(String)}.
+ *
+ * <p>String serialization and JDBC write operations are inherited from
+ * {@link AbstractLongType}.</p>
+ *
+ * @see AbstractLongType
  */
 public final class LongType extends AbstractLongType {
 
@@ -32,17 +42,17 @@ public final class LongType extends AbstractLongType {
     public static final String LONG = Long.class.getSimpleName();
 
     /**
-     * Package-private constructor for LongType.
-     * This constructor is called by the TypeFactory to create Long type instances.
+     * Package-private constructor for {@code LongType}.
+     * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     LongType() {
         super(LONG);
     }
 
     /**
-     * Returns the Class object representing the {@code Long} type.
+     * Returns the Java class represented by this type handler.
      *
-     * @return the Class object for {@code Long}
+     * @return {@code Long.class}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
@@ -52,9 +62,9 @@ public final class LongType extends AbstractLongType {
 
     /**
      * Indicates whether this type represents a primitive wrapper class.
-     * Long is the wrapper class for the primitive long type.
+     * {@link Long} is the wrapper for the primitive {@code long} type.
      *
-     * @return {@code true}, indicating Long is a primitive wrapper
+     * @return {@code true}, always, because {@link Long} is a primitive wrapper
      */
     @Override
     public boolean isPrimitiveWrapper() {
@@ -62,21 +72,18 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * Retrieves a Long value from a ResultSet at the specified column index.
-     * This method handles various numeric types in the database and converts them to Long.
+     * Retrieves a {@link Long} value from a {@link java.sql.ResultSet} at the specified column index.
+     * The column is read via {@link java.sql.ResultSet#getObject(int)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Long} it is returned directly; any other
+     * {@link Number} is narrowed via {@link Number#longValue()}; non-numeric values are parsed via
+     * {@link com.landawn.abacus.util.Numbers#toLong(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = Mockito.mock(ResultSet.class);
-     * Long userId = type.get(rs, 1);   // retrieves Long from column 1
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return the Long value at the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnIndex the 1-based column index
+     * @return the converted {@code Long} value
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Long
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code long}
      */
     @Override
     public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
@@ -94,21 +101,18 @@ public final class LongType extends AbstractLongType {
     }
 
     /**
-     * Retrieves a Long value from a ResultSet using the specified column label.
-     * This method handles various numeric types in the database and converts them to Long.
+     * Retrieves a {@link Long} value from a {@link java.sql.ResultSet} using the specified column label.
+     * The column is read via {@link java.sql.ResultSet#getObject(String)} to preserve SQL {@code NULL}.
+     * If the returned object is already a {@link Long} it is returned directly; any other
+     * {@link Number} is narrowed via {@link Number#longValue()}; non-numeric values are parsed via
+     * {@link com.landawn.abacus.util.Numbers#toLong(String)}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Type<Long> type = TypeFactory.getType(Long.class);
-     * ResultSet rs = Mockito.mock(ResultSet.class);
-     * Long userId = type.get(rs, "user_id");   // retrieves Long from "user_id" column
-     * }</pre>
-     *
-     * @param rs the ResultSet containing the data, must not be {@code null}
-     * @param columnName the label of the column to retrieve the value from, must not be {@code null}
-     * @return the Long value in the specified column, or {@code null} if the column value is SQL NULL
+     * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
+     * @param columnName the label of the column to retrieve
+     * @return the converted {@code Long} value
+     *         or {@code null} if the column value is SQL {@code NULL}
      * @throws SQLException if a database access error occurs
-     * @throws NumberFormatException if a non-numeric value cannot be converted to Long
+     * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code long}
      */
     @Override
     public Long get(final ResultSet rs, final String columnName) throws SQLException {

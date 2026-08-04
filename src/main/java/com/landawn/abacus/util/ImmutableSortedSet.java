@@ -413,7 +413,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *
      * <p><b>Warning:</b> This method does not create a defensive copy. Changes to the underlying
      * SortedSet will be visible through the returned ImmutableSortedSet, which violates the
-     * immutability contract. Use {@link #copyOf(Collection)} for a {@code true} immutable copy.</p>
+     * immutability contract. Use {@link #copyOf(Collection)} for a truly independent immutable copy.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -510,10 +510,9 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         (or, if the set has no comparator, using natural ordering)
      * @throws NullPointerException if {@code fromElement} or {@code toElement} is {@code null}
      *         and this set uses natural ordering, or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if {@code fromElement} is greater than
-     *         {@code toElement}; or if this set itself has a restricted range,
-     *         and {@code fromElement} or {@code toElement} lies outside the
-     *         bounds of the range
+     * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set
+     *         itself has a restricted range, and {@code fromElement} or {@code toElement} lies outside the bounds of
+     *         the range.
      */
     @Override
     public ImmutableSortedSet<E> subSet(final E fromElement, final E toElement) {
@@ -538,8 +537,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         this set's comparator (or, if the set has no comparator, using natural ordering)
      * @throws NullPointerException if {@code toElement} is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range,
-     *         and {@code toElement} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside
+     *         the bounds of the range.
      */
     @Override
     public ImmutableSortedSet<E> headSet(final E toElement) {
@@ -564,8 +563,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *         this set's comparator (or, if the set has no comparator, using natural ordering)
      * @throws NullPointerException if {@code fromElement} is {@code null} and this set uses natural ordering,
      *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range,
-     *         and {@code fromElement} lies outside the bounds of the range
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies
+     *         outside the bounds of the range.
      */
     @Override
     public ImmutableSortedSet<E> tailSet(final E fromElement) {

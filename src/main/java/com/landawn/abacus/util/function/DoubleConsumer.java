@@ -63,7 +63,7 @@ public interface DoubleConsumer extends Throwables.DoubleConsumer<RuntimeExcepti
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code DoubleConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default DoubleConsumer andThen(final java.util.function.DoubleConsumer after) throws IllegalArgumentException {

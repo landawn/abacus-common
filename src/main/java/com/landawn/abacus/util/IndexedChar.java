@@ -15,21 +15,18 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable container that pairs a char value with its index position.
- * This class is useful for operations where both the character value and its original position
- * need to be preserved, such as when processing strings while maintaining knowledge of
- * character positions.
+ * Represents a primitive char value paired with an index position.
  *
  * <p>This class is a specialized version of {@code Indexed<Character>} for primitive char
- * values, providing better performance by avoiding boxing/unboxing overhead. It extends
- * {@link AbstractIndexed} and provides factory methods for creating instances with validated
- * non-negative indices.</p>
+ * values, providing better performance by avoiding boxing/unboxing overhead.</p>
+ *
+ * <p>The class is immutable and extends {@link AbstractIndexed}.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * IndexedChar ic = IndexedChar.of('A', 0);
- * System.out.println(ic.value());   // prints A
- * System.out.println(ic.index());   // prints 0
+ * IndexedChar indexedChar = IndexedChar.of('A', 0);
+ * char value = indexedChar.value();   // returns 'A'
+ * int index = indexedChar.index();    // returns 0
  * }</pre>
  *
  * @see Indexed
@@ -60,7 +57,7 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedChar} instance with the specified value and index.
+     * Creates a new IndexedChar instance with the specified value and index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -69,8 +66,8 @@ public final class IndexedChar extends AbstractIndexed {
      *
      * @param value the char value to be associated with the index
      * @param index the index position (must be non-negative, 0 to Integer.MAX_VALUE)
-     * @return a new immutable {@code IndexedChar} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @return a new immutable IndexedChar instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedChar of(final char value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -79,9 +76,9 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Creates a new {@code IndexedChar} instance with the specified value and long index.
-     * This method is useful when working with large strings or character sequences where
-     * the index might exceed the range of an int.
+     * Creates a new IndexedChar instance with the specified value and index.
+     *
+     * <p>This overload accepts a long index for cases where the index might exceed Integer.MAX_VALUE.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -89,9 +86,9 @@ public final class IndexedChar extends AbstractIndexed {
      * }</pre>
      *
      * @param value the char value to be associated with the index
-     * @param index the index position as a long (must be non-negative, 0 to Long.MAX_VALUE)
-     * @return a new immutable {@code IndexedChar} instance containing the specified value and index
-     * @throws IllegalArgumentException if the index is negative (index &lt; 0)
+     * @param index the index position (must be non-negative, 0 to Long.MAX_VALUE)
+     * @return a new immutable IndexedChar instance containing the specified value and index
+     * @throws IllegalArgumentException if index is negative (index &lt; 0).
      */
     public static IndexedChar of(final char value, final long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
@@ -119,11 +116,11 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Returns a hash code value for this object. The hash code is computed
-     * using both the index and the value to ensure proper distribution in
-     * hash-based collections.
+     * Returns the hash code of this {@code IndexedChar} instance.
      *
-     * @return a hash code value for this object
+     * <p>The hash code is computed from both the index and the value.</p>
+     *
+     * @return the hash code value for this object
      */
     @Override
     public int hashCode() {
@@ -131,13 +128,23 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one.
-     * Two {@code IndexedChar} objects are considered equal if they have
-     * the same index and the same value.
+     * Checks if this IndexedChar instance is equal to another object.
      *
-     * @param obj the reference object with which to compare
-     * @return {@code true} if this object is equal to the obj argument;
-     *         {@code false} otherwise
+     * <p>Two IndexedChar instances are equal if they have the same index and value.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedChar indexed1 = IndexedChar.of('X', 5);
+     * IndexedChar indexed2 = IndexedChar.of('X', 5);
+     * IndexedChar indexed3 = IndexedChar.of('Y', 5);
+     *
+     * indexed1.equals(indexed2);   // returns true
+     * indexed1.equals(indexed3);   // returns false
+     * }</pre>
+     *
+     * @param obj the object to compare with this IndexedChar instance for equality
+     * @return {@code true} if the specified object is an IndexedChar with the same
+     *         index and value, {@code false} otherwise
      */
     @Override
     public boolean equals(final Object obj) {
@@ -145,14 +152,17 @@ public final class IndexedChar extends AbstractIndexed {
     }
 
     /**
-     * Returns a string representation of this {@code IndexedChar}.
-     * The string representation consists of the index in square brackets
-     * followed by an equals sign and the character value.
+     * Returns a string representation of this IndexedChar instance.
      *
-     * <p>For example, an {@code IndexedChar} with index 3 and value 'B'
-     * would return the string {@code "[3]=B"}.</p>
+     * <p>The format is: {@code [index]=value}</p>
      *
-     * @return a string representation of this object
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexedChar indexed = IndexedChar.of('B', 3);
+     * System.out.println(indexed);   // prints [3]=B
+     * }</pre>
+     *
+     * @return a string representation in the format {@code [index]=value}
      */
     @Override
     public String toString() {

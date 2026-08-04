@@ -16,8 +16,8 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents an operation on two {@code boolean} operands that produces a {@code boolean} result.
- * This is the primitive type specialization of {@link BinaryOperator} for {@code boolean}.
+ * Represents an operation upon two {@code boolean} operands and producing a {@code boolean} result.
+ * This is the primitive type specialization of {@link java.util.function.BinaryOperator} for {@code boolean}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsBoolean(boolean, boolean)}.
  *
@@ -38,9 +38,9 @@ public interface BooleanBinaryOperator extends Throwables.BooleanBinaryOperator<
      * boolean result = and.applyAsBoolean(true, false);   // Returns false
      * }</pre>
      *
-     * @param a the first operand ({@code boolean} value)
-     * @param b the second operand ({@code boolean} value)
-     * @return the operator result ({@code boolean} value)
+     * @param a the first operand
+     * @param b the second operand
+     * @return the operator result
      */
     @Override
     boolean applyAsBoolean(boolean a, boolean b);

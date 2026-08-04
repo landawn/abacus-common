@@ -497,7 +497,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided array of elements based on their natural ordering.
-     * Null values are considered to be maximum value.
+     * Null values are considered to be the maximum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -540,7 +540,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterable of elements based on their natural ordering.
-     * Null values are considered to be maximum value.
+     * Null values are considered to be the maximum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -583,7 +583,7 @@ public final class Iterables {
 
     /**
      * Returns the minimum value from the provided iterator of elements based on their natural ordering.
-     * Null values are considered to be maximum value.
+     * Null values are considered to be the maximum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1193,7 +1193,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided array of elements based on their natural ordering.
-     * Null values are considered to be minimum value.
+     * Null values are considered to be the minimum value.
      * If the array is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1236,7 +1236,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterable of elements based on their natural ordering.
-     * Null values are considered to be minimum value.
+     * Null values are considered to be the minimum value.
      * If the iterable is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1279,7 +1279,7 @@ public final class Iterables {
 
     /**
      * Returns the maximum value from the provided iterator of elements based on their natural ordering.
-     * Null values are considered to be minimum value.
+     * Null values are considered to be the minimum value.
      * If the iterator is {@code null} or empty, it returns an empty {@code Nullable}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2062,8 +2062,8 @@ public final class Iterables {
      * @param k the position of the largest element to find (1-based index).
      * @param cmp the comparator to determine the order of the elements.
      * @return a {@code Nullable} containing the k-th largest value if the array is not {@code null} and has at least k elements, otherwise an empty {@code Nullable}.
-     * @throws IllegalArgumentException if {@code k <= 0} and the array is neither {@code null} nor empty.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the array is neither {@code null} nor empty, or if
+     *         {@code cmp} is {@code null}.
      * @see N#kthLargest(Object[], int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
@@ -2114,8 +2114,8 @@ public final class Iterables {
      * @param k the 1-based rank from the largest: {@code k=1} is the largest, {@code k=2} is the second-largest, and so on.
      * @param cmp the comparator used to determine the order of the collection's elements.
      * @return a {@code Nullable} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Nullable}.
-     * @throws IllegalArgumentException if {@code k <= 0} and the collection is neither {@code null} nor empty.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code k <= 0} and the collection is neither {@code null} nor empty, or if
+     *         {@code cmp} is {@code null}.
      * @see N#kthLargest(Collection, int, Comparator)
      */
     public static <T> Nullable<T> kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
@@ -2553,7 +2553,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract an integer value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the extracted integer values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Object[], int, int, ToIntFunction)
@@ -2611,7 +2611,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract an integer value from each element.
-     * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the extracted integer values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageInt(Collection, int, int, ToIntFunction)
@@ -2786,7 +2786,7 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a long value from each element.
-     * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
+     * @return the average of the extracted long values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
      * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see N#averageLong(Object[], int, int, ToLongFunction)
@@ -3988,8 +3988,7 @@ public final class Iterables {
      * @param <T> the type of elements in the list.
      * @param list the list to be filled.
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} is {@code null}.
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code list} is {@code null}, or if {@code supplier} is {@code null}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
      * @see N#setAll(List, java.util.function.IntFunction)
@@ -4035,9 +4034,8 @@ public final class Iterables {
      * @param fromIndex the starting index (inclusive) to begin filling.
      * @param toIndex the ending index (exclusive) to stop filling. May exceed {@code list.size()}, in which case the list is extended.
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IllegalArgumentException if {@code list} is {@code null}.
+     * @throws IllegalArgumentException if {@code list} is {@code null}, or if {@code supplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || fromIndex > toIndex}.
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see N#fill(List, Object)
      * @see N#fill(List, int, int, Object)
      * @see N#setAll(List, java.util.function.IntFunction)
@@ -4996,7 +4994,8 @@ public final class Iterables {
      * @param set the original {@code NavigableSet} from which to derive the subset. May be {@code null} or empty.
      * @param range the non-null {@code Range} that defines the lower and upper bounds of the subset (inclusive/exclusive per bound type).
      * @return a {@code NavigableSet} view of the elements within the specified range; a detached empty {@code NavigableSet} only if {@code set} is {@code null}.
-     * @throws IllegalArgumentException if {@code range} is {@code null}, or if its endpoints are ordered oppositely by the set's comparator.
+     * @throws IllegalArgumentException if {@code range} is {@code null}, or if its endpoints are ordered oppositely
+     *         by the set's comparator.
      */
     public static <T extends Comparable<? super T>> NavigableSet<T> subSet(final NavigableSet<T> set, final Range<T> range) throws IllegalArgumentException {
         N.checkArgNotNull(range, cs.range);
@@ -5055,7 +5054,8 @@ public final class Iterables {
      * @param <T> the type of the elements.
      * @param set the set of elements to construct a power set from.
      * @return a {@code Set} containing all {@code 2^n} possible subsets of the input set.
-     * @throws IllegalArgumentException if {@code set} has more than 30 elements (the implementation limits the input size so the subset bitmask fits in an {@code int})
+     * @throws IllegalArgumentException if {@code set} has more than 30 elements (the implementation limits the input
+     *         size so the subset bitmask fits in an {@code int}).
      * @see <a href="http://en.wikipedia.org/wiki/Power_set">Power set article at Wikipedia</a>
      */
     public static <T> Set<Set<T>> powerSet(final Set<T> set) {
@@ -5153,9 +5153,6 @@ public final class Iterables {
      *
      * <p>An empty iterable has only one permutation, which is an empty list.
      *
-     * <p>This method is equivalent to
-     * {@code Collections2.orderedPermutations(list, Ordering.natural())}.
-     *
      * <p>Like {@link #powerSet(Set)}, {@link #rollup(Collection)} and {@link #cartesianProduct(Collection)},
      * a {@code null} input is treated as an empty collection (yielding the single empty permutation).</p>
      *
@@ -5185,7 +5182,7 @@ public final class Iterables {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     *   for (List<String> perm : Iterables.orderedPermutations(Arrays.asList("b", "c", "a"))) {
+     *   for (List<String> perm : Iterables.orderedPermutations(Arrays.asList("b", "c", "a"), Comparator.naturalOrder())) {
      *     System.out.println(perm);
      *   }
      *   // -> ["a", "b", "c"]
@@ -5195,7 +5192,7 @@ public final class Iterables {
      *   // -> ["c", "a", "b"]
      *   // -> ["c", "b", "a"]
      *
-     *   for (List<Integer> perm : Iterables.orderedPermutations(Arrays.asList(1, 2, 2, 1))) {
+     *   for (List<Integer> perm : Iterables.orderedPermutations(Arrays.asList(1, 2, 2, 1), Comparator.naturalOrder())) {
      *     System.out.println(perm);
      *   }
      *   // -> [1, 1, 2, 2]

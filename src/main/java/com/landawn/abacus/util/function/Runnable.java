@@ -17,21 +17,18 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * A functional interface that represents a task to be executed without arguments and
- * without returning a result. This interface extends both {@link java.lang.Runnable}
- * and {@link Throwables.Runnable}, providing compatibility with the standard Java
- * Runnable interface while adding exception handling capabilities.
+ * Represents a task that takes no arguments and returns no result.
+ * This interface extends {@link java.lang.Runnable} and is parameterized so that
+ * {@link #run()} may only propagate unchecked exceptions ({@code RuntimeException}).
+ * Lambdas that need to throw checked exceptions should use {@link Throwables.Runnable}
+ * with an appropriate exception type instead.
  *
- * <p>Unlike {@link java.lang.Runnable}, whose {@code run()} contract says nothing about
- * exceptions, this interface is parameterized over {@code RuntimeException}, meaning the
- * {@code run()} method may only propagate unchecked exceptions.  Lambdas that need to
- * throw checked exceptions should use {@link Throwables.Runnable} with an appropriate
- * exception type instead. Instances of this interface are directly usable wherever a
- * {@code java.lang.Runnable} is expected (e.g., {@link Thread}, {@link java.util.concurrent.Executor}).
+ * <p>Instances are usable wherever a {@code java.lang.Runnable} is expected
+ * (for example with {@link Thread} or {@link java.util.concurrent.Executor}).
  *
  * <p>This is a functional interface whose functional method is {@link #run()}.
  *
- * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
+ * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html</a></p>
  *
  * @see java.lang.Runnable
  * @see Callable
@@ -41,14 +38,7 @@ import com.landawn.abacus.util.Throwables;
 public interface Runnable extends java.lang.Runnable, Throwables.Runnable<RuntimeException> { //NOSONAR
     /**
      * Executes this runnable task.
-     *
-     * <p>When an object implementing interface {@code Runnable} is used to create
-     * a thread, starting the thread causes the object's {@code run} method to be
-     * called in that separately executing thread.
-     *
-     * <p>The general contract of the method {@code run} is that it may take any
-     * action whatsoever. This method performs its task without returning any result
-     * and without accepting any parameters.
+     * The general contract is that this method may take any action whatsoever.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -77,12 +67,7 @@ public interface Runnable extends java.lang.Runnable, Throwables.Runnable<Runtim
     void run();
 
     /**
-     * Converts this {@code Runnable} to a {@code Callable<Void>}.
-     *
-     * <p>This method wraps the runnable in a callable that executes the runnable's
-     * {@code run} method and returns {@code null}. This is useful where a
-     * {@link Callable} is specifically required, or when you need to obtain a
-     * {@link java.util.concurrent.Future} for a task that doesn't produce a result.
+     * Returns a {@code Callable<Void>} that executes this runnable and returns {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

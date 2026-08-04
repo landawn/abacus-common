@@ -9137,4 +9137,18 @@ public class IOUtilTest extends TestBase {
         };
     }
 
+    @Test
+    public void testCharsToBytes_outOfRangeThrowsIndexOutOfBounds() {
+        final char[] chars = new char[] { 'a', 'b', 'c' };
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.charsToBytes(chars, 5, 1, UTF_8));
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.charsToBytes(chars, 2, 5, UTF_8));
+    }
+
+    @Test
+    public void testBytesToChars_outOfRangeThrowsIndexOutOfBounds() {
+        final byte[] bytes = new byte[] { 1, 2, 3 };
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.bytesToChars(bytes, 5, 1, UTF_8));
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.bytesToChars(bytes, 1, 10, UTF_8));
+    }
+
 }

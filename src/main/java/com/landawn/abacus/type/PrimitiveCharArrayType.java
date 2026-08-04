@@ -101,7 +101,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
@@ -156,7 +156,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @return the parsed char array, or {@code null} if input is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
      * @throws NumberFormatException if an unquoted multi-character element cannot be parsed as a numeric character code
-     * @throws IllegalArgumentException if such an element parses to a numeric value outside the {@code char} range
+     * @throws IllegalArgumentException if such an element parses to a numeric value outside the {@code char} range.
      * @see #valueOf(Object)
      * @see #stringOf(char[])
      */

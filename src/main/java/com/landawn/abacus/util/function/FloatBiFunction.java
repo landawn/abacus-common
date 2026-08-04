@@ -19,12 +19,9 @@ import com.landawn.abacus.util.cs;
 
 /**
  * Represents a function that accepts two float-valued arguments and produces a result.
- * This is the two-arity specialization of {@link java.util.function.Function} for {@code float} values.
+ * This is the primitive type specialization of {@link java.util.function.BiFunction} for {@code float}.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(float, float)}.</p>
- *
- * <p>This interface extends {@link Throwables.FloatBiFunction} with {@link RuntimeException},
- * providing exception handling capabilities while maintaining compatibility with standard functional programming patterns.</p>
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -37,19 +34,7 @@ import com.landawn.abacus.util.cs;
 @FunctionalInterface
 public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, RuntimeException> { //NOSONAR
     /**
-     * Applies this function to the given two float arguments and produces a result.
-     *
-     * <p>This method takes two float values as input and returns a result of type {@code R}.
-     * The specific computation performed depends on the implementation.</p>
-     *
-     * <p>Common use cases include:</p>
-     * <ul>
-     *   <li>Mathematical calculations with two variables (e.g., addition, multiplication, power)</li>
-     *   <li>Creating objects from two float values (e.g., Point2D from x and y coordinates)</li>
-     *   <li>Comparison operations returning wrapped results</li>
-     *   <li>Converting pairs of float values to other representations</li>
-     *   <li>Aggregating two float values into a single result</li>
-     * </ul>
+     * Applies this function to the given arguments.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -89,7 +74,7 @@ public interface FloatBiFunction<R> extends Throwables.FloatBiFunction<R, Runtim
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> FloatBiFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

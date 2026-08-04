@@ -135,7 +135,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     }
 
     /**
-     * Parses a string representation of a long list and returns the corresponding LongList.
+     * Parses a string representation and creates a LongList.
      * The string should contain comma-separated long values enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
@@ -157,7 +157,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed LongList, or {@code null} if the input string is {@code null} or blank
+     * @return the parsed LongList, or {@code null} if the input string is {@code null} or empty
      * @throws NumberFormatException if any element in the string cannot be parsed as a long
      * @see #valueOf(Object)
      * @see #stringOf(LongList)
@@ -173,7 +173,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     }
 
     /**
-     * Appends the string representation of a LongList to the given Appendable.
+     * Appends the string representation of a LongList to an Appendable.
      * The list is formatted as comma-separated values enclosed in square brackets.
      * If the list is {@code null}, appends "null".
      *
@@ -219,7 +219,7 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
     }
 
     /**
-     * Writes the character representation of a LongList to the given CharacterWriter.
+     * Writes the character representation of a LongList to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
      * The list is converted to an array and then written as comma-separated values
      * enclosed in square brackets.

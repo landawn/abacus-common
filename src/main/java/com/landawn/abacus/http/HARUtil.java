@@ -115,7 +115,7 @@ public final class HARUtil {
      *
      * @param httpHeaderFilterForHARRequest the filter to apply to headers; must not be {@code null}.
      *        Use {@link #resetThreadLocalHeaderFilter()} to restore the default filter.
-     * @throws IllegalArgumentException if {@code httpHeaderFilterForHARRequest} is {@code null}
+     * @throws IllegalArgumentException if {@code httpHeaderFilterForHARRequest} is {@code null}.
      */
     public static void setThreadLocalHeaderFilter(final BiPredicate<? super String, String> httpHeaderFilterForHARRequest) throws IllegalArgumentException {
         N.checkArgNotNull(httpHeaderFilterForHARRequest, cs.httpHeaderFilterForHARRequest);
@@ -229,7 +229,7 @@ public final class HARUtil {
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable.
      * @param quoteChar the character to use for quoting in curl commands.
      * @param logHandler the consumer that will handle the generated curl command strings; must not be {@code null}
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
      * @see #configureCurlLoggingForCurrentThread(boolean)
      * @see #configureCurlLoggingForCurrentThread(boolean, char)
      */
@@ -315,7 +315,8 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, or the HAR content contains no entries under {@code log.entries}.
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, or the HAR content contains no
+     *         entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR file matches {@code filterForTargetUrl}.
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -373,7 +374,8 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, or the HAR content contains no entries under {@code log.entries}.
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, or the HAR content contains no
+     *         entries under {@code log.entries}.
      * @throws java.util.NoSuchElementException if no entry in the HAR content matches {@code filterForTargetUrl}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -423,7 +425,7 @@ public final class HARUtil {
      * @return a list of response bodies as strings, in the order they appear in the HAR file;
      *         an empty list if the HAR has no entries or none of them match
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -448,7 +450,7 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
      * @return a list of response bodies as strings, in the order they appear in the HAR content;
      *         an empty list if the HAR has no entries under {@code log.entries} or none of them match
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -498,7 +500,7 @@ public final class HARUtil {
      * @return a stream of tuples where the first element is the request entry map and the second is the
      *         {@code HttpResponse}; an empty stream if the HAR has no entries or none of them match
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -527,7 +529,7 @@ public final class HARUtil {
      * @return a stream of tuples where the first element is the request entry map and the second is the
      *         {@code HttpResponse}; an empty stream if the HAR has no entries under {@code log.entries}
      *         or none of them match
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -583,7 +585,8 @@ public final class HARUtil {
      * @param requestEntry the HAR request entry map containing request details.
      * @param responseClass the class to deserialize the response into.
      * @return the response deserialized into the specified type.
-     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a recognized {@link HttpMethod}.
+     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a
+     *         recognized {@link HttpMethod}.
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HTTP request execution fails with an I/O error.
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass) {
@@ -634,7 +637,7 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs.
      * @return an {@code Optional} containing the first matching request entry map, or empty if no match is found.
      * @throws com.landawn.abacus.exception.UncheckedIOException if the HAR file cannot be read.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      */
     public static Optional<Map<String, Object>> findRequestEntry(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException {
@@ -668,7 +671,7 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs.
      * @return an {@code Optional} containing the first matching request entry map, or empty if no match is found.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
     public static Optional<Map<String, Object>> findRequestEntry(final String har, final Predicate<? super String> filterForTargetUrl)
@@ -720,7 +723,8 @@ public final class HARUtil {
      *
      * @param requestEntry the HAR request entry map.
      * @return the HTTP method enum value ({@code GET}, {@code POST}, {@code PUT}, {@code DELETE}, etc.).
-     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a recognized {@link HttpMethod}.
+     * @throws IllegalArgumentException if the request entry has no {@code method} field, or its value is not a
+     *         recognized {@link HttpMethod}.
      */
     public static HttpMethod getHttpMethodByRequestEntry(final Map<String, Object> requestEntry) {
         final Object method = requestEntry.get("method");

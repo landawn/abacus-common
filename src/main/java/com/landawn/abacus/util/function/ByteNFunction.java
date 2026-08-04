@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts a variable number of byte-valued arguments and produces a result.
+ * Represents a function that accepts a variable number of {@code byte}-valued arguments and produces a result.
  * This is a functional interface designed to process byte arrays of any length and return a value.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(byte...)}.
@@ -73,7 +73,7 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     @Override
     default <V> ByteNFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {

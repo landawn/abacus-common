@@ -22,10 +22,6 @@ import com.landawn.abacus.util.cs;
  * object-valued argument and a long-valued argument. This is a specialization of
  * BiPredicate for the case where the second argument is a primitive long.
  *
- * <p>This interface is typically used for testing conditions that involve both an object
- * and a long value, such as timestamp validations, ID checks, size comparisons, or
- * filtering operations based on long numeric criteria.
- *
  * <p>This is a functional interface whose functional method is {@link #test(Object, long)}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
@@ -38,10 +34,6 @@ import com.landawn.abacus.util.cs;
 public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, RuntimeException> { // NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
-     *
-     * <p>This method tests whether the given object and long value satisfy the
-     * condition represented by this predicate. It should return {@code true} if
-     * the input arguments match the predicate's criteria, {@code false} otherwise.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -64,10 +56,6 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.
-     *
-     * <p>The returned predicate will return {@code true} when this predicate returns
-     * {@code false}, and vice versa. This is useful for inverting conditions without
-     * having to write a new predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -107,7 +95,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjLongPredicate<T> and(final ObjLongPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -139,7 +127,7 @@ public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, Runt
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default ObjLongPredicate<T> or(final ObjLongPredicate<? super T> other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

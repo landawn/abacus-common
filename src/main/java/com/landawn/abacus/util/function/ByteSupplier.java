@@ -16,7 +16,7 @@ package com.landawn.abacus.util.function;
 import com.landawn.abacus.util.Throwables;
 
 /**
- * Represents a supplier of byte-valued results. This is the byte-producing
+ * Represents a supplier of {@code byte}-valued results. This is the {@code byte}-producing
  * primitive specialization of {@link java.util.function.Supplier}.
  *
  * <p>There is no requirement that a new or distinct result be returned each time the supplier is invoked.
@@ -53,7 +53,7 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
      * byte value = counter.getAsByte();   // Returns 0, then 1, 2, ...
      * }</pre>
      *
-     * @return a byte value
+     * @return a {@code byte} value
      */
     @Override
     byte getAsByte();

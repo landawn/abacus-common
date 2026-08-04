@@ -17,8 +17,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation that accepts a variable number of short-valued arguments and returns no result.
- * This is the variable-arity specialization of {@link ShortConsumer}.
+ * Represents an operation that accepts a variable number of {@code short}-valued arguments and returns no result.
+ * This is the N-arity specialization of {@link ShortConsumer}.
  * Unlike most other functional interfaces, {@code ShortNConsumer} is expected to operate via side-effects.
  *
  * <p>This is a functional interface whose functional method is {@link #accept(short...)}.
@@ -80,7 +80,7 @@ public interface ShortNConsumer {
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code ShortNConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default ShortNConsumer andThen(final ShortNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

@@ -92,7 +92,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * @param str a valid ISO 4217 currency code; may be {@code null} or empty
      * @return the corresponding {@link Currency} instance,
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if {@code str} is not a supported ISO 4217 currency code
+     * @throws IllegalArgumentException if {@code str} is not a supported ISO 4217 currency code.
      * @see #valueOf(Object)
      * @see #stringOf(Currency)
      */

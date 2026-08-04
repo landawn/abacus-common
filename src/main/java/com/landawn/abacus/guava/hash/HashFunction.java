@@ -138,7 +138,7 @@ public interface HashFunction {
      *
      * @param expectedInputSize a hint about the expected total size of input in bytes (must be non-negative)
      * @return a new hasher instance optimized for the expected input size
-     * @throws IllegalArgumentException if {@code expectedInputSize} is negative
+     * @throws IllegalArgumentException if {@code expectedInputSize} is negative.
      */
     Hasher newHasher(int expectedInputSize);
 

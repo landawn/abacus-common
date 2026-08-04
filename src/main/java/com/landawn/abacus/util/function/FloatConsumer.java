@@ -60,7 +60,7 @@ public interface FloatConsumer extends Throwables.FloatConsumer<RuntimeException
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code FloatConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default FloatConsumer andThen(final FloatConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

@@ -768,7 +768,7 @@ public final class ClassUtil {
      * @param <T> the type the returned {@code Class} object is parameterized to (the caller-expected type)
      * @param clsName the fully qualified name of the desired class; must not be {@code null}
      * @return the Class object for the class with the specified name
-     * @throws IllegalArgumentException if the class cannot be located by the specified name
+     * @throws IllegalArgumentException if the class cannot be located by the specified name.
      * @throws NullPointerException if {@code clsName} is {@code null}
      */
     public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
@@ -991,7 +991,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package is to be retrieved
      * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     @MayReturnNull
     public static Package getPackage(final Class<?> cls) {
@@ -1023,7 +1023,7 @@ public final class ClassUtil {
      *
      * @param cls the class whose package name is to be retrieved
      * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     public static String getPackageName(final Class<?> cls) {
         String pkgName = packageNamePool.get(cls);
@@ -1052,7 +1052,8 @@ public final class ClassUtil {
      * @param isRecursive if {@code true}, searches recursively in sub-packages
      * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
      * @return a list of classes in the specified package
-     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not exist or JDK packages)
+     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not
+     *         exist or JDK packages).
      * @throws UncheckedIOException if an I/O error occurs during package scanning
      * @see #findClassesInPackage(String, boolean, boolean, Predicate)
      */
@@ -1229,8 +1230,9 @@ public final class ClassUtil {
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
      *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
      *         discovery order; duplicate classes may appear if multiple resources overlap.
-     * @throws IllegalArgumentException if {@code pkgName} is {@code null} or empty, or if no resources are
-     *                                  found for the specified package (e.g., the package does not exist or is a JDK package)
+     * @throws IllegalArgumentException if {@code pkgName} is {@code null} or empty, or if no resources are found for
+     *         the specified package (e.g., the package does not exist or is a JDK package), or if {@code predicate}
+     *         is {@code null}.
      * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
      *                              resource enumeration. This typically indicates file system issues, corrupted
      *                              JAR files, or insufficient permissions for accessing classpath resources.
@@ -1238,7 +1240,6 @@ public final class ClassUtil {
      *                         operation fails. The exception will contain details about the specific class
      *                         that failed to load and the underlying cause of the failure.
      *
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #findClassesInPackage(String, boolean, boolean)
      * @see java.lang.ClassLoader#getResources(String)
      * @see java.util.function.Predicate
@@ -2478,7 +2479,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}
+     * @throws IllegalArgumentException if the class is {@code null}.
      * @see #isPrimitiveWrapper(Class)
      * @see #isPrimitiveArrayType(Class)
      */
@@ -2500,7 +2501,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive wrapper type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}
+     * @throws IllegalArgumentException if the class is {@code null}.
      * @see #isPrimitiveType(Class)
      * @see #isPrimitiveArrayType(Class)
      */
@@ -2522,7 +2523,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a primitive array type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}
+     * @throws IllegalArgumentException if the class is {@code null}.
      * @see #isPrimitiveType(Class)
      * @see #isPrimitiveWrapper(Class)
      */
@@ -2569,7 +2570,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be wrapped
      * @return the corresponding wrapper type if {@code cls} is a primitive type or primitive array, otherwise {@code cls} itself
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      * @see #unwrap(Class)
      */
     public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
@@ -2594,7 +2595,7 @@ public final class ClassUtil {
      *
      * @param cls the class to be unwrapped
      * @return the corresponding primitive type if {@code cls} is a wrapper type or wrapper array, otherwise {@code cls} itself
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      * @see #wrap(Class)
      */
     public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
@@ -2671,7 +2672,8 @@ public final class ClassUtil {
     }
 
     /**
-     * The Class ClassSentinel.
+     * A holder class whose field and method serve as sentinel placeholders for absent class
+     * metadata in the internal reflection cache pools.
      */
     static final class SentinelClass {//NOSONAR
 

@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents an operation on a single short-valued operand that produces a short-valued result.
+ * Represents an operation on a single {@code short}-valued operand that produces a {@code short}-valued result.
  * This is the primitive type specialization of {@link java.util.function.UnaryOperator} for {@code short}.
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsShort(short)}.
@@ -26,6 +26,7 @@ import com.landawn.abacus.util.cs;
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
  * @see java.util.function.UnaryOperator
+ * @see ShortBinaryOperator
  */
 @FunctionalInterface
 public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<RuntimeException> { //NOSONAR
@@ -47,8 +48,8 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      * short result4 = abs.applyAsShort((short) -25);   // returns 25
      * }</pre>
      *
-     * @param operand the input operand
-     * @return the result of applying this operator
+     * @param operand the operand
+     * @return the operator result
      */
     @Override
     short applyAsShort(short operand);
@@ -68,7 +69,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}
+     * @throws IllegalArgumentException if {@code before} is {@code null}.
      * @see #andThen(ShortUnaryOperator)
      */
     default ShortUnaryOperator compose(final ShortUnaryOperator before) throws IllegalArgumentException {
@@ -92,7 +93,7 @@ public interface ShortUnaryOperator extends Throwables.ShortUnaryOperator<Runtim
      *
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      * @see #compose(ShortUnaryOperator)
      */
     default ShortUnaryOperator andThen(final ShortUnaryOperator after) throws IllegalArgumentException {

@@ -18,7 +18,7 @@ import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
 /**
- * Represents a function that accepts three byte-valued arguments and produces a result.
+ * Represents a function that accepts three {@code byte}-valued arguments and produces a result.
  * This is the three-arity specialization of {@link ByteFunction} for byte values.
  *
  * <p>This is a functional interface whose functional method is {@link #apply(byte, byte, byte)}.
@@ -36,8 +36,6 @@ import com.landawn.abacus.util.cs;
 public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given byte arguments.
-     * This method takes three byte values as input and produces a result of type R.
-     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteTriFunction<String> formatter = (r, g, b) -> String.format("RGB(%d,%d,%d)", r & 0xFF, g & 0xFF, b & 0xFF);
@@ -73,7 +71,7 @@ public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, Runtim
      * @param after the function to apply after this function is applied.
      * @return a composed function that first applies this function and then applies the
      *         {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default <V> ByteTriFunction<V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

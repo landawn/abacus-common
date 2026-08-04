@@ -135,7 +135,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * Returns a composed predicate that represents a short-circuiting logical AND of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code false}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -147,7 +147,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default DoublePredicate and(final java.util.function.DoublePredicate other) throws IllegalArgumentException {
@@ -160,7 +160,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      * Returns a composed predicate that represents a short-circuiting logical OR of this predicate and another.
      * When evaluating the composed predicate, if this predicate is {@code true}, then the {@code other} predicate is not evaluated.
      *
-     * <p>If evaluation of either operation throws an exception, it is relayed to the caller of the composed operation.
+     * <p>If evaluation of either predicate throws an exception, it is relayed to the caller of the composed predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -172,7 +172,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      *
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     @Override
     default DoublePredicate or(final java.util.function.DoublePredicate other) throws IllegalArgumentException {
@@ -195,7 +195,7 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      *
      * @param predicate the predicate to return
      * @return the same predicate instance
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     static DoublePredicate of(final DoublePredicate predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);

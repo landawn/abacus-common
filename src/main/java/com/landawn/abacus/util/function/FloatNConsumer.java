@@ -32,9 +32,7 @@ import com.landawn.abacus.util.cs;
 public interface FloatNConsumer {
     /**
      * Performs this operation on the given float arguments.
-     *
-     * <p>The behavior of this method is implementation-dependent and may process
-     * the float values in any manner required by the specific use case.</p>
+     * This method is expected to operate via side-effects.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -82,7 +80,7 @@ public interface FloatNConsumer {
      * @param after the operation to perform after this operation.
      * @return a composed {@code FloatNConsumer} that performs in sequence this
      *         operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}
+     * @throws IllegalArgumentException if {@code after} is {@code null}.
      */
     default FloatNConsumer andThen(final FloatNConsumer after) throws IllegalArgumentException {
         N.checkArgNotNull(after, cs.after);

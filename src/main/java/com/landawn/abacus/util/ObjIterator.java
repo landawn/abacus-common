@@ -664,7 +664,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param n the number of elements to skip
      * @return a new {@code ObjIterator} that skips the first {@code n} elements
-     * @throws IllegalArgumentException if {@code n} is negative
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public ObjIterator<T> skip(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -725,7 +725,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param count the maximum number of elements to return
      * @return a new {@code ObjIterator} limited to {@code count} elements
-     * @throws IllegalArgumentException if {@code count} is negative
+     * @throws IllegalArgumentException if {@code count} is negative.
      */
     public ObjIterator<T> limit(final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
@@ -773,7 +773,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param offset the number of elements to skip
      * @param count the maximum number of elements to return after skipping
      * @return a new {@code ObjIterator} with skip and limit applied
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative
+     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see #skip(long)
      * @see #limit(long)
      */
@@ -1065,7 +1065,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param startIndex the index to assign to the first element
      * @return a new {@code ObjIterator} of {@link Indexed} elements
-     * @throws IllegalArgumentException if {@code startIndex} is negative
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      * @see #indexed()
      */

@@ -126,7 +126,7 @@ public class Seid implements EntityId {
      *
      * @param propName the property name (can be canonical like "Entity.property" or simple like "property")
      * @param propValue the property value
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     public Seid(final String propName, final Object propValue) {
         this(NameUtil.getParentName(N.checkArgNotNull(propName, cs.propName)));
@@ -147,7 +147,8 @@ public class Seid implements EntityId {
      * }</pre>
      *
      * @param nameValues a map of property names to their values
-     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null} property name
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null}
+     *         property name.
      */
     public Seid(final Map<String, Object> nameValues) {
         this(extractEntityName(nameValues));
@@ -194,7 +195,7 @@ public class Seid implements EntityId {
      * @param propName the property name (can be canonical like "Entity.property" or simple like "property")
      * @param propValue the property value
      * @return a new Seid instance
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     public static Seid of(final String propName, final Object propValue) {
         return new Seid(propName, propValue);
@@ -214,7 +215,7 @@ public class Seid implements EntityId {
      * @param propName2 the second property name
      * @param propValue2 the second property value
      * @return a new Seid instance
-     * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}
+     * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}.
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
         final Seid result = new Seid(propName1, propValue1);
@@ -238,7 +239,8 @@ public class Seid implements EntityId {
      * @param propName3 the third property name
      * @param propValue3 the third property value
      * @return a new Seid instance
-     * @throws IllegalArgumentException if any of {@code propName1}, {@code propName2} or {@code propName3} is {@code null}
+     * @throws IllegalArgumentException if any of {@code propName1}, {@code propName2} or {@code propName3} is
+     *         {@code null}.
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
             final Object propValue3) {
@@ -260,7 +262,8 @@ public class Seid implements EntityId {
      *
      * @param nameValues a map of property names to their values
      * @return a new Seid instance
-     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null} property name
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null}
+     *         property name.
      */
     public static Seid create(final Map<String, Object> nameValues) throws IllegalArgumentException {
         N.checkArgNotEmpty(nameValues, "nameValues");
@@ -295,7 +298,7 @@ public class Seid implements EntityId {
      *
      * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new Seid containing the entity's ID properties
-     * @throws IllegalArgumentException if no ID properties are defined in the entity class
+     * @throws IllegalArgumentException if no ID properties are defined in the entity class.
      * @throws NullPointerException if {@code entity} is {@code null}
      */
     public static Seid create(final Object entity) {
@@ -322,8 +325,8 @@ public class Seid implements EntityId {
      * @param entity the entity object to extract values from; must not be {@code null}
      * @param idPropNames the simple names of properties to use as ID; must not be {@code null} or empty
      * @return a new Seid containing the specified properties and their values from the entity
-     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named
-     *         property does not exist on the entity type
+     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named property does
+     *         not exist on the entity type.
      * @throws NullPointerException if {@code entity} is {@code null}
      */
     public static Seid create(final Object entity, final Collection<String> idPropNames) {
@@ -378,7 +381,7 @@ public class Seid implements EntityId {
      * @param <T> the expected type of the property value
      * @param propName the property name
      * @return the property value, or {@code null} if not found
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -405,7 +408,7 @@ public class Seid implements EntityId {
      *
      * @param propName the property name
      * @return the property value as an int, or {@code 0} if the property is absent or {@code null}
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @Override
     public int getInt(final String propName) {
@@ -427,7 +430,7 @@ public class Seid implements EntityId {
      *
      * @param propName the property name
      * @return the property value as a long, or {@code 0L} if the property is absent or {@code null}
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @Override
     public long getLong(final String propName) {
@@ -453,7 +456,7 @@ public class Seid implements EntityId {
      * @param targetType the class of the target type
      * @return the property value converted to the target type, or the target type's default value
      *         (which is {@code null} for reference types) if the property is absent or its value is {@code null}
-     * @throws IllegalArgumentException if {@code propName} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} or {@code targetType} is {@code null}.
      */
     @Override
     public <T> T get(final String propName, final Class<? extends T> targetType) {
@@ -485,7 +488,7 @@ public class Seid implements EntityId {
      * @param propName the property name
      * @param propValue the property value
      * @return this Seid instance for method chaining
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      * @deprecated for internal use only
      */
     @Deprecated
@@ -532,7 +535,7 @@ public class Seid implements EntityId {
      * this identifier is left unchanged.</p>
      *
      * @param nameValues a map of property names (simple or canonical) to their values; ignored if {@code null} or empty
-     * @throws IllegalArgumentException if the map contains a {@code null} property name
+     * @throws IllegalArgumentException if the map contains a {@code null} property name.
      * @deprecated for internal use only
      */
     @Deprecated
@@ -569,7 +572,7 @@ public class Seid implements EntityId {
      *
      * @param propName the property name to check
      * @return {@code true} if the property exists, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code propName} is {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @Override
     public boolean containsKey(final String propName) {

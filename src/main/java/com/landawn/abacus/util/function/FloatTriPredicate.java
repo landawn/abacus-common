@@ -43,10 +43,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
     FloatTriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     /**
-     * Evaluates this predicate on the given float arguments.
-     *
-     * <p>The implementation should define the condition under which the three float
-     * arguments satisfy this predicate.</p>
+     * Evaluates this predicate on the given arguments.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -103,7 +100,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * @param other a predicate that will be logically-ANDed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         AND of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatTriPredicate and(final FloatTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);
@@ -132,7 +129,7 @@ public interface FloatTriPredicate extends Throwables.FloatTriPredicate<RuntimeE
      * @param other a predicate that will be logically-ORed with this predicate.
      * @return a composed predicate that represents the short-circuiting logical
      *         OR of this predicate and the {@code other} predicate
-     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}.
      */
     default FloatTriPredicate or(final FloatTriPredicate other) throws IllegalArgumentException {
         N.checkArgNotNull(other, cs.other);

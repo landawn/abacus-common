@@ -61,7 +61,7 @@ import com.landawn.abacus.util.u.Optional;
  *     <td>Mutability</td>
  *     <td><b>Mutable</b> — implements {@link Mutable}; values can be reassigned via
  *         {@link #setLeft(Object)} / {@link #setRight(Object)}</td>
- *     <td><b>Effectively immutable</b> — {@code _1} and {@code _2} are {@code public final}</td>
+ *     <td><b>Structurally immutable</b> — {@code _1} and {@code _2} are {@code public final}; referenced objects may still be mutable</td>
  *   </tr>
  *   <tr>
  *     <td>Field access</td>
@@ -466,8 +466,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the condition to evaluate against the current left and right values;
-     *
+     * @param predicate the condition to evaluate against the current left and right values; must not be {@code null}.
      * @param newLeft the new value to assign to the left element if the predicate passes;
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
@@ -508,8 +507,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the condition to evaluate against the current left and right values;
-     *
+     * @param predicate the condition to evaluate against the current left and right values; must not be {@code null}.
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
@@ -556,9 +554,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw
-     * @param predicate the condition to evaluate against the current left and right values;
-     *
-     * @param newLeft  the new value to assign to the left element if the predicate passes;
+     * @param predicate the condition to evaluate against the current left and right values; must not be {@code null}.
+     * @param newLeft the new value to assign to the left element if the predicate passes;
      *                 may be {@code null}
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
@@ -585,7 +582,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * <p>Note: this instance method is non-mutating and returns a <i>new</i> swapped pair, in contrast to the
      * static {@link N#swap(Pair)} / {@link N#swapIf(Pair, java.util.function.Predicate)} helpers, which
-     * <i>mutate</i> the given pair in place (those require both element types to be the same, {@code Pair<T, T>}).
+     * <i>mutate</i> the given pair in place (those require both element types to be the same, {@code Pair<T, T>}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -713,7 +710,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the consumer may throw.
      * @param consumer the action to be performed on each element; must accept a common
-     *                 supertype of both L and R (typically {@code Object});
+     *                 supertype of both L and R (typically {@code Object}); must not be {@code null}.
      * @throws E if the consumer throws an exception.
      * @throws ClassCastException if the consumer cannot accept the runtime types of the elements.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
@@ -867,7 +864,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with the left and right elements;
+     * @param predicate the condition to test with the left and right elements; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
      * @throws E if the predicate throws an exception.
@@ -903,7 +900,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.
-     * @param predicate the condition to test with this pair;
+     * @param predicate the condition to test with this pair; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
      * @throws E if the predicate throws an exception.
