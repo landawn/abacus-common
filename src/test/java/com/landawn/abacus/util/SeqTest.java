@@ -438,7 +438,7 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalStateException.class, () -> seq.rateLimited(0));
         assertThrows(IllegalStateException.class, () -> seq.delay((java.time.Duration) null));
         assertThrows(IllegalStateException.class, () -> seq.sortedByInt(null));
-        assertThrows(IllegalStateException.class, () -> seq.isMatchCountBetween(-1, -1, null));
+        assertThrows(IllegalStateException.class, () -> seq.hasMatchCountBetween(-1, -1, null));
         assertThrows(IllegalStateException.class, () -> seq.skipUntil(null));
         assertThrows(IllegalStateException.class, () -> seq.throwIfEmpty(null));
         assertThrows(IllegalStateException.class, () -> seq.transform(null));
@@ -530,10 +530,10 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testNMatch() throws Exception {
-        boolean result = Seq.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 3, x -> x % 2 == 0);
+        boolean result = Seq.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 3, x -> x % 2 == 0);
         assertFalse(result);
 
-        result = Seq.of(2, 4, 6, 8, 10).isMatchCountBetween(3, Long.MAX_VALUE, x -> x % 2 == 0);
+        result = Seq.of(2, 4, 6, 8, 10).hasMatchCountBetween(3, Long.MAX_VALUE, x -> x % 2 == 0);
         assertTrue(result);
     }
 
@@ -6726,14 +6726,14 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testLimit_WithOffset() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5, 6, 7).limit(2, 3).toList();
+    public void testSkipAndLimit_WithOffset() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5, 6, 7).skipAndLimit(2, 3).toList();
         assertEquals(Arrays.asList(3, 4, 5), result);
     }
 
     @Test
-    public void testLimit_OffsetAndMaxSize() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(1, 3).toList();
+    public void testSkipAndLimit_OffsetAndMaxSize() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5).skipAndLimit(1, 3).toList();
         assertEquals(3, result.size());
         assertEquals(Integer.valueOf(2), result.get(0));
         assertEquals(Integer.valueOf(3), result.get(1));
@@ -6741,30 +6741,30 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
-    public void testLimit_offsetZero_maxSizeMax() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(0, Long.MAX_VALUE).toList();
+    public void testSkipAndLimit_offsetZero_maxSizeMax() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, Long.MAX_VALUE).toList();
         assertEquals(5, result.size());
     }
 
     @Test
-    public void testLimit_offsetZero_maxSizeMax_onClosedSeq_throwsIllegalStateException() throws Exception {
-        // limit(0, MAX_VALUE) is a special shortcut path that previously bypassed assertNotClosed().
-        // After the fix it must throw immediately, just like limit(0,3) and limit(2, MAX_VALUE) do.
+    public void testSkipAndLimit_offsetZero_maxSizeMax_onClosedSeq_throwsIllegalStateException() throws Exception {
+        // skipAndLimit(0, MAX_VALUE) is a special shortcut path that previously bypassed assertNotClosed().
+        // After the fix it must throw immediately, just like skipAndLimit(0,3) and skipAndLimit(2, MAX_VALUE) do.
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
         drainWithException(seq); // closes the sequence
-        assertThrows(IllegalStateException.class, () -> seq.limit(0, Long.MAX_VALUE));
+        assertThrows(IllegalStateException.class, () -> seq.skipAndLimit(0, Long.MAX_VALUE));
     }
 
     @Test
-    public void testLimit_offsetZero_withMaxSize() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(0, 3).toList();
+    public void testSkipAndLimit_offsetZero_withMaxSize() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, 3).toList();
         assertEquals(3, result.size());
         assertEquals(Integer.valueOf(1), result.get(0));
     }
 
     @Test
-    public void testLimit_withOffset_maxSizeMax() throws Exception {
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(2, Long.MAX_VALUE).toList();
+    public void testSkipAndLimit_withOffset_maxSizeMax() throws Exception {
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5).skipAndLimit(2, Long.MAX_VALUE).toList();
         assertEquals(3, result.size());
         assertEquals(Integer.valueOf(3), result.get(0));
     }
@@ -8683,16 +8683,16 @@ public class SeqTest extends AbstractTest {
 
     @Test
     public void testIsMatchCountBetween() throws Exception {
-        assertTrue(Seq.of(1, 2, 3, 4, 5, 6).isMatchCountBetween(2, 4, x -> x % 2 == 0));
-        assertFalse(Seq.of(1, 2, 3, 4, 5, 6).isMatchCountBetween(4, 5, x -> x % 2 == 0));
-        assertTrue(Seq.of(1, 2, 3, 4, 5, 6).isMatchCountBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(Seq.of(1, 2, 3, 4, 5, 6).hasMatchCountBetween(2, 4, x -> x % 2 == 0));
+        assertFalse(Seq.of(1, 2, 3, 4, 5, 6).hasMatchCountBetween(4, 5, x -> x % 2 == 0));
+        assertTrue(Seq.of(1, 2, 3, 4, 5, 6).hasMatchCountBetween(3, 3, x -> x % 2 == 0));
     }
 
     @Test
     public void testIsMatchCountBetween_New() throws Exception {
-        assertTrue(Seq.of(1, 2, 3, 4, 5).isMatchCountBetween(2, 3, n -> n % 2 == 0));
-        assertFalse(Seq.of(1, 2, 3, 4, 5).isMatchCountBetween(3, 5, n -> n % 2 == 0));
-        assertTrue(Seq.of(1, 3, 5).isMatchCountBetween(0, 0, n -> n % 2 == 0));
+        assertTrue(Seq.of(1, 2, 3, 4, 5).hasMatchCountBetween(2, 3, n -> n % 2 == 0));
+        assertFalse(Seq.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 5, n -> n % 2 == 0));
+        assertTrue(Seq.of(1, 3, 5).hasMatchCountBetween(0, 0, n -> n % 2 == 0));
     }
 
     @Test
@@ -9192,6 +9192,21 @@ public class SeqTest extends AbstractTest {
     }
 
     @Test
+    public void testFindFirst_NoArg_AliasOfFirst() throws Exception {
+        assertEquals(Optional.of(1), Seq.of(1, 2, 3).findFirst());
+        assertTrue(Seq.<Integer, Exception> empty().findFirst().isEmpty());
+        // same contract as Stream.findFirst() / first()
+        assertEquals(Seq.of("a", "b").first(), Seq.of("a", "b").findFirst());
+    }
+
+    @Test
+    public void testFindAny_NoArg_AliasOfFirst() throws Exception {
+        assertEquals(Optional.of(1), Seq.of(1, 2, 3).findAny());
+        assertTrue(Seq.<Integer, Exception> empty().findAny().isEmpty());
+        assertEquals(Seq.of("a", "b").first(), Seq.of("a", "b").findAny());
+    }
+
+    @Test
     public void testElementAt() throws Exception {
         Optional<Integer> elem = Seq.of(1, 2, 3, 4, 5).elementAt(2);
         assertTrue(elem.isPresent());
@@ -9285,20 +9300,20 @@ public class SeqTest extends AbstractTest {
     @Test
     public void test_countMatchBetween() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.isMatchCountBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(seq.hasMatchCountBetween(3, 3, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.isMatchCountBetween(2, 2, x -> x % 2 == 0));
+        assertFalse(seq.hasMatchCountBetween(2, 2, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertTrue(seq.isMatchCountBetween(1, 5, x -> x % 2 == 0));
+        assertTrue(seq.hasMatchCountBetween(1, 5, x -> x % 2 == 0));
 
         seq = Seq.of(1, 2, 3, 4, 5, 6);
-        assertFalse(seq.isMatchCountBetween(4, 5, x -> x % 2 == 0));
+        assertFalse(seq.hasMatchCountBetween(4, 5, x -> x % 2 == 0));
 
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(-1, 1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(1, -1, x -> true));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).isMatchCountBetween(2, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).hasMatchCountBetween(-1, 1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).hasMatchCountBetween(1, -1, x -> true));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).hasMatchCountBetween(2, 1, x -> true));
     }
 
     @Test
@@ -11545,12 +11560,12 @@ public class SeqTest extends AbstractTest {
         }
     }
 
-    // ===== checkArgPositive with long/double via limit =====
+    // ===== checkArgPositive with long/double via skipAndLimit =====
 
     @Test
-    public void testLimit_longOffset_triggersCheckArgPositive() throws Exception {
-        // limit(long offset, long maxSize) - exercises checkArgPositive/checkArgNotNegative
-        List<Integer> result = Seq.of(1, 2, 3, 4, 5).limit(2L, 2L).toList();
+    public void testSkipAndLimit_longOffset_triggersCheckArgPositive() throws Exception {
+        // skipAndLimit(long offset, long maxSize) - exercises checkArgPositive/checkArgNotNegative
+        List<Integer> result = Seq.of(1, 2, 3, 4, 5).skipAndLimit(2L, 2L).toList();
         assertEquals(2, result.size());
         assertEquals(Integer.valueOf(3), result.get(0));
         assertEquals(Integer.valueOf(4), result.get(1));

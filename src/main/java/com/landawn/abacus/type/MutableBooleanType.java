@@ -98,7 +98,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      */
     @Override
     public MutableBoolean valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : MutableBoolean.of(parseBoolean(str));
+        return Strings.isBlank(str) ? null : MutableBoolean.of(parseBoolean(str.trim()));
     }
 
     /**

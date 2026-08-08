@@ -46,7 +46,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * String simpleName = "firstName";
  * }</pre>
  *
- * @see ObjectPool
+ * @see ConcurrentCacheMap
  */
 @Internal
 @SuppressFBWarnings("JLM_JSR166_UTILCONCURRENT_MONITORENTER")
@@ -55,11 +55,11 @@ public final class NameUtil {
     @SuppressWarnings("deprecation")
     static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    private static final Map<String, String> cachedNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, String> cachedNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<String, String> simpleNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, String> simpleNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<String, String> parentNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, String> parentNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     /**
      * Private constructor to prevent instantiation of this utility class.

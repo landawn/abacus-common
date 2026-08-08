@@ -134,11 +134,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      */
     @Override
     public Boolean valueOf(final String str) {
-        if (Strings.isEmpty(str)) {
+        if (Strings.isBlank(str)) {
             return defaultValue();
         }
 
-        return parseBoolean(str);
+        return parseBoolean(str.trim());
     }
 
     /**

@@ -2203,14 +2203,14 @@ public class LongStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimit_WithOffset() {
-        long[] result = LongStream.of(1, 2, 3, 4, 5).limit(1, 3).toArray();
+    public void testSkipAndLimit_WithOffset() {
+        long[] result = LongStream.of(1, 2, 3, 4, 5).skipAndLimit(1, 3).toArray();
         assertArrayEquals(new long[] { 2, 3, 4 }, result);
     }
 
     @Test
-    public void testLimit_WithOffsetBeyondSize() {
-        long[] result = LongStream.of(1, 2, 3).limit(5, 3).toArray();
+    public void testSkipAndLimit_WithOffsetBeyondSize() {
+        long[] result = LongStream.of(1, 2, 3).skipAndLimit(5, 3).toArray();
         assertArrayEquals(new long[0], result);
     }
 

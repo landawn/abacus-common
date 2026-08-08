@@ -225,4 +225,14 @@ public class MutableBooleanTypeTest extends TestBase {
             mutableBooleanType.serializeTo(characterWriter, MutableBoolean.of(false), null);
         });
     }
+
+    // Bug: valueOf used isEmpty (no trim), so " Y" / "  " diverged from AtomicBooleanType.
+    @Test
+    public void testValueOf_trimsAndTreatsBlankAsNull() {
+        Assertions.assertNull(mutableBooleanType.valueOf("   "));
+        Assertions.assertTrue(mutableBooleanType.valueOf(" Y").getValue());
+        Assertions.assertTrue(mutableBooleanType.valueOf(" 1 ").getValue());
+        Assertions.assertTrue(mutableBooleanType.valueOf(" true ").getValue());
+        Assertions.assertFalse(mutableBooleanType.valueOf(" false ").getValue());
+    }
 }

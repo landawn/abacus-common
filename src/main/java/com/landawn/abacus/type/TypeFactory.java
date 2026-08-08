@@ -46,6 +46,7 @@ import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ConcurrentCacheMap;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.HBaseColumn;
@@ -59,7 +60,6 @@ import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.SetMultimap;
@@ -199,9 +199,9 @@ public final class TypeFactory {
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    private static final Map<java.lang.reflect.Type, Type<?>> javaType2TypeCache = new ObjectPool<>(POOL_SIZE);
+    private static final Map<java.lang.reflect.Type, Type<?>> javaType2TypeCache = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<String, Type<?>> typePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, Type<?>> typePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     static final Class<?> guavaMultisetClass; // could be null if Guava library is not in the classpath.
     static final Class<?> guavaMultimapClass; // could be null if Guava library is not in the classpath.

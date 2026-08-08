@@ -101,8 +101,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Creates a {@code LongIterator} from the specified long array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator will iterate over all elements in the array from start to end. The non-empty
-     * iterator is backed by the supplied array, so changes made before an element is consumed are visible.</p>
+     * The iterator will iterate over all elements in the array from start to end. A non-empty
+     * iterator reads values directly from the supplied array; changes made to an element before
+     * that element is consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -123,8 +124,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned. A {@code null} array is treated as length 0 for range validation,
-     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator is backed by
-     * the supplied array, so changes made before an element is consumed are visible.</p>
+     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator reads values
+     * directly from the supplied array; changes made to an element before that element is
+     * consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

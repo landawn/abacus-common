@@ -2930,7 +2930,8 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         try {
-            return fromIndex < toIndex ? Optional.of(elements[fromIndex]) : Optional.empty();
+            // ofNullable: a null stream element must not NPE; empty matches Collectors.first().
+            return fromIndex < toIndex ? Optional.ofNullable(elements[fromIndex]) : Optional.empty();
         } finally {
             close();
         }
@@ -2950,7 +2951,8 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         try {
-            return fromIndex < toIndex ? Optional.of(elements[toIndex - 1]) : Optional.empty();
+            // ofNullable: a null stream element must not NPE; empty matches Collectors.last().
+            return fromIndex < toIndex ? Optional.ofNullable(elements[toIndex - 1]) : Optional.empty();
         } finally {
             close();
         }
@@ -2963,7 +2965,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             if (position < toIndex - fromIndex) {
-                return Optional.of(elements[fromIndex + (int) position]);
+                return Optional.ofNullable(elements[fromIndex + (int) position]);
             } else {
                 return Optional.empty();
             }
@@ -2983,9 +2985,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (size == 0) {
                 return Optional.empty();
             } else if (size == 1) {
-                return Optional.of(elements[fromIndex]);
+                return Optional.ofNullable(elements[fromIndex]);
             } else {
-                throw new TooManyElementsException("There are at least two elements: " + Strings.concat(elements[fromIndex], ", ", elements[fromIndex + 1]));
+                throw new TooManyElementsException(
+                        "There are at least two elements: " + Strings.concat(N.toString(elements[fromIndex]), ", ", N.toString(elements[fromIndex + 1])));
             }
         } finally {
             close();
@@ -3021,7 +3024,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements[i]);
             }
 
-            return Optional.of(result);
+            return Optional.ofNullable(result);
         } finally {
             close();
         }
@@ -3082,7 +3085,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (toIndex - fromIndex == 1) {
-                return Optional.of(elements[fromIndex]);
+                return Optional.ofNullable(elements[fromIndex]);
             }
 
             T result = elements[toIndex - 1];
@@ -3091,7 +3094,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements[i]);
             }
 
-            return Optional.of(result);
+            return Optional.ofNullable(result);
         } finally {
             close();
         }
@@ -3318,10 +3321,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[fromIndex]);
+                return Optional.ofNullable(elements[fromIndex]);
             }
 
-            return Optional.of(N.min(elements, fromIndex, toIndex, comparator));
+            return Optional.ofNullable(N.min(elements, fromIndex, toIndex, comparator));
         } finally {
             close();
         }
@@ -3349,10 +3352,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[toIndex - 1]);
+                return Optional.ofNullable(elements[toIndex - 1]);
             }
 
-            return Optional.of(N.max(elements, fromIndex, toIndex, comparator));
+            return Optional.ofNullable(N.max(elements, fromIndex, toIndex, comparator));
         } finally {
             close();
         }
@@ -3423,10 +3426,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (k > toIndex - fromIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[toIndex - k]);
+                return Optional.ofNullable(elements[toIndex - k]);
             }
 
-            return Optional.of(N.kthLargest(elements, fromIndex, toIndex, k, comparator));
+            return Optional.ofNullable(N.kthLargest(elements, fromIndex, toIndex, k, comparator));
         } finally {
             close();
         }
@@ -3602,7 +3605,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         try {
             for (int i = fromIndex; i < toIndex; i++) {
                 if (predicate.test(elements[i])) {
-                    return Optional.of(elements[i]);
+                    return Optional.ofNullable(elements[i]);
                 }
             }
 
@@ -3636,7 +3639,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         try {
             for (int i = toIndex - 1; i >= fromIndex; i--) {
                 if (predicate.test(elements[i])) {
-                    return Optional.of(elements[i]);
+                    return Optional.ofNullable(elements[i]);
                 }
             }
 

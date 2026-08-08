@@ -31,7 +31,6 @@ import java.util.function.Supplier;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Stateful;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.Fn.BinaryOperators;
 import com.landawn.abacus.util.Tuple.Tuple1;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -136,6 +135,61 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Map Operations:</b> {@code key()}, {@code value()}, {@code invert()}</li>
  *   <li><b>Utility Functions:</b> {@code pair()}, {@code triple()}, {@code tuple1()}, {@code tuple2()}, {@code tuple3()}</li>
  * </ul>
+ *
+ * <p id="conversion-method-naming"><b>Conversion Method Naming:</b></p>
+ * <p>The type-conversion shorthands use a compact {@code <source>2<target>} notation operating on
+ * {@link Throwables} interfaces. The letters are not globally unique — {@code c} means
+ * {@link Throwables.Consumer} in {@code c2f}/{@code f2c} but {@link Throwables.Callable} in
+ * {@code c2r}/{@code r2c} — and a leading {@code j} marks the JDK (Java standard library) variant of
+ * the source or target type. The following table maps each shorthand to its full descriptive name:</p>
+ * <table border="1">
+ *   <caption>Conversion method shorthand mapping</caption>
+ *   <tr>
+ *     <th>Shorthand</th>
+ *     <th>Conversion</th>
+ *     <th>Full name</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code c2f}</td>
+ *     <td>{@link Throwables.Consumer} to {@link Throwables.Function}</td>
+ *     <td>{@code consumerToFunction}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code f2c}</td>
+ *     <td>{@link Throwables.Function} to {@link Throwables.Consumer}</td>
+ *     <td>{@code functionToConsumer}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code r2c}</td>
+ *     <td>{@link Throwables.Runnable} to {@link Throwables.Callable}</td>
+ *     <td>{@code runnableToCallable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code c2r}</td>
+ *     <td>{@link Throwables.Callable} to {@link Throwables.Runnable}</td>
+ *     <td>{@code callableToRunnable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code jr2r}</td>
+ *     <td>{@link java.lang.Runnable} to {@link Throwables.Runnable}</td>
+ *     <td>{@code jdkRunnableToThrowableRunnable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code r2jr}</td>
+ *     <td>{@link Throwables.Runnable} to {@link java.lang.Runnable}</td>
+ *     <td>{@code throwableRunnableToJdkRunnable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code jc2c}</td>
+ *     <td>{@link java.util.concurrent.Callable} to {@link Throwables.Callable}</td>
+ *     <td>{@code jdkCallableToThrowableCallable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code c2jc}</td>
+ *     <td>{@link Throwables.Callable} to {@link java.util.concurrent.Callable}</td>
+ *     <td>{@code throwableCallableToJdkCallable}</td>
+ *   </tr>
+ * </table>
  *
  * <p><b>Memoization Features:</b>
  * <ul>
@@ -3923,6 +3977,7 @@ public final class Fnn {
      * @param consumer the consumer to convert to a function
      * @return a Throwables.Function that executes the consumer and returns {@code null}
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) throws IllegalArgumentException {
@@ -3953,6 +4008,7 @@ public final class Fnn {
      * @param valueToReturn the value to return after executing the consumer
      * @return a Throwables.Function that executes the consumer and returns the specified value
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn)
@@ -3984,6 +4040,7 @@ public final class Fnn {
      * @param biConsumer the BiConsumer to convert to a BiFunction
      * @return a Throwables.BiFunction that executes the BiConsumer and returns {@code null}
      * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer)
@@ -4017,6 +4074,7 @@ public final class Fnn {
      * @param valueToReturn the value to return after executing the BiConsumer
      * @return a Throwables.BiFunction that executes the BiConsumer and returns the specified value
      * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer, final R valueToReturn)
@@ -4049,6 +4107,7 @@ public final class Fnn {
      * @param triConsumer the TriConsumer to convert to a TriFunction
      * @return a Throwables.TriFunction that executes the TriConsumer and returns {@code null}
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer)
@@ -4083,6 +4142,7 @@ public final class Fnn {
      * @param valueToReturn the value to return after executing the TriConsumer
      * @return a Throwables.TriFunction that executes the TriConsumer and returns the specified value
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
@@ -4112,6 +4172,7 @@ public final class Fnn {
      * @param func the function to convert to a consumer
      * @return a Throwables.Consumer that executes the function and ignores its result
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ?, E> func) throws IllegalArgumentException {
@@ -4138,6 +4199,7 @@ public final class Fnn {
      * @param func the BiFunction to convert to a BiConsumer
      * @return a Throwables.BiConsumer that executes the BiFunction and ignores its result
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ?, E> func) throws IllegalArgumentException {
@@ -4165,6 +4227,7 @@ public final class Fnn {
      * @param func the TriFunction to convert to a TriConsumer
      * @return a Throwables.TriConsumer that executes the TriFunction and ignores its result
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
     public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ?, E> func)
@@ -4232,6 +4295,7 @@ public final class Fnn {
      * @param runnable the runnable to convert to a callable
      * @return a Throwables.Callable that executes the runnable and returns {@code null}
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     public static <E extends Throwable> Throwables.Callable<Void, E> r2c(final Throwables.Runnable<E> runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable, cs.runnable);
@@ -4259,6 +4323,7 @@ public final class Fnn {
      * @param valueToReturn the value to return after executing the runnable
      * @return a Throwables.Callable that executes the runnable and returns the specified value
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     public static <R, E extends Throwable> Throwables.Callable<R, E> r2c(final Throwables.Runnable<E> runnable, final R valueToReturn)
             throws IllegalArgumentException {
@@ -4285,6 +4350,7 @@ public final class Fnn {
      * @param callable the callable to convert to a runnable
      * @return a Throwables.Runnable that executes the callable and ignores its result
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     public static <E extends Throwable> Throwables.Runnable<E> c2r(final Throwables.Callable<?, E> callable) throws IllegalArgumentException {
         N.checkArgNotNull(callable, cs.callable);
@@ -4357,6 +4423,7 @@ public final class Fnn {
      * @param runnable the standard Runnable to convert
      * @return a Throwables.Runnable that wraps the provided Runnable
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     public static <E extends Throwable> Throwables.Runnable<E> jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable, cs.runnable);
@@ -4387,6 +4454,7 @@ public final class Fnn {
      * @return a standard {@code java.lang.Runnable} that wraps the provided {@code Throwables.Runnable},
      *         re-throwing any exception as an unchecked {@code RuntimeException}
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     public static java.lang.Runnable r2jr(final Throwables.Runnable<?> runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable, cs.runnable);
@@ -4421,6 +4489,7 @@ public final class Fnn {
      * @param callable the standard {@code java.util.concurrent.Callable} to convert
      * @return a {@code Throwables.Callable<R, Exception>} that delegates to the provided callable
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2jc(Throwables.Callable)
      */
     public static <R> Throwables.Callable<R, Exception> jc2c(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException {
@@ -4450,6 +4519,7 @@ public final class Fnn {
      * @param callable the Throwables.Callable to convert
      * @return a standard {@code java.util.concurrent.Callable} that delegates to the provided callable
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #jc2c(java.util.concurrent.Callable)
      */
     public static <R> java.util.concurrent.Callable<R> c2jc(final Throwables.Callable<? extends R, ? extends Exception> callable)

@@ -297,4 +297,14 @@ public class AbstractBooleanTypeTest extends TestBase {
             type.serializeTo(characterWriter, null, config);
         });
     }
+
+    // Bug: valueOf used isEmpty (no trim), so " Y" / blank diverged from AtomicBooleanType.
+    @Test
+    public void testValueOf_trimsAndTreatsBlankAsDefault() {
+        assertEquals(type.defaultValue(), type.valueOf("   "));
+        assertEquals(Boolean.TRUE, type.valueOf(" Y"));
+        assertEquals(Boolean.TRUE, type.valueOf(" 1 "));
+        assertEquals(Boolean.TRUE, type.valueOf(" true "));
+        assertEquals(Boolean.FALSE, type.valueOf(" false "));
+    }
 }

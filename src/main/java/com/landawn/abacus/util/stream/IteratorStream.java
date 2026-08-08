@@ -2784,7 +2784,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements.next());
             }
 
-            return Optional.of(result);
+            return Optional.ofNullable(result);
         } finally {
             close();
         }
@@ -3127,7 +3127,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             if (!elements.hasNext()) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                return Optional.of(elements.next());
+                return Optional.ofNullable(elements.next());
             }
 
             T candidate = elements.next();
@@ -3140,7 +3140,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return Optional.of(candidate);
+            return Optional.ofNullable(candidate);
         } finally {
             close();
         }
@@ -3175,7 +3175,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     next = elements.next();
                 }
 
-                return Optional.of(next);
+                return Optional.ofNullable(next);
             }
 
             T candidate = elements.next();
@@ -3188,7 +3188,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return Optional.of(candidate);
+            return Optional.ofNullable(candidate);
         } finally {
             close();
         }
@@ -3215,7 +3215,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     queue.offer(elements.next());
                 }
 
-                return queue.size() < k ? Optional.empty() : Optional.of(queue.peek());
+                return queue.size() < k ? Optional.empty() : Optional.ofNullable(queue.peek());
             }
 
             final Comparator<? super T> cmp = comparator;
@@ -3240,7 +3240,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return queue.size() < k ? Optional.empty() : Optional.of(queue.peek().value());
+            return queue.size() < k ? Optional.empty() : Optional.ofNullable(queue.peek().value());
         } finally {
             close();
         }
@@ -3418,7 +3418,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 e = elements.next();
 
                 if (predicate.test(e)) {
-                    return Optional.of(e);
+                    return Optional.ofNullable(e);
                 }
             }
         } finally {
@@ -3461,7 +3461,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.of(result);
+            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
         } finally {
             close();
         }

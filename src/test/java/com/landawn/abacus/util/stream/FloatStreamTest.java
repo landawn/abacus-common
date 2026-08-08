@@ -6056,20 +6056,20 @@ public class FloatStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset() {
-        float[] result = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).limit(2, 2).toArray();
+    public void testSkipAndLimit_WithOffset() {
+        float[] result = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).skipAndLimit(2, 2).toArray();
         assertArrayEquals(new float[] { 3.0f, 4.0f }, result, DELTA);
     }
 
     @Test
-    public void testLimitWithOffset_ZeroOffset() {
-        float[] result = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).limit(0, 3).toArray();
+    public void testSkipAndLimit_ZeroOffset() {
+        float[] result = createFloatStream(1.0f, 2.0f, 3.0f, 4.0f, 5.0f).skipAndLimit(0, 3).toArray();
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result, DELTA);
     }
 
     @Test
-    public void testLimitWithOffset_OffsetBeyondSize() {
-        float[] result = createFloatStream(1.0f, 2.0f, 3.0f).limit(10, 5).toArray();
+    public void testSkipAndLimit_OffsetBeyondSize() {
+        float[] result = createFloatStream(1.0f, 2.0f, 3.0f).skipAndLimit(10, 5).toArray();
         assertEquals(0, result.length);
     }
 

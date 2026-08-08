@@ -306,8 +306,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
         if (x == null || x.isNull()) {
             appendable.append(NULL_STRING);
         } else {
-            // elementType.write(writer, x.value());
-            Type.<Object> of(x.value().getClass()).appendTo(appendable, x.value());
+            elementType.appendTo(appendable, x.value());
         }
     }
 
@@ -332,8 +331,7 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
         if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            // elementType.serializeTo(writer, x.value(), config);
-            Type.<Object> of(x.value().getClass()).serializeTo(writer, x.value(), config);
+            elementType.serializeTo(writer, x.value(), config);
         }
     }
 }

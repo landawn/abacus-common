@@ -61,6 +61,7 @@ import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.EntityId;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableEntry;
@@ -2914,15 +2915,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         startBraceCount--;
                                     }
 
-                                    sb.append(jr.getText());
+                                    appendJsonRawToken(sb, jr, nextToken);
 
                                     if (nextToken == EOF) {
                                         break;
-                                    } else if (nextToken == COMMA || nextToken == COLON) {
-                                        sb.append(eventChars[nextToken]);
-                                        sb.append(' ');
-                                    } else {
-                                        sb.append(eventChars[nextToken]);
                                     }
                                 }
 
@@ -2973,15 +2969,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         startBracketCount--;
                                     }
 
-                                    sb.append(jr.getText());
+                                    appendJsonRawToken(sb, jr, nextToken);
 
                                     if (nextToken == EOF) {
                                         break;
-                                    } else if (nextToken == COMMA || nextToken == COLON) {
-                                        sb.append(eventChars[nextToken]);
-                                        sb.append(' ');
-                                    } else {
-                                        sb.append(eventChars[nextToken]);
                                     }
                                 }
 
@@ -5443,6 +5434,49 @@ final class JsonParserImpl extends AbstractJsonParser {
 
             default:
                 return "Unknown error on event : " + (token == EOF ? "EOF" : String.valueOf((char) token)) + " with " + jr.getText();
+        }
+    }
+
+    /**
+     * Reconstructs one JSON token into a raw JSON fragment for {@code @JsonXmlField(isJsonRawValue=true)}.
+     * Quoted string content is re-escaped because {@link JsonReader#getText()} returns the unescaped value.
+     *
+     * @param sb the buffer receiving the reconstructed fragment
+     * @param jr the JSON reader whose current text is the token payload
+     * @param token the token just returned by {@link JsonReader#nextToken()}
+     */
+    private static void appendJsonRawToken(final StringBuilder sb, final JsonReader jr, final int token) {
+        if (token == END_DOUBLE_QUOTE) {
+            // getText() is already unescaped; re-escape so embedded quotes/newlines stay valid JSON.
+            final String text = jr.getText();
+            if (Strings.isNotEmpty(text)) {
+                sb.append(EscapeUtil.escapeJson(text));
+            }
+            sb.append(eventChars[token]);
+            return;
+        }
+
+        if (token == END_SINGLE_QUOTE) {
+            final String text = jr.getText();
+            if (Strings.isNotEmpty(text)) {
+                // Single-quoted JSON-like strings need both quote styles escaped for a safe rewrite.
+                sb.append(EscapeUtil.escapeEcmaScript(text));
+            }
+            sb.append(eventChars[token]);
+            return;
+        }
+
+        sb.append(jr.getText());
+
+        if (token == EOF) {
+            return;
+        }
+
+        if (token == COMMA || token == COLON) {
+            sb.append(eventChars[token]);
+            sb.append(' ');
+        } else if (token >= 0 && token < eventChars.length && eventChars[token] != 0) {
+            sb.append(eventChars[token]);
         }
     }
 }

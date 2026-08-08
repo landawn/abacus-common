@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -98,6 +99,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *   <li>{@link java.util.Calendar} — returns the time in milliseconds</li>
      *   <li>{@link java.time.Instant} — returns the epoch milliseconds</li>
      *   <li>{@link java.time.ZonedDateTime} — returns the epoch milliseconds</li>
+     *   <li>{@link java.time.OffsetDateTime} — returns the epoch milliseconds</li>
      *   <li>{@link java.time.LocalDateTime} — converted to {@link java.sql.Timestamp} then to milliseconds</li>
      *   <li>Other objects — converted to string and parsed as a {@code long}</li>
      * </ul>
@@ -121,6 +123,8 @@ public abstract class AbstractLongType extends NumberType<Number> {
             return ((Instant) obj).toEpochMilli();
         } else if (obj instanceof ZonedDateTime) {
             return ((ZonedDateTime) obj).toInstant().toEpochMilli();
+        } else if (obj instanceof OffsetDateTime) {
+            return ((OffsetDateTime) obj).toInstant().toEpochMilli();
         } else if (obj instanceof LocalDateTime) {
             return Timestamp.valueOf((LocalDateTime) obj).getTime();
         }

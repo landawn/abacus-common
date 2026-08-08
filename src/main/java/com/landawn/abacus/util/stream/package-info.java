@@ -19,5 +19,12 @@
  * {@link com.landawn.abacus.util.stream.EntryStream}, collectors, extended iterators, and internal
  * stream implementations. Streams support lazy intermediate operations and single-use terminal
  * consumption with explicit resource-closing behavior.</p>
+ *
+ * <p><b>Shared naming with {@link com.landawn.abacus.util.Seq Seq}:</b> pipeline operation names
+ * (including the intentional {@code flatMap}/{@code flatmap}/{@code flattMap}/{@code flatMapArray}
+ * casing, first/last/find* terminals, and boolean match terminals such as
+ * {@code hasMatchCountBetween}) are documented in the canonical glossary on
+ * {@link com.landawn.abacus.util.stream.Stream} &mdash; see that class's
+ * <i>Shared pipeline naming</i> section ({@code Stream.html#shared-pipeline-naming}).</p>
  */
 package com.landawn.abacus.util.stream;

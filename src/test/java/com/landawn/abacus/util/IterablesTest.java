@@ -5212,7 +5212,7 @@ public class IterablesTest extends AbstractTest {
 
         {
             final List<Integer> list = N.toList(1, 2, 3, 4, 5);
-            final List<Integer> reversed = N.reverseToList(list);
+            final List<Integer> reversed = N.toReversedList(list);
             assertEquals(N.toList(5, 4, 3, 2, 1), reversed);
         }
 

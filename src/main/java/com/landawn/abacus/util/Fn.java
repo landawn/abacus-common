@@ -16,8 +16,6 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -88,15 +86,10 @@ import com.landawn.abacus.util.function.FloatFunction;
 import com.landawn.abacus.util.function.FloatPredicate;
 import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.IntBiFunction;
-import com.landawn.abacus.util.function.IntBiObjConsumer;
-import com.landawn.abacus.util.function.IntBiObjFunction;
-import com.landawn.abacus.util.function.IntBiObjPredicate;
 import com.landawn.abacus.util.function.IntBiPredicate;
 import com.landawn.abacus.util.function.IntBinaryOperator;
 import com.landawn.abacus.util.function.IntConsumer;
 import com.landawn.abacus.util.function.IntFunction;
-import com.landawn.abacus.util.function.IntObjConsumer;
-import com.landawn.abacus.util.function.IntObjFunction;
 import com.landawn.abacus.util.function.IntObjPredicate;
 import com.landawn.abacus.util.function.IntPredicate;
 import com.landawn.abacus.util.function.LongBiFunction;
@@ -105,7 +98,6 @@ import com.landawn.abacus.util.function.LongBinaryOperator;
 import com.landawn.abacus.util.function.LongConsumer;
 import com.landawn.abacus.util.function.LongFunction;
 import com.landawn.abacus.util.function.LongPredicate;
-import com.landawn.abacus.util.function.LongSupplier;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.QuadFunction;
 import com.landawn.abacus.util.function.Runnable;
@@ -165,6 +157,51 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@link #o(UnaryOperator) o} - <b>O</b>perator (Unary or Binary)</li>
  * </ul>
  * <p>These shorthands are particularly useful in stream pipelines and functional compositions to reduce boilerplate.</p>
+ *
+ * <p id="conversion-method-naming"><b>Conversion Method Naming:</b></p>
+ * <p>The type-conversion shorthands use a compact {@code <source>2<target>} notation. The letters are
+ * not globally unique — {@code c} means {@link Consumer} in {@code c2f}/{@code f2c} but
+ * {@link Callable} in {@code c2r}/{@code r2c} — and a leading {@code j} marks the JDK (Java standard
+ * library) variant of the source type. The following table maps each shorthand to its full
+ * descriptive name:</p>
+ * <table border="1">
+ *   <caption>Conversion method shorthand mapping</caption>
+ *   <tr>
+ *     <th>Shorthand</th>
+ *     <th>Conversion</th>
+ *     <th>Full name</th>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code c2f}</td>
+ *     <td>{@link Consumer} to {@link Function}</td>
+ *     <td>{@code consumerToFunction}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code f2c}</td>
+ *     <td>{@link Function} to {@link Consumer}</td>
+ *     <td>{@code functionToConsumer}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code r2c}</td>
+ *     <td>{@link Runnable} to {@link Callable}</td>
+ *     <td>{@code runnableToCallable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code c2r}</td>
+ *     <td>{@link Callable} to {@link Runnable}</td>
+ *     <td>{@code callableToRunnable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code jr2r}</td>
+ *     <td>{@link java.lang.Runnable} to {@link Runnable}</td>
+ *     <td>{@code jdkRunnableToRunnable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code jc2c}</td>
+ *     <td>{@link java.util.concurrent.Callable} to {@link Callable}</td>
+ *     <td>{@code jdkCallableToCallable}</td>
+ *   </tr>
+ * </table>
  *
  * <p><b>Final Class &amp; Usage Notes:</b></p>
  * <ul>
@@ -8063,6 +8100,7 @@ public final class Fn {
      * @param action the consumer to convert to a function
      * @return a function that executes the consumer and returns null
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.Consumer, Object)
      * @see #f2c(java.util.function.Function)
      */
@@ -8093,6 +8131,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the consumer executes
      * @return a function that executes the consumer and returns the specified value
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.Consumer)
      * @see #f2c(java.util.function.Function)
      */
@@ -8122,6 +8161,7 @@ public final class Fn {
      * @param action the bi-consumer to convert to a bi-function
      * @return a bi-function that executes the bi-consumer and returns null
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.BiConsumer, Object)
      * @see #f2c(java.util.function.BiFunction)
      */
@@ -8153,6 +8193,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the bi-consumer executes
      * @return a bi-function that executes the bi-consumer and returns the specified value
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.BiConsumer)
      * @see #f2c(java.util.function.BiFunction)
      */
@@ -8184,6 +8225,7 @@ public final class Fn {
      * @param action the tri-consumer to convert to a tri-function
      * @return a tri-function that executes the tri-consumer and returns null
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(TriConsumer, Object)
      * @see #f2c(TriFunction)
      */
@@ -8216,6 +8258,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the tri-consumer executes
      * @return a tri-function that executes the tri-consumer and returns the specified value
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(TriConsumer)
      * @see #f2c(TriFunction)
      */
@@ -8245,6 +8288,7 @@ public final class Fn {
      * @param func the function to convert to a consumer
      * @return a consumer that executes the function and discards its return value
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.Consumer)
      */
     @Beta
@@ -8270,6 +8314,7 @@ public final class Fn {
      * @param func the bi-function to convert to a bi-consumer
      * @return a bi-consumer that executes the bi-function and discards its return value
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.BiConsumer)
      */
     @Beta
@@ -8296,6 +8341,7 @@ public final class Fn {
      * @param func the tri-function to convert to a tri-consumer
      * @return a tri-consumer that executes the tri-function and discards its return value
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(TriConsumer)
      */
     @Beta
@@ -8478,6 +8524,7 @@ public final class Fn {
      * @param runnable the runnable to convert to a callable
      * @return a callable that executes the runnable and returns null
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #r2c(java.lang.Runnable, Object)
      * @see #c2r(Callable)
      */
@@ -8506,6 +8553,7 @@ public final class Fn {
      * @param valueToReturn the value to return after the runnable executes
      * @return a callable that executes the runnable and returns the specified value
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #r2c(java.lang.Runnable)
      * @see #c2r(Callable)
      */
@@ -8534,6 +8582,7 @@ public final class Fn {
      * @param callable the callable to convert to a runnable
      * @return a runnable that executes the callable and discards its return value
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #r2c(java.lang.Runnable)
      */
     public static Runnable c2r(final Callable<?> callable) throws IllegalArgumentException {
@@ -8559,6 +8608,7 @@ public final class Fn {
      * @return an abacus Runnable that delegates to the Java runnable; if the argument is already an
      *         abacus Runnable it is returned unchanged
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #jc2c(java.util.concurrent.Callable)
      */
     public static Runnable jr2r(final java.lang.Runnable runnable) throws IllegalArgumentException {
@@ -8589,6 +8639,7 @@ public final class Fn {
      * @return an abacus Callable that delegates to the Java callable; if the argument is already an
      *         abacus Callable it is returned unchanged
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #jr2r(java.lang.Runnable)
      */
     public static <R> Callable<R> jc2c(final java.util.concurrent.Callable<? extends R> callable) throws IllegalArgumentException {
@@ -8622,6 +8673,7 @@ public final class Fn {
      * @param callable the Java callable to convert to an abacus {@code Runnable}
      * @return an abacus {@code Runnable} that executes the callable and discards its return value
      * @throws IllegalArgumentException if {@code callable} is {@code null}.
+     * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #r2c(java.lang.Runnable)
      */
     public static Runnable jc2r(final java.util.concurrent.Callable<?> callable) throws IllegalArgumentException {
@@ -8839,1623 +8891,6 @@ public final class Fn {
                 return flag.getAndNegate() ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
             }
         };
-    }
-
-    /**
-     * Utility class providing commonly used {@code LongSupplier} instances.
-     *
-     * <p>This class contains factory methods and constants for creating and accessing
-     * standard long suppliers, such as suppliers for current time.</p>
-     */
-    public static final class LongSuppliers {
-        private LongSuppliers() {
-            // utility class
-        }
-
-        private static final LongSupplier CURRENT_TIME = System::currentTimeMillis;
-
-        /**
-         * Returns a LongSupplier that supplies the current time in milliseconds.
-         *
-         * <p>This supplier returns the current time in milliseconds since the Unix epoch
-         * (January 1, 1970, 00:00:00 GMT) each time it is called.</p>
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * LongSuppliers.ofCurrentTimeMillis().getAsLong();        // returns current time millis
-         * }</pre>
-         *
-         * @return a LongSupplier that returns System.currentTimeMillis()
-         */
-        public static LongSupplier ofCurrentTimeMillis() {
-            return CURRENT_TIME;
-        }
-    }
-
-    /**
-     * Utility class providing various Predicate implementations and factory methods.
-     * This class contains methods for creating stateful, indexed, and specialized predicates.
-     */
-    public static final class Predicates {
-
-        private Predicates() {
-        }
-
-        /**
-         * Returns a stateful Predicate that tests elements based on their index position.
-         * The predicate maintains an internal counter that increments with each test.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicates.indexed((i, s) -> i < 5).test("hello");     // returns true (index 0 < 5)
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @param predicate the IntObjPredicate that accepts an index and element for testing
-         * @return a stateful Predicate that applies the given IntObjPredicate with an incrementing index
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> Predicate<T> indexed(final IntObjPredicate<T> predicate) throws IllegalArgumentException {
-            N.checkArgNotNull(predicate, cs.predicate);
-
-            return new Predicate<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public boolean test(final T t) {
-                    return predicate.test(idx.getAndIncrement(), t);
-                }
-            };
-        }
-
-        /**
-         * Returns a stateful Predicate that maintains a set of seen elements and returns {@code true} only for distinct elements.
-         * The predicate uses a HashSet internally to track previously seen elements.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicate<String> p = Predicates.distinct();
-         * p.test("a");   // returns true (new)
-         * p.test("a");   // returns false (seen)
-         * p.test("b");   // returns true (new)
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @return a stateful Predicate that returns {@code true} for first occurrence of each distinct element
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> Predicate<T> distinct() {
-            return new Predicate<>() {
-                private final Set<Object> set = N.newHashSet();
-
-                @Override
-                public boolean test(final T value) {
-                    return set.add(value);
-                }
-            };
-        }
-
-        /**
-         * Returns a stateful Predicate that maintains distinct elements based on a key extracted by the mapper function.
-         * The predicate returns {@code true} only for elements whose mapped keys haven't been seen before.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicate<Person> p = Predicates.distinctBy(Person::getName);
-         * p.test(new Person("Alice"));   // returns true
-         * p.test(new Person("Alice"));   // returns false
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @param mapper the function to extract the key for distinctness comparison
-         * @return a stateful Predicate that returns {@code true} for elements with distinct mapped keys
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> Predicate<T> distinctBy(final java.util.function.Function<? super T, ?> mapper) throws IllegalArgumentException {
-            N.checkArgNotNull(mapper, cs.mapper);
-
-            return new Predicate<>() {
-                private final Set<Object> set = N.newHashSet();
-
-                @Override
-                public boolean test(final T value) {
-                    return set.add(mapper.apply(value));
-                }
-            };
-        }
-
-        /**
-         * Returns a stateful Predicate that maintains a concurrent set of seen elements and returns {@code true} only for distinct elements.
-         * This predicate is thread-safe and can be used in parallel streams.
-         * This method is marked as Beta and Stateful, indicating it should not be saved or cached for reuse.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicate<String> p = Predicates.concurrentDistinct();
-         * p.test("a");   // returns true (thread-safe)
-         * p.test("a");   // returns false
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @return a stateful thread-safe Predicate that returns {@code true} for first occurrence of each distinct element
-         */
-        @Beta
-        @Stateful
-        public static <T> Predicate<T> concurrentDistinct() {
-            return new Predicate<>() {
-                private final Map<Object, Object> map = new ConcurrentHashMap<>();
-
-                @Override
-                public boolean test(final T value) {
-                    final Object key = value == null ? NONE : value;
-                    return map.putIfAbsent(key, NONE) == null;
-                }
-            };
-        }
-
-        /**
-         * Returns a stateful Predicate that maintains distinct elements based on a key extracted by the mapper function.
-         * This predicate is thread-safe and can be used in parallel streams.
-         * This method is marked as Beta and Stateful, indicating it should not be saved or cached for reuse.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicates.concurrentDistinctBy(Person::getName).test(person);   // returns true (thread-safe)
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @param mapper the function to extract the key for distinctness comparison
-         * @return a stateful thread-safe Predicate that returns {@code true} for elements with distinct mapped keys
-         * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-         */
-        @Beta
-        @Stateful
-        public static <T> Predicate<T> concurrentDistinctBy(final java.util.function.Function<? super T, ?> mapper) throws IllegalArgumentException {
-            N.checkArgNotNull(mapper, cs.mapper);
-
-            return new Predicate<>() {
-                private final Map<Object, Object> map = new ConcurrentHashMap<>();
-
-                @Override
-                public boolean test(final T value) {
-                    final Object key = mapper.apply(value);
-                    return map.putIfAbsent(key == null ? NONE : key, NONE) == null;
-                }
-            };
-        }
-
-        /**
-         * Returns a stateful Predicate that removes continuous repeat elements.
-         * The predicate returns {@code false} for elements that are equal to the immediately preceding element.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Predicate<String> p = Predicates.skipRepeats();
-         * p.test("a");   // returns true
-         * p.test("a");   // returns false (repeated)
-         * p.test("b");   // returns true (different)
-         * }</pre>
-         *
-         * @param <T> the type of the input to the predicate
-         * @return a stateful Predicate that returns {@code true} for elements different from their immediate predecessor
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> Predicate<T> skipRepeats() {
-            return new Predicate<>() {
-                private T pre = (T) NONE;
-
-                @Override
-                public boolean test(final T value) {
-                    final boolean res = pre == NONE || !N.equals(value, pre);
-                    pre = value;
-                    return res;
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various BiPredicate implementations and factory methods.
-     * This class contains predefined BiPredicates and methods for creating indexed BiPredicates.
-     */
-    public static final class BiPredicates {
-
-        /** The Constant ALWAYS_TRUE. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate ALWAYS_TRUE = (t, u) -> true;
-
-        /** The Constant ALWAYS_FALSE. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate ALWAYS_FALSE = (t, u) -> false;
-
-        /** The Constant EQUAL. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate EQUAL = N::equals;
-
-        /** The Constant NOT_EQUAL. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate NOT_EQUAL = (t, u) -> !N.equals(t, u);
-
-        /** The Constant GREATER_THAN. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> GREATER_THAN = (t, u) -> N.compare(t, u) > 0;
-
-        /** The Constant GREATER_THAN_OR_EQUAL. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> GREATER_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) >= 0;
-
-        /** The Constant LESS_THAN. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_THAN = (t, u) -> N.compare(t, u) < 0;
-
-        /** The Constant LESS_THAN_OR_EQUAL. */
-        @SuppressWarnings("rawtypes")
-        private static final BiPredicate<? extends Comparable, ? extends Comparable> LESS_THAN_OR_EQUAL = (t, u) -> N.compare(t, u) <= 0;
-
-        private BiPredicates() {
-        }
-
-        /**
-         * Returns a BiPredicate that always returns {@code true} regardless of input.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiPredicates.alwaysTrue().test("a", "b");          // returns true
-         * BiPredicates.alwaysTrue().test(null, null);        // returns true
-         * BiPredicates.alwaysTrue().test(new Object(), 1);   // returns true
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the predicate
-         * @param <U> the type of the second argument to the predicate
-         * @return a BiPredicate that always returns true
-         */
-        public static <T, U> BiPredicate<T, U> alwaysTrue() {
-            return ALWAYS_TRUE;
-        }
-
-        /**
-         * Returns a BiPredicate that always returns {@code false} regardless of input.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiPredicates.alwaysFalse().test("a", "b");          // returns false
-         * BiPredicates.alwaysFalse().test(null, null);        // returns false
-         * BiPredicates.alwaysFalse().test(new Object(), 1);   // returns false
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the predicate
-         * @param <U> the type of the second argument to the predicate
-         * @return a BiPredicate that always returns false
-         */
-        public static <T, U> BiPredicate<T, U> alwaysFalse() {
-            return ALWAYS_FALSE;
-        }
-
-        /**
-         * Returns a stateful BiPredicate that tests elements based on their index position.
-         * The predicate maintains an internal counter that increments with each test.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiPredicates.indexed((i, t, u) -> i < 5).test("a", "b");  // returns true (index 0 < 5)
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the predicate
-         * @param <U> the type of the second argument to the predicate
-         * @param predicate the IntBiObjPredicate that accepts an index and two elements for testing
-         * @return a stateful BiPredicate that applies the given IntBiObjPredicate with an incrementing index
-         * @throws IllegalArgumentException if {@code predicate} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T, U> BiPredicate<T, U> indexed(final IntBiObjPredicate<T, U> predicate) throws IllegalArgumentException {
-            N.checkArgNotNull(predicate, cs.predicate);
-
-            return new BiPredicate<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public boolean test(final T t, final U u) {
-                    return predicate.test(idx.getAndIncrement(), t, u);
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various TriPredicate implementations and factory methods.
-     * This class contains predefined TriPredicates for common operations.
-     */
-    public static final class TriPredicates {
-
-        /** The Constant ALWAYS_TRUE. */
-        @SuppressWarnings("rawtypes")
-        private static final TriPredicate ALWAYS_TRUE = (a, b, c) -> true;
-
-        /** The Constant ALWAYS_FALSE. */
-        @SuppressWarnings({ "rawtypes" })
-        private static final TriPredicate ALWAYS_FALSE = (a, b, c) -> false;
-
-        private TriPredicates() {
-        }
-
-        /**
-         * Returns a TriPredicate that always returns {@code true} regardless of input.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * TriPredicates.alwaysTrue().test("a", "b", "c");           // returns true
-         * TriPredicates.alwaysTrue().test(null, null, null);        // returns true
-         * TriPredicates.alwaysTrue().test(new Object(), 1, true);   // returns true
-         * }</pre>
-         *
-         * @param <A> the type of the first argument to the predicate
-         * @param <B> the type of the second argument to the predicate
-         * @param <C> the type of the third argument to the predicate
-         * @return a TriPredicate that always returns true
-         */
-        public static <A, B, C> TriPredicate<A, B, C> alwaysTrue() {
-            return ALWAYS_TRUE;
-        }
-
-        /**
-         * Returns a TriPredicate that always returns {@code false} regardless of input.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * TriPredicates.alwaysFalse().test("a", "b", "c");           // returns false
-         * TriPredicates.alwaysFalse().test(null, null, null);        // returns false
-         * TriPredicates.alwaysFalse().test(new Object(), 1, true);   // returns false
-         * }</pre>
-         *
-         * @param <A> the type of the first argument to the predicate
-         * @param <B> the type of the second argument to the predicate
-         * @param <C> the type of the third argument to the predicate
-         * @return a TriPredicate that always returns false
-         */
-        public static <A, B, C> TriPredicate<A, B, C> alwaysFalse() {
-            return ALWAYS_FALSE;
-        }
-
-    }
-
-    /**
-     * Utility class providing various Consumer implementations and factory methods.
-     * This class contains methods for creating indexed consumers.
-     */
-    public static final class Consumers {
-        private Consumers() {
-        }
-
-        /**
-         * Returns a stateful Consumer that accepts elements based on their index position.
-         * The consumer maintains an internal counter that increments with each accept call.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Consumers.indexed((i, s) -> System.out.println(i + ":" + s)).accept("hello");  // prints 0:hello
-         * }</pre>
-         *
-         * @param <T> the type of the input to the consumer
-         * @param action the IntObjConsumer that accepts an index and element
-         * @return a stateful Consumer that applies the given IntObjConsumer with an incrementing index
-         * @throws IllegalArgumentException if {@code action} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T> Consumer<T> indexed(final IntObjConsumer<T> action) throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-
-            return new Consumer<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public void accept(final T t) {
-                    action.accept(idx.getAndIncrement(), t);
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various BiConsumer implementations and factory methods.
-     * This class contains predefined BiConsumers for common collection and map operations.
-     */
-    public static final class BiConsumers {
-
-        /** The Constant DO_NOTHING. */
-        @SuppressWarnings("rawtypes")
-        private static final BiConsumer DO_NOTHING = (t, u) -> {
-            // do nothing.
-        };
-
-        /** The Constant ADD. */
-        private static final BiConsumer<Collection<Object>, Object> ADD = Collection::add;
-
-        /** The Constant ADD_ALL. */
-        private static final BiConsumer<Collection<Object>, Collection<Object>> ADD_ALL = Collection::addAll;
-
-        /** The Constant ADD_ALL_2. */
-        @SuppressWarnings("rawtypes")
-        private static final BiConsumer<PrimitiveList, PrimitiveList> ADD_ALL_2 = PrimitiveList::addAll;
-
-        /** The Constant REMOVE. */
-        private static final BiConsumer<Collection<Object>, Object> REMOVE = Collection::remove;
-
-        /** The Constant REMOVE_ALL. */
-        private static final BiConsumer<Collection<Object>, Collection<Object>> REMOVE_ALL = Collection::removeAll;
-
-        /** The Constant REMOVE_ALL_2. */
-        @SuppressWarnings("rawtypes")
-        private static final BiConsumer<PrimitiveList, PrimitiveList> REMOVE_ALL_2 = PrimitiveList::removeAll;
-
-        /** The Constant PUT. */
-        private static final BiConsumer<Map<Object, Object>, Map.Entry<Object, Object>> PUT = (t, u) -> t.put(u.getKey(), u.getValue());
-
-        /** The Constant PUT_ALL. */
-        private static final BiConsumer<Map<Object, Object>, Map<Object, Object>> PUT_ALL = Map::putAll;
-
-        /** The Constant REMOVE_BY_KEY. */
-        private static final BiConsumer<Map<Object, Object>, Object> REMOVE_BY_KEY = Map::remove;
-
-        /** The Constant MERGE. */
-        private static final BiConsumer<Joiner, Joiner> MERGE = Joiner::merge;
-
-        /** The Constant APPEND. */
-        private static final BiConsumer<StringBuilder, Object> APPEND = StringBuilder::append;
-
-        private BiConsumers() {
-        }
-
-        /**
-         * Returns a BiConsumer that does nothing.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.doNothing().accept("a", "b");
-         * BiConsumers.doNothing().accept(null, null);
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the consumer
-         * @param <U> the type of the second argument to the consumer
-         * @return a BiConsumer that performs no operation
-         */
-        public static <T, U> BiConsumer<T, U> doNothing() {
-            return DO_NOTHING;
-        }
-
-        /**
-         * Returns a BiConsumer that adds an element to a collection.
-         * The BiConsumer calls Collection.add(element) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, java.util.List<String>>ofAdd().accept(new java.util.ArrayList<>(java.util.List.of("a")), "b");        // adds "b" to the list
-         * }</pre>
-         *
-         * @param <T> the type of element to add
-         * @param <C> the type of collection
-         * @return a BiConsumer that adds the second argument to the first argument collection
-         */
-        public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofAdd() {
-            return (BiConsumer<C, T>) ADD;
-        }
-
-        /**
-         * Returns a BiConsumer that adds all elements from one collection to another.
-         * The BiConsumer calls Collection.addAll(collection) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, java.util.List<String>>ofAddAll().accept(new java.util.ArrayList<>(java.util.List.of("a")), java.util.List.of("b", "c"));   // adds "b" and "c" to the list
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collections
-         * @param <C> the type of collection
-         * @return a BiConsumer that adds all elements from the second collection to the first collection
-         */
-        public static <T, C extends Collection<T>> BiConsumer<C, C> ofAddAll() {
-            return (BiConsumer<C, C>) ADD_ALL;
-        }
-
-        /**
-         * Returns a BiConsumer that adds all elements from one PrimitiveList to another.
-         * The BiConsumer calls PrimitiveList.addAll(list) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.ofAddAlll().accept(com.landawn.abacus.util.IntList.of(1, 2), com.landawn.abacus.util.IntList.of(3, 4));   // adds 3 and 4 to the first list
-         * }</pre>
-         *
-         * @param <T> the type of PrimitiveList
-         * @return a BiConsumer that adds all elements from the second PrimitiveList to the first PrimitiveList
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends PrimitiveList> BiConsumer<T, T> ofAddAlll() {
-            return (BiConsumer<T, T>) ADD_ALL_2;
-        }
-
-        /**
-         * Returns a BiConsumer that removes an element from a collection.
-         * The BiConsumer calls Collection.remove(element) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, java.util.List<String>>ofRemove().accept(new java.util.ArrayList<>(java.util.List.of("a", "b")), "a");   // removes "a" from the list
-         * }</pre>
-         *
-         * @param <T> the type of element to remove
-         * @param <C> the type of collection
-         * @return a BiConsumer that removes the second argument from the first argument collection
-         */
-        public static <T, C extends Collection<? super T>> BiConsumer<C, T> ofRemove() {
-            return (BiConsumer<C, T>) REMOVE;
-        }
-
-        /**
-         * Returns a BiConsumer that removes all elements of one collection from another.
-         * The BiConsumer calls Collection.removeAll(collection) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, java.util.List<String>>ofRemoveAll().accept(new java.util.ArrayList<>(java.util.List.of("a", "b")), java.util.List.of("a"));   // removes "a" from the list
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collections
-         * @param <C> the type of collection
-         * @return a BiConsumer that removes all elements in the second collection from the first collection
-         */
-        public static <T, C extends Collection<T>> BiConsumer<C, C> ofRemoveAll() {
-            return (BiConsumer<C, C>) REMOVE_ALL;
-        }
-
-        /**
-         * Returns a BiConsumer that removes all elements of one PrimitiveList from another.
-         * The BiConsumer calls PrimitiveList.removeAll(list) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.ofRemoveAlll().accept(com.landawn.abacus.util.IntList.of(1, 2, 3), com.landawn.abacus.util.IntList.of(2));   // removes 2 from the first list
-         * }</pre>
-         *
-         * @param <T> the type of PrimitiveList
-         * @return a BiConsumer that removes all elements in the second PrimitiveList from the first PrimitiveList
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends PrimitiveList> BiConsumer<T, T> ofRemoveAlll() {
-            return (BiConsumer<T, T>) REMOVE_ALL_2;
-        }
-
-        /**
-         * Returns a BiConsumer that puts a Map.Entry into a Map.
-         * The BiConsumer extracts the key and value from the entry and puts them into the map.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, Integer, java.util.Map<String, Integer>, java.util.Map.Entry<String, Integer>>ofPut().accept(new java.util.HashMap<>(), java.util.Map.entry("k", 1));   // adds the entry into the map
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @param <E> the type of map entry
-         * @return a BiConsumer that puts the entry into the map
-         */
-        public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiConsumer<M, E> ofPut() {
-            return (BiConsumer<M, E>) PUT;
-        }
-
-        /**
-         * Returns a BiConsumer that puts all entries from one map into another.
-         * The BiConsumer calls Map.putAll(map) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, Integer, java.util.Map<String, Integer>>ofPutAll().accept(new java.util.HashMap<>(java.util.Map.of("k", 1)), java.util.Map.of("m", 2));   // adds all entries of the second map into the first
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BiConsumer that puts all entries from the second map into the first map
-         */
-        public static <K, V, M extends Map<K, V>> BiConsumer<M, M> ofPutAll() {
-            return (BiConsumer<M, M>) PUT_ALL;
-        }
-
-        /**
-         * Returns a BiConsumer that removes an entry from a map by key.
-         * The BiConsumer calls Map.remove(key) on the first argument with the second argument as the key.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String, Integer, java.util.Map<String, Integer>>ofRemoveByKey().accept(new java.util.HashMap<>(java.util.Map.of("k", 1)), "k");   // removes the entry with key "k"
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BiConsumer that removes the entry with the given key from the map
-         */
-        public static <K, V, M extends Map<K, V>> BiConsumer<M, K> ofRemoveByKey() {
-            return (BiConsumer<M, K>) REMOVE_BY_KEY;
-        }
-
-        /**
-         * Returns a BiConsumer that merges two Joiner instances.
-         * The BiConsumer calls Joiner.merge(joiner) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.ofMerge().accept(Joiner.with(",").append("a"), Joiner.with(",").append("b"));   // adds the second Joiner's content into the first
-         * }</pre>
-         *
-         * @return a BiConsumer that merges the second Joiner into the first Joiner
-         */
-        public static BiConsumer<Joiner, Joiner> ofMerge() {
-            return MERGE;
-        }
-
-        /**
-         * Returns a BiConsumer that appends an object to a StringBuilder.
-         * The BiConsumer calls StringBuilder.append(object) on the first argument with the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.<String>ofAppend().accept(new StringBuilder("a"), "hello");   // adds "hello" to the StringBuilder
-         * }</pre>
-         *
-         * @param <T> the type of object to append
-         * @return a BiConsumer that appends the second argument to the first argument StringBuilder
-         */
-        public static <T> BiConsumer<StringBuilder, T> ofAppend() {
-            return (BiConsumer<StringBuilder, T>) APPEND;
-        }
-
-        /**
-         * Returns a stateful BiConsumer that accepts elements based on their index position.
-         * The consumer maintains an internal counter that increments with each accept call.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiConsumers.indexed((i, t, u) -> System.out.println(i)).accept("a", "b");  // prints 0
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the consumer
-         * @param <U> the type of the second argument to the consumer
-         * @param action the IntBiObjConsumer that accepts an index and two elements
-         * @return a stateful BiConsumer that applies the given IntBiObjConsumer with an incrementing index
-         * @throws IllegalArgumentException if {@code action} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T, U> BiConsumer<T, U> indexed(final IntBiObjConsumer<T, U> action) throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-
-            return new BiConsumer<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public void accept(final T t, final U u) {
-                    action.accept(idx.getAndIncrement(), t, u);
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various TriConsumer implementations and factory methods.
-     * This class is reserved for future TriConsumer utilities.
-     */
-    public static final class TriConsumers {
-        private TriConsumers() {
-        }
-    }
-
-    /**
-     * Utility class providing various Function implementations and factory methods.
-     * This class contains methods for creating indexed functions.
-     */
-    public static final class Functions {
-
-        private Functions() {
-        }
-
-        /**
-         * Returns a stateful Function that applies a function based on element index position.
-         * The function maintains an internal counter that increments with each apply call.
-         * This method is marked as Beta, SequentialOnly, and Stateful, indicating it should not be saved, cached for reuse, or used in parallel streams.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * Functions.indexed((i, s) -> i + ":" + s).apply("hello");  // returns "0:hello"
-         * }</pre>
-         *
-         * @param <T> the type of the input to the function
-         * @param <R> the type of the result of the function
-         * @param func the IntObjFunction that accepts an index and element and produces a result
-         * @return a stateful Function that applies the given IntObjFunction with an incrementing index
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T, R> Function<T, R> indexed(final IntObjFunction<T, ? extends R> func) throws IllegalArgumentException {
-            N.checkArgNotNull(func, cs.func);
-
-            return new Function<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public R apply(final T t) {
-                    return func.apply(idx.getAndIncrement(), t);
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various BiFunction implementations and factory methods.
-     * This class contains predefined BiFunctions for common collection and map operations.
-     */
-    public static final class BiFunctions {
-
-        /** The Constant RETURN_FIRST. */
-        private static final BiFunction<Object, Object, Object> RETURN_FIRST = (t, u) -> t;
-
-        /** The Constant RETURN_SECOND. */
-        private static final BiFunction<Object, Object, Object> RETURN_SECOND = (t, u) -> u;
-
-        /** The Constant ADD. */
-        private static final BiFunction<Collection<Object>, Object, Collection<Object>> ADD = (t, u) -> {
-            t.add(u);
-            return t;
-        };
-
-        /** The Constant ADD_ALL. */
-        private static final BiFunction<Collection<Object>, Collection<Object>, Collection<Object>> ADD_ALL = (t, u) -> {
-            t.addAll(u);
-            return t;
-        };
-
-        /** The Constant ADD_ALL_2. */
-        @SuppressWarnings("rawtypes")
-        private static final BiFunction<PrimitiveList, PrimitiveList, PrimitiveList> ADD_ALL_2 = (t, u) -> {
-            t.addAll(u);
-            return t;
-        };
-
-        /** The Constant REMOVE. */
-        private static final BiFunction<Collection<Object>, Object, Collection<Object>> REMOVE = (t, u) -> {
-            t.remove(u);
-            return t;
-        };
-
-        /** The Constant REMOVE_ALL. */
-        private static final BiFunction<Collection<Object>, Collection<Object>, Collection<Object>> REMOVE_ALL = (t, u) -> {
-            t.removeAll(u);
-            return t;
-        };
-
-        /** The Constant REMOVE_ALL_2. */
-        @SuppressWarnings("rawtypes")
-        private static final BiFunction<PrimitiveList, PrimitiveList, PrimitiveList> REMOVE_ALL_2 = (t, u) -> {
-            t.removeAll(u);
-            return t;
-        };
-
-        /** The Constant PUT. */
-        private static final BiFunction<Map<Object, Object>, Map.Entry<Object, Object>, Map<Object, Object>> PUT = (t, u) -> {
-            t.put(u.getKey(), u.getValue());
-            return t;
-        };
-
-        /** The Constant PUT_ALL. */
-        private static final BiFunction<Map<Object, Object>, Map<Object, Object>, Map<Object, Object>> PUT_ALL = (t, u) -> {
-            t.putAll(u);
-            return t;
-        };
-
-        /** The Constant REMOVE_BY_KEY. */
-        private static final BiFunction<Map<Object, Object>, Object, Map<Object, Object>> REMOVE_BY_KEY = (t, u) -> {
-            t.remove(u);
-            return t;
-        };
-
-        /** The Constant MERGE. */
-        private static final BiFunction<Joiner, Joiner, Joiner> MERGE = Joiner::merge;
-
-        /** The Constant APPEND. */
-        private static final BiFunction<StringBuilder, Object, StringBuilder> APPEND = StringBuilder::append;
-
-        private BiFunctions() {
-        }
-
-        /**
-         * Returns a BiFunction that always returns the first argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.selectFirst().apply("first","second");   // returns "first"
-         * BiFunctions.selectFirst().apply(1,2);                // returns 1
-         * }</pre>
-         *
-         * @param <T> the type of the first argument and result
-         * @param <U> the type of the second argument
-         * @return a BiFunction that returns the first argument
-         */
-        public static <T, U> BiFunction<T, U, T> selectFirst() {
-            return (BiFunction<T, U, T>) RETURN_FIRST;
-        }
-
-        /**
-         * Returns a BiFunction that always returns the second argument.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.selectSecond().apply("first","second");   // returns "second"
-         * BiFunctions.selectSecond().apply(1,2);                // returns 2
-         * }</pre>
-         *
-         * @param <T> the type of the first argument
-         * @param <U> the type of the second argument and result
-         * @return a BiFunction that returns the second argument
-         */
-        public static <T, U> BiFunction<T, U, U> selectSecond() {
-            return (BiFunction<T, U, U>) RETURN_SECOND;
-        }
-
-        /**
-         * Returns a BiFunction that adds an element to a collection and returns the collection.
-         * The BiFunction calls Collection.add(element) and returns the modified collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, java.util.List<String>>ofAdd().apply(new java.util.ArrayList<>(java.util.List.of("a")), "b");        // adds "b", returns the list
-         * }</pre>
-         *
-         * @param <T> the type of element to add
-         * @param <C> the type of collection
-         * @return a BiFunction that adds the second argument to the first argument collection and returns the collection
-         */
-        public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofAdd() {
-            return (BiFunction<C, T, C>) ADD;
-        }
-
-        /**
-         * Returns a BiFunction that adds all elements from one collection to another and returns the target collection.
-         * The BiFunction calls Collection.addAll(collection) and returns the modified collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, java.util.List<String>>ofAddAll().apply(new java.util.ArrayList<>(java.util.List.of("a")), new java.util.ArrayList<>(java.util.List.of("b")));   // adds all, returns the first list
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collections
-         * @param <C> the type of collection
-         * @return a BiFunction that adds all elements from the second collection to the first and returns the first collection
-         */
-        public static <T, C extends Collection<T>> BiFunction<C, C, C> ofAddAll() {
-            return (BiFunction<C, C, C>) ADD_ALL;
-        }
-
-        /**
-         * Returns a BiFunction that adds all elements from one PrimitiveList to another and returns the target list.
-         * The BiFunction calls PrimitiveList.addAll(list) and returns the modified list.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.ofAddAlll().apply(com.landawn.abacus.util.IntList.of(1, 2), com.landawn.abacus.util.IntList.of(3, 4));   // adds all primitives, returns the first list
-         * }</pre>
-         *
-         * @param <T> the type of PrimitiveList
-         * @return a BiFunction that adds all elements from the second PrimitiveList to the first and returns the first list
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends PrimitiveList> BiFunction<T, T, T> ofAddAlll() {
-            return (BiFunction<T, T, T>) ADD_ALL_2;
-        }
-
-        /**
-         * Returns a BiFunction that removes an element from a collection and returns the collection.
-         * The BiFunction calls Collection.remove(element) and returns the modified collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, java.util.List<String>>ofRemove().apply(new java.util.ArrayList<>(java.util.List.of("a", "b")), "a");   // removes "a", returns the list
-         * }</pre>
-         *
-         * @param <T> the type of element to remove
-         * @param <C> the type of collection
-         * @return a BiFunction that removes the second argument from the first argument collection and returns the collection
-         */
-        public static <T, C extends Collection<? super T>> BiFunction<C, T, C> ofRemove() {
-            return (BiFunction<C, T, C>) REMOVE;
-        }
-
-        /**
-         * Returns a BiFunction that removes all elements of one collection from another and returns the target collection.
-         * The BiFunction calls Collection.removeAll(collection) and returns the modified collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, java.util.List<String>>ofRemoveAll().apply(new java.util.ArrayList<>(java.util.List.of("a", "b")), new java.util.ArrayList<>(java.util.List.of("a")));   // removes all, returns the first list
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collections
-         * @param <C> the type of collection
-         * @return a BiFunction that removes all elements in the second collection from the first and returns the first collection
-         */
-        public static <T, C extends Collection<T>> BiFunction<C, C, C> ofRemoveAll() {
-            return (BiFunction<C, C, C>) REMOVE_ALL;
-        }
-
-        /**
-         * Returns a BiFunction that removes all elements of one PrimitiveList from another and returns the target list.
-         * The BiFunction calls PrimitiveList.removeAll(list) and returns the modified list.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.ofRemoveAlll().apply(com.landawn.abacus.util.IntList.of(1, 2, 3), com.landawn.abacus.util.IntList.of(2));   // removes all primitives, returns the first list
-         * }</pre>
-         *
-         * @param <T> the type of PrimitiveList
-         * @return a BiFunction that removes all elements in the second PrimitiveList from the first and returns the first list
-         */
-        @Beta
-        @SuppressWarnings("rawtypes")
-        public static <T extends PrimitiveList> BiFunction<T, T, T> ofRemoveAlll() {
-            return (BiFunction<T, T, T>) REMOVE_ALL_2;
-        }
-
-        /**
-         * Returns a BiFunction that puts a Map.Entry into a Map and returns the map.
-         * The BiFunction extracts the key and value from the entry, puts them into the map, and returns the map.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, Integer, java.util.Map<String, Integer>, java.util.Map.Entry<String, Integer>>ofPut().apply(new java.util.HashMap<>(), java.util.Map.entry("k", 1));   // returns the map after the put
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @param <E> the type of map entry
-         * @return a BiFunction that puts the entry into the map and returns the map
-         */
-        public static <K, V, M extends Map<K, V>, E extends Map.Entry<K, V>> BiFunction<M, E, M> ofPut() {
-            return (BiFunction<M, E, M>) PUT;
-        }
-
-        /**
-         * Returns a BiFunction that puts all entries from one map into another and returns the target map.
-         * The BiFunction calls Map.putAll(map) and returns the modified map.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, Integer, java.util.Map<String, Integer>>ofPutAll().apply(new java.util.HashMap<>(java.util.Map.of("k", 1)), java.util.Map.of("m", 2));   // returns the first map after putting all
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BiFunction that puts all entries from the second map into the first and returns the first map
-         */
-        public static <K, V, M extends Map<K, V>> BiFunction<M, M, M> ofPutAll() {
-            return (BiFunction<M, M, M>) PUT_ALL;
-        }
-
-        /**
-         * Returns a BiFunction that removes an entry from a map by key and returns the map.
-         * The BiFunction calls Map.remove(key) and returns the modified map.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String, Integer, java.util.Map<String, Integer>>ofRemoveByKey().apply(new java.util.HashMap<>(java.util.Map.of("k", 1)), "k");   // removes by key, returns the map
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BiFunction that removes the entry with the given key from the map and returns the map
-         */
-        public static <K, V, M extends Map<K, V>> BiFunction<M, K, M> ofRemoveByKey() {
-            return (BiFunction<M, K, M>) REMOVE_BY_KEY;
-        }
-
-        /**
-         * Returns a BiFunction that merges two Joiner instances and returns the result.
-         * The BiFunction calls Joiner.merge(joiner) and returns the merged Joiner.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.ofMerge().apply(Joiner.with(",").append("a"), Joiner.with(",").append("b"));   // returns the merged Joiner
-         * }</pre>
-         *
-         * @return a BiFunction that merges the second Joiner into the first and returns the result
-         */
-        public static BiFunction<Joiner, Joiner, Joiner> ofMerge() {
-            return MERGE;
-        }
-
-        /**
-         * Returns a BiFunction that appends an object to a StringBuilder and returns the StringBuilder.
-         * The BiFunction calls StringBuilder.append(object) and returns the modified StringBuilder.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BiFunctions.<String>ofAppend().apply(new StringBuilder("a"), "hello");   // returns the StringBuilder after appending
-         * }</pre>
-         *
-         * @param <T> the type of object to append
-         * @return a BiFunction that appends the second argument to the first argument StringBuilder and returns the StringBuilder
-         */
-        public static <T> BiFunction<StringBuilder, T, StringBuilder> ofAppend() {
-            return (BiFunction<StringBuilder, T, StringBuilder>) APPEND;
-        }
-
-        /**
-         * Returns a stateful BiFunction that applies a function based on element index position.
-         * The function maintains an internal counter that increments with each apply call, starting from 0.
-         *
-         * <p><b>Important:</b> This method is marked as {@code @Beta}, {@code @SequentialOnly}, and {@code @Stateful},
-         * indicating it should not be saved, cached for reuse, or used in parallel streams. Each invocation
-         * creates a new instance with its own independent counter starting at 0.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Create indexed pairs from two lists
-         * List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
-         * List<Integer> ages = Arrays.asList(25, 30, 35);
-         *
-         * BiFunction<String, Integer, String> indexedFormatter =
-         *     BiFunctions.indexed((idx, name, age) ->
-         *         String.format("[%d] %s is %d years old", idx, name, age));
-         *
-         * // Apply to pairs - index increments with each call
-         * System.out.println(indexedFormatter.apply(names.get(0), ages.get(0)));
-         * // Output: "[0] Alice is 25 years old"
-         * System.out.println(indexedFormatter.apply(names.get(1), ages.get(1)));
-         * // Output: "[1] Bob is 30 years old"
-         * }</pre>
-         *
-         * @param <T> the type of the first argument to the function
-         * @param <U> the type of the second argument to the function
-         * @param <R> the type of the result of the function
-         * @param func the IntBiObjFunction that accepts an index and two elements and produces a result
-         * @return a stateful BiFunction that applies the given IntBiObjFunction with an incrementing index
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
-         */
-        @Beta
-        @SequentialOnly
-        @Stateful
-        public static <T, U, R> BiFunction<T, U, R> indexed(final IntBiObjFunction<T, U, ? extends R> func) throws IllegalArgumentException {
-            N.checkArgNotNull(func, cs.func);
-
-            return new BiFunction<>() {
-                private final MutableInt idx = new MutableInt(0);
-
-                @Override
-                public R apply(final T t, final U u) {
-                    return func.apply(idx.getAndIncrement(), t, u);
-                }
-            };
-        }
-    }
-
-    /**
-     * Utility class providing various TriFunction implementations and factory methods.
-     * This class is reserved for future TriFunction utilities.
-     */
-    public static final class TriFunctions {
-
-        private TriFunctions() {
-        }
-    }
-
-    /**
-     * Utility class providing various BinaryOperator implementations and factory methods.
-     * This class contains predefined BinaryOperators for common merge and combination operations.
-     */
-    public static final class BinaryOperators {
-
-        /** The Constant THROWING_MERGER. */
-        @SuppressWarnings("rawtypes")
-        static final BinaryOperator THROWING_MERGER = (t, u) -> {
-            throw new IllegalStateException(String.format("Duplicate key (attempted merging values %s and %s)", t, u));
-        };
-
-        /** The Constant IGNORING_MERGER. */
-        @SuppressWarnings("rawtypes")
-        static final BinaryOperator IGNORING_MERGER = (t, u) -> t;
-
-        /** The Constant REPLACING_MERGER. */
-        @SuppressWarnings("rawtypes")
-        static final BinaryOperator REPLACING_MERGER = (t, u) -> u;
-
-        /** The Constant ADD_ALL_TO_FIRST. */
-        private static final BinaryOperator<Collection<Object>> ADD_ALL_TO_FIRST = (t, u) -> {
-            t.addAll(u);
-            return t;
-        };
-
-        /** The Constant ADD_ALL_TO_BIGGER. */
-        private static final BinaryOperator<Collection<Object>> ADD_ALL_TO_BIGGER = (t, u) -> {
-            if (t.size() >= u.size()) {
-                t.addAll(u);
-                return t;
-            } else {
-                u.addAll(t);
-                return u;
-            }
-        };
-
-        /** The Constant REMOVE_ALL_FROM_FIRST. */
-        private static final BinaryOperator<Collection<Object>> REMOVE_ALL_FROM_FIRST = (t, u) -> {
-            t.removeAll(u);
-            return t;
-        };
-
-        /** The Constant PUT_ALL_TO_FIRST. */
-        private static final BinaryOperator<Map<Object, Object>> PUT_ALL_TO_FIRST = (t, u) -> {
-            t.putAll(u);
-            return t;
-        };
-
-        /** The Constant PUT_ALL_TO_BIGGER. */
-        private static final BinaryOperator<Map<Object, Object>> PUT_ALL_TO_BIGGER = (t, u) -> {
-            if (t.size() >= u.size()) {
-                t.putAll(u);
-                return t;
-            } else {
-                u.putAll(t);
-                return u;
-            }
-        };
-
-        /** The Constant MERGE_TO_FIRST. */
-        private static final BinaryOperator<Joiner> MERGE_TO_FIRST = Joiner::merge;
-
-        /** The Constant MERGE_TO_BIGGER. */
-        private static final BinaryOperator<Joiner> MERGE_TO_BIGGER = (t, u) -> {
-            if (t.length() >= u.length()) {
-                return t.merge(u);
-            } else {
-                return u.merge(t);
-            }
-        };
-
-        /** The Constant APPEND_TO_FIRST. */
-        private static final BinaryOperator<StringBuilder> APPEND_TO_FIRST = StringBuilder::append;
-
-        /** The Constant APPEND_TO_BIGGER. */
-        private static final BinaryOperator<StringBuilder> APPEND_TO_BIGGER = (t, u) -> {
-            if (t.length() >= u.length()) {
-                return t.append(u);
-            } else {
-                return u.insert(0, t);
-            }
-        };
-
-        /** The Constant CONCAT. */
-        private static final BinaryOperator<String> CONCAT = (t, u) -> t + u;
-
-        /** The Constant ADD_INTEGER. */
-        private static final BinaryOperator<Integer> ADD_INTEGER = Integer::sum;
-
-        /** The Constant ADD_LONG. */
-        private static final BinaryOperator<Long> ADD_LONG = Long::sum;
-
-        /** The Constant ADD_DOUBLE. */
-        private static final BinaryOperator<Double> ADD_DOUBLE = Double::sum;
-
-        /** The Constant ADD_BIG_INTEGER. */
-        private static final BinaryOperator<BigInteger> ADD_BIG_INTEGER = BigInteger::add;
-
-        /** The Constant ADD_BIG_DECIMAL. */
-        private static final BinaryOperator<BigDecimal> ADD_BIG_DECIMAL = BigDecimal::add;
-
-        private BinaryOperators() {
-        }
-
-        /**
-         * Returns a BinaryOperator that adds all elements from the second collection to the first.
-         * This method is deprecated, use ofAddAllToFirst() instead.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, java.util.List<String>>ofAddAll().apply(new java.util.ArrayList<>(java.util.List.of("a")), new java.util.ArrayList<>(java.util.List.of("b")));   // adds the second list into the first, returns the first
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collection
-         * @param <C> the type of collection
-         * @return a BinaryOperator that adds all elements from the second collection to the first and returns the first
-         * @deprecated replaced by {@link #ofAddAllToFirst()}
-         */
-        @Deprecated
-        @SuppressWarnings("unchecked")
-        public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAll() {
-            return (BinaryOperator<C>) ADD_ALL_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds all elements from the second collection to the first.
-         * The operator modifies and returns the first collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, java.util.List<String>>ofAddAllToFirst().apply(new java.util.ArrayList<>(java.util.List.of("a")), new java.util.ArrayList<>(java.util.List.of("b")));   // adds the second list into the first, returns the first
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collection
-         * @param <C> the type of collection
-         * @return a BinaryOperator that adds all elements from the second collection to the first and returns the first
-         */
-        @SuppressWarnings("unchecked")
-        public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToFirst() {
-            return (BinaryOperator<C>) ADD_ALL_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds all elements to the bigger collection.
-         * The operator compares sizes and adds the smaller collection to the larger one, returning the larger.
-         * Both inputs must be mutable. If the second collection is larger, its existing elements precede
-         * the first collection's elements, so this operator does not preserve first-then-second order.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, java.util.List<String>>ofAddAllToBigger().apply(new java.util.ArrayList<>(java.util.List.of("a", "b")), new java.util.ArrayList<>(java.util.List.of("c")));   // returns the bigger list after adding the smaller into it
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collection
-         * @param <C> the type of collection
-         * @return a BinaryOperator that adds all elements to the bigger collection and returns it
-         */
-        @SuppressWarnings("unchecked")
-        public static <T, C extends Collection<T>> BinaryOperator<C> ofAddAllToBigger() {
-            return (BinaryOperator<C>) ADD_ALL_TO_BIGGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that removes all elements of the second collection from the first.
-         * This method is deprecated, use ofRemoveAllFromFirst() instead.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, java.util.List<String>>ofRemoveAll().apply(new java.util.ArrayList<>(java.util.List.of("a", "b")), new java.util.ArrayList<>(java.util.List.of("a")));   // removes the second list from the first, returns the first
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collection
-         * @param <C> the type of collection
-         * @return a BinaryOperator that removes all elements of the second collection from the first and returns the first
-         * @deprecated replaced by {@link #ofRemoveAllFromFirst()}
-         */
-        @Deprecated
-        @SuppressWarnings("unchecked")
-        public static <T, C extends Collection<T>> BinaryOperator<C> ofRemoveAll() {
-            return (BinaryOperator<C>) REMOVE_ALL_FROM_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that removes all elements of the second collection from the first.
-         * The operator modifies and returns the first collection.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, java.util.List<String>>ofRemoveAllFromFirst().apply(new java.util.ArrayList<>(java.util.List.of("a", "b")), new java.util.ArrayList<>(java.util.List.of("a")));   // removes the second list from the first, returns the first
-         * }</pre>
-         *
-         * @param <T> the type of elements in the collection
-         * @param <C> the type of collection
-         * @return a BinaryOperator that removes all elements of the second collection from the first and returns the first
-         */
-        @SuppressWarnings("unchecked")
-        public static <T, C extends Collection<T>> BinaryOperator<C> ofRemoveAllFromFirst() {
-            return (BinaryOperator<C>) REMOVE_ALL_FROM_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that puts all entries from the second map into the first.
-         * This method is deprecated, use ofPutAllToFirst() instead.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, Integer, java.util.Map<String, Integer>>ofPutAll().apply(new java.util.HashMap<>(java.util.Map.of("k", 1)), new java.util.HashMap<>(java.util.Map.of("m", 2)));   // returns the first map after putting all entries of the second
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BinaryOperator that puts all entries from the second map into the first and returns the first
-         * @deprecated replaced by {@link #ofPutAllToFirst()}
-         */
-        @Deprecated
-        @SuppressWarnings("unchecked")
-        public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAll() {
-            return (BinaryOperator<M>) PUT_ALL_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that puts all entries from the second map into the first.
-         * The operator modifies and returns the first map.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, Integer, java.util.Map<String, Integer>>ofPutAllToFirst().apply(new java.util.HashMap<>(java.util.Map.of("k", 1)), new java.util.HashMap<>(java.util.Map.of("m", 2)));   // returns the first map after putting all entries of the second
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BinaryOperator that puts all entries from the second map into the first and returns the first
-         */
-        @SuppressWarnings("unchecked")
-        public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToFirst() {
-            return (BinaryOperator<M>) PUT_ALL_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that puts all entries into the bigger map.
-         * The operator compares sizes and puts the smaller map into the larger one, returning the larger.
-         * Both inputs must be mutable. For duplicate keys, values from the smaller map replace values in
-         * the larger map; the winning argument therefore depends on their sizes.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.<String, Integer, java.util.Map<String, Integer>>ofPutAllToBigger().apply(new java.util.HashMap<>(java.util.Map.of("k", 1, "k2", 2)), new java.util.HashMap<>(java.util.Map.of("m", 3)));   // returns the bigger map after putting all entries of the smaller into it
-         * }</pre>
-         *
-         * @param <K> the type of keys maintained by the map
-         * @param <V> the type of mapped values
-         * @param <M> the type of map
-         * @return a BinaryOperator that puts all entries into the bigger map and returns it
-         */
-        @SuppressWarnings("unchecked")
-        public static <K, V, M extends Map<K, V>> BinaryOperator<M> ofPutAllToBigger() {
-            return (BinaryOperator<M>) PUT_ALL_TO_BIGGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that merges two Joiners.
-         * This method is deprecated, use ofMergeToFirst() instead.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofMerge().apply(Joiner.with(",").append("a"), Joiner.with(",").append("b"));   // returns the first Joiner after merging the second into it
-         * }</pre>
-         *
-         * @return a BinaryOperator that merges the second Joiner into the first and returns the first
-         * @deprecated replaced by {@link #ofMergeToFirst()}
-         */
-        @Deprecated
-        public static BinaryOperator<Joiner> ofMerge() {
-            return MERGE_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that merges the second Joiner into the first.
-         * The operator modifies and returns the first Joiner.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofMergeToFirst().apply(Joiner.with(",").append("a"), Joiner.with(",").append("b"));   // returns the first Joiner after merging the second into it
-         * }</pre>
-         *
-         * @return a BinaryOperator that merges the second Joiner into the first and returns the first
-         */
-        public static BinaryOperator<Joiner> ofMergeToFirst() {
-            return MERGE_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that merges to the bigger Joiner.
-         * The operator compares lengths and merges the smaller Joiner into the larger one, returning the larger.
-         * Both inputs are mutated candidates. If the second joiner is larger, it remains first and the first
-         * joiner is merged after it, so this operator does not preserve first-then-second order.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofMergeToBigger().apply(Joiner.with(",").append("a").append("b"), Joiner.with(",").append("c"));   // returns the bigger Joiner after merging the smaller into it
-         * }</pre>
-         *
-         * @return a BinaryOperator that merges to the bigger Joiner and returns it
-         */
-        public static BinaryOperator<Joiner> ofMergeToBigger() {
-            return MERGE_TO_BIGGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that appends the second StringBuilder to the first.
-         * This method is deprecated, use ofAppendToFirst() instead.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAppend().apply(new StringBuilder("a"), new StringBuilder("b"));   // returns the first StringBuilder after appending the second
-         * }</pre>
-         *
-         * @return a BinaryOperator that appends the second StringBuilder to the first and returns the first
-         * @deprecated replaced by {@link #ofAppendToFirst()}
-         */
-        @Deprecated
-        public static BinaryOperator<StringBuilder> ofAppend() {
-            return APPEND_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that appends the second StringBuilder to the first.
-         * The operator modifies and returns the first StringBuilder.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAppendToFirst().apply(new StringBuilder("a"), new StringBuilder("b"));   // returns the first StringBuilder after appending the second
-         * }</pre>
-         *
-         * @return a BinaryOperator that appends the second StringBuilder to the first and returns the first
-         */
-        public static BinaryOperator<StringBuilder> ofAppendToFirst() {
-            return APPEND_TO_FIRST;
-        }
-
-        /**
-         * Returns a BinaryOperator that appends to the bigger StringBuilder.
-         * The operator combines the two builders into the larger one (appending the second to the first, or inserting
-         * the first at the front of the second), preserving first-then-second order and returning the larger.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAppendToBigger().apply(new StringBuilder("ab"), new StringBuilder("c"));   // returns the bigger StringBuilder after appending the smaller
-         * }</pre>
-         *
-         * @return a BinaryOperator that appends to the bigger StringBuilder and returns it
-         */
-        public static BinaryOperator<StringBuilder> ofAppendToBigger() {
-            return APPEND_TO_BIGGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that concatenates two strings.
-         * The operator performs string concatenation using the + operator.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofConcat().apply("Hello","World");      // returns "HelloWorld"
-         * }</pre>
-         *
-         * @return a BinaryOperator that concatenates two strings
-         */
-        public static BinaryOperator<String> ofConcat() {
-            return CONCAT;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds two Integer values.
-         * The operator uses Integer.sum for addition.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAddInt().apply(5,3);                  // returns 8
-         * }</pre>
-         *
-         * @return a BinaryOperator that adds two Integer values
-         */
-        public static BinaryOperator<Integer> ofAddInt() {
-            return ADD_INTEGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds two Long values.
-         * The operator uses Long.sum for addition.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAddLong().apply(5L,3L);               // returns 8L
-         * }</pre>
-         *
-         * @return a BinaryOperator that adds two Long values
-         */
-        public static BinaryOperator<Long> ofAddLong() {
-            return ADD_LONG;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds two Double values.
-         * The operator uses Double.sum for addition.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAddDouble().apply(5.0,3.0);           // returns 8.0
-         * }</pre>
-         *
-         * @return a BinaryOperator that adds two Double values
-         */
-        public static BinaryOperator<Double> ofAddDouble() {
-            return ADD_DOUBLE;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds two BigInteger values.
-         * The operator uses BigInteger.add for addition.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAddBigInteger().apply(BigInteger.TEN,BigInteger.ONE); // returns BigInteger 11
-         * }</pre>
-         *
-         * @return a BinaryOperator that adds two BigInteger values
-         */
-        public static BinaryOperator<BigInteger> ofAddBigInteger() {
-            return ADD_BIG_INTEGER;
-        }
-
-        /**
-         * Returns a BinaryOperator that adds two BigDecimal values.
-         * The operator uses BigDecimal.add for addition.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * BinaryOperators.ofAddBigDecimal().apply(BigDecimal.TEN,BigDecimal.ONE); // returns BigDecimal 11
-         * }</pre>
-         *
-         * @return a BinaryOperator that adds two BigDecimal values
-         */
-        public static BinaryOperator<BigDecimal> ofAddBigDecimal() {
-            return ADD_BIG_DECIMAL;
-        }
-    }
-
-    /**
-     * Utility class providing various UnaryOperator implementations and factory methods.
-     * This class contains the identity operator.
-     */
-    public static final class UnaryOperators {
-
-        /** The Constant IDENTITY. */
-        @SuppressWarnings("rawtypes")
-        private static final UnaryOperator IDENTITY = t -> t;
-
-        private UnaryOperators() {
-        }
-
-        /**
-         * Returns a UnaryOperator that always returns its input argument unchanged.
-         * This is the identity function for UnaryOperator.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * UnaryOperators.identity().apply("hello");   // returns "hello"
-         * UnaryOperators.identity().apply(42);        // returns 42
-         * UnaryOperators.identity().apply(null);      // returns null
-         * }</pre>
-         *
-         * @param <T> the type of the operand and result of the operator
-         * @return a UnaryOperator that returns its input argument
-         */
-        public static <T> UnaryOperator<T> identity() {
-            return IDENTITY;
-        }
     }
 
     /**

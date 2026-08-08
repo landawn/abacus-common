@@ -13,12 +13,12 @@ public class QuickHashMapTest extends AbstractTest {
 
     @Test
     public void test_toString() {
-        Map<String, Object> m = new ObjectPool<>(16);
+        Map<String, Object> m = new ConcurrentCacheMap<>(16);
         m.put("a", "b");
         m.put("c", "d");
         N.println(m);
 
-        Map<String, Object> m2 = new ObjectPool<>(8);
+        Map<String, Object> m2 = new ConcurrentCacheMap<>(8);
         m2.put("c", "d");
         m2.put("a", "b");
         N.println(m);

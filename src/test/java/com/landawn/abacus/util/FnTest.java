@@ -77,10 +77,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Fn.BiConsumers;
-import com.landawn.abacus.util.Fn.BiFunctions;
-import com.landawn.abacus.util.Fn.BiPredicates;
-import com.landawn.abacus.util.Fn.Consumers;
 import com.landawn.abacus.util.Fn.Entries;
 import com.landawn.abacus.util.Fn.FB;
 import com.landawn.abacus.util.Fn.FC;
@@ -89,8 +85,6 @@ import com.landawn.abacus.util.Fn.FF;
 import com.landawn.abacus.util.Fn.FI;
 import com.landawn.abacus.util.Fn.FL;
 import com.landawn.abacus.util.Fn.FS;
-import com.landawn.abacus.util.Fn.Functions;
-import com.landawn.abacus.util.Fn.Predicates;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -1002,7 +996,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfCurrentTimeMillis() {
-        LongSupplier supplier = Fn.LongSuppliers.ofCurrentTimeMillis();
+        LongSupplier supplier = LongSuppliers.ofCurrentTimeMillis();
         Assertions.assertNotNull(supplier);
 
         long time1 = supplier.getAsLong();
@@ -1020,7 +1014,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testLongSuppliersCurrentTimeMillis() {
-        LongSupplier currentTime = Fn.LongSuppliers.ofCurrentTimeMillis();
+        LongSupplier currentTime = LongSuppliers.ofCurrentTimeMillis();
 
         long time1 = currentTime.getAsLong();
         assertTrue(time1 > 0);
@@ -1928,41 +1922,41 @@ public class FnTest extends TestBase {
         assertThat(Fn.mapSize().apply(java.util.Map.of("a", 1))).isEqualTo(1);
     }
 
-    @Test
-    public void testOfAddAlll() {
-        IntList list1 = new IntList();
-        list1.add(1);
+    // @Test // commented out with Fn.BiConsumers.ofAddAlll (triple-l PrimitiveList marker)
+    // public void testOfAddAlll() {
+    //     IntList list1 = new IntList();
+    //     list1.add(1);
+    //
+    //     IntList list2 = new IntList();
+    //     list2.add(2);
+    //     list2.add(3);
+    //
+    //     BiConsumer<IntList, IntList> consumer = Fn.BiConsumers.ofAddAlll();
+    //     consumer.accept(list1, list2);
+    //
+    //     assertEquals(3, list1.size());
+    //     assertEquals(1, list1.get(0));
+    //     assertEquals(2, list1.get(1));
+    //     assertEquals(3, list1.get(2));
+    // }
 
-        IntList list2 = new IntList();
-        list2.add(2);
-        list2.add(3);
-
-        BiConsumer<IntList, IntList> consumer = Fn.BiConsumers.ofAddAlll();
-        consumer.accept(list1, list2);
-
-        assertEquals(3, list1.size());
-        assertEquals(1, list1.get(0));
-        assertEquals(2, list1.get(1));
-        assertEquals(3, list1.get(2));
-    }
-
-    @Test
-    public void testOfRemoveAlll() {
-        IntList list1 = new IntList();
-        list1.add(1);
-        list1.add(2);
-        list1.add(3);
-
-        IntList list2 = new IntList();
-        list2.add(2);
-
-        BiConsumer<IntList, IntList> consumer = Fn.BiConsumers.ofRemoveAlll();
-        consumer.accept(list1, list2);
-
-        assertEquals(2, list1.size());
-        assertEquals(1, list1.get(0));
-        assertEquals(3, list1.get(1));
-    }
+    // @Test // commented out with Fn.BiConsumers.ofRemoveAlll (triple-l PrimitiveList marker)
+    // public void testOfRemoveAlll() {
+    //     IntList list1 = new IntList();
+    //     list1.add(1);
+    //     list1.add(2);
+    //     list1.add(3);
+    //
+    //     IntList list2 = new IntList();
+    //     list2.add(2);
+    //
+    //     BiConsumer<IntList, IntList> consumer = Fn.BiConsumers.ofRemoveAlll();
+    //     consumer.accept(list1, list2);
+    //
+    //     assertEquals(2, list1.size());
+    //     assertEquals(1, list1.get(0));
+    //     assertEquals(3, list1.get(1));
+    // }
 
     @Test
     public void testOfPutAll() {
@@ -1973,7 +1967,7 @@ public class FnTest extends TestBase {
         map2.put("b", 2);
         map2.put("c", 3);
 
-        BiConsumer<Map<String, Integer>, Map<String, Integer>> consumer = Fn.BiConsumers.ofPutAll();
+        BiConsumer<Map<String, Integer>, Map<String, Integer>> consumer = BiConsumers.ofPutAll();
         consumer.accept(map1, map2);
 
         assertEquals(3, map1.size());
@@ -1988,7 +1982,7 @@ public class FnTest extends TestBase {
         map.put("a", 1);
         map.put("b", 2);
 
-        BiConsumer<Map<String, Integer>, String> consumer = Fn.BiConsumers.ofRemoveByKey();
+        BiConsumer<Map<String, Integer>, String> consumer = BiConsumers.ofRemoveByKey();
         consumer.accept(map, "a");
 
         assertEquals(1, map.size());
@@ -2674,7 +2668,7 @@ public class FnTest extends TestBase {
         map2.put("b", 2);
         map2.put("c", 3);
 
-        BinaryOperator<Map<String, Integer>> operator = Fn.BinaryOperators.ofPutAll();
+        BinaryOperator<Map<String, Integer>> operator = BinaryOperators.ofPutAll();
         Map<String, Integer> result = operator.apply(map1, map2);
 
         assertSame(map1, result);
@@ -2693,7 +2687,7 @@ public class FnTest extends TestBase {
         map2.put("b", 2);
         map2.put("c", 3);
 
-        BinaryOperator<Map<String, Integer>> operator = Fn.BinaryOperators.ofPutAllToFirst();
+        BinaryOperator<Map<String, Integer>> operator = BinaryOperators.ofPutAllToFirst();
         Map<String, Integer> result = operator.apply(map1, map2);
 
         assertSame(map1, result);
@@ -2711,7 +2705,7 @@ public class FnTest extends TestBase {
         map2.put("d", 4);
         map2.put("e", 5);
 
-        BinaryOperator<Map<String, Integer>> operator = Fn.BinaryOperators.ofPutAllToBigger();
+        BinaryOperator<Map<String, Integer>> operator = BinaryOperators.ofPutAllToBigger();
 
         Map<String, Integer> result1 = operator.apply(map1, map2);
         assertSame(map1, result1);
@@ -3728,7 +3722,7 @@ public class FnTest extends TestBase {
         Joiner joiner2 = Joiner.with(",");
         joiner2.append("d");
 
-        BinaryOperator<Joiner> operator = Fn.BinaryOperators.ofMergeToBigger();
+        BinaryOperator<Joiner> operator = BinaryOperators.ofMergeToBigger();
 
         Joiner result1 = operator.apply(joiner1, joiner2);
         assertSame(joiner1, result1);
@@ -8408,8 +8402,8 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfCurrentTimeMillisMultipleCalls() {
-        LongSupplier supplier1 = Fn.LongSuppliers.ofCurrentTimeMillis();
-        LongSupplier supplier2 = Fn.LongSuppliers.ofCurrentTimeMillis();
+        LongSupplier supplier1 = LongSuppliers.ofCurrentTimeMillis();
+        LongSupplier supplier2 = LongSuppliers.ofCurrentTimeMillis();
 
         Assertions.assertSame(supplier1, supplier2);
     }
@@ -9383,7 +9377,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testConcurrentDistinctBy() {
-        Predicate<String> predicate = Fn.Predicates.concurrentDistinctBy(String::length);
+        Predicate<String> predicate = Predicates.concurrentDistinctBy(String::length);
 
         assertTrue(predicate.test("a"));
         assertTrue(predicate.test("ab"));
@@ -9395,7 +9389,7 @@ public class FnTest extends TestBase {
     @Test
     public void testOfAdd() {
         List<String> list = new ArrayList<>();
-        BiConsumer<List<String>, String> consumer = Fn.BiConsumers.ofAdd();
+        BiConsumer<List<String>, String> consumer = BiConsumers.ofAdd();
 
         consumer.accept(list, "a");
         consumer.accept(list, "b");
@@ -9410,7 +9404,7 @@ public class FnTest extends TestBase {
 
         List<String> list2 = Arrays.asList("b", "c");
 
-        BiConsumer<List<String>, List<String>> consumer = Fn.BiConsumers.ofAddAll();
+        BiConsumer<List<String>, List<String>> consumer = BiConsumers.ofAddAll();
         consumer.accept(list1, list2);
 
         assertEquals(Arrays.asList("a", "b", "c"), list1);
@@ -9419,7 +9413,7 @@ public class FnTest extends TestBase {
     @Test
     public void testOfRemove() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        BiConsumer<List<String>, String> consumer = Fn.BiConsumers.ofRemove();
+        BiConsumer<List<String>, String> consumer = BiConsumers.ofRemove();
 
         consumer.accept(list, "b");
         assertEquals(Arrays.asList("a", "c"), list);
@@ -9430,7 +9424,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         List<String> list2 = Arrays.asList("b", "d");
 
-        BiConsumer<List<String>, List<String>> consumer = Fn.BiConsumers.ofRemoveAll();
+        BiConsumer<List<String>, List<String>> consumer = BiConsumers.ofRemoveAll();
         consumer.accept(list1, list2);
 
         assertEquals(Arrays.asList("a", "c"), list1);
@@ -9441,7 +9435,7 @@ public class FnTest extends TestBase {
         Map<String, Integer> map = new HashMap<>();
         Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<>("key", 123);
 
-        BiConsumer<Map<String, Integer>, Map.Entry<String, Integer>> consumer = Fn.BiConsumers.ofPut();
+        BiConsumer<Map<String, Integer>, Map.Entry<String, Integer>> consumer = BiConsumers.ofPut();
         consumer.accept(map, entry);
 
         assertEquals(123, map.get("key"));
@@ -9455,7 +9449,7 @@ public class FnTest extends TestBase {
         Joiner joiner2 = Joiner.with(",");
         joiner2.append("c").append("d");
 
-        BiConsumer<Joiner, Joiner> consumer = Fn.BiConsumers.ofMerge();
+        BiConsumer<Joiner, Joiner> consumer = BiConsumers.ofMerge();
         consumer.accept(joiner1, joiner2);
 
         assertEquals("a,b,c,d", joiner1.toString());
@@ -9464,7 +9458,7 @@ public class FnTest extends TestBase {
     @Test
     public void testOfAppend() {
         StringBuilder sb = new StringBuilder("Hello");
-        BiConsumer<StringBuilder, String> consumer = Fn.BiConsumers.ofAppend();
+        BiConsumer<StringBuilder, String> consumer = BiConsumers.ofAppend();
 
         consumer.accept(sb, " World");
         assertEquals("Hello World", sb.toString());
@@ -9475,7 +9469,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b"));
         List<String> list2 = Arrays.asList("c", "d");
 
-        BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofAddAll();
+        BinaryOperator<List<String>> operator = BinaryOperators.ofAddAll();
         List<String> result = operator.apply(list1, list2);
 
         assertSame(list1, result);
@@ -9487,7 +9481,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b"));
         List<String> list2 = Arrays.asList("c", "d");
 
-        BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofAddAllToFirst();
+        BinaryOperator<List<String>> operator = BinaryOperators.ofAddAllToFirst();
         List<String> result = operator.apply(list1, list2);
 
         assertSame(list1, result);
@@ -9499,7 +9493,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b", "c"));
         List<String> list2 = new ArrayList<>(Arrays.asList("d", "e"));
 
-        BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofAddAllToBigger();
+        BinaryOperator<List<String>> operator = BinaryOperators.ofAddAllToBigger();
 
         List<String> result1 = operator.apply(list1, list2);
         assertSame(list1, result1);
@@ -9518,7 +9512,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         List<String> list2 = Arrays.asList("b", "d");
 
-        BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofRemoveAll();
+        BinaryOperator<List<String>> operator = BinaryOperators.ofRemoveAll();
         List<String> result = operator.apply(list1, list2);
 
         assertSame(list1, result);
@@ -9530,7 +9524,7 @@ public class FnTest extends TestBase {
         List<String> list1 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
         List<String> list2 = Arrays.asList("b", "d");
 
-        BinaryOperator<List<String>> operator = Fn.BinaryOperators.ofRemoveAllFromFirst();
+        BinaryOperator<List<String>> operator = BinaryOperators.ofRemoveAllFromFirst();
         List<String> result = operator.apply(list1, list2);
 
         assertSame(list1, result);
@@ -9545,7 +9539,7 @@ public class FnTest extends TestBase {
         Joiner joiner2 = Joiner.with(",");
         joiner2.append("c").append("d");
 
-        BinaryOperator<Joiner> operator = Fn.BinaryOperators.ofMerge();
+        BinaryOperator<Joiner> operator = BinaryOperators.ofMerge();
         Joiner result = operator.apply(joiner1, joiner2);
 
         assertSame(joiner1, result);
@@ -9560,7 +9554,7 @@ public class FnTest extends TestBase {
         Joiner joiner2 = Joiner.with(",");
         joiner2.append("c").append("d");
 
-        BinaryOperator<Joiner> operator = Fn.BinaryOperators.ofMergeToFirst();
+        BinaryOperator<Joiner> operator = BinaryOperators.ofMergeToFirst();
         Joiner result = operator.apply(joiner1, joiner2);
 
         assertSame(joiner1, result);
@@ -9572,7 +9566,7 @@ public class FnTest extends TestBase {
         StringBuilder sb1 = new StringBuilder("Hello");
         StringBuilder sb2 = new StringBuilder(" World");
 
-        BinaryOperator<StringBuilder> operator = Fn.BinaryOperators.ofAppend();
+        BinaryOperator<StringBuilder> operator = BinaryOperators.ofAppend();
         StringBuilder result = operator.apply(sb1, sb2);
 
         assertSame(sb1, result);
@@ -9584,7 +9578,7 @@ public class FnTest extends TestBase {
         StringBuilder sb1 = new StringBuilder("Hello");
         StringBuilder sb2 = new StringBuilder(" World");
 
-        BinaryOperator<StringBuilder> operator = Fn.BinaryOperators.ofAppendToFirst();
+        BinaryOperator<StringBuilder> operator = BinaryOperators.ofAppendToFirst();
         StringBuilder result = operator.apply(sb1, sb2);
 
         assertSame(sb1, result);
@@ -9596,7 +9590,7 @@ public class FnTest extends TestBase {
         StringBuilder sb1 = new StringBuilder("Hello World");
         StringBuilder sb2 = new StringBuilder("!");
 
-        BinaryOperator<StringBuilder> operator = Fn.BinaryOperators.ofAppendToBigger();
+        BinaryOperator<StringBuilder> operator = BinaryOperators.ofAppendToBigger();
 
         StringBuilder result1 = operator.apply(sb1, sb2);
         assertSame(sb1, result1);
@@ -9612,7 +9606,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfConcat() {
-        BinaryOperator<String> operator = Fn.BinaryOperators.ofConcat();
+        BinaryOperator<String> operator = BinaryOperators.ofConcat();
         assertEquals("HelloWorld", operator.apply("Hello", "World"));
         assertEquals("", operator.apply("", ""));
         assertEquals("test", operator.apply("test", ""));
@@ -9620,7 +9614,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfAddInt() {
-        BinaryOperator<Integer> operator = Fn.BinaryOperators.ofAddInt();
+        BinaryOperator<Integer> operator = BinaryOperators.ofAddInt();
         assertEquals(5, operator.apply(2, 3));
         assertEquals(0, operator.apply(0, 0));
         assertEquals(-1, operator.apply(1, -2));
@@ -9628,7 +9622,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfAddLong() {
-        BinaryOperator<Long> operator = Fn.BinaryOperators.ofAddLong();
+        BinaryOperator<Long> operator = BinaryOperators.ofAddLong();
         assertEquals(5L, operator.apply(2L, 3L));
         assertEquals(0L, operator.apply(0L, 0L));
         assertEquals(-1L, operator.apply(1L, -2L));
@@ -9636,7 +9630,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfAddDouble() {
-        BinaryOperator<Double> operator = Fn.BinaryOperators.ofAddDouble();
+        BinaryOperator<Double> operator = BinaryOperators.ofAddDouble();
         assertEquals(5.5, operator.apply(2.2, 3.3), 0.0001);
         assertEquals(0.0, operator.apply(0.0, 0.0), 0.0001);
         assertEquals(-1.0, operator.apply(1.5, -2.5), 0.0001);
@@ -9644,7 +9638,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfAddBigInteger() {
-        BinaryOperator<BigInteger> operator = Fn.BinaryOperators.ofAddBigInteger();
+        BinaryOperator<BigInteger> operator = BinaryOperators.ofAddBigInteger();
 
         BigInteger bi1 = new BigInteger("12345678901234567890");
         BigInteger bi2 = new BigInteger("98765432109876543210");
@@ -9656,7 +9650,7 @@ public class FnTest extends TestBase {
 
     @Test
     public void testOfAddBigDecimal() {
-        BinaryOperator<BigDecimal> operator = Fn.BinaryOperators.ofAddBigDecimal();
+        BinaryOperator<BigDecimal> operator = BinaryOperators.ofAddBigDecimal();
 
         BigDecimal bd1 = new BigDecimal("123.456");
         BigDecimal bd2 = new BigDecimal("876.544");

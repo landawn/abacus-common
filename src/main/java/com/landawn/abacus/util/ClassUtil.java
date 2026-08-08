@@ -423,7 +423,7 @@ public final class ClassUtil {
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
     // Built-in aliases resolved without class-loader lookups.
-    private static final Map<String, Class<?>> BUILT_IN_TYPE = new ObjectPool<>(POOL_SIZE); // new LinkedHashMap<>();
+    private static final Map<String, Class<?>> BUILT_IN_TYPE = new ConcurrentCacheMap<>(POOL_SIZE); // new LinkedHashMap<>();
 
     static {
         BUILT_IN_TYPE.put(boolean.class.getCanonicalName(), boolean.class);
@@ -695,27 +695,27 @@ public final class ClassUtil {
         SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.put(double.class.getName(), "D");
     }
 
-    private static final Map<Class<?>, Package> packagePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Package> packagePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> packageNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, String> packageNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<String, Class<?>> clsNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<String, Class<?>> clsNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> simpleClassNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, String> simpleClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> fullClassNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, String> fullClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> canonicalClassNamePool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, String> canonicalClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Class<?>> enclosingClassPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Class<?>> enclosingClassPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Constructor<?>> classNoArgDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Constructor<?>> classNoArgDeclaredConstructorPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<List<Class<?>>, Constructor<?>>> classDeclaredConstructorPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<List<Class<?>>, Constructor<?>>> classDeclaredConstructorPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Method>> classNoArgDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Method>> classNoArgDeclaredMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     // Superclasses/Superinterfaces. Copied from Apache Commons Lang under Apache License v2.
     // ----------------------------------------------------------------------

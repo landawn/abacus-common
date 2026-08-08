@@ -16871,7 +16871,7 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testReverseToList() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> reversed = N.reverseToList(list);
+        List<Integer> reversed = N.toReversedList(list);
         assertEquals(5, reversed.size());
         assertEquals(Integer.valueOf(5), reversed.get(0));
         assertEquals(Integer.valueOf(1), reversed.get(4));

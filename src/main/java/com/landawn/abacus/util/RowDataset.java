@@ -10274,6 +10274,14 @@ public final class RowDataset implements Dataset, Cloneable {
         }
     }
 
+    /**
+     * Returns a hash code consistent with {@link #equals(Object)}.
+     *
+     * <p>The hash is derived from the column-name list and the column data only.
+     * Dataset properties and frozen state are not included.</p>
+     *
+     * @return a hash code value for this dataset
+     */
     @Override
     public int hashCode() {
         int h = 17;
@@ -10281,6 +10289,18 @@ public final class RowDataset implements Dataset, Cloneable {
         return (h * 31) + _columnList.hashCode();
     }
 
+    /**
+     * Compares this dataset to the specified object for equality.
+     *
+     * <p>Two {@code RowDataset} instances are equal when they have the same row count,
+     * the same ordered column names, and equal column values (element-wise). Properties
+     * and frozen state are not considered. Other {@link Dataset} implementations are never
+     * equal to a {@code RowDataset} under this method.</p>
+     *
+     * @param obj the object to compare with
+     * @return {@code true} if {@code obj} is a {@code RowDataset} with the same structure
+     *         and cell values; {@code false} otherwise
+     */
     @SuppressFBWarnings
     @Override
     public boolean equals(final Object obj) {
@@ -10295,6 +10315,14 @@ public final class RowDataset implements Dataset, Cloneable {
         return false;
     }
 
+    /**
+     * Returns a string representation of this dataset for debugging.
+     *
+     * <p>The format includes column names, optional non-empty properties, frozen flag, and
+     * each column's values. It is not intended as a stable serialization format.</p>
+     *
+     * @return a string describing column names, properties (when present), frozen state, and column data
+     */
     @Override
     public String toString() {
         final StringBuilder sb = Objectory.createStringBuilder();

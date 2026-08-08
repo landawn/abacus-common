@@ -32931,7 +32931,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] words = {"apple", "banana", "cherry", "date"};
-     * boolean result = N.isMatchCountBetween(words, 2, 3, s -> s.length() > 5);
+     * boolean result = N.hasMatchCountBetween(words, 2, 3, s -> s.length() > 5);
      * // returns true (2 words: "banana" and "cherry" are > 5 chars)
      * }</pre>
      *
@@ -32946,7 +32946,7 @@ public final class N extends CommonUtil {
      * @see #allMatch(Object[], Predicate)
      * @see #count(Object[], Predicate)
      */
-    public static <T> boolean isMatchCountBetween(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter)
+    public static <T> boolean hasMatchCountBetween(final T[] a, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -32980,7 +32980,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = Arrays.asList(2, 4, 5, 6, 8);
-     * boolean result = N.isMatchCountBetween(numbers, 2, 4, n -> n % 2 == 0);
+     * boolean result = N.hasMatchCountBetween(numbers, 2, 4, n -> n % 2 == 0);
      * // returns true (4 even numbers: 2, 4, 6, 8)
      * }</pre>
      *
@@ -32995,7 +32995,7 @@ public final class N extends CommonUtil {
      * @see #allMatch(Iterable, Predicate)
      * @see #count(Iterable, Predicate)
      */
-    public static <T> boolean isMatchCountBetween(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter)
+    public static <T> boolean hasMatchCountBetween(final Iterable<? extends T> c, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -33014,7 +33014,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return isMatchCountBetween(c.iterator(), atLeast, atMost, filter);
+        return hasMatchCountBetween(c.iterator(), atLeast, atMost, filter);
     }
 
     /**
@@ -33025,7 +33025,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter = Arrays.asList("Hi", "Hey", "Hello", "World").iterator();
-     * boolean result = N.isMatchCountBetween(iter, 1, 2, s -> s.length() <= 3);
+     * boolean result = N.hasMatchCountBetween(iter, 1, 2, s -> s.length() <= 3);
      * // returns true (2 short words: "Hi" and "Hey")
      * }</pre>
      *
@@ -33040,7 +33040,7 @@ public final class N extends CommonUtil {
      * @see #allMatch(Iterator, Predicate)
      * @see #count(Iterator, Predicate)
      */
-    public static <T> boolean isMatchCountBetween(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter)
+    public static <T> boolean hasMatchCountBetween(final Iterator<? extends T> iter, final int atLeast, final int atMost, final Predicate<? super T> filter)
             throws IllegalArgumentException {
         checkArgNotNegative(atLeast, cs.atLeast);
         checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
@@ -44663,24 +44663,24 @@ public final class N extends CommonUtil {
         return Throwables.LazyInitializer.of(supplier);
     }
 
-    /**
-     * Creates a lazy-initialized supplier from the provided exception-throwing supplier that defers computation until first access.
-     *
-     * @param <T> the type of results supplied by this supplier
-     * @param <E> the type of exception that may be thrown by the supplier
-     * @param supplier the exception-throwing supplier to be lazily initialized
-     * @return a thread-safe lazy-initialized supplier that caches the result of the first successful call
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
-     * @deprecated unguessable name; use the self-describing {@link #lazyInitChecked(Throwables.Supplier)} instead
-     *             (the checked-exception counterpart of {@link #lazyInit(Supplier)}).
-     */
-    @Deprecated
-    @Beta
-    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier, cs.supplier);
-
-        return lazyInitChecked(supplier);
-    }
+    //    /**
+    //     * Creates a lazy-initialized supplier from the provided exception-throwing supplier that defers computation until first access.
+    //     *
+    //     * @param <T> the type of results supplied by this supplier
+    //     * @param <E> the type of exception that may be thrown by the supplier
+    //     * @param supplier the exception-throwing supplier to be lazily initialized
+    //     * @return a thread-safe lazy-initialized supplier that caches the result of the first successful call
+    //     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+    //     * @deprecated unguessable name; use the self-describing {@link #lazyInitChecked(Throwables.Supplier)} instead
+    //     *             (the checked-exception counterpart of {@link #lazyInit(Supplier)}).
+    //     */
+    //    @Deprecated
+    //    @Beta
+    //    public static <T, E extends Exception> Throwables.Supplier<T, E> lazyInitialize(final Throwables.Supplier<T, E> supplier) throws IllegalArgumentException {
+    //        N.checkArgNotNull(supplier, cs.supplier);
+    //
+    //        return lazyInitChecked(supplier);
+    //    }
 
     /**
      * Converts the specified {@code Exception} to a {@code RuntimeException} if it's a checked {@code exception}, otherwise returns itself.

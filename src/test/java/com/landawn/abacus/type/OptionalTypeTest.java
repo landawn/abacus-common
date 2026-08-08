@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.Optional;
 
 public class OptionalTypeTest extends TestBase {
@@ -328,8 +329,7 @@ public class OptionalTypeTest extends TestBase {
 
     @Test
     public void testStringOf_usesDeclaredElementTypeForSubtype() {
-        TypeFactory.registerType(OptionalBaseValue.class, value -> "base:" + value.value, str -> new OptionalBaseValue(str.substring(5)));
-        TypeFactory.registerType(OptionalDerivedValue.class, value -> "derived:" + value.value, str -> new OptionalDerivedValue(str.substring(8)));
+        registerOptionalSubtypeFixtures();
 
         final OptionalType<OptionalBaseValue> type = new OptionalType<>(TypeFactory.getType(OptionalBaseValue.class).name());
         final OptionalBaseValue value = new OptionalDerivedValue("test");
@@ -339,6 +339,19 @@ public class OptionalTypeTest extends TestBase {
 
         assertEquals("base:test", str);
         assertEquals("test", roundTripped.get().value);
+    }
+
+    private static void registerOptionalSubtypeFixtures() {
+        try {
+            TypeFactory.registerType(OptionalBaseValue.class, value -> "base:" + value.value, str -> new OptionalBaseValue(str.substring(5)));
+        } catch (IllegalArgumentException ignore) {
+            // already registered by a sibling test in this class
+        }
+        try {
+            TypeFactory.registerType(OptionalDerivedValue.class, value -> "derived:" + value.value, str -> new OptionalDerivedValue(str.substring(8)));
+        } catch (IllegalArgumentException ignore) {
+            // already registered by a sibling test in this class
+        }
     }
 
     public static class OptionalBaseValue {
@@ -353,6 +366,24 @@ public class OptionalTypeTest extends TestBase {
         OptionalDerivedValue(final String value) {
             super(value);
         }
+    }
+
+    // Bug: serializeTo/appendTo used runtime Type.of(getClass()) instead of declared elementType,
+    // so subtype formatting diverged from stringOf (which already uses elementType).
+    @Test
+    public void testSerializeTo_usesDeclaredElementTypeForSubtype() throws java.io.IOException {
+        registerOptionalSubtypeFixtures();
+
+        final OptionalType<OptionalBaseValue> type = new OptionalType<>(TypeFactory.getType(OptionalBaseValue.class).name());
+        final OptionalBaseValue value = new OptionalDerivedValue("test");
+
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, Optional.of(value));
+        assertEquals("base:test", sb.toString(), "appendTo must use declared elementType, not runtime class");
+
+        final CharacterWriter writer = createCharacterWriter();
+        assertNotNull(type);
+        type.serializeTo(writer, Optional.of(value), null);
     }
 
 }

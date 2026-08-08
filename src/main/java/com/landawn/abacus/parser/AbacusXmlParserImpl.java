@@ -55,12 +55,12 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ConcurrentCacheMap;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
-import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
@@ -125,7 +125,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     // Cached node-name and node-type metadata used during deserialization.
     private static final Map<Class<?>, Map<String, Class<?>>> nodeNameClassMapPool = new ConcurrentHashMap<>(POOL_SIZE);
 
-    private static final Map<String, NodeType> nodeTypePool = new ObjectPool<>(64);
+    private static final Map<String, NodeType> nodeTypePool = new ConcurrentCacheMap<>(64);
 
     static {
         nodeTypePool.put(XmlConstants.ARRAY, NodeType.ARRAY);

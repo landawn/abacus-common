@@ -3918,7 +3918,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.of(result);
+            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
         }, this, asyncExecutor, asyncExecutorToUse);
     }
 
@@ -4239,7 +4239,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[fromIndex]);
+                return Optional.ofNullable(elements[fromIndex]);
             } else {
                 isDone = false;
             }
@@ -4275,7 +4275,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[toIndex - 1]);
+                return Optional.ofNullable(elements[toIndex - 1]);
             } else {
                 isDone = false;
             }
@@ -4734,7 +4734,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
     }
 
     /**
@@ -4835,7 +4835,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value());
+        return resultHolder.value() == NONE ? Optional.empty() : Optional.ofNullable(resultHolder.value());
     }
 
     /**
@@ -4937,7 +4937,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
     }
 
     /**

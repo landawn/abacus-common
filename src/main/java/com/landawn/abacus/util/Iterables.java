@@ -4251,7 +4251,7 @@ public final class Iterables {
      * @return a reversed view of the specified list.
      * @see N#reverse(List)
      * @see N#reverse(Collection)
-     * @see N#reverseToList(Collection)
+     * @see N#toReversedList(Collection)
      */
     public static <T> List<T> asReversed(final List<T> list) {
         if (list instanceof ImmutableList) {

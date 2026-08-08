@@ -658,11 +658,11 @@ sealed class CommonUtil permits N {
     }
 
     // Cached immutable views of enum constants.
-    private static final Map<Class<? extends Enum<?>>, ImmutableList<? extends Enum<?>>> enumListPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableList<? extends Enum<?>>> enumListPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableSet<? extends Enum<?>>> enumSetPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<? extends Enum<?>>, ImmutableBiMap<? extends Enum<?>, String>> enumMapPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<? extends Enum<?>>, ImmutableBiMap<? extends Enum<?>, String>> enumMapPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     static final String[] charStringCache = new String[128];
 
@@ -18997,6 +18997,46 @@ sealed class CommonUtil permits N {
         return c;
     }
 
+    // replaced by SequencedCollection in JDK 21?
+
+    /**
+     * Creates a new list containing the elements from the specified collection in reversed order.
+     *
+     * <p>This method does not modify the original collection. Instead, it creates a new
+     * {@link ArrayList} containing all elements from the collection, then reverses the
+     * order of elements in the new list.</p>
+     *
+     * <p>The input collection does not need to have a well-defined encounter order.
+     * If the collection is {@code null} or empty, an empty list is returned.</p>
+     *
+     * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
+     * {@code SequencedCollection} functionality in JDK 21 or later.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * N.toReversedList(Arrays.asList(1,2,3));      // returns [3,2,1]
+     * N.toReversedList(Collections.emptyList());   // returns []
+     * }</pre>
+     *
+     * @param <T> the type of elements in the collection
+     * @param c the collection whose elements will be added to the returned list in reverse order. May be {@code null}.
+     * @return a new list containing the elements from the collection in reversed order
+     * @see #reverse(List)
+     * @see #reverse(Collection)
+     */
+    @Beta
+    public static <T> List<T> toReversedList(final Collection<? extends T> c) {
+        if (isEmpty(c)) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(c);
+
+        reverse(result);
+
+        return result;
+    }
+
     /**
      * Converts an Iterable to a Map using a key extractor function.
      *
@@ -27742,7 +27782,7 @@ sealed class CommonUtil permits N {
      * @param list the list to be reversed. May be {@code null}.
      * @see #reverse(List, int, int)
      * @see #reverse(Collection)
-     * @see #reverseToList(Collection)
+     * @see #toReversedList(Collection)
      * @see Collections#reverse(List)
      */
     public static void reverse(final List<?> list) {
@@ -27779,7 +27819,7 @@ sealed class CommonUtil permits N {
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > list.size()} or {@code fromIndex > toIndex}
      * @see #reverse(List)
      * @see #reverse(Collection)
-     * @see #reverseToList(Collection)
+     * @see #toReversedList(Collection)
      */
     public static void reverse(final List<?> list, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(list));
@@ -27834,7 +27874,7 @@ sealed class CommonUtil permits N {
      *
      * @param c the collection to be reversed. Should have a well-defined encounter order.
      * @see #reverse(List)
-     * @see #reverseToList(Collection)
+     * @see #toReversedList(Collection)
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -27851,46 +27891,6 @@ sealed class CommonUtil permits N {
             c.clear();
             c.addAll((List) Arrays.asList(tmp));
         }
-    }
-
-    // replaced by SequencedCollection in JDK 21?
-
-    /**
-     * Creates a new list containing the elements from the specified collection in reversed order.
-     *
-     * <p>This method does not modify the original collection. Instead, it creates a new
-     * {@link ArrayList} containing all elements from the collection, then reverses the
-     * order of elements in the new list.</p>
-     *
-     * <p>The input collection does not need to have a well-defined encounter order.
-     * If the collection is {@code null} or empty, an empty list is returned.</p>
-     *
-     * <p><b>Note:</b> This method is marked as {@link Beta} and may be replaced by
-     * {@code SequencedCollection} functionality in JDK 21 or later.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * N.reverseToList(Arrays.asList(1,2,3));      // returns [3,2,1]
-     * N.reverseToList(Collections.emptyList());   // returns []
-     * }</pre>
-     *
-     * @param <T> the type of elements in the collection
-     * @param c the collection whose elements will be added to the returned list in reverse order. May be {@code null}.
-     * @return a new list containing the elements from the collection in reversed order
-     * @see #reverse(List)
-     * @see #reverse(Collection)
-     */
-    @Beta
-    public static <T> List<T> reverseToList(final Collection<? extends T> c) {
-        if (isEmpty(c)) {
-            return new ArrayList<>();
-        }
-
-        final List<T> result = new ArrayList<>(c);
-
-        reverse(result);
-
-        return result;
     }
 
     /**

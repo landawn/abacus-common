@@ -57,11 +57,11 @@ import com.landawn.abacus.util.AndroidUtil;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.Charsets;
+import com.landawn.abacus.util.ConcurrentCacheMap;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -183,7 +183,7 @@ public final class HttpUtil {
         contentFormat2Type.put(ContentFormat.KRYO, HttpHeaders.Values.APPLICATION_KRYO);
     }
 
-    private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ObjectPool<>(64);
+    private static final Map<String, Map<String, ContentFormat>> contentTypeEncoding2Format = new ConcurrentCacheMap<>(64);
 
     static {
         for (final Map.Entry<ContentFormat, String> entry : contentFormat2Type.entrySet()) {

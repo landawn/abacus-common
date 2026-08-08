@@ -122,25 +122,25 @@ public class StreamBaseTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset() {
+    public void testSkipAndLimit() {
         Stream<Integer> stream1 = createStream(1, 2, 3, 4, 5);
-        List<Integer> result1 = stream1.limit(2, 2).toList();
+        List<Integer> result1 = stream1.skipAndLimit(2, 2).toList();
         Assertions.assertEquals(Arrays.asList(3, 4), result1);
 
         Stream<Integer> stream2 = createStream(1, 2, 3, 4, 5);
-        List<Integer> result2 = stream2.limit(0, 3).toList();
+        List<Integer> result2 = stream2.skipAndLimit(0, 3).toList();
         Assertions.assertEquals(Arrays.asList(1, 2, 3), result2);
 
         Stream<Integer> stream3 = createStream(1, 2, 3, 4, 5);
-        List<Integer> result3 = stream3.limit(0, Long.MAX_VALUE).toList();
+        List<Integer> result3 = stream3.skipAndLimit(0, Long.MAX_VALUE).toList();
         Assertions.assertEquals(Arrays.asList(1, 2, 3, 4, 5), result3);
 
         Stream<Integer> stream4 = createStream(1, 2, 3, 4, 5);
-        List<Integer> result4 = stream4.limit(3, Long.MAX_VALUE).toList();
+        List<Integer> result4 = stream4.skipAndLimit(3, Long.MAX_VALUE).toList();
         Assertions.assertEquals(Arrays.asList(4, 5), result4);
 
         Stream<Integer> stream5 = createStream(1, 2, 3);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> stream5.limit(-1, 2));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> stream5.skipAndLimit(-1, 2));
     }
 
     @Test

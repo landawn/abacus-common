@@ -2827,14 +2827,14 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimit_WithOffset() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).limit(1, 3).toArray();
+    public void testSkipAndLimit_WithOffset() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0).skipAndLimit(1, 3).toArray();
         assertArrayEquals(new double[] { 2.0, 3.0, 4.0 }, result, 0.001);
     }
 
     @Test
-    public void testLimit_WithOffsetBeyondSize() {
-        double[] result = DoubleStream.of(1.0, 2.0, 3.0).limit(5, 3).toArray();
+    public void testSkipAndLimit_WithOffsetBeyondSize() {
+        double[] result = DoubleStream.of(1.0, 2.0, 3.0).skipAndLimit(5, 3).toArray();
         assertArrayEquals(new double[0], result, 0.001);
     }
 

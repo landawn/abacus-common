@@ -3959,14 +3959,14 @@ public class IntStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimit_WithOffset() {
-        int[] result = IntStream.of(1, 2, 3, 4, 5).limit(1, 3).toArray();
+    public void testSkipAndLimit_WithOffset() {
+        int[] result = IntStream.of(1, 2, 3, 4, 5).skipAndLimit(1, 3).toArray();
         assertArrayEquals(new int[] { 2, 3, 4 }, result);
     }
 
     @Test
-    public void testLimit_WithOffsetBeyondSize() {
-        int[] result = IntStream.of(1, 2, 3).limit(5, 3).toArray();
+    public void testSkipAndLimit_WithOffsetBeyondSize() {
+        int[] result = IntStream.of(1, 2, 3).skipAndLimit(5, 3).toArray();
         assertArrayEquals(new int[0], result);
     }
 

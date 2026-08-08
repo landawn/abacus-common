@@ -73,6 +73,7 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.ConcurrentCacheMap;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -83,7 +84,6 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Numbers;
-import com.landawn.abacus.util.ObjectPool;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
@@ -146,7 +146,7 @@ public final class ParserUtil {
     private static final NamingPolicy[] NAMING_POLICIES = NamingPolicy.values();
 
     // Bean metadata cache, keyed by the complete reflective type.
-    private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     private ParserUtil() {
         // Singleton.
@@ -1208,9 +1208,9 @@ public final class ParserUtil {
             final List<PropInfo> transientSeriPropInfoList = new ArrayList<>();
 
             propInfos = new PropInfo[propNameList.size()];
-            propInfoMap = new ObjectPool<>((propNameList.size() + 1) * 2);
-            propInfoQueueMap = new ObjectPool<>((propNameList.size() + 1) * 2);
-            hashPropInfoMap = new ObjectPool<>((propNameList.size() + 1) * 2);
+            propInfoMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
+            propInfoQueueMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
+            hashPropInfoMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
 
             PropInfo propInfo = null;
             int idx = 0;
@@ -2186,6 +2186,14 @@ public final class ParserUtil {
             return this == obj || (obj instanceof BeanInfo && N.equals(((BeanInfo) obj).clazz, clazz));
         }
 
+        /**
+         * Returns the canonical class name of the bean type this {@code BeanInfo} describes.
+         *
+         * <p>Useful for logging and debugging; the value is the same as
+         * {@link ClassUtil#getCanonicalClassName(Class)} applied to the represented class.</p>
+         *
+         * @return the canonical name of the bean class; never {@code null} for a valid {@code BeanInfo}
+         */
         @Override
         public String toString() {
             return ClassUtil.getCanonicalClassName(clazz);

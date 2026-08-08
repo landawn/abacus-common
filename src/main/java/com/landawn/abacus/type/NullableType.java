@@ -255,8 +255,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
         if (x == null || x.isNull()) {
             appendable.append(NULL_STRING);
         } else {
-            // elementType.write(writer, x.get());
-            Type.<Object> of(x.get().getClass()).appendTo(appendable, x.get());
+            elementType.appendTo(appendable, x.get());
         }
     }
 
@@ -281,8 +280,7 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
         if (x == null || x.isNull()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            // elementType.serializeTo(writer, x.get(), config);
-            Type.<Object> of(x.get().getClass()).serializeTo(writer, x.get(), config);
+            elementType.serializeTo(writer, x.get(), config);
         }
     }
 }

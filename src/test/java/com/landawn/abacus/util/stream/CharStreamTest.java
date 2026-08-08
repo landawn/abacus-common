@@ -5179,8 +5179,8 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset() {
-        char[] result = createCharStream('a', 'b', 'c', 'd', 'e').limit(1, 3).toArray();
+    public void testSkipAndLimit() {
+        char[] result = createCharStream('a', 'b', 'c', 'd', 'e').skipAndLimit(1, 3).toArray();
         assertArrayEquals(new char[] { 'b', 'c', 'd' }, result);
     }
 
@@ -5346,9 +5346,9 @@ public class CharStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset_ZeroOffset() {
+    public void testSkipAndLimit_ZeroOffset() {
         CharStream stream = createCharStream('a', 'b', 'c', 'd', 'e');
-        char[] result = stream.limit(0, 2).toArray();
+        char[] result = stream.skipAndLimit(0, 2).toArray();
         assertArrayEquals(new char[] { 'a', 'b' }, result);
     }
 

@@ -151,7 +151,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public OptionalBoolean valueOf(final String str) {
-        return Strings.isEmpty(str) ? OptionalBoolean.empty() : OptionalBoolean.of(parseBoolean(str));
+        return Strings.isBlank(str) ? OptionalBoolean.empty() : OptionalBoolean.of(parseBoolean(str.trim()));
     }
 
     /**
@@ -327,6 +327,10 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
-        writer.write((x == null || x.isEmpty()) ? NULL_CHAR_ARRAY : (x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));
+        if (x == null || x.isEmpty()) {
+            writer.write(config != null && config.isWriteNullBooleanAsFalse() ? FALSE_CHAR_ARRAY : NULL_CHAR_ARRAY);
+        } else {
+            writer.write(x.get() ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY);
+        }
     }
 }

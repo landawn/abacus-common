@@ -529,7 +529,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      *
      * <pre>{@code
      * // Get elements 10 through 19 (0-based):
-     * stream.limit(10, 10);
+     * stream.skipAndLimit(10, 10);
      * }</pre>
      *
      * @param offset the number of leading elements to skip; must be non-negative
@@ -539,7 +539,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative.
      */
     @Override
-    public S limit(final long offset, final long maxSize) throws IllegalArgumentException, IllegalStateException {
+    public S skipAndLimit(final long offset, final long maxSize) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
         checkArgNotNegative(offset, cs.offset);
         checkArgNotNegative(maxSize, cs.maxSize);

@@ -86,7 +86,6 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -7696,7 +7695,7 @@ public final class IOUtil {
      * @throws IOException if an I/O error occurs.
      */
     public static void copyToDirectory(final File srcFile, final File destDir, final boolean preserveFileDate) throws IOException {
-        copyToDirectory(srcFile, destDir, preserveFileDate, Fn.BiPredicates.alwaysTrue());
+        copyToDirectory(srcFile, destDir, preserveFileDate, BiPredicates.alwaysTrue());
     }
 
     /**

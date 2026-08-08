@@ -277,4 +277,26 @@ public class OptionalBooleanTypeTest extends TestBase {
         optionalBooleanType.serializeTo(writer, opt, config);
         verify(writer).write(any(char[].class));
     }
+
+    // Bug: valueOf used isEmpty (no trim), so " Y" / blank diverged from AtomicBooleanType.
+    @Test
+    public void testValueOf_trimsAndTreatsBlankAsEmpty() {
+        assertTrue(optionalBooleanType.valueOf("   ").isEmpty());
+        assertTrue(optionalBooleanType.valueOf(" Y").get());
+        assertTrue(optionalBooleanType.valueOf(" 1 ").get());
+        assertTrue(optionalBooleanType.valueOf(" true ").get());
+        assertFalse(optionalBooleanType.valueOf(" false ").get());
+    }
+
+    // Bug: serializeTo ignored writeNullBooleanAsFalse for null/empty OptionalBoolean.
+    @Test
+    public void testSerializeTo_nullAndEmpty_honorWriteNullBooleanAsFalse() throws IOException {
+        when(config.isWriteNullBooleanAsFalse()).thenReturn(true);
+
+        optionalBooleanType.serializeTo(writer, null, config);
+        verify(writer).write(FALSE_CHAR_ARRAY);
+
+        optionalBooleanType.serializeTo(writer, OptionalBoolean.empty(), config);
+        verify(writer, org.mockito.Mockito.times(2)).write(FALSE_CHAR_ARRAY);
+    }
 }

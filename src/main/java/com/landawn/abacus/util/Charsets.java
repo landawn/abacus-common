@@ -147,7 +147,7 @@ public final class Charsets {
      */
     public static final Charset DEFAULT = Charset.defaultCharset();
 
-    private static final Map<String, Charset> charsetPool = new ObjectPool<>(128);
+    private static final Map<String, Charset> charsetPool = new ConcurrentCacheMap<>(128);
 
     static {
         charsetPool.put(US_ASCII.name(), US_ASCII);

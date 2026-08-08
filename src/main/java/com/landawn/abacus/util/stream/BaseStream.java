@@ -1179,7 +1179,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @see #skip(long)
      * @see #takeWhile(Object)
      * @see #step(long)
-     * @see #limit(long, long)
+     * @see #skipAndLimit(long, long)
      * @see java.util.stream.Stream#limit(long)
      */
     @SequentialOnly
@@ -1197,22 +1197,22 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <pre>{@code
      * // Get elements 3, 4, 5 from a stream of 1-10
      * Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-     *       .limit(2, 3)
+     *       .skipAndLimit(2, 3)
      *       .toList();   // returns [3, 4, 5]
      *
      * // Pagination: get page 3 with page size 10 (elements 21-30)
      * Stream.rangeClosed(1, 100)
-     *       .limit(20, 10)
+     *       .skipAndLimit(20, 10)
      *       .toList();   // returns [21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
      *
      * // If offset exceeds stream size, returns empty stream
      * Stream.of(1, 2, 3)
-     *       .limit(5, 10)
+     *       .skipAndLimit(5, 10)
      *       .toList();   // returns []
      *
      * // If fewer elements available than maxSize, returns remaining elements
      * Stream.of(1, 2, 3, 4, 5)
-     *       .limit(3, 10)
+     *       .skipAndLimit(3, 10)
      *       .toList();   // returns [4, 5]
      * }</pre>
      *
@@ -1234,7 +1234,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S limit(long offset, long maxSize) throws IllegalArgumentException;
+    S skipAndLimit(long offset, long maxSize) throws IllegalArgumentException;
 
     /**
      * Returns a stream consisting of every 'step'th element of this stream.
@@ -2233,6 +2233,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @see #last()
      * @see #elementAt(long)
      * @see #count()
+     * @see Stream#findFirst()
+     * @see Stream#findAny()
+     * @see <a href="Stream.html#element-access-naming">element-access naming glossary on Stream</a>
      */
     @SequentialOnly
     @TerminalOp

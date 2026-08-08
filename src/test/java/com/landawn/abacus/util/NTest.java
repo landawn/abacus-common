@@ -1277,64 +1277,64 @@ public class NTest extends AbstractParserTest {
     @Test
     public void testNMatchIterable() {
         List<Integer> list = List.of(1, 2, 3, 4, 5, 6);
-        assertTrue(N.isMatchCountBetween(list, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.isMatchCountBetween(list, 1, 2, x -> x > 5));
-        assertTrue(N.isMatchCountBetween(list, 1, 1, x -> x > 5));
+        assertTrue(N.hasMatchCountBetween(list, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.hasMatchCountBetween(list, 1, 2, x -> x > 5));
+        assertTrue(N.hasMatchCountBetween(list, 1, 1, x -> x > 5));
     }
 
     @Test
     public void testNMatchIterator() {
         Iterator<Integer> iter = List.of(1, 2, 3, 4, 5, 6).iterator();
-        assertTrue(N.isMatchCountBetween(iter, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.hasMatchCountBetween(iter, 3, 3, IS_EVEN_INTEGER));
     }
 
     @Test
     public void testNMatch() {
-        assertTrue(N.isMatchCountBetween(integerArray, 2, 3, i -> i % 2 == 0));
-        assertFalse(N.isMatchCountBetween(integerArray, 3, 4, i -> i % 2 == 0));
-        assertTrue(N.isMatchCountBetween(new Integer[0], 0, 0, i -> true));
+        assertTrue(N.hasMatchCountBetween(integerArray, 2, 3, i -> i % 2 == 0));
+        assertFalse(N.hasMatchCountBetween(integerArray, 3, 4, i -> i % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(new Integer[0], 0, 0, i -> true));
     }
 
     @Test
     public void testNMatchEdgeCases() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
 
-        assertTrue(N.isMatchCountBetween(arr, 2, 2, i -> i % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(arr, 2, 2, i -> i % 2 == 0));
 
-        assertTrue(N.isMatchCountBetween(arr, 0, 5, i -> false));
+        assertTrue(N.hasMatchCountBetween(arr, 0, 5, i -> false));
 
-        assertFalse(N.isMatchCountBetween(arr, 10, 10, i -> true));
+        assertFalse(N.hasMatchCountBetween(arr, 10, 10, i -> true));
     }
 
     @Test
     public void testNMatchArray() {
         Integer[] arr = { 1, 2, 3, 4, 5, 6 };
-        assertTrue(N.isMatchCountBetween(arr, 3, 3, IS_EVEN_INTEGER));
-        assertTrue(N.isMatchCountBetween(arr, 2, 4, IS_EVEN_INTEGER));
-        assertFalse(N.isMatchCountBetween(arr, 4, 5, IS_EVEN_INTEGER));
-        assertTrue(N.isMatchCountBetween(arr, 0, 0, x -> x > 10));
-        assertFalse(N.isMatchCountBetween(arr, 1, 1, x -> x > 10));
+        assertTrue(N.hasMatchCountBetween(arr, 3, 3, IS_EVEN_INTEGER));
+        assertTrue(N.hasMatchCountBetween(arr, 2, 4, IS_EVEN_INTEGER));
+        assertFalse(N.hasMatchCountBetween(arr, 4, 5, IS_EVEN_INTEGER));
+        assertTrue(N.hasMatchCountBetween(arr, 0, 0, x -> x > 10));
+        assertFalse(N.hasMatchCountBetween(arr, 1, 1, x -> x > 10));
 
-        assertTrue(N.isMatchCountBetween((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
-        assertFalse(N.isMatchCountBetween((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
+        assertTrue(N.hasMatchCountBetween((Integer[]) null, 0, 0, IS_EVEN_INTEGER));
+        assertFalse(N.hasMatchCountBetween((Integer[]) null, 1, 1, IS_EVEN_INTEGER));
 
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, -1, 2, IS_EVEN_INTEGER));
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, 3, 1, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(arr, -1, 2, IS_EVEN_INTEGER));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(arr, 3, 1, IS_EVEN_INTEGER));
     }
 
     @Test
     public void testNMatchNegativeAtLeast() {
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, -1, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(integerArray, -1, 2, i -> true));
     }
 
     @Test
     public void testNMatchNegativeAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, 1, -1, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(integerArray, 1, -1, i -> true));
     }
 
     @Test
     public void testNMatchAtLeastGreaterThanAtMost() {
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(integerArray, 3, 2, i -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(integerArray, 3, 2, i -> true));
     }
 
     @Test
@@ -16699,51 +16699,51 @@ public class NTest extends AbstractParserTest {
         assertTrue(N.noneMatch(new Integer[0], i -> true));
     }
 
-    // ==================== isMatchCountBetween tests ====================
+    // ==================== hasMatchCountBetween tests ====================
 
     @Test
     public void testIsMatchCountBetween() {
         Integer[] arr = { 2, 4, 5, 6, 8 };
         // 4 even numbers
-        assertTrue(N.isMatchCountBetween(arr, 2, 5, (Predicate<Integer>) x -> x % 2 == 0));
-        assertTrue(N.isMatchCountBetween(arr, 4, 4, (Predicate<Integer>) x -> x % 2 == 0));
-        assertFalse(N.isMatchCountBetween(arr, 5, 5, (Predicate<Integer>) x -> x % 2 == 0));
-        assertFalse(N.isMatchCountBetween(arr, 0, 2, (Predicate<Integer>) x -> x % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(arr, 2, 5, (Predicate<Integer>) x -> x % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(arr, 4, 4, (Predicate<Integer>) x -> x % 2 == 0));
+        assertFalse(N.hasMatchCountBetween(arr, 5, 5, (Predicate<Integer>) x -> x % 2 == 0));
+        assertFalse(N.hasMatchCountBetween(arr, 0, 2, (Predicate<Integer>) x -> x % 2 == 0));
     }
 
     @Test
     public void testIsMatchCountBetween_Iterable() {
         List<Integer> list = Arrays.asList(2, 4, 5, 6, 8);
-        assertTrue(N.isMatchCountBetween(list, 3, 5, (Predicate<Integer>) x -> x % 2 == 0));
-        assertFalse(N.isMatchCountBetween(list, 5, 10, (Predicate<Integer>) x -> x % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(list, 3, 5, (Predicate<Integer>) x -> x % 2 == 0));
+        assertFalse(N.hasMatchCountBetween(list, 5, 10, (Predicate<Integer>) x -> x % 2 == 0));
     }
 
     @Test
     public void testIsMatchCountBetween_Iterator() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        assertTrue(N.isMatchCountBetween(list.iterator(), 2, 3, (Predicate<Integer>) x -> x % 2 == 0));
+        assertTrue(N.hasMatchCountBetween(list.iterator(), 2, 3, (Predicate<Integer>) x -> x % 2 == 0));
     }
 
     @Test
     public void testIsMatchCountBetweenIteratorStopsAfterUpperBoundIsExceeded() {
         final Iterator<Integer> iterator = Arrays.asList(2, 4, 99).iterator();
 
-        assertFalse(N.isMatchCountBetween(iterator, 0, 1, (Predicate<Integer>) x -> x % 2 == 0));
+        assertFalse(N.hasMatchCountBetween(iterator, 0, 1, (Predicate<Integer>) x -> x % 2 == 0));
         assertEquals(99, iterator.next());
     }
 
     @Test
     public void testIsMatchCountBetween_EmptyArray() {
         Integer[] arr = {};
-        assertTrue(N.isMatchCountBetween(arr, 0, 5, (Predicate<Integer>) x -> true));
-        assertFalse(N.isMatchCountBetween(arr, 1, 5, (Predicate<Integer>) x -> true));
+        assertTrue(N.hasMatchCountBetween(arr, 0, 5, (Predicate<Integer>) x -> true));
+        assertFalse(N.hasMatchCountBetween(arr, 1, 5, (Predicate<Integer>) x -> true));
     }
 
     @Test
     public void testIsMatchCountBetween_InvalidArgs() {
         Integer[] arr = { 1, 2, 3 };
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, -1, 5, (Predicate<Integer>) x -> true));
-        assertThrows(IllegalArgumentException.class, () -> N.isMatchCountBetween(arr, 5, 2, (Predicate<Integer>) x -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(arr, -1, 5, (Predicate<Integer>) x -> true));
+        assertThrows(IllegalArgumentException.class, () -> N.hasMatchCountBetween(arr, 5, 2, (Predicate<Integer>) x -> true));
     }
 
     @Test
@@ -24948,55 +24948,55 @@ public class NTest extends AbstractParserTest {
         assertEquals(2, attempts.get());
     }
 
-    @Test
-    public void lazyInitialize_throwablesSupplier() throws Exception {
-        AtomicInteger supplierCallCount = new AtomicInteger(0);
-        Throwables.Supplier<String, IOException> lazySupplier = N.lazyInitialize(() -> {
-            supplierCallCount.incrementAndGet();
-            if (supplierCallCount.get() == 1)
-                return "firstCall";
-            throw new IOException("Simulated failure on subsequent init (should not happen)");
-        });
-
-        assertEquals(0, supplierCallCount.get());
-        assertEquals("firstCall", lazySupplier.get());
-        assertEquals(1, supplierCallCount.get());
-        assertEquals("firstCall", lazySupplier.get());
-        assertEquals(1, supplierCallCount.get());
-    }
-
-    @Test
-    public void testLazyInitialize() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
-            counter.incrementAndGet();
-            return "value";
-        });
-
-        assertEquals(0, counter.get());
-        assertEquals("value", lazy.get());
-        assertEquals(1, counter.get());
-        assertEquals("value", lazy.get());
-        assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testLazyInitializeWithCheckedException() throws Exception {
-        AtomicInteger attempts = new AtomicInteger(0);
-        Throwables.Supplier<String, IOException> lazy = N.lazyInitialize(() -> {
-            attempts.incrementAndGet();
-            if (attempts.get() == 1) {
-                throw new IOException("First attempt fails");
-            }
-            return "Success";
-        });
-
-        assertThrows(IOException.class, lazy::get);
-        assertEquals(1, attempts.get());
-
-        assertEquals("Success", lazy.get());
-        assertEquals(2, attempts.get());
-    }
+//    @Test
+//    public void lazyInitialize_throwablesSupplier() throws Exception {
+//        AtomicInteger supplierCallCount = new AtomicInteger(0);
+//        Throwables.Supplier<String, IOException> lazySupplier = N.lazyInitialize(() -> {
+//            supplierCallCount.incrementAndGet();
+//            if (supplierCallCount.get() == 1)
+//                return "firstCall";
+//            throw new IOException("Simulated failure on subsequent init (should not happen)");
+//        });
+//
+//        assertEquals(0, supplierCallCount.get());
+//        assertEquals("firstCall", lazySupplier.get());
+//        assertEquals(1, supplierCallCount.get());
+//        assertEquals("firstCall", lazySupplier.get());
+//        assertEquals(1, supplierCallCount.get());
+//    }
+//
+//    @Test
+//    public void testLazyInitialize() throws Exception {
+//        AtomicInteger counter = new AtomicInteger(0);
+//        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
+//            counter.incrementAndGet();
+//            return "value";
+//        });
+//
+//        assertEquals(0, counter.get());
+//        assertEquals("value", lazy.get());
+//        assertEquals(1, counter.get());
+//        assertEquals("value", lazy.get());
+//        assertEquals(1, counter.get());
+//    }
+//
+//    @Test
+//    public void testLazyInitializeWithCheckedException() throws Exception {
+//        AtomicInteger attempts = new AtomicInteger(0);
+//        Throwables.Supplier<String, IOException> lazy = N.lazyInitialize(() -> {
+//            attempts.incrementAndGet();
+//            if (attempts.get() == 1) {
+//                throw new IOException("First attempt fails");
+//            }
+//            return "Success";
+//        });
+//
+//        assertThrows(IOException.class, lazy::get);
+//        assertEquals(1, attempts.get());
+//
+//        assertEquals("Success", lazy.get());
+//        assertEquals(2, attempts.get());
+//    }
 
     @Test
     public void toRuntimeException_exception() {

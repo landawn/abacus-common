@@ -106,7 +106,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * Creates an {@code IntIterator} from the specified int array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator will iterate over all elements in the array from start to end.</p>
+     * The iterator will iterate over all elements in the array from start to end. A non-empty
+     * iterator reads values directly from the supplied array; changes made to an element before
+     * that element is consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -127,7 +129,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned. A {@code null} array is treated as length 0 for range validation,
-     * so only {@code fromIndex == toIndex == 0} is valid.</p>
+     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator reads values
+     * directly from the supplied array; changes made to an element before that element is
+     * consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

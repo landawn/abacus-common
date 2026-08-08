@@ -3951,8 +3951,8 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset() {
-        byte[] result = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(1, 3).toArray();
+    public void testSkipAndLimit() {
+        byte[] result = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skipAndLimit(1, 3).toArray();
         assertArrayEquals(new byte[] { 2, 3, 4 }, result);
     }
 
@@ -4059,9 +4059,9 @@ public class ByteStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset_ZeroOffset() {
+    public void testSkipAndLimit_ZeroOffset() {
         ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        byte[] result = stream.limit(0, 2).toArray();
+        byte[] result = stream.skipAndLimit(0, 2).toArray();
         assertArrayEquals(new byte[] { 1, 2 }, result);
     }
 

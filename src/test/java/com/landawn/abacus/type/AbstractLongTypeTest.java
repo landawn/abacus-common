@@ -17,7 +17,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -71,6 +73,10 @@ public class AbstractLongTypeTest extends TestBase {
 
         LocalDateTime ldt = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
         assertEquals(Timestamp.valueOf(ldt).getTime(), longType.valueOf(ldt));
+
+        // Bug: OffsetDateTime previously fell through to string parse and threw NumberFormatException
+        OffsetDateTime odt = OffsetDateTime.of(2023, 10, 15, 10, 30, 0, 123_000_000, ZoneOffset.ofHours(1));
+        assertEquals(odt.toInstant().toEpochMilli(), longType.valueOf(odt));
 
         assertEquals(123L, longType.valueOf("123"));
     }

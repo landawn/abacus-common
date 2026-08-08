@@ -76,6 +76,7 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.AsyncExecutor;
+import com.landawn.abacus.util.BiConsumers;
 import com.landawn.abacus.util.BufferedCsvWriter;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
@@ -89,7 +90,6 @@ import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.BiConsumers;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.ImmutableMap;
@@ -401,6 +401,84 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  * {@code Seq} from an array, {@code Iterable}, or {@code Iterator} via the {@code Seq.of(...)} factories.
  * A common pattern is to perform the exception-throwing I/O or JDBC stages in a {@code Seq}, then hand the
  * results to a {@code Stream} for parallel, CPU-bound post-processing.
+ *
+ * <h2 id="shared-pipeline-naming">Shared pipeline naming ({@code Stream} ↔ {@link com.landawn.abacus.util.Seq Seq})</h2>
+ * <p>Both types intentionally share the same operation names so pipelines can be read interchangeably.
+ * This section is the <b>canonical glossary</b> for those shared names; {@link com.landawn.abacus.util.Seq Seq}
+ * links here from its class and method docs. Keep the two APIs aligned when adding or renaming operations.</p>
+ *
+ * <h3 id="flatMap-naming">{@code flatMap} / {@code flatmap} / {@code flattMap} / {@code flatMapArray}</h3>
+ * <p>Casing is intentional and encodes the mapper's return type (not a typo). Do not “normalize” these names:</p>
+ * <table border="1">
+ *   <caption>{@code flatMap} family naming</caption>
+ *   <tr><th>Method</th><th>Mapper returns</th><th>On {@code Stream}</th><th>On {@code Seq}</th></tr>
+ *   <tr>
+ *     <td>{@code flatMap} (uppercase {@code M})</td>
+ *     <td>Same pipeline type</td>
+ *     <td>{@link #flatMap(Function) flatMap} → abacus {@link Stream}</td>
+ *     <td>{@link com.landawn.abacus.util.Seq#flatMap Seq.flatMap} → {@code Seq}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code flatmap} (lowercase {@code m})</td>
+ *     <td>{@link java.util.Collection Collection}</td>
+ *     <td>{@link #flatmap(Function) flatmap}</td>
+ *     <td>{@link com.landawn.abacus.util.Seq#flatmap Seq.flatmap}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code flatMapArray}</td>
+ *     <td>Array ({@code R[]})</td>
+ *     <td>{@link #flatMapArray(Function) flatMapArray}</td>
+ *     <td>{@link com.landawn.abacus.util.Seq#flatMapArray Seq.flatMapArray}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code flattMap} (double {@code t}, uppercase {@code M})</td>
+ *     <td>JDK {@link java.util.stream.Stream}</td>
+ *     <td>{@link #flattMap(Function) flattMap} (also {@link #flatMapJdkStream flatMapJdkStream})</td>
+ *     <td><i>Not present</i> — convert with {@code seq.stream()} if needed</td>
+ *   </tr>
+ * </table>
+ * <p>Related helpers follow the same casing: e.g. {@code flatmapIfNotNull}, {@code flatMapToInt},
+ * {@code spsFlatMap} / {@code spsFlatmap} (parallel segment variants on {@code Stream} only).</p>
+ *
+ * <h3 id="element-access-naming">First / last element terminals</h3>
+ * <table border="1">
+ *   <caption>Element-access naming shared by {@code Stream} and {@code Seq}</caption>
+ *   <tr><th>Name</th><th>Meaning</th></tr>
+ *   <tr>
+ *     <td>{@link #first() first()} / {@link BaseStream#last() last()}</td>
+ *     <td>Primary names: first or last element in encounter order (no predicate).</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link #findFirst() findFirst()} / {@link #findAny() findAny()} (no-arg)</td>
+ *     <td>JDK-aligned aliases of {@code first()} (deterministic encounter order on this API).</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link #findFirst(Throwables.Predicate) findFirst(predicate)}</td>
+ *     <td>First element matching a predicate (encounter order).</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link #findAny(Throwables.Predicate) findAny(predicate)}</td>
+ *     <td>Any matching element; on parallel {@code Stream} may differ from {@code findFirst};
+ *         on sequential {@code Stream}/{@code Seq} equivalent to {@code findFirst(predicate)}.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link #findLast(Throwables.Predicate) findLast(predicate)}</td>
+ *     <td>Last matching element (must scan all remaining elements).</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link BaseStream#onlyOne() onlyOne()}</td>
+ *     <td>Exactly zero or one element; more than one throws.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@link BaseStream#elementAt(long) elementAt(position)}</td>
+ *     <td>Zero-based indexed element access.</td>
+ *   </tr>
+ * </table>
+ *
+ * <h3 id="boolean-match-naming">Boolean match terminals</h3>
+ * <p>Shared names: {@link #anyMatch anyMatch}, {@link #allMatch allMatch}, {@link #noneMatch noneMatch},
+ * and {@link #hasMatchCountBetween hasMatchCountBetween} (count of matches in an inclusive range).
+ * Prefer the {@code has*} form for “does the match count fall in a range?” — not {@code isMatchCountBetween}.</p>
  *
  * <br />
  * Note: This class includes code copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License, version 2.0.
@@ -1573,14 +1651,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return a Stream of elements.
      * This is an intermediate operation.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMap} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMap(Function) flatMap} (this method) - transforms elements into this library's {@link com.landawn.abacus.util.stream.Stream Stream}.</li>
-     *   <li>{@link #flatmap(Function) flatmap} (lowercase 'm') - transforms elements into {@link java.util.Collection Collection}.</li>
-     *   <li>{@link #flatMapArray(Function) flatMapArray} (this library's array variant) - transforms elements into an array.</li>
-     *   <li>{@link #flattMap(Function) flattMap} (double 't', uppercase 'M') - transforms elements into a standard {@link java.util.stream.Stream java.util.stream.Stream}.</li>
-     * </ul>
+     * <p><b>Naming:</b> uppercase {@code M} means the mapper returns an abacus {@link Stream}.
+     * See the class-level <a href="#flatMap-naming">{@code flatMap} naming glossary</a>
+     * (shared with {@link com.landawn.abacus.util.Seq Seq}).</p>
      *
      * <p>This is the flatMap operation that flattens nested streams into a single stream.
      * Each element is transformed into a stream, and all resulting streams are concatenated.
@@ -1622,14 +1695,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return a Collection of elements.
      * This is an intermediate operation.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMap} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMap(Function) flatMap} (uppercase 'M') - transforms elements into this library's {@link com.landawn.abacus.util.stream.Stream Stream}.</li>
-     *   <li>{@link #flatmap(Function) flatmap} (this method) - transforms elements into {@link java.util.Collection Collection}.</li>
-     *   <li>{@link #flatMapArray(Function) flatMapArray} (array-based variant) - transforms elements into an array.</li>
-     *   <li>{@link #flattMap(Function) flattMap} (double 't', uppercase 'M') - transforms elements into a standard {@link java.util.stream.Stream java.util.stream.Stream}.</li>
-     * </ul>
+     * <p><b>Naming:</b> lowercase {@code m} means the mapper returns a {@link Collection}.
+     * See the class-level <a href="#flatMap-naming">{@code flatMap} naming glossary</a>
+     * (shared with {@link com.landawn.abacus.util.Seq Seq}).</p>
      *
      * <p>This is similar to flatMap but works with Collections instead of Streams.
      * Each element is transformed into a collection, and all resulting collections are flattened into a single stream.
@@ -1669,6 +1737,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return an array of elements.
      * This is an intermediate operation.
      *
+     * <p><b>Naming:</b> see the class-level <a href="#flatMap-naming">{@code flatMap} naming glossary</a>
+     * (shared with {@link com.landawn.abacus.util.Seq Seq}).</p>
+     *
      * <p>This is similar to flatMap but works with arrays instead of Streams.
      * Each element is transformed into an array, and all resulting arrays are flattened into a single stream.
      *
@@ -1702,6 +1773,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a java.util.stream.Stream of elements.
      * This is an intermediate operation.
+     *
+     * <p><b>Naming:</b> double {@code t} + uppercase {@code M} means the mapper returns a JDK
+     * {@link java.util.stream.Stream}. See the class-level <a href="#flatMap-naming">{@code flatMap} naming glossary</a>.</p>
      *
      * <p>This is similar to flatMap but works specifically with JDK streams.
      * Each element is transformed into a JDK stream, and all resulting streams are flattened into a single stream.
@@ -2388,14 +2462,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return a Stream of Map.Entry instances.
      * This is an intermediate operation.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMapToEntry} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMapToEntry(Function) flatMapToEntry} (this method) - transforms elements into this library's
-     *       {@link Stream} of {@link Map.Entry Map.Entry} instances.</li>
-     *   <li>{@link #flatmapToEntry(Function) flatmapToEntry} (lowercase 'm') - transforms elements into a {@link java.util.Map Map}.</li>
-     *   <li>{@link #flattMapToEntry(Function) flattMapToEntry} (double 't') - transforms elements into an {@link EntryStream}.</li>
-     * </ul>
+     * <p><b>Naming:</b> same casing rules as the <a href="#flatMap-naming">{@code flatMap} glossary</a>:
+     * uppercase {@code M} → abacus {@link Stream} of entries; lowercase {@code m} → {@link Map};
+     * double {@code t} → {@link EntryStream} ({@link #flattMapToEntry}).</p>
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -2433,14 +2502,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return a Map of key-value pairs.
      * This is an intermediate operation.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMapToEntry} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMapToEntry(Function) flatMapToEntry} (uppercase 'M') - transforms elements into this library's
-     *       {@link Stream} of {@link Map.Entry Map.Entry} instances.</li>
-     *   <li>{@link #flatmapToEntry(Function) flatmapToEntry} (this method) - transforms elements into a {@link java.util.Map Map}.</li>
-     *   <li>{@link #flattMapToEntry(Function) flattMapToEntry} (double 't') - transforms elements into an {@link EntryStream}.</li>
-     * </ul>
+     * <p><b>Naming:</b> lowercase {@code m} → mapper returns a {@link Map}. Same family as the
+     * <a href="#flatMap-naming">{@code flatMap} glossary</a> ({@link #flatMapToEntry}, {@link #flattMapToEntry}).</p>
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -2478,14 +2541,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The function should return an EntryStream of key-value pairs.
      * This is an intermediate operation.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMapToEntry} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMapToEntry(Function) flatMapToEntry} (uppercase 'M') - transforms elements into this library's
-     *       {@link Stream} of {@link Map.Entry Map.Entry} instances.</li>
-     *   <li>{@link #flatmapToEntry(Function) flatmapToEntry} (lowercase 'm') - transforms elements into a {@link java.util.Map Map}.</li>
-     *   <li>{@link #flattMapToEntry(Function) flattMapToEntry} (this method) - transforms elements into an {@link EntryStream}.</li>
-     * </ul>
+     * <p><b>Naming:</b> double {@code t} → mapper returns an {@link EntryStream}. Same family as the
+     * <a href="#flatMap-naming">{@code flatMap} glossary</a> ({@link #flatMapToEntry}, {@link #flatmapToEntry}).</p>
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -6368,6 +6425,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * It's equivalent to: {@code atLeast <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}
      *
+     * <p>Name is shared with {@link com.landawn.abacus.util.Seq Seq} / {@link com.landawn.abacus.util.N N}
+     * (not {@code isMatchCountBetween}); see the class-level
+     * <a href="#boolean-match-naming">boolean-match naming</a> glossary.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean hasExactlyTwo = Stream.of(1, 2, 3, 4, 5)
@@ -6387,6 +6448,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @throws E Exception thrown by the predicate
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
+     * @see com.landawn.abacus.util.Seq#hasMatchCountBetween(long, long, Throwables.Predicate)
      */
     @ParallelSupported
     @TerminalOp
@@ -6421,6 +6483,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #findFirst(Throwables.Predicate)
      * @see #findAny(Throwables.Predicate)
      * @see #last()
+     * @see com.landawn.abacus.util.Seq#findFirst()
+     * @see <a href="#element-access-naming">element-access naming glossary</a>
      */
     @ParallelSupported
     @TerminalOp
@@ -6460,6 +6524,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #findFirst(Throwables.Predicate)
      * @see #findAny(Throwables.Predicate)
      * @see #last()
+     * @see com.landawn.abacus.util.Seq#findAny()
+     * @see <a href="#element-access-naming">element-access naming glossary</a>
      */
     @ParallelSupported
     @TerminalOp

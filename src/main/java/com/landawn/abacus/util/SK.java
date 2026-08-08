@@ -1415,5 +1415,8 @@ public final class SK {
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 
+    /** Constant for the COUNT(*) aggregate function. */
+    public static final String COUNT_ALL = "count(*)";
+
     // --------------------End SQL constants------------------------
 }

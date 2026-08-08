@@ -3885,8 +3885,8 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset() {
-        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).limit(1, 3).toArray();
+    public void testSkipAndLimit() {
+        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).skipAndLimit(1, 3).toArray();
         assertArrayEquals(new short[] { 2, 3, 4 }, result);
     }
 
@@ -3927,14 +3927,14 @@ public class ShortStreamTest extends TestBase {
     }
 
     @Test
-    public void testLimitWithOffset_ZeroOffset() {
-        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).limit(0, 3).toArray();
+    public void testSkipAndLimit_ZeroOffset() {
+        short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).skipAndLimit(0, 3).toArray();
         assertArrayEquals(new short[] { 1, 2, 3 }, result);
     }
 
     @Test
-    public void testLimitWithOffset_OffsetBeyondSize() {
-        short[] result = createShortStream((short) 1, (short) 2, (short) 3).limit(10, 5).toArray();
+    public void testSkipAndLimit_OffsetBeyondSize() {
+        short[] result = createShortStream((short) 1, (short) 2, (short) 3).skipAndLimit(10, 5).toArray();
         assertEquals(0, result.length);
     }
 

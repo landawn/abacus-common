@@ -49,7 +49,6 @@ import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Fn.BiPredicates;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.stream.Stream;
@@ -451,45 +450,45 @@ public final class Beans {
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
-    private static final Map<String, String> camelCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> camelCasePropNamePool = new ConcurrentCacheMap<>(POOL_SIZE * 2);
 
-    private static final Map<String, String> snakeCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> snakeCasePropNamePool = new ConcurrentCacheMap<>(POOL_SIZE * 2);
 
-    private static final Map<String, String> screamingSnakeCasePropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> screamingSnakeCasePropNamePool = new ConcurrentCacheMap<>(POOL_SIZE * 2);
 
-    private static final Map<Class<?>, Boolean> registeredXmlBindingClassList = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Boolean> registeredXmlBindingClassList = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Set<String>> registeredNonPropGetSetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Method>> registeredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Method>> registeredPropGetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Method>> registeredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Method>> registeredPropSetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, ImmutableList<String>> beanDeclaredPropNameListPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableList<String>> beanDeclaredPropNameListPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, ImmutableMap<String, Field>> beanDeclaredPropFieldPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableMap<String, Field>> beanDeclaredPropFieldPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Field>> beanPropFieldPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Field>> beanPropFieldPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Field>> declaredFieldPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Field>> declaredFieldPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, ImmutableMap<String, Method>> beanDeclaredPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableMap<String, Method>> beanDeclaredPropGetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, ImmutableMap<String, Method>> beanDeclaredPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableMap<String, Method>> beanDeclaredPropSetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Method>> beanPropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Method>> beanPropGetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, Method>> beanPropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, Method>> beanPropSetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Map<String, List<Method>>> beanInlinePropGetMethodPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Map<String, List<Method>>> beanInlinePropGetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     //    /** The Constant beanInlinePropSetMethodPool. */
-    //    private static final Map<Class<?>, Map<String, List<Method>>> beanInlinePropSetMethodPool = new ObjectPool<>(POOL_SIZE);
+    //    private static final Map<Class<?>, Map<String, List<Method>>> beanInlinePropSetMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     // Normalized property names and reflected method-name metadata.
-    private static final Map<String, String> formalizedPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<String, String> formalizedPropNamePool = new ConcurrentCacheMap<>(POOL_SIZE * 2);
 
-    private static final Map<Method, String> methodPropNamePool = new ObjectPool<>(POOL_SIZE * 2);
+    private static final Map<Method, String> methodPropNamePool = new ConcurrentCacheMap<>(POOL_SIZE * 2);
 
     // Java keywords mapped to legal property identifiers.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
@@ -506,11 +505,11 @@ public final class Beans {
         nonGetSetMethodName.add("toString");
     }
 
-    private static final Map<Class<?>, ImmutableSet<String>> beanDiffIgnoredPropNamesPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, ImmutableSet<String>> beanDiffIgnoredPropNamesPool = new ConcurrentCacheMap<>(POOL_SIZE);
     private static final Map<Class<?>, BuilderInfo> builderMap = new ConcurrentHashMap<>();
-    private static final Map<Class<?>, Boolean> beanClassPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Boolean> beanClassPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, Class<?>> registeredNonBeanClass = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Class<?>> registeredNonBeanClass = new ConcurrentCacheMap<>(POOL_SIZE);
 
     static {
         registeredNonBeanClass.put(Object.class, Object.class);
@@ -536,7 +535,7 @@ public final class Beans {
         recordClass = cls;
     }
 
-    private static final Map<Class<?>, Boolean> recordClassPool = new ObjectPool<>(POOL_SIZE);
+    private static final Map<Class<?>, Boolean> recordClassPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     /**
      * Checks if the specified class is a bean class.
@@ -1002,7 +1001,7 @@ public final class Beans {
 
                 checkPropertyAccessorConflict(propName, method, cls, propMethodMap, registeredPropGetMethodPool);
 
-                registeredPropGetMethodPool.computeIfAbsent(cls, k -> new ObjectPool<>(16)).put(propName, method);
+                registeredPropGetMethodPool.computeIfAbsent(cls, k -> new ConcurrentCacheMap<>(16)).put(propName, method);
             } else if (isSetMethod(method)) {
                 Map<String, Method> propMethodMap = beanPropSetMethodPool.get(cls);
 
@@ -1013,7 +1012,7 @@ public final class Beans {
 
                 checkPropertyAccessorConflict(propName, method, cls, propMethodMap, registeredPropSetMethodPool);
 
-                registeredPropSetMethodPool.computeIfAbsent(cls, k -> new ObjectPool<>(16)).put(propName, method);
+                registeredPropSetMethodPool.computeIfAbsent(cls, k -> new ConcurrentCacheMap<>(16)).put(propName, method);
             } else {
                 throw new IllegalArgumentException("The name of property getter/setter method must start with 'get/is/has' or 'set': " + method.getName());
             }
@@ -1879,7 +1878,7 @@ public final class Beans {
             beanDeclaredPropFieldPool.put(cls, unmodifiableFieldMap);
 
             // put it into map.
-            final Map<String, Field> tempFieldMap = new ObjectPool<>(N.max(64, propFieldMap.size()));
+            final Map<String, Field> tempFieldMap = new ConcurrentCacheMap<>(N.max(64, propFieldMap.size()));
             tempFieldMap.putAll(propFieldMap);
             beanPropFieldPool.put(cls, tempFieldMap);
 
@@ -1890,7 +1889,7 @@ public final class Beans {
 
             Map<String, Method> existingGetMethodMap = beanPropGetMethodPool.get(cls);
             if (existingGetMethodMap == null) {
-                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propGetMethodMap.size()));
+                final Map<String, Method> tmp = new ConcurrentCacheMap<>(N.max(64, propGetMethodMap.size()));
                 tmp.putAll(propGetMethodMap);
                 beanPropGetMethodPool.put(cls, tmp);
             } else {
@@ -1905,7 +1904,7 @@ public final class Beans {
 
             Map<String, Method> existingSetMethodMap = beanPropSetMethodPool.get(cls);
             if (existingSetMethodMap == null) {
-                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, propSetMethodMap.size()));
+                final Map<String, Method> tmp = new ConcurrentCacheMap<>(N.max(64, propSetMethodMap.size()));
                 tmp.putAll(propSetMethodMap);
                 beanPropSetMethodPool.put(cls, tmp);
             } else {
@@ -1939,7 +1938,7 @@ public final class Beans {
                 unmodifiableBuilderPropSetMethodMap.keySet(); // initialize? //NOSONAR
                 beanDeclaredPropSetMethodPool.put(builderClass, unmodifiableBuilderPropSetMethodMap);
 
-                final Map<String, Method> tmp = new ObjectPool<>(N.max(64, builderPropSetMethodMap.size()));
+                final Map<String, Method> tmp = new ConcurrentCacheMap<>(N.max(64, builderPropSetMethodMap.size()));
                 tmp.putAll(builderPropSetMethodMap);
                 beanPropSetMethodPool.put(builderClass, tmp);
             }
@@ -2044,7 +2043,7 @@ public final class Beans {
                         // ignore
                     }
 
-                    fieldMap = new ObjectPool<>(fields == null ? 0 : N.max(16, fields.length));
+                    fieldMap = new ConcurrentCacheMap<>(fields == null ? 0 : N.max(16, fields.length));
 
                     if (fields != null) {
                         for (final Field field : fields) {
@@ -2477,7 +2476,7 @@ public final class Beans {
         List<Method> inlinePropGetMethodQueue = null;
 
         if (inlinePropGetMethodMap == null) {
-            inlinePropGetMethodMap = new ObjectPool<>(getPropNameList(cls).size());
+            inlinePropGetMethodMap = new ConcurrentCacheMap<>(getPropNameList(cls).size());
             beanInlinePropGetMethodPool.put(cls, inlinePropGetMethodMap);
         } else {
             inlinePropGetMethodQueue = inlinePropGetMethodMap.get(propName);
@@ -2587,7 +2586,7 @@ public final class Beans {
         List<Method> inlinePropGetMethodQueue = null;
 
         if (inlinePropGetMethodMap == null) {
-            inlinePropGetMethodMap = new ObjectPool<>(getPropNameList(cls).size());
+            inlinePropGetMethodMap = new ConcurrentCacheMap<>(getPropNameList(cls).size());
             beanInlinePropGetMethodPool.put(cls, inlinePropGetMethodMap);
         } else {
             inlinePropGetMethodQueue = inlinePropGetMethodMap.get(propName);

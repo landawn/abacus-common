@@ -13,9 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.Fn.UnaryOperators;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
+import com.landawn.abacus.util.UnaryOperators;
 import com.landawn.abacus.util.cs;
 
 /**

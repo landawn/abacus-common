@@ -104,7 +104,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * Creates a {@code FloatIterator} from the specified float array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator will iterate over all elements in the array from start to end.</p>
+     * The iterator will iterate over all elements in the array from start to end. A non-empty
+     * iterator reads values directly from the supplied array; changes made to an element before
+     * that element is consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -128,7 +130,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned. A {@code null} array is treated as length 0 for range validation,
-     * so only {@code fromIndex == toIndex == 0} is valid.</p>
+     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator reads values
+     * directly from the supplied array; changes made to an element before that element is
+     * consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -138,8 +142,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }</pre>
      *
      * @param a the float array (may be {@code null})
-     * @param fromIndex the start index (inclusive)
-     * @param toIndex the end index (exclusive)
+     * @param fromIndex the starting index (inclusive)
+     * @param toIndex the ending index (exclusive)
      * @return a new {@code FloatIterator} over the specified range, or an empty iterator if the array is {@code null} or {@code fromIndex == toIndex}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > (a == null ? 0 : a.length)}, or {@code fromIndex > toIndex}
      */

@@ -1512,6 +1512,10 @@ public final class Profiler {
             this.methodStatisticsList = methodStatisticsList;
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>Names are returned in first-seen order for this loop; duplicates are omitted.</p>
+         */
         @Override
         public List<String> getMethodNameList() {
             final List<String> result = new ArrayList<>();
@@ -1556,6 +1560,10 @@ public final class Profiler {
             getMethodStatisticsList().add(methodStatistics);
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>Among all executions recorded in this single loop, returns the one with the largest elapsed time.</p>
+         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1569,6 +1577,10 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>Among all executions recorded in this single loop, returns the one with the smallest elapsed time.</p>
+         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1662,6 +1674,10 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>Sums the elapsed time of every method execution recorded in this single loop.</p>
+         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -1673,6 +1689,9 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int getMethodInvocationCount(final String methodName) {
             int methodSize = 0;
@@ -1686,6 +1705,10 @@ public final class Profiler {
             return methodSize;
         }
 
+        /**
+         * {@inheritDoc}
+         * <p>Returns the executions of {@code methodName} recorded in this single loop, in recording order.</p>
+         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>(getMethodInvocationCount(methodName));
@@ -1699,6 +1722,9 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1712,6 +1738,9 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -1828,6 +1857,15 @@ public final class Profiler {
             return threadNum;
         }
 
+        /**
+         * Gets the distinct names of the methods that were executed across all loops and threads,
+         * in the order they were first recorded.
+         *
+         * <p>Each name appears at most once. The returned list is a new, never-{@code null}
+         * (possibly empty) snapshot; modifying it does not affect this statistics object.</p>
+         *
+         * @return a new list of distinct method names without duplicates
+         */
         @Override
         public List<String> getMethodNameList() {
             final List<String> result = new ArrayList<>();
@@ -1911,6 +1949,14 @@ public final class Profiler {
             getLoopStatisticsList().add(N.checkArgNotNull(loopStatistics, cs.loopStatistics));
         }
 
+        /**
+         * Returns the method execution with the maximum elapsed time across all loops and threads.
+         *
+         * <p>Compares each loop's own max-elapsed execution and returns the slowest among them.</p>
+         *
+         * @return the {@link MethodStatistics} with the largest elapsed time,
+         *         or {@code null} if no method executions have been recorded
+         */
         @Override
         public MethodStatistics getMaxElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -1927,6 +1973,14 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Returns the method execution with the minimum elapsed time across all loops and threads.
+         *
+         * <p>Compares each loop's own min-elapsed execution and returns the fastest among them.</p>
+         *
+         * @return the {@link MethodStatistics} with the smallest elapsed time,
+         *         or {@code null} if no method executions have been recorded
+         */
         @Override
         public MethodStatistics getMinElapsedTimeMethod() {
             MethodStatistics result = null;
@@ -2052,6 +2106,14 @@ public final class Profiler {
             return (methodNum > 0) ? (totalTime / methodNum) : totalTime;
         }
 
+        /**
+         * Gets the total elapsed time of all recorded method executions across all loops and threads.
+         *
+         * <p>This is the sum of each loop's {@link LoopStatistics#getTotalElapsedTimeInMillis()},
+         * not wall-clock time for the overall test (which may overlap concurrent threads).</p>
+         *
+         * @return the summed elapsed time in milliseconds, or {@code 0} if nothing was recorded
+         */
         @Override
         public double getTotalElapsedTimeInMillis() {
             double result = 0;
@@ -2063,6 +2125,12 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets the number of times the specified method was invoked across all loops and threads.
+         *
+         * @param methodName the name of the method
+         * @return the total invocation count, or {@code 0} if the method was never executed
+         */
         @Override
         public int getMethodInvocationCount(final String methodName) {
             int result = 0;
@@ -2074,6 +2142,15 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets all statistics for executions of the specified method across all loops and threads.
+         *
+         * <p>Results from each loop are concatenated in loop order. The returned list is a new,
+         * never-{@code null} (possibly empty) snapshot; modifying it does not affect this statistics object.</p>
+         *
+         * @param methodName the name of the method
+         * @return a new list of the {@link MethodStatistics} recorded for {@code methodName}
+         */
         @Override
         public List<MethodStatistics> getMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> methodStatisticsList = new ArrayList<>(getMethodInvocationCount(methodName));
@@ -2085,6 +2162,15 @@ public final class Profiler {
             return methodStatisticsList;
         }
 
+        /**
+         * Gets statistics for the failed executions of the specified method across all loops and threads,
+         * that is, those for which {@link MethodStatistics#isFailed()} returns {@code true}.
+         *
+         * <p>The returned list is a new, never-{@code null} (possibly empty) snapshot.</p>
+         *
+         * @param methodName the name of the method
+         * @return a new list of the failed {@link MethodStatistics} recorded for {@code methodName}
+         */
         @Override
         public List<MethodStatistics> getFailedMethodStatisticsList(final String methodName) {
             final List<MethodStatistics> result = new ArrayList<>();
@@ -2096,6 +2182,14 @@ public final class Profiler {
             return result;
         }
 
+        /**
+         * Gets all failed method executions across all methods, loops, and threads.
+         *
+         * <p>The returned list is a new, never-{@code null} (possibly empty) snapshot of every failed
+         * {@link MethodStatistics}, in the order the executions were recorded within each loop.</p>
+         *
+         * @return a new list of every failed {@link MethodStatistics} recorded
+         */
         @Override
         public List<MethodStatistics> getAllFailedMethodStatisticsList() {
             final List<MethodStatistics> result = new ArrayList<>();

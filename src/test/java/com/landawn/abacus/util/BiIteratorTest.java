@@ -701,13 +701,20 @@ public class BiIteratorTest extends TestBase {
     @Test
     @DisplayName("Test generate with stateful output consumer")
     public void testGenerateStateful() {
+        // State must live outside the reused Pair holder: generate clears the holder before each
+        // invocation (same contract as TriIterator.generate), so Fibonacci cannot rely on stale pair values.
         MutableInt counter = MutableInt.of(10);
+        final int[] prev = { 0, 1 };
+        final boolean[] started = { false };
         BiIterator<Integer, Integer> fib = BiIterator.generate(() -> counter.getAndDecrement() > 0, pair -> {
-            if (pair.left() == null || pair.right() == null) {
+            if (!started[0]) {
+                started[0] = true;
                 pair.set(0, 1);
             } else {
-                int next = pair.left() + pair.right();
-                pair.set(pair.right(), next);
+                int next = prev[0] + prev[1];
+                pair.set(prev[1], next);
+                prev[0] = prev[1];
+                prev[1] = next;
             }
         });
 
@@ -2033,5 +2040,69 @@ public class BiIteratorTest extends TestBase {
             int second = Integer.parseInt(parts[1]);
             return first % 2 == 0 && second % 4 == 0;
         }));
+    }
+
+    // -----------------------------------------------------------------
+    // Bug: BiIterator.generate reused Pair without clearing unset components
+    // (stale left/right from previous iteration; TriIterator already cleared).
+    // -----------------------------------------------------------------
+
+    @Test
+    public void generate_clearsUnsetPairComponentsBetweenIterations() {
+        final AtomicInteger n = new AtomicInteger(0);
+        final BiIterator<Integer, String> it = BiIterator.generate(() -> n.get() < 2, pair -> {
+            final int i = n.getAndIncrement();
+            pair.setLeft(i);
+            if (i == 0) {
+                pair.setRight("first");
+            }
+            // i == 1: only setLeft — right must not keep "first"
+        });
+
+        assertEquals(Pair.of(0, "first"), it.next());
+        assertEquals(Pair.of(1, null), it.next());
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    public void generateIndexed_clearsUnsetPairComponentsBetweenIterations() {
+        final BiIterator<Integer, String> it = BiIterator.generate(0, 2, (i, pair) -> {
+            pair.setLeft(i);
+            if (i == 0) {
+                pair.setRight("first");
+            }
+        });
+
+        assertEquals(Pair.of(0, "first"), it.next());
+        assertEquals(Pair.of(1, null), it.next());
+        assertFalse(it.hasNext());
+    }
+
+    // -----------------------------------------------------------------
+    // Bug: BiIterator.generate did not latch exhaustion; a later true from
+    // the supplier could resurrect hasNext() after it had returned false.
+    // -----------------------------------------------------------------
+
+    @Test
+    public void generate_staysExhaustedAfterHasNextReturnsFalse() {
+        final AtomicInteger calls = new AtomicInteger(0);
+        final BiIterator<Integer, Integer> it = BiIterator.generate(() -> {
+            // first call true, subsequent false — even if caller flips state later
+            return calls.getAndIncrement() == 0;
+        }, pair -> pair.set(1, 1));
+
+        assertTrue(it.hasNext());
+        assertEquals(Pair.of(1, 1), it.next());
+        assertFalse(it.hasNext());
+
+        // Supplier would return true again if consulted (calls already > 0 on first false,
+        // but force a supplier that could flip true):
+        final AtomicInteger phase = new AtomicInteger(0);
+        final BiIterator<Integer, Integer> it2 = BiIterator.generate(() -> phase.getAndIncrement() < 1, pair -> pair.set(7, 7));
+        assertTrue(it2.hasNext());
+        it2.next();
+        assertFalse(it2.hasNext());
+        phase.set(0); // would make supplier true again if re-consulted
+        assertFalse(it2.hasNext(), "iterator must stay exhausted after first false hasNext");
     }
 }

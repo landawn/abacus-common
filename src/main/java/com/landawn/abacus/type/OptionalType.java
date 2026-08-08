@@ -311,8 +311,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
-            // elementType.write(writer, x.get());
-            Type.<Object> of(x.get().getClass()).appendTo(appendable, x.get());
+            elementType.appendTo(appendable, x.get());
         }
     }
 
@@ -338,8 +337,7 @@ public class OptionalType<T> extends AbstractOptionalType<Optional<T>> {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            // elementType.serializeTo(writer, x.get(), config);
-            Type.<Object> of(x.get().getClass()).serializeTo(writer, x.get(), config);
+            elementType.serializeTo(writer, x.get(), config);
         }
     }
 }

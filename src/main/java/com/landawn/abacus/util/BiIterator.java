@@ -68,6 +68,16 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
     }
 
     /**
+     * Resets the reused output holder to two {@code null} values, so that a component the
+     * generator does not set is {@code null} rather than a leftover from the previous iteration.
+     *
+     * @param output the holder to clear
+     */
+    private static void clearOutput(final Pair<?, ?> output) {
+        output.set(null, null);
+    }
+
+    /**
      * A singleton empty BiIterator instance that contains no elements.
      * This iterator's hasNext() always returns {@code false}, and any attempt to retrieve elements throws NoSuchElementException.
      *
@@ -322,6 +332,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>This method provides full control over iteration termination and element generation.
      * The hasNext supplier is called before each element is produced to determine if iteration should continue.</p>
      *
+     * <p>The holder is reused and cleared to two {@code null} values before each invocation, so an
+     * omitted component is {@code null}, never a value left by the previous iteration. The holder
+     * must not be retained by the consumer. Once {@code hasNext} returns {@code false}, the iterator
+     * is permanently exhausted.</p>
+     *
      * <p>The output consumer receives a mutable {@code Pair} object that should be populated
      * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
      *
@@ -351,11 +366,16 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         return new BiIterator<>() {
             private final Pair<A, B> tmp = new Pair<>();
             private boolean hasNextFlag = false;
+            private boolean exhausted = false;
 
             @Override
             public boolean hasNext() {
-                if (!hasNextFlag) {
-                    hasNextFlag = hasNext.getAsBoolean();
+                if (!hasNextFlag && !exhausted) {
+                    if (hasNext.getAsBoolean()) {
+                        hasNextFlag = true;
+                    } else {
+                        exhausted = true;
+                    }
                 }
 
                 return hasNextFlag;
@@ -367,8 +387,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                hasNextFlag = false; // Reset for the next call
-
+                hasNextFlag = false; // The available element is handed to the producer.
+                clearOutput(tmp);
                 output.accept(tmp);
 
                 return Pair.of(tmp.left(), tmp.right());
@@ -380,8 +400,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                hasNextFlag = false; // Reset for the next call
-
+                hasNextFlag = false; // The available element is handed to the producer.
+                clearOutput(tmp);
                 output.accept(tmp);
 
                 action.accept(tmp.left(), tmp.right());
@@ -394,13 +414,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             public void forEachRemaining(final BiConsumer<? super A, ? super B> action) throws IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
-                while (hasNextFlag || hasNext.getAsBoolean()) {
-                    hasNextFlag = false; // Reset for the next call
-
+                while (hasNextFlag || (!exhausted && hasNext.getAsBoolean())) {
+                    hasNextFlag = false; // The available element is handed to the producer.
+                    clearOutput(tmp);
                     output.accept(tmp);
 
                     action.accept(tmp.left(), tmp.right());
                 }
+                exhausted = true;
             }
 
             /**
@@ -410,13 +431,14 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E, IllegalArgumentException {
                 N.checkArgNotNull(action, cs.action);
 
-                while (hasNextFlag || hasNext.getAsBoolean()) {
-                    hasNextFlag = false; // Reset for the next call
-
+                while (hasNextFlag || (!exhausted && hasNext.getAsBoolean())) {
+                    hasNextFlag = false; // The available element is handed to the producer.
+                    clearOutput(tmp);
                     output.accept(tmp);
 
                     action.accept(tmp.left(), tmp.right());
                 }
+                exhausted = true;
             }
 
             /**
@@ -429,8 +451,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
-                        if (!hasNextFlag) {
-                            hasNextFlag = hasNext.getAsBoolean();
+                        if (!hasNextFlag && !exhausted) {
+                            if (hasNext.getAsBoolean()) {
+                                hasNextFlag = true;
+                            } else {
+                                exhausted = true;
+                            }
                         }
 
                         return hasNextFlag;
@@ -442,8 +468,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        hasNextFlag = false; // Reset for the next call
-
+                        hasNextFlag = false; // The available element is handed to the producer.
+                        clearOutput(tmp);
                         output.accept(tmp);
 
                         return mapper.apply(tmp.left(), tmp.right());
@@ -462,7 +488,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * index-value pairs, or any other index-dependent data.</p>
      *
      * <p>The output consumer receives the current index and a mutable {@code Pair} object that should be
-     * populated with the values corresponding to that index.</p>
+     * populated with the values corresponding to that index. The holder is reused and cleared to two
+     * {@code null} values before each invocation, so an omitted component is {@code null} rather than a
+     * leftover from the previous index.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -502,6 +530,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                clearOutput(tmp);
                 output.accept(cursor.getAndIncrement(), tmp);
 
                 return Pair.of(tmp.left(), tmp.right());
@@ -513,6 +542,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                clearOutput(tmp);
                 output.accept(cursor.getAndIncrement(), tmp);
 
                 action.accept(tmp.left(), tmp.right());
@@ -526,6 +556,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 N.checkArgNotNull(action, cs.action);
 
                 while (cursor.value() < toIndex) {
+                    clearOutput(tmp);
                     output.accept(cursor.getAndIncrement(), tmp);
 
                     action.accept(tmp.left(), tmp.right());
@@ -540,6 +571,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 N.checkArgNotNull(action, cs.action);
 
                 while (cursor.value() < toIndex) {
+                    clearOutput(tmp);
                     output.accept(cursor.getAndIncrement(), tmp);
 
                     action.accept(tmp.left(), tmp.right());
@@ -565,6 +597,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
+                        clearOutput(tmp);
                         output.accept(cursor.getAndIncrement(), tmp);
 
                         return mapper.apply(tmp.left(), tmp.right());

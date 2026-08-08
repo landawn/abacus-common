@@ -2932,7 +2932,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.of(result);
+            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
         }, this, asyncExecutor, asyncExecutorToUse);
     }
 
@@ -3169,7 +3169,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             if (!elements.hasNext()) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                return Optional.of(elements.next());
+                return Optional.ofNullable(elements.next());
             } else {
                 isDone = false;
             }
@@ -3212,7 +3212,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                     next = elements.next();
                 }
 
-                return Optional.of(next);
+                return Optional.ofNullable(next);
             } else {
                 isDone = false;
             }
@@ -3541,7 +3541,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
     }
 
     /**
@@ -3607,7 +3607,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value());
+        return resultHolder.value() == NONE ? Optional.empty() : Optional.ofNullable(resultHolder.value());
     }
 
     /**
@@ -3673,7 +3673,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
     }
 
     /**

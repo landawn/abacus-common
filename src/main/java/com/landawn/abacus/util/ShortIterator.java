@@ -90,7 +90,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator empty = ShortIterator.empty();
-     * assert !empty.hasNext();
+     * System.out.println(empty.hasNext());   // returns false
      * }</pre>
      *
      * @return an empty {@code ShortIterator}
@@ -104,8 +104,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Creates a {@code ShortIterator} from the specified short array.
      *
      * <p>If the array is {@code null} or empty, returns an empty iterator.
-     * The iterator reads the supplied array directly from start to end; changes made to an element
-     * before that element is consumed are therefore visible to the iterator.</p>
+     * The iterator will iterate over all elements in the array from start to end. A non-empty
+     * iterator reads values directly from the supplied array; changes made to an element before
+     * that element is consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -127,7 +128,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p>The iterator will iterate over elements from {@code fromIndex} (inclusive) to
      * {@code toIndex} (exclusive). If {@code fromIndex} equals {@code toIndex}, an empty
      * iterator is returned. A {@code null} array is treated as length 0 for range validation,
-     * so only {@code fromIndex == toIndex == 0} is valid.</p>
+     * so only {@code fromIndex == toIndex == 0} is valid. A non-empty iterator reads values
+     * directly from the supplied array; changes made to an element before that element is
+     * consumed are visible to the iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

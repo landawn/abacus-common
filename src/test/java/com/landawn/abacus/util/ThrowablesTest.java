@@ -2478,65 +2478,65 @@ public class ThrowablesTest extends TestBase {
         assertEquals("Sum is 10", result);
     }
 
-    @Test
-    public void testLazyInitializer() throws Throwable {
-        final AtomicInteger supplierCalls = new AtomicInteger(0);
-        final Throwables.Supplier<String, Exception> supplier = () -> {
-            supplierCalls.incrementAndGet();
-            return "initialized";
-        };
+//    @Test
+//    public void testLazyInitializer() throws Throwable {
+//        final AtomicInteger supplierCalls = new AtomicInteger(0);
+//        final Throwables.Supplier<String, Exception> supplier = () -> {
+//            supplierCalls.incrementAndGet();
+//            return "initialized";
+//        };
+//
+//        Throwables.Supplier<String, ?> lazy = N.lazyInitialize(supplier);
+//
+//        assertEquals(0, supplierCalls.get(), "Supplier should not be called on creation.");
+//
+//        String value1 = lazy.get();
+//        assertEquals("initialized", value1);
+//        assertEquals(1, supplierCalls.get(), "Supplier should be called on first get().");
+//
+//        String value2 = lazy.get();
+//        assertEquals("initialized", value2);
+//        assertEquals(1, supplierCalls.get(), "Supplier should not be called on subsequent get() calls.");
+//        assertSame(value1, value2, "Should return the same cached instance.");
+//    }
 
-        Throwables.Supplier<String, ?> lazy = N.lazyInitialize(supplier);
-
-        assertEquals(0, supplierCalls.get(), "Supplier should not be called on creation.");
-
-        String value1 = lazy.get();
-        assertEquals("initialized", value1);
-        assertEquals(1, supplierCalls.get(), "Supplier should be called on first get().");
-
-        String value2 = lazy.get();
-        assertEquals("initialized", value2);
-        assertEquals(1, supplierCalls.get(), "Supplier should not be called on subsequent get() calls.");
-        assertSame(value1, value2, "Should return the same cached instance.");
-    }
-
-    @Test
-    public void testLazyInitializer_threadSafety() throws InterruptedException {
-        final AtomicInteger supplierCalls = new AtomicInteger(0);
-        final Throwables.Supplier<String, Exception> supplier = () -> {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                fail("Sleep interrupted");
-            }
-            supplierCalls.incrementAndGet();
-            return "initialized";
-        };
-
-        final Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(supplier);
-        final int numThreads = 10;
-        final Thread[] threads = new Thread[numThreads];
-
-        for (int i = 0; i < numThreads; i++) {
-            threads[i] = new Thread(() -> {
-                try {
-                    assertEquals("initialized", lazy.get());
-                } catch (Throwable e) {
-                    fail("Exception in thread", e);
-                }
-            });
-        }
-
-        for (Thread t : threads) {
-            t.start();
-        }
-
-        for (Thread t : threads) {
-            t.join();
-        }
-
-        assertEquals(1, supplierCalls.get(), "Supplier must be called exactly once in a multi-threaded environment.");
-    }
+//    @Test
+//    public void testLazyInitializer_threadSafety() throws InterruptedException {
+//        final AtomicInteger supplierCalls = new AtomicInteger(0);
+//        final Throwables.Supplier<String, Exception> supplier = () -> {
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                fail("Sleep interrupted");
+//            }
+//            supplierCalls.incrementAndGet();
+//            return "initialized";
+//        };
+//
+//        final Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(supplier);
+//        final int numThreads = 10;
+//        final Thread[] threads = new Thread[numThreads];
+//
+//        for (int i = 0; i < numThreads; i++) {
+//            threads[i] = new Thread(() -> {
+//                try {
+//                    assertEquals("initialized", lazy.get());
+//                } catch (Throwable e) {
+//                    fail("Exception in thread", e);
+//                }
+//            });
+//        }
+//
+//        for (Thread t : threads) {
+//            t.start();
+//        }
+//
+//        for (Thread t : threads) {
+//            t.join();
+//        }
+//
+//        assertEquals(1, supplierCalls.get(), "Supplier must be called exactly once in a multi-threaded environment.");
+//    }
 
     @Test
     public void testIterator_Empty() throws Exception {
@@ -2973,55 +2973,55 @@ public class ThrowablesTest extends TestBase {
         assertTrue(resourceClosed.get(), "Resource should be closed");
     }
 
-    @Test
-    public void testLazyInitializer_Basic() throws Exception {
-        AtomicInteger callCount = new AtomicInteger(0);
-
-        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
-            callCount.incrementAndGet();
-            return "Initialized Value";
-        });
-
-        assertEquals(0, callCount.get());
-        assertEquals("Initialized Value", lazy.get());
-        assertEquals(1, callCount.get());
-        assertEquals("Initialized Value", lazy.get());
-        assertEquals(1, callCount.get());
-    }
-
-    @Test
-    public void testLazyInitializer_WithNull() throws Exception {
-
-        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> null);
-
-        assertNull(lazy.get());
-        assertNull(lazy.get());
-    }
-
-    @Test
-    public void testLazyInitializer_WithException() throws Exception {
-
-        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
-            throw new TestException("Initialization failed");
-        });
-
-        try {
-            lazy.get();
-            fail("Should have thrown exception");
-        } catch (TestException e) {
-            assertEquals("Initialization failed", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testLazyInitializer_OfAlreadyLazy() throws Exception {
-
-        Throwables.Supplier<String, Exception> lazy1 = N.lazyInitialize(() -> "Value");
-
-        Throwables.Supplier<String, Exception> lazy2 = N.lazyInitialize(lazy1);
-
-        assertSame(lazy1, lazy2, "Should return the same instance");
-    }
+//    @Test
+//    public void testLazyInitializer_Basic() throws Exception {
+//        AtomicInteger callCount = new AtomicInteger(0);
+//
+//        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
+//            callCount.incrementAndGet();
+//            return "Initialized Value";
+//        });
+//
+//        assertEquals(0, callCount.get());
+//        assertEquals("Initialized Value", lazy.get());
+//        assertEquals(1, callCount.get());
+//        assertEquals("Initialized Value", lazy.get());
+//        assertEquals(1, callCount.get());
+//    }
+//
+//    @Test
+//    public void testLazyInitializer_WithNull() throws Exception {
+//
+//        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> null);
+//
+//        assertNull(lazy.get());
+//        assertNull(lazy.get());
+//    }
+//
+//    @Test
+//    public void testLazyInitializer_WithException() throws Exception {
+//
+//        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
+//            throw new TestException("Initialization failed");
+//        });
+//
+//        try {
+//            lazy.get();
+//            fail("Should have thrown exception");
+//        } catch (TestException e) {
+//            assertEquals("Initialization failed", e.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testLazyInitializer_OfAlreadyLazy() throws Exception {
+//
+//        Throwables.Supplier<String, Exception> lazy1 = N.lazyInitialize(() -> "Value");
+//
+//        Throwables.Supplier<String, Exception> lazy2 = N.lazyInitialize(lazy1);
+//
+//        assertSame(lazy1, lazy2, "Should return the same instance");
+//    }
 
     @Test
     public void testRunnable_Unchecked_Exception() {
@@ -3386,45 +3386,45 @@ public class ThrowablesTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Throwables.IntObjPredicate.of(null));
     }
 
-    @Test
-    public void testLazyInitializer_ThreadSafety() throws Exception {
-        final int threadCount = 100;
-        final AtomicInteger initCount = new AtomicInteger(0);
-
-        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
-            initCount.incrementAndGet();
-            Thread.sleep(10);
-            return "Initialized";
-        });
-
-        Thread[] threads = new Thread[threadCount];
-        final String[] results = new String[threadCount];
-
-        for (int i = 0; i < threadCount; i++) {
-            final int index = i;
-            threads[i] = new Thread(() -> {
-                try {
-                    results[index] = lazy.get();
-                } catch (Exception e) {
-                    results[index] = "ERROR";
-                }
-            });
-        }
-
-        for (Thread t : threads) {
-            t.start();
-        }
-
-        for (Thread t : threads) {
-            t.join();
-        }
-
-        assertEquals(1, initCount.get(), "Initialization should happen only once");
-
-        for (String result : results) {
-            assertEquals("Initialized", result);
-        }
-    }
+//    @Test
+//    public void testLazyInitializer_ThreadSafety() throws Exception {
+//        final int threadCount = 100;
+//        final AtomicInteger initCount = new AtomicInteger(0);
+//
+//        Throwables.Supplier<String, Exception> lazy = N.lazyInitialize(() -> {
+//            initCount.incrementAndGet();
+//            Thread.sleep(10);
+//            return "Initialized";
+//        });
+//
+//        Thread[] threads = new Thread[threadCount];
+//        final String[] results = new String[threadCount];
+//
+//        for (int i = 0; i < threadCount; i++) {
+//            final int index = i;
+//            threads[i] = new Thread(() -> {
+//                try {
+//                    results[index] = lazy.get();
+//                } catch (Exception e) {
+//                    results[index] = "ERROR";
+//                }
+//            });
+//        }
+//
+//        for (Thread t : threads) {
+//            t.start();
+//        }
+//
+//        for (Thread t : threads) {
+//            t.join();
+//        }
+//
+//        assertEquals(1, initCount.get(), "Initialization should happen only once");
+//
+//        for (String result : results) {
+//            assertEquals("Initialized", result);
+//        }
+//    }
 
     @Test
     public void testPrimitiveBiPredicates() throws Exception {

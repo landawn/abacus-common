@@ -70,6 +70,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.BiFunctions;
 import com.landawn.abacus.util.BufferedCsvWriter;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -80,7 +81,6 @@ import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fn.BiFunctions;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Indexed;
@@ -2669,7 +2669,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return Optional.empty();
             }
 
-            return Optional.of(iter.next());
+            // ofNullable: a null stream element must not NPE; empty matches Collectors.first().
+            return Optional.ofNullable(iter.next());
         } finally {
             close();
         }
@@ -2693,7 +2694,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                 next = iter.next();
             }
 
-            return Optional.of(next);
+            // ofNullable: a null stream element must not NPE; empty matches Collectors.last().
+            return Optional.ofNullable(next);
         } finally {
             close();
         }
@@ -2725,13 +2727,19 @@ abstract class AbstractStream<T> extends Stream<T> {
             @SuppressWarnings("resource")
             final Iterator<T> iter = iteratorEx();
 
-            final Optional<T> result = iter.hasNext() ? Optional.of(iter.next()) : Optional.empty();
-
-            if (result.isPresent() && iter.hasNext()) {
-                throw new TooManyElementsException("There are at least two elements: " + Strings.concat(result.get(), ", ", iter.next()));
+            if (!iter.hasNext()) {
+                return Optional.empty();
             }
 
-            return result;
+            // Read first before checking for a second element: a null first value is a valid sole element
+            // and must not collapse into empty via isPresent() before the too-many-elements check.
+            final T first = iter.next();
+
+            if (iter.hasNext()) {
+                throw new TooManyElementsException("There are at least two elements: " + Strings.concat(N.toString(first), ", ", N.toString(iter.next())));
+            }
+
+            return Optional.ofNullable(first);
         } finally {
             close();
         }

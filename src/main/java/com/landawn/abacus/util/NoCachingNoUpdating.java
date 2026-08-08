@@ -4213,6 +4213,23 @@ public interface NoCachingNoUpdating {
             return Strings.join(deque, delimiter, prefix, suffix);
         }
 
+        /**
+         * Returns a string representation of the wrapped deque, formatted as by
+         * {@link N#toString(Object)} (typically a list-like {@code [e1, e2, ...]} form).
+         *
+         * <p>Like other disposable wrappers, the result reflects the live wrapped deque and must not
+         * be treated as a durable cache of element values beyond the current use.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Deque<String> data = new ArrayDeque<>(Arrays.asList("a", "b", "c"));
+         * DisposableDeque<String> deque = DisposableDeque.wrap(data);
+         * deque.toString();                                          // returns a string like "[a, b, c]"
+         * DisposableDeque.wrap(new ArrayDeque<>()).toString();       // returns a string like "[]"
+         * }</pre>
+         *
+         * @return a string representation of the current deque contents
+         */
         @Override
         public String toString() {
             return N.toString(deque);

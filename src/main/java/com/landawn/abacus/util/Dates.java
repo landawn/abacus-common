@@ -669,7 +669,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     private static final int MAX_POOLED_TIME_ZONES = 64;
 
-    private static final Map<String, Queue<DateFormat>> dfPool = new ObjectPool<>(64);
+    private static final Map<String, Queue<DateFormat>> dfPool = new ConcurrentCacheMap<>(64);
 
     private static final ConcurrentHashMap<TimeZone, Queue<Calendar>> calendarPool = new ConcurrentHashMap<>(64);
 

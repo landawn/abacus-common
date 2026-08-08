@@ -202,6 +202,26 @@ import com.landawn.abacus.util.stream.Stream;
  * A common pattern is to perform the exception-throwing I/O or JDBC stages in a {@code Seq}, then hand the
  * results to a {@link Stream} for parallel, CPU-bound post-processing.
  *
+ * <h2 id="shared-pipeline-naming">Shared pipeline naming ({@code Seq} ↔ {@link Stream})</h2>
+ * <p>Operation names are deliberately aligned with abacus {@link Stream}. The <b>canonical glossary</b>
+ * (flatMap family, first/last/find*, boolean match terminals) lives on
+ * {@link Stream} &mdash; see that class's <i>Shared pipeline naming</i> section
+ * ({@code Stream.html#shared-pipeline-naming}, including
+ * {@code #flatMap-naming}, {@code #element-access-naming}, and {@code #boolean-match-naming}).
+ * Seq-specific notes:</p>
+ * <ul>
+ *   <li><b>{@code flatMap} (uppercase {@code M})</b> maps each element to a {@link Seq}, not a {@link Stream}.
+ *       {@link #flatmap(Throwables.Function) flatmap} (lowercase {@code m}) still maps to {@link java.util.Collection},
+ *       and {@link #flatMapArray(Throwables.Function) flatMapArray} maps to arrays. There is no {@code flattMap}
+ *       (JDK {@code java.util.stream.Stream}) overload on {@code Seq}; use {@link #stream()} when needed.</li>
+ *   <li><b>First / last element:</b> prefer {@link #first()} / {@link #last()};
+ *       {@link #findFirst()} and {@link #findAny()} (no-arg) are JDK-aligned aliases of {@link #first()}.
+ *       With a predicate, use {@link #findFirst(Throwables.Predicate)}; {@link #findAny(Throwables.Predicate)}
+ *       is deprecated here because {@code Seq} is sequential-only and identical to {@code findFirst}.</li>
+ *   <li><b>Boolean match:</b> {@link #anyMatch}, {@link #allMatch}, {@link #noneMatch}, and
+ *       {@link #hasMatchCountBetween} match {@link Stream} naming (not {@code isMatchCountBetween}).</li>
+ * </ul>
+ *
  * <p><b>Reading the per-operation characteristics:</b> each operation below carries a one-line
  * <i>Operation characteristics</i> summary. Its classification terms link to the annotations that
  * define them &mdash; {@link TerminalOp}, {@link IntermediateOp} and {@link TerminalOpTriggered}
@@ -4635,13 +4655,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMap} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMap(Throwables.Function) flatMap} (this method) - transforms elements into {@link com.landawn.abacus.util.Seq Seq}.</li>
-     *   <li>{@link #flatmap(Throwables.Function) flatmap} (lowercase 'm') - transforms elements into {@link java.util.Collection Collection}.</li>
-     *   <li>{@link #flatMapArray(Throwables.Function) flatMapArray} - transforms elements into an array.</li>
-     * </ul>
+     * <p><b>Naming:</b> uppercase {@code M} means the mapper returns a {@link Seq}.
+     * See the class-level <a href="#shared-pipeline-naming">shared pipeline naming</a> notes and the
+     * canonical glossary on {@link Stream} ({@code Stream.html#flatMap-naming}).</p>
      *
      * <p>This is the monadic bind operation for sequences. Each sequence returned by the mapper
      * is consumed completely before moving to the next element. Each completed mapped sequence is
@@ -4753,13 +4769,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
      *
-     * <p><b>Naming Convention:</b></p>
-     * <p>This library uses specific naming for different {@code flatMap} variants:</p>
-     * <ul>
-     *   <li>{@link #flatMap(Throwables.Function) flatMap} (uppercase 'M') - transforms elements into {@link com.landawn.abacus.util.Seq Seq}.</li>
-     *   <li>{@link #flatmap(Throwables.Function) flatmap} (this method) - transforms elements into {@link java.util.Collection Collection}.</li>
-     *   <li>{@link #flatMapArray(Throwables.Function) flatMapArray} - transforms elements into an array.</li>
-     * </ul>
+     * <p><b>Naming:</b> lowercase {@code m} means the mapper returns a {@link Collection}.
+     * See the class-level <a href="#shared-pipeline-naming">shared pipeline naming</a> notes and the
+     * canonical glossary on {@link Stream} ({@code Stream.html#flatMap-naming}).</p>
      *
      * <p>This is similar to flatMap but works with collections instead of sequences.
      * It's more efficient when the mapper returns small collections.</p>
@@ -4822,6 +4834,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * which returns an array of new elements for each element. The resulting arrays
      * are then flattened into a single sequence.
      * This is an intermediate operation that does not consume the sequence.
+     *
+     * <p><b>Naming:</b> see the class-level <a href="#shared-pipeline-naming">shared pipeline naming</a>
+     * notes and the canonical glossary on {@link Stream} ({@code Stream.html#flatMap-naming}).</p>
      *
      * <p>This is similar to flatMap but works with arrays instead of sequences.</p>
      *
@@ -8750,6 +8765,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if <i>maxSize</i> is negative.
      * @see #skip(long)
+     * @see #skipAndLimit(long, long)
      */
     @IntermediateOp
     public Seq<T, E> limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
@@ -8804,22 +8820,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <pre>{@code
      * // Get elements 3, 4, 5 from a sequence of 1-10
      * Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-     *    .limit(2, 3)
+     *    .skipAndLimit(2, 3)
      *    .toList();   // returns [3, 4, 5]
      *
      * // Pagination: get page 3 with page size 10 (elements 21-30)
      * Seq.rangeClosed(1, 100)
-     *    .limit(20, 10)
+     *    .skipAndLimit(20, 10)
      *    .toList();   // returns [21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
      *
      * // If offset exceeds sequence size, returns empty sequence
      * Seq.of(1, 2, 3)
-     *    .limit(5, 10)
+     *    .skipAndLimit(5, 10)
      *    .toList();   // returns []
      *
      * // If fewer elements available than maxSize, returns remaining elements
      * Seq.of(1, 2, 3, 4, 5)
-     *    .limit(3, 10)
+     *    .skipAndLimit(3, 10)
      *    .toList();   // returns [4, 5]
      * }</pre>
      *
@@ -8839,7 +8855,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #step(long)
      */
     @IntermediateOp
-    public Seq<T, E> limit(final long offset, final long maxSize) throws IllegalStateException, IllegalArgumentException {
+    public Seq<T, E> skipAndLimit(final long offset, final long maxSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         if (offset == 0) {
@@ -12144,7 +12160,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5, 6);
-     * boolean has2to4Even = seq.isMatchCountBetween(2, 4, n -> n % 2 == 0);
+     * boolean has2to4Even = seq.hasMatchCountBetween(2, 4, n -> n % 2 == 0);
      * // has2to4Even == true (there are 3 even numbers)
      * }</pre>
      *
@@ -12161,9 +12177,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         than {@code atLeast}, or if {@code predicate} is {@code null}.
      * @throws E if an exception occurs while processing the sequence
      * @throws E2 if the predicate throws an exception
+     * @see Stream#hasMatchCountBetween(long, long, Throwables.Predicate)
+     * @see #anyMatch(Throwables.Predicate)
+     * @see #allMatch(Throwables.Predicate)
+     * @see #noneMatch(Throwables.Predicate)
      */
     @TerminalOp
-    public <E2 extends Exception> boolean isMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
+    public <E2 extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
         checkArgNotNegative(atLeast, cs.atLeast);
@@ -12214,9 +12234,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws E if an exception occurs during iteration
      * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #findFirst()
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
      * @see #first()
+     * @see Stream#findFirst(Throwables.Predicate)
      * @see N#findFirst(Iterable, Predicate)
      */
     @TerminalOp
@@ -12838,9 +12860,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalStateException if the sequence is already closed
      * @throws NullPointerException if the first element is {@code null}
      * @throws E if an exception occurs during iteration
+     * @see #findFirst()
+     * @see #findAny()
      * @see #last()
      * @see #elementAt(long)
      * @see #findFirst(Throwables.Predicate)
+     * @see Stream#first()
      */
     @TerminalOp
     public Optional<T> first() throws IllegalStateException, E {
@@ -12855,6 +12880,72 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         } finally {
             close();
         }
+    }
+
+    /**
+     * Returns the first element of this sequence wrapped in an {@code Optional}, or an empty
+     * {@code Optional} if this sequence is empty. This is a short-circuiting terminal operation.
+     *
+     * <p>This method is a JDK-aligned alias of {@link #first()}: it always returns the first element
+     * in encounter order. The name matches abacus {@link Stream#findFirst()} and
+     * {@link java.util.stream.Stream#findFirst()}.</p>
+     *
+     * <p><b>Null elements:</b> the returned {@code Optional} cannot hold {@code null}, so a
+     * {@link NullPointerException} is thrown if the first element is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Optional<Integer> first = Seq.of(1, 2, 3).findFirst();   // returns Optional.of(1)
+     * Optional<Integer> none = Seq.<Integer, Exception>of().findFirst();   // returns Optional.empty()
+     * }</pre>
+     *
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
+     *
+     * @return an {@code Optional} containing the first element of the sequence, or an empty {@code Optional} if empty
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws NullPointerException if the first element is {@code null}
+     * @throws E if an exception occurs during iteration
+     * @see #first()
+     * @see #findAny()
+     * @see #findFirst(Throwables.Predicate)
+     * @see Stream#findFirst()
+     */
+    @TerminalOp
+    public Optional<T> findFirst() throws IllegalStateException, E {
+        return first();
+    }
+
+    /**
+     * Returns the first element of this sequence wrapped in an {@code Optional}, or an empty
+     * {@code Optional} if this sequence is empty. This is a short-circuiting terminal operation.
+     *
+     * <p>Despite the name, this method is deterministic: it is an alias of {@link #first()} and always
+     * returns the first element in encounter order. The name matches abacus {@link Stream#findAny()} and
+     * is kept for API parity (on sequential pipelines it behaves like {@code findFirst()}).</p>
+     *
+     * <p><b>Null elements:</b> the returned {@code Optional} cannot hold {@code null}, so a
+     * {@link NullPointerException} is thrown if the first element is {@code null}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Optional<Integer> any = Seq.of(1, 2, 3).findAny();   // returns Optional.of(1)
+     * Optional<Integer> none = Seq.<Integer, Exception>of().findAny();   // returns Optional.empty()
+     * }</pre>
+     *
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
+     *
+     * @return an {@code Optional} containing the first element of the sequence, or an empty {@code Optional} if empty
+     * @throws IllegalStateException if the sequence is already closed
+     * @throws NullPointerException if the first element is {@code null}
+     * @throws E if an exception occurs during iteration
+     * @see #first()
+     * @see #findFirst()
+     * @see #findFirst(Throwables.Predicate)
+     * @see Stream#findAny()
+     */
+    @TerminalOp
+    public Optional<T> findAny() throws IllegalStateException, E {
+        return first();
     }
 
     /**
