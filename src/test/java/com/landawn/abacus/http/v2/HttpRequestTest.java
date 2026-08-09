@@ -1690,8 +1690,7 @@ public class HttpRequestTest extends TestBase {
         final HttpRequest request = new HttpRequest(TEST_URL, null, null, clientBuilder, java.net.http.HttpRequest.newBuilder())
                 .closeHttpClientAfterExecution(true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
         verify(clientBuilder, never()).build();
     }
 
@@ -1706,8 +1705,7 @@ public class HttpRequestTest extends TestBase {
 
         final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
 
-        final RuntimeException thrown = assertThrows(RuntimeException.class,
-                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
 
         assertSame(failure, thrown.getCause());
         assertEquals(1, thrown.getSuppressed().length);
@@ -1726,8 +1724,7 @@ public class HttpRequestTest extends TestBase {
 
         final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
 
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
 
         assertSame(failure, thrown);
         assertEquals(1, thrown.getSuppressed().length);
@@ -1748,8 +1745,7 @@ public class HttpRequestTest extends TestBase {
 
         final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
 
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
 
         assertSame(failure, thrown);
         assertEquals(1, thrown.getSuppressed().length);
@@ -2204,8 +2200,7 @@ public class HttpRequestTest extends TestBase {
 
         final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
 
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString()));
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString()));
 
         assertSame(failure, thrown);
         assertEquals(1, thrown.getSuppressed().length);
@@ -2375,8 +2370,8 @@ public class HttpRequestTest extends TestBase {
         final IllegalStateException failure = new IllegalStateException("synchronous push send failure");
         final AssertionError cleanupFailure = new AssertionError("push-handler cleanup failure");
         final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class),
-                any(HttpResponse.PushPromiseHandler.class))).thenThrow(failure);
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class), any(HttpResponse.PushPromiseHandler.class)))
+                .thenThrow(failure);
         doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
 
         final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
@@ -2399,24 +2394,21 @@ public class HttpRequestTest extends TestBase {
         final HttpRequest twoArgRequest = new HttpRequest(TEST_URL, null, null, twoArgBuilder, java.net.http.HttpRequest.newBuilder())
                 .closeHttpClientAfterExecution(true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
         verify(twoArgBuilder, never()).build();
 
         final HttpClient.Builder pushBuilder = mock(HttpClient.Builder.class);
         final HttpRequest pushRequest = new HttpRequest(TEST_URL, null, null, pushBuilder, java.net.http.HttpRequest.newBuilder())
                 .closeHttpClientAfterExecution(true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
+        assertThrows(IllegalArgumentException.class, () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
         verify(pushBuilder, never()).build();
 
         final HttpClient.Builder nullPushHandlerBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder,
-                java.net.http.HttpRequest.newBuilder()).closeHttpClientAfterExecution(true);
+        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
+        assertThrows(IllegalArgumentException.class, () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
         verify(nullPushHandlerBuilder, never()).build();
     }
 

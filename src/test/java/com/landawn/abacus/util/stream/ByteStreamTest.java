@@ -1819,7 +1819,6 @@ public class ByteStreamTest extends TestBase {
 
         assertThrows(IllegalArgumentException.class, () -> ByteStream.defer(null));
     }
- 
 
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {
@@ -2916,7 +2915,8 @@ public class ByteStreamTest extends TestBase {
 
     @Test
     public void testIterateNullOperator() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.iterate((byte) 0, (com.landawn.abacus.util.function.ByteUnaryOperator) null).limit(2).count());
+        assertThrows(IllegalArgumentException.class,
+                () -> ByteStream.iterate((byte) 0, (com.landawn.abacus.util.function.ByteUnaryOperator) null).limit(2).count());
     }
 
     @Test

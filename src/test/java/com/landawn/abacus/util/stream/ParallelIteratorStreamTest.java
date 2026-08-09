@@ -419,7 +419,10 @@ public class ParallelIteratorStreamTest extends TestBase {
 
     @Test
     public void testSlidingMap_BiFunction_SequentialFallback() {
-        List<Integer> result = Stream.of(1, 2, 3, 4).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).slidingMap(2, true, Integer::sum).toList();
+        List<Integer> result = Stream.of(1, 2, 3, 4)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .slidingMap(2, true, Integer::sum)
+                .toList();
 
         assertEquals(Arrays.asList(3, 7), result);
     }
@@ -770,14 +773,16 @@ public class ParallelIteratorStreamTest extends TestBase {
         {
             List<Integer> results = new ArrayList<>();
 
-            createStream(TEST_DATA).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build()).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+            createStream(TEST_DATA).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build())
+                    .forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
             assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
         }
         {
             List<Integer> results = new ArrayList<>();
 
-            createStream(TEST_DATA).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build()).forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
+            createStream(TEST_DATA).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build())
+                    .forEach(it -> N.toList(it * 2, it * 2), Fn.sc(results, (a, b) -> results.add(a)));
 
             assertHaveSameElements(N.cycle(TEST_DATA, 2), results);
 
@@ -885,21 +890,27 @@ public class ParallelIteratorStreamTest extends TestBase {
         {
             List<String> results = new ArrayList<>();
 
-            createStream(TEST_DATA).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build()).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            createStream(TEST_DATA).limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build())
+                    .forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
         }
         {
             List<String> results = new ArrayList<>();
 
-            createStream(TEST_DATA).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build()).forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            createStream(TEST_DATA).limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).build())
+                    .forEachPair(Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "2->3", "3->4", "4->5"), results);
         }
         {
             List<String> results = new ArrayList<>();
 
-            createStream(TEST_DATA).limit(5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build()).forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
+            createStream(TEST_DATA).limit(5)
+                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).build())
+                    .forEachPair(2, Fn.sc(results, (a, b) -> results.add(a + "->" + b)));
 
             assertHaveSameElements(N.toList("1->2", "3->4", "5->null"), results);
         }
@@ -1788,9 +1799,10 @@ public class ParallelIteratorStreamTest extends TestBase {
         // propagating it. The worker now catches Throwable so the error reaches the caller.
         final List<Integer> data = N.asList(1, 2, 3, 4, 5, 6, 7, 8);
 
-        assertThrows(RuntimeException.class, () -> Stream.of(data.iterator()).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).map(x -> {
-            throw new AssertionError("boom-" + x);
-        }).count());
+        assertThrows(RuntimeException.class,
+                () -> Stream.of(data.iterator()).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).map(x -> {
+                    throw new AssertionError("boom-" + x);
+                }).count());
     }
 
     @Test
@@ -1815,8 +1827,8 @@ public class ParallelIteratorStreamTest extends TestBase {
 
     @Test
     public void testCancelUncompletedThreadsIsPreserved() {
-        try (ParallelIteratorStream<Integer> source = new ParallelIteratorStream<>(Arrays.asList(1, 2, 3).iterator(), false, null, 4, SplitStrategy.ITERATOR, null,
-                true, null)) {
+        try (ParallelIteratorStream<Integer> source = new ParallelIteratorStream<>(Arrays.asList(1, 2, 3).iterator(), false, null, 4, SplitStrategy.ITERATOR,
+                null, true, null)) {
             assertTrue(source.cancelUncompletedThreads());
 
             try (Stream<Integer> mapped = source.map(Fn.identity())) {

@@ -1826,7 +1826,7 @@ public class FloatStreamTest extends TestBase {
     public void testDefer() {
         FloatStream stream = FloatStream.defer(() -> FloatStream.of(1.0f, 2.0f, 3.0f));
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, stream.toArray());
-    } 
+    }
 
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {

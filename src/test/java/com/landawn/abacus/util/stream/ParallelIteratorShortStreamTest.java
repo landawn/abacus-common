@@ -46,7 +46,9 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     private short[] smallArray;
 
     protected ShortStream createShortStream(short... elements) {
-        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return ShortStream.of(elements)
+                .map(e -> (short) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -104,7 +106,9 @@ public class ParallelIteratorShortStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private ShortStream createSingleThreadStream(short... elements) {
-        return ShortStream.of(elements).map(e -> (short) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
+        return ShortStream.of(elements)
+                .map(e -> (short) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test

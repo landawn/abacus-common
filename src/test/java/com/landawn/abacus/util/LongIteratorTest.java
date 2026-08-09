@@ -22,7 +22,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.LongStream;
 
 public class LongIteratorTest extends TestBase {
-  
 
     @Test
     public void testEmpty() {

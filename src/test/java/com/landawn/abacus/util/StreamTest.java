@@ -183,9 +183,9 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void test_saveEach() {
+    public void test_onEachSave() {
         final File file = new File("./test.txt");
-        Stream.range(0, 10).saveEach(file).count();
+        Stream.range(0, 10).onEachSave(file).count();
         assertEquals(Stream.range(0, 10).map(String::valueOf).toList(), IOUtil.readAllLines(file));
         IOUtil.deleteIfExists(file);
     }

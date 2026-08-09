@@ -160,7 +160,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> {@code sumInt()}, {@code sumLong()}, {@code sumDouble()}, {@code averageInt()},
- *       {@code averageLong()}, {@code averageDouble()}, {@code median()}, {@code kthLargest()}</li>
+ *       {@code averageLong()}, {@code averageDouble()}, {@code lowerMedian()}, {@code kthLargest()}</li>
  *   <li><b>Extremes:</b> {@code min()}, {@code max()}, {@code minBy()}, {@code maxBy()}, {@code minMax()}</li>
  *   <li><b>Type-Specific:</b> Specialized methods for int, long, double, BigInteger, BigDecimal</li>
  *   <li><b>Custom Extractors:</b> Support for {@code ToIntFunction}, {@code ToLongFunction}, {@code ToDoubleFunction}</li>
@@ -256,7 +256,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // notable => Nullable[1600.25]
  *
  * // Median
- * Nullable<Double> median = Iterables.median(salesData);         // Nullable[1350.0]
+ * Nullable<Double> median = Iterables.lowerMedian(salesData);    // Nullable[1350.0]
  * }</pre>
  *
  * <p><b>Usage Examples: Set and Collection Operations</b></p>
@@ -1905,21 +1905,21 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] oddArray = {1, 5, 2, 8, 3};
-     * Nullable<Integer> median1 = Iterables.median(oddArray);   // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.lowerMedian(oddArray);   // Nullable[3]
      *
      * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
-     * Nullable<Integer> median2 = Iterables.median(evenArray);   // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.lowerMedian(evenArray);   // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of the elements.
      * @param a the array of values to find the median of.
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
-     * @see N#median(Comparable...)
+     * @see N#lowerMedian(Comparable[])
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
      */
-    public static <T extends Comparable<? super T>> Nullable<T> median(final T[] a) {
-        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.median(a));
+    public static <T extends Comparable<? super T>> Nullable<T> lowerMedian(final T[] a) {
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.lowerMedian(a));
     }
 
     /**
@@ -1935,10 +1935,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] oddArray = {1, 5, 2, 8, 3};
-     * Nullable<Integer> median1 = Iterables.median(oddArray, Comparator.naturalOrder());   // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.lowerMedian(oddArray, Comparator.naturalOrder());   // Nullable[3]
      *
      * Integer[] evenArray = {1, 5, 2, 8, 3, 4};
-     * Nullable<Integer> median2 = Iterables.median(evenArray, Comparator.naturalOrder());   // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.lowerMedian(evenArray, Comparator.naturalOrder());   // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -1946,14 +1946,14 @@ public final class Iterables {
      * @param cmp the comparator to determine the order of the values.
      * @return a {@code Nullable} containing the median value if the array is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
-     * @see N#median(Object[], Comparator)
+     * @see N#lowerMedian(Object[], Comparator)
      * @see Median#of(Comparable[])
      * @see Median#of(Object[], Comparator)
      */
-    public static <T> Nullable<T> median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Nullable<T> lowerMedian(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
-        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.median(a, cmp));
+        return N.isEmpty(a) ? Nullable.empty() : Nullable.of(N.lowerMedian(a, cmp));
     }
 
     /**
@@ -1969,21 +1969,21 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
-     * Nullable<Integer> median1 = Iterables.median(oddList);   // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.lowerMedian(oddList);   // Nullable[3]
      *
      * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
-     * Nullable<Integer> median2 = Iterables.median(evenList);   // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.lowerMedian(evenList);   // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of the elements.
      * @param c the collection of values to find the median of.
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}.
-     * @see N#median(Collection)
+     * @see N#lowerMedian(Collection)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
      */
-    public static <T extends Comparable<? super T>> Nullable<T> median(final Collection<? extends T> c) {
-        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c));
+    public static <T extends Comparable<? super T>> Nullable<T> lowerMedian(final Collection<? extends T> c) {
+        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.lowerMedian(c));
     }
 
     /**
@@ -1999,10 +1999,10 @@ public final class Iterables {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> oddList = Arrays.asList(1, 5, 2, 8, 3);
-     * Nullable<Integer> median1 = Iterables.median(oddList, Comparator.naturalOrder());   // Nullable[3]
+     * Nullable<Integer> median1 = Iterables.lowerMedian(oddList, Comparator.naturalOrder());   // Nullable[3]
      *
      * List<Integer> evenList = Arrays.asList(1, 5, 2, 8, 3, 4);
-     * Nullable<Integer> median2 = Iterables.median(evenList, Comparator.naturalOrder());   // Nullable[3]
+     * Nullable<Integer> median2 = Iterables.lowerMedian(evenList, Comparator.naturalOrder());   // Nullable[3]
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -2010,14 +2010,14 @@ public final class Iterables {
      * @param cmp the comparator to determine the order of the values.
      * @return a {@code Nullable} containing the median value if the collection is not {@code null} or empty, otherwise an empty {@code Nullable}.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
-     * @see N#median(Collection, Comparator)
+     * @see N#lowerMedian(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, Comparator)
      */
-    public static <T> Nullable<T> median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> Nullable<T> lowerMedian(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
-        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.median(c, cmp));
+        return N.isEmpty(c) ? Nullable.empty() : Nullable.of(N.lowerMedian(c, cmp));
     }
 
     /**

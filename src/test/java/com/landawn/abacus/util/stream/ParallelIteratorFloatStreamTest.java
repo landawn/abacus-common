@@ -44,7 +44,9 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
     private FloatStream parallelStream;
 
     protected FloatStream createFloatStream(float... elements) {
-        return FloatStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return FloatStream.of(elements)
+                .map(e -> (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test

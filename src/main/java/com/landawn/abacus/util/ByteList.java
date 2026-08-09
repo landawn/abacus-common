@@ -91,7 +91,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * // Statistical operations
  * OptionalByte min = data.min();         // Find minimum value
  * OptionalByte max = data.max();         // Find maximum value
- * OptionalByte median = data.median();   // Calculate median
+ * OptionalByte median = data.lowerMedian();   // Calculate lower median
  *
  * // Set operations for data analysis
  * ByteList set1 = ByteList.of((byte)1, (byte)2, (byte)3);
@@ -1235,13 +1235,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.removeAt(5);                  // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code byte} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code byte} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public byte removeAt(final int index) {
         rangeCheck(index);
@@ -1264,11 +1264,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)10, (byte)20, (byte)30, (byte)40, (byte)50);
-     * list.removeAt(1, 3);   // Remove elements at positions 1 and 3
+     * list.removeAllAt(1, 3);   // Remove elements at positions 1 and 3
      * // list now contains: [10, 30, 50]
      * }</pre>
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code byte} value.</p>
      *
      * @param indices the indices of elements to remove. Can be {@code null} or empty.
@@ -1276,7 +1276,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2218,13 +2218,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)5, (byte)2, (byte)8, (byte)1, (byte)9);
-     * OptionalByte median = list.median();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalByte[5]
+     * OptionalByte median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalByte[5]
      * }</pre>
      *
      * @return an OptionalByte containing the median value if the list is non-empty, or an empty OptionalByte if the list is empty
      */
-    public OptionalByte median() {
-        return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, 0, size));
+    public OptionalByte lowerMedian() {
+        return size() == 0 ? OptionalByte.empty() : OptionalByte.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2237,7 +2237,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)5, (byte)2, (byte)8, (byte)1, (byte)9);
-     * OptionalByte median = list.median(1, 4);  // returns median of [2, 8, 1] = OptionalByte[2]
+     * OptionalByte median = list.lowerMedian(1, 4);  // returns median of [2, 8, 1] = OptionalByte[2]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2245,10 +2245,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return an OptionalByte containing the median value if the range is non-empty, or an empty OptionalByte if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalByte median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalByte lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalByte.empty() : OptionalByte.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2329,6 +2329,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @return an OptionalByte containing the first element if the list is non-empty, or an empty OptionalByte if the list is empty
+     * @see #getFirst()
      */
     public OptionalByte first() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[0]);
@@ -2347,6 +2348,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @return an OptionalByte containing the last element if the list is non-empty, or an empty OptionalByte if the list is empty
+     * @see #getLast()
      */
     public OptionalByte last() {
         return size() == 0 ? OptionalByte.empty() : OptionalByte.of(elementData[size() - 1]);
@@ -3140,6 +3142,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @return the first byte value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public byte getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -3164,6 +3168,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @return the last byte value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public byte getLast() {
         throwNoSuchElementExceptionIfEmpty();

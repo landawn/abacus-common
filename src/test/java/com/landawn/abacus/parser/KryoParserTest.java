@@ -670,8 +670,7 @@ public class KryoParserTest extends TestBase {
 
         parser.register(TestObject.class, new CustomSerializer(), occupiedId);
         parser.register(LateRegisteredObject.class, retainedSerializer, laterValidId);
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.register(LateRegisteredObject.class, new LateRegisteredObjectSerializer(), occupiedId));
+        assertThrows(IllegalArgumentException.class, () -> parser.register(LateRegisteredObject.class, new LateRegisteredObjectSerializer(), occupiedId));
 
         final Kryo kryo = parser.createKryo();
 

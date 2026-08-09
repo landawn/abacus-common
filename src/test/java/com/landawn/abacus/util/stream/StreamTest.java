@@ -6663,7 +6663,7 @@ public class StreamTest extends AbstractTest {
         List<Integer> result = deferred.toList();
         assertEquals(1, callCount.get());
         assertEquals(Arrays.asList(1, 2, 3), result);
-    } 
+    }
 
     @Test
     public void testDefer2() {
@@ -12139,8 +12139,7 @@ public class StreamTest extends AbstractTest {
         final List<Stream<Integer>> sources = Arrays.asList(Stream.of(1), Stream.of(2), Stream.of(3), Stream.of(4));
 
         assertThrows(IllegalArgumentException.class, () -> Stream.parallelMerge(sources, null, 2).toList());
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.merge(Stream.of(1), Stream.of(2), (BiFunction<Integer, Integer, MergeResult>) null).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(Stream.of(1), Stream.of(2), (BiFunction<Integer, Integer, MergeResult>) null).toList());
         assertThrows(IllegalArgumentException.class,
                 () -> Stream.merge(N.asList(1).iterator(), N.asList(2).iterator(), (BiFunction<Integer, Integer, MergeResult>) null).toList());
         assertThrows(IllegalArgumentException.class,
@@ -12161,8 +12160,7 @@ public class StreamTest extends AbstractTest {
 
         assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.of((byte) 1), ByteIterator.of((byte) 2), null).count());
         assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.of((byte) 1), ByteStream.of((byte) 2), null).count());
-        assertThrows(IllegalArgumentException.class,
-                () -> ByteStream.merge(N.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), null).count());
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(N.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), null).count());
     }
 
     @Test

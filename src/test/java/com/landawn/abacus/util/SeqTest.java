@@ -223,6 +223,7 @@ public class SeqTest extends AbstractTest {
         assertTrue(min.isPresent());
         assertEquals("apple", min.get());
     }
+
     @Test
     public void testDeferWithNullSupplier() throws Exception {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> defer(null));
@@ -10709,7 +10710,6 @@ public class SeqTest extends AbstractTest {
         assertFalse(transferCalled.get(), "Transfer function should not be called yet for deferred transformViaStream");
     }
 
-
     @Test
     public void testTransformViaStream_WithFilter() throws Exception {
         Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
@@ -10791,8 +10791,7 @@ public class SeqTest extends AbstractTest {
         assertThrows(Exception.class, () -> {
             result.toList();
         });
-    } 
- 
+    }
 
     @Test
     public void testTransformViaStreamImmediate() throws Exception {
@@ -10804,7 +10803,6 @@ public class SeqTest extends AbstractTest {
         List<String> result = transformed.toList();
         assertEquals(Arrays.asList("A", "B", "C"), result);
     }
-
 
     @Test
     public void test_sps() throws Exception {
@@ -12004,7 +12002,8 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
         // empty stream short-circuits: the null action is never invoked
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of().forEachUntil((Throwables.BiConsumer<Integer, MutableBoolean, Exception>) null));
     }
 
     @Test
@@ -12012,7 +12011,8 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
         // empty stream short-circuits: the null action is never invoked
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
     }
 
     @Test
@@ -12020,7 +12020,8 @@ public class SeqTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Seq.<Integer, Exception> of(1, 2, 3).forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
         // empty stream short-circuits: the null action is never invoked
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
     }
 
     @Test

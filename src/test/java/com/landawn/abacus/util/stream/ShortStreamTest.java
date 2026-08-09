@@ -1644,7 +1644,6 @@ public class ShortStreamTest extends TestBase {
         assertArrayEquals(new short[] { 1, 2, 3 }, stream.toArray());
         assertEquals(1, counter.get());
     }
- 
 
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {

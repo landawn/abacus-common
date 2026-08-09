@@ -58,12 +58,16 @@ public class TryTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.run(resource -> {
         }, (java.util.function.Consumer<Exception>) null));
         assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> tryInstance.call(command, (Predicate<Exception>) null, (java.util.function.Supplier<String>) () -> "default"));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (Predicate<Exception>) null, "default"));
 
         assertFalse(closeable.isClosed(), "argument validation happens before the managed resource is closed");

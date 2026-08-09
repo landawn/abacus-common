@@ -223,7 +223,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Mathematical operations
  * double avg = N.average(numbers);   // returns 2.857142857142857
  * int max = N.max(numbers);          // returns 5
- * int median = N.median(numbers);    // returns 3
+ * int median = N.lowerMedian(numbers);    // returns 3
  *
  * // Async operations with built-in executor
  * N.sleep(1);                                               // no exception thrown if not interrupted
@@ -19824,7 +19824,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #min(char[], int, int)
      * @see #max(char...)
-     * @see #median(char...)
+     * @see #lowerMedian(char...)
      */
     public static char min(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty"); //NOSONAR
@@ -20013,7 +20013,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #min(int[], int, int)
      * @see #max(int...)
-     * @see #median(int...)
+     * @see #lowerMedian(int...)
      */
     public static int min(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22120,7 +22120,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(char[], int, int)
      * @see #min(char...)
-     * @see #median(char...)
+     * @see #lowerMedian(char...)
      */
     public static char max(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22182,7 +22182,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(byte[], int, int)
      * @see #min(byte...)
-     * @see #median(byte...)
+     * @see #lowerMedian(byte...)
      */
     public static byte max(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22244,7 +22244,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(short[], int, int)
      * @see #min(short...)
-     * @see #median(short...)
+     * @see #lowerMedian(short...)
      */
     public static short max(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22306,7 +22306,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(int[], int, int)
      * @see #min(int...)
-     * @see #median(int...)
+     * @see #lowerMedian(int...)
      */
     public static int max(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22368,7 +22368,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(long[], int, int)
      * @see #min(long...)
-     * @see #median(long...)
+     * @see #lowerMedian(long...)
      */
     public static long max(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
@@ -22434,7 +22434,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(float[], int, int)
      * @see #min(float...)
-     * @see #median(float...)
+     * @see #lowerMedian(float...)
      * @see Math#max(float, float)
      * @see IEEE754rUtil#max(float[]) IEEE754rUtil.max(float[]), which skips NaN per IEEE 754r
      */
@@ -22510,7 +22510,7 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      * @see #max(double[], int, int)
      * @see #min(double...)
-     * @see #median(double...)
+     * @see #lowerMedian(double...)
      * @see Math#max(double, double)
      * @see IEEE754rUtil#max(double[]) IEEE754rUtil.max(double[]), which skips NaN per IEEE 754r
      */
@@ -23735,7 +23735,25 @@ public final class N extends CommonUtil {
      * @param b the second char value
      * @param c the third char value
      * @return the median of the three values
-     * @see #median(char...)
+     * @see #lowerMedian(char...)
+     * @see #min(char, char, char)
+     * @see #max(char, char, char)
+     */
+    /**
+     * Returns the median of three char values.
+     * The median is the middle value when sorted in ascending order.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * char median1 = N.median('a', 'm', 'z');   // returns 'm'
+     * char median2 = N.median('z', 'a', 'm');   // returns 'm'
+     * }</pre>
+     *
+     * @param a the first char value
+     * @param b the second char value
+     * @param c the third char value
+     * @return the median of the three values
+     * @see #lowerMedian(char...)
      * @see #min(char, char, char)
      * @see #max(char, char, char)
      */
@@ -23763,7 +23781,7 @@ public final class N extends CommonUtil {
      * @param b the second byte value
      * @param c the third byte value
      * @return the median of the three values
-     * @see #median(byte...)
+     * @see #lowerMedian(byte...)
      * @see #min(byte, byte, byte)
      * @see #max(byte, byte, byte)
      */
@@ -23791,7 +23809,7 @@ public final class N extends CommonUtil {
      * @param b the second short value
      * @param c the third short value
      * @return the median of the three values
-     * @see #median(short...)
+     * @see #lowerMedian(short...)
      * @see #min(short, short, short)
      * @see #max(short, short, short)
      */
@@ -23820,7 +23838,7 @@ public final class N extends CommonUtil {
      * @param b the second int value
      * @param c the third int value
      * @return the median of the three values
-     * @see #median(int...)
+     * @see #lowerMedian(int...)
      * @see #min(int, int, int)
      * @see #max(int, int, int)
      */
@@ -23848,7 +23866,7 @@ public final class N extends CommonUtil {
      * @param b the second long value
      * @param c the third long value
      * @return the median of the three values
-     * @see #median(long...)
+     * @see #lowerMedian(long...)
      * @see #min(long, long, long)
      * @see #max(long, long, long)
      */
@@ -23877,7 +23895,7 @@ public final class N extends CommonUtil {
      * @param b the second float value
      * @param c the third float value
      * @return the median of the three values
-     * @see #median(float...)
+     * @see #lowerMedian(float...)
      * @see #min(float, float, float)
      * @see #max(float, float, float)
      */
@@ -23910,7 +23928,7 @@ public final class N extends CommonUtil {
      * @param b the second double value
      * @param c the third double value
      * @return the median of the three values
-     * @see #median(double...)
+     * @see #lowerMedian(double...)
      * @see #min(double, double, double)
      * @see #max(double, double, double)
      */
@@ -23944,7 +23962,7 @@ public final class N extends CommonUtil {
      * @param b the second value
      * @param c the third value
      * @return the median of the three values; {@code null} if the median value is itself {@code null}
-     * @see #median(Comparable[])
+     * @see #lowerMedian(Comparable[])
      * @see #median(Object, Object, Object, Comparator)
      * @see #min(Comparable, Comparable, Comparable)
      * @see #max(Comparable, Comparable, Comparable)
@@ -23971,7 +23989,7 @@ public final class N extends CommonUtil {
      * @return the median of the three values; {@code null} if the median value is itself {@code null}
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      * @see #median(Comparable, Comparable, Comparable)
-     * @see #median(Object[], Comparator)
+     * @see #lowerMedian(Object[], Comparator)
      */
     @MayReturnNull
     public static <T> T median(final T a, final T b, final T c, Comparator<? super T> cmp) throws IllegalArgumentException {
@@ -24000,29 +24018,468 @@ public final class N extends CommonUtil {
     }
 
     /**
+     * Returns the conventional statistical median of the specified int array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median(10, 5, 20, 15);   // returns 12.5 (the mean of the two middle values 10 and 15)
+     *
+     * int[] numbers = {5, 30, 15, 8, 20};
+     * double median2 = N.median(numbers);   // returns 15.0
+     * }</pre>
+     *
+     * @param a the array or varargs of int values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(int[], int, int)
+     * @see #lowerMedian(int...)
+     * @see Median#of(int[])
+     */
+    public static double median(final int... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the int values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {5, 30, 15, 8, 20};
+     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+     *
+     * int[] evens = {500, 100, 300, 200};
+     * double evenMedian = N.median(evens, 0, 4);   // returns 250.0 (the mean of 200 and 300)
+     * }</pre>
+     *
+     * @param a the array of int values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(int...)
+     * @see #lowerMedian(int[], int, int)
+     * @see Median#of(int[], int, int)
+     */
+    public static double median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final int[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified byte array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median((byte) 10, (byte) 5, (byte) 20, (byte) 15);   // returns 12.5
+     *
+     * byte[] numbers = {5, 30, 15, 8, 20};
+     * double median2 = N.median(numbers);   // returns 15.0
+     * }</pre>
+     *
+     * @param a the array or varargs of byte values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(byte[], int, int)
+     * @see #lowerMedian(byte...)
+     * @see Median#of(byte[])
+     */
+    public static double median(final byte... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the byte values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * byte[] numbers = {5, 30, 15, 8, 20};
+     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+     * }</pre>
+     *
+     * @param a the array of byte values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(byte...)
+     * @see #lowerMedian(byte[], int, int)
+     * @see Median#of(byte[], int, int)
+     */
+    public static double median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final byte[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified short array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median((short) 10, (short) 5, (short) 20, (short) 15);   // returns 12.5
+     *
+     * short[] numbers = {50, 300, 150, 80, 200};
+     * double median2 = N.median(numbers);   // returns 150.0
+     * }</pre>
+     *
+     * @param a the array or varargs of short values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(short[], int, int)
+     * @see #lowerMedian(short...)
+     * @see Median#of(short[])
+     */
+    public static double median(final short... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the short values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * short[] numbers = {50, 300, 150, 80, 200};
+     * double median = N.median(numbers, 1, 4);   // returns 150.0 (from 300, 150, 80)
+     * }</pre>
+     *
+     * @param a the array of short values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(short...)
+     * @see #lowerMedian(short[], int, int)
+     * @see Median#of(short[], int, int)
+     */
+    public static double median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final short[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified long array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median(10L, 5L, 20L, 15L);   // returns 12.5
+     *
+     * long[] numbers = {500L, 3000L, 1500L, 800L, 2000L};
+     * double median2 = N.median(numbers);   // returns 1500.0
+     * }</pre>
+     *
+     * @param a the array or varargs of long values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(long[], int, int)
+     * @see #lowerMedian(long...)
+     * @see Median#of(long[])
+     */
+    public static double median(final long... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the long values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * long[] numbers = {500L, 3000L, 1500L, 800L, 2000L};
+     * double median = N.median(numbers, 1, 4);   // returns 1500.0 (from 3000, 1500, 800)
+     * }</pre>
+     *
+     * @param a the array of long values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(long...)
+     * @see #lowerMedian(long[], int, int)
+     * @see Median#of(long[], int, int)
+     */
+    public static double median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final long[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified float array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median(10.5f, 5.2f, 20.8f, 15.1f);   // returns 12.8 (the mean of 10.5 and 15.1)
+     *
+     * float[] numbers = {5.0f, 30.0f, 15.0f, 8.0f, 20.0f};
+     * double median2 = N.median(numbers);   // returns 15.0
+     * }</pre>
+     *
+     * @param a the array or varargs of float values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(float[], int, int)
+     * @see #lowerMedian(float...)
+     * @see Median#of(float[])
+     */
+    public static double median(final float... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the float values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * float[] numbers = {5.0f, 30.0f, 15.0f, 8.0f, 20.0f};
+     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+     * }</pre>
+     *
+     * @param a the array of float values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(float...)
+     * @see #lowerMedian(float[], int, int)
+     * @see Median#of(float[], int, int)
+     */
+    public static double median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final float[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified double array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median(10.5, 5.2, 20.8, 15.1);   // returns 12.8 (the mean of 10.5 and 15.1)
+     *
+     * double[] numbers = {5.0, 30.0, 15.0, 8.0, 20.0};
+     * double median2 = N.median(numbers);   // returns 15.0
+     * }</pre>
+     *
+     * @param a the array or varargs of double values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(double[], int, int)
+     * @see #lowerMedian(double...)
+     * @see Median#of(double[])
+     */
+    public static double median(final double... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the double values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double[] numbers = {5.0, 30.0, 15.0, 8.0, 20.0};
+     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+     * }</pre>
+     *
+     * @param a the array of double values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(double...)
+     * @see #lowerMedian(double[], int, int)
+     * @see Median#of(double[], int, int)
+     */
+    public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException("The specified array or range cannot be empty");
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return (a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final double[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return (tmp[middle - 1] + tmp[middle]) / 2d;
+        }
+    }
+
+    /**
      * Returns the median value in the specified char array or varargs.
      * The median is the middle value when sorted in ascending order.
      * For arrays with an even number of elements, returns the lower of the two middle elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char median1 = N.median('a', 'm', 'z', 'b');   // returns 'b' (the lower of the two middle values)
-     *
-     * char[] chars = {'x', 'a', 'p', 'z', 'm'};
-     * char median2 = N.median(chars);   // returns 'p'
+     * char median1 = N.lowerMedian('a', 'm', 'z');        // returns 'm' (middle of sorted {'a', 'm', 'z'})
+     * char median2 = N.lowerMedian('a', 'z', 'm', 'b');   // returns 'b' (lower of the two middle values 'b' and 'm')
      * }</pre>
      *
      * @param a the array or varargs of char values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(char[], int, int)
+     * @see #lowerMedian(char[], int, int)
      * @see #median(char, char, char)
      * @see Median#of(char[])
      */
-    public static char median(final char... a) throws IllegalArgumentException {
+    public static char lowerMedian(final char... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24033,7 +24490,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] chars = {'a', 'z', 'm', 'b', 'x'};
-     * char median = N.median(chars, 1, 4);   // returns 'm' (from 'z', 'm', 'b')
+     * char median1 = N.lowerMedian(chars, 1, 4);   // returns 'm' (middle of sorted {'b', 'm', 'z'})
+     * char median2 = N.lowerMedian(chars, 0, 4);   // returns 'b' (lower of the two middle values 'b' and 'm')
      * }</pre>
      *
      * @param a the array of char values, must not be {@code null} or empty
@@ -24042,10 +24500,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(char...)
+     * @see #lowerMedian(char...)
      * @see Median#of(char[], int, int)
      */
-    public static char median(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static char lowerMedian(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24072,23 +24530,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte median1 = N.median((byte) 10, (byte) 30, (byte) 20);   // returns 20
-     *
-     * byte[] numbers = {5, 30, 15, 8, 20};
-     * byte median2 = N.median(numbers);   // returns 15
+     * byte median1 = N.lowerMedian((byte) 10, (byte) 30, (byte) 20);           // returns 20 (middle of sorted {10, 20, 30})
+     * byte median2 = N.lowerMedian((byte) 10, (byte) 5, (byte) 20, (byte) 15); // returns 10 (lower of the two middle values 10 and 15)
      * }</pre>
      *
      * @param a the array or varargs of byte values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(byte[], int, int)
+     * @see #lowerMedian(byte[], int, int)
      * @see #median(byte, byte, byte)
      * @see Median#of(byte[])
      */
-    public static byte median(final byte... a) throws IllegalArgumentException {
+    public static byte lowerMedian(final byte... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24099,7 +24555,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] numbers = {5, 30, 15, 8, 20};
-     * byte median = N.median(numbers, 1, 4);   // returns 15 (from 30, 15, 8)
+     * byte median1 = N.lowerMedian(numbers, 1, 4);   // returns 15 (middle of sorted {8, 15, 30})
+     * byte median2 = N.lowerMedian(numbers, 0, 4);   // returns 8 (lower of the two middle values 8 and 15)
      * }</pre>
      *
      * @param a the array of byte values, must not be {@code null} or empty
@@ -24108,10 +24565,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(byte...)
+     * @see #lowerMedian(byte...)
      * @see Median#of(byte[], int, int)
      */
-    public static byte median(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static byte lowerMedian(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24138,23 +24595,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * short median1 = N.median((short) 100, (short) 300, (short) 200);   // returns 200
-     *
-     * short[] numbers = {50, 300, 150, 80, 200};
-     * short median2 = N.median(numbers);   // returns 150
+     * short median1 = N.lowerMedian((short) 100, (short) 300, (short) 200);             // returns 200 (middle of sorted {100, 200, 300})
+     * short median2 = N.lowerMedian((short) 100, (short) 50, (short) 200, (short) 150); // returns 100 (lower of the two middle values 100 and 150)
      * }</pre>
      *
      * @param a the array or varargs of short values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(short[], int, int)
+     * @see #lowerMedian(short[], int, int)
      * @see #median(short, short, short)
      * @see Median#of(short[])
      */
-    public static short median(final short... a) throws IllegalArgumentException {
+    public static short lowerMedian(final short... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24165,7 +24620,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] numbers = {50, 300, 150, 80, 200};
-     * short median = N.median(numbers, 1, 4);   // returns 150 (from 300, 150, 80)
+     * short median1 = N.lowerMedian(numbers, 1, 4);   // returns 150 (middle of sorted {80, 150, 300})
+     * short median2 = N.lowerMedian(numbers, 0, 4);   // returns 80 (lower of the two middle values 80 and 150)
      * }</pre>
      *
      * @param a the array of short values, must not be {@code null} or empty
@@ -24174,10 +24630,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(short...)
+     * @see #lowerMedian(short...)
      * @see Median#of(short[], int, int)
      */
-    public static short median(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static short lowerMedian(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24204,24 +24660,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int median1 = N.median(10, 30, 20);   // returns 20
-     * int median2 = N.median(1, 2);         // returns 1
-     *
-     * int[] numbers = {5, 30, 15, 8, 20};
-     * int median3 = N.median(numbers);   // returns 15
+     * int median1 = N.lowerMedian(10, 30, 20);       // returns 20 (middle of sorted {10, 20, 30})
+     * int median2 = N.lowerMedian(10, 5, 20, 15);    // returns 10 (lower of the two middle values 10 and 15)
      * }</pre>
      *
      * @param a the array or varargs of int values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(int[], int, int)
+     * @see #lowerMedian(int[], int, int)
      * @see #median(int, int, int)
      * @see Median#of(int[])
      */
-    public static int median(final int... a) throws IllegalArgumentException {
+    public static int lowerMedian(final int... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24232,7 +24685,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] numbers = {5, 30, 15, 8, 20};
-     * int median = N.median(numbers, 1, 4);   // returns 15 (from 30, 15, 8)
+     * int median1 = N.lowerMedian(numbers, 1, 4);   // returns 15 (middle of sorted {8, 15, 30})
+     * int median2 = N.lowerMedian(numbers, 0, 4);   // returns 8 (lower of the two middle values 8 and 15)
      * }</pre>
      *
      * @param a the array of int values, must not be {@code null} or empty
@@ -24241,10 +24695,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(int...)
+     * @see #lowerMedian(int...)
      * @see Median#of(int[], int, int)
      */
-    public static int median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static int lowerMedian(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24271,23 +24725,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * long median1 = N.median(1000L, 3000L, 2000L);   // returns 2000L
-     *
-     * long[] numbers = {500L, 3000L, 1500L, 800L, 2000L};
-     * long median2 = N.median(numbers);   // returns 1500L
+     * long median1 = N.lowerMedian(1000L, 3000L, 2000L);        // returns 2000L (middle of sorted {1000, 2000, 3000})
+     * long median2 = N.lowerMedian(1000L, 500L, 2000L, 1500L);  // returns 1000L (lower of the two middle values 1000 and 1500)
      * }</pre>
      *
      * @param a the array or varargs of long values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(long[], int, int)
+     * @see #lowerMedian(long[], int, int)
      * @see #median(long, long, long)
      * @see Median#of(long[])
      */
-    public static long median(final long... a) throws IllegalArgumentException {
+    public static long lowerMedian(final long... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24298,7 +24750,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] numbers = {500L, 3000L, 1500L, 800L, 2000L};
-     * long median = N.median(numbers, 1, 4);   // returns 1500L (from 3000, 1500, 800)
+     * long median1 = N.lowerMedian(numbers, 1, 4);   // returns 1500L (middle of sorted {800, 1500, 3000})
+     * long median2 = N.lowerMedian(numbers, 0, 4);   // returns 800L (lower of the two middle values 800 and 1500)
      * }</pre>
      *
      * @param a the array of long values, must not be {@code null} or empty
@@ -24307,10 +24760,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(long...)
+     * @see #lowerMedian(long...)
      * @see Median#of(long[], int, int)
      */
-    public static long median(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static long lowerMedian(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24340,23 +24793,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * float median1 = N.median(1.5f, 3.5f, 2.5f);   // returns 2.5f
-     *
-     * float[] numbers = {0.5f, 3.0f, 1.5f, 0.8f, 2.0f};
-     * float median2 = N.median(numbers);   // returns 1.5f
+     * float median1 = N.lowerMedian(1.5f, 3.5f, 2.5f);         // returns 2.5f (middle of sorted {1.5, 2.5, 3.5})
+     * float median2 = N.lowerMedian(1.5f, 0.5f, 3.5f, 2.5f);   // returns 1.5f (lower of the two middle values 1.5 and 2.5)
      * }</pre>
      *
      * @param a the array or varargs of float values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(float[], int, int)
+     * @see #lowerMedian(float[], int, int)
      * @see #median(float, float, float)
      * @see Median#of(float[])
      */
-    public static float median(final float... a) throws IllegalArgumentException {
+    public static float lowerMedian(final float... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24370,7 +24821,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] numbers = {0.5f, 3.0f, 1.5f, 0.8f, 2.0f};
-     * float median = N.median(numbers, 1, 4);   // returns 1.5f (from 3.0, 1.5, 0.8)
+     * float median1 = N.lowerMedian(numbers, 1, 4);   // returns 1.5f (middle of sorted {0.8, 1.5, 3.0})
+     * float median2 = N.lowerMedian(numbers, 0, 4);   // returns 0.8f (lower of the two middle values 0.8 and 1.5)
      * }</pre>
      *
      * @param a the array of float values, must not be {@code null} or empty
@@ -24379,10 +24831,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(float...)
+     * @see #lowerMedian(float...)
      * @see Median#of(float[], int, int)
      */
-    public static float median(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static float lowerMedian(final float[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24412,23 +24864,21 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double median1 = N.median(1.5, 3.5, 2.5);   // returns 2.5
-     *
-     * double[] numbers = {0.5, 3.0, 1.5, 0.8, 2.0};
-     * double median2 = N.median(numbers);   // returns 1.5
+     * double median1 = N.lowerMedian(1.5, 3.5, 2.5);         // returns 2.5 (middle of sorted {1.5, 2.5, 3.5})
+     * double median2 = N.lowerMedian(1.5, 0.5, 3.5, 2.5);    // returns 1.5 (lower of the two middle values 1.5 and 2.5)
      * }</pre>
      *
      * @param a the array or varargs of double values, must not be {@code null} or empty
      * @return the median value in the array
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(double[], int, int)
+     * @see #lowerMedian(double[], int, int)
      * @see #median(double, double, double)
      * @see Median#of(double[])
      */
-    public static double median(final double... a) throws IllegalArgumentException {
+    public static double lowerMedian(final double... a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24442,7 +24892,8 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] numbers = {0.5, 3.0, 1.5, 0.8, 2.0};
-     * double median = N.median(numbers, 1, 4);   // returns 1.5 (from 3.0, 1.5, 0.8)
+     * double median1 = N.lowerMedian(numbers, 1, 4);   // returns 1.5 (middle of sorted {0.8, 1.5, 3.0})
+     * double median2 = N.lowerMedian(numbers, 0, 4);   // returns 0.8 (lower of the two middle values 0.8 and 1.5)
      * }</pre>
      *
      * @param a the array of double values, must not be {@code null} or empty
@@ -24451,10 +24902,10 @@ public final class N extends CommonUtil {
      * @return the median value within the specified range
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(double...)
+     * @see #lowerMedian(double...)
      * @see Median#of(double[], int, int)
      */
-    public static double median(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static double lowerMedian(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
@@ -24483,23 +24934,23 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.median(new Integer[] {5, 2, 8, 1, 9});   // returns 5 (middle of sorted {1,2,5,8,9})
-     * N.median(new Integer[] {5, 2, 8, 1});      // returns 2 (lower of two middles of sorted {1,2,5,8})
-     * N.median(new Integer[] {});                // throws IllegalArgumentException (empty array)
+     * N.lowerMedian(new Integer[] {5, 2, 8, 1, 9});   // returns 5 (middle of sorted {1,2,5,8,9})
+     * N.lowerMedian(new Integer[] {5, 2, 8, 1});      // returns 2 (lower of two middles of sorted {1,2,5,8})
+     * N.lowerMedian(new Integer[] {});                // throws IllegalArgumentException (empty array)
      * }</pre>
      *
      * @param <T> the type of elements in the input array
      * @param a the array of values to find the median of
      * @return the median in the specified array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty.
-     * @see #median(int[])
+     * @see #lowerMedian(int[])
      * @see Median#of(Comparable[])
      */
     @MayReturnNull
-    public static <T extends Comparable<? super T>> T median(final T[] a) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> T lowerMedian(final T[] a) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
 
-        return median(a, 0, a.length);
+        return lowerMedian(a, 0, a.length);
     }
 
     /**
@@ -24512,9 +24963,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] a = {5, 2, 8, 1, 9};
-     * N.median(a, 1, 4);   // returns 2 (middle of sorted {1,2,8} from indices 1..3)
-     * N.median(a, 0, 5);   // returns 5 (middle of sorted {1,2,5,8,9})
-     * N.median(a, 1, 1);   // throws IllegalArgumentException (empty range)
+     * N.lowerMedian(a, 1, 4);   // returns 2 (middle of sorted {1, 2, 8}; odd count)
+     * N.lowerMedian(a, 3, 5);   // returns 1 (lower of the two middle values 1 and 9; even count)
+     * N.lowerMedian(a, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -24524,11 +24975,11 @@ public final class N extends CommonUtil {
      * @return the median within the specified range in the input array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
-     * @see #median(int[])
+     * @see #lowerMedian(int[])
      * @see Median#of(Comparable[], int, int)
      */
     @MayReturnNull
-    public static <T extends Comparable<? super T>> T median(final T[] a, final int fromIndex, final int toIndex)
+    public static <T extends Comparable<? super T>> T lowerMedian(final T[] a, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
@@ -24536,7 +24987,7 @@ public final class N extends CommonUtil {
             throw new IllegalArgumentException("The specified array or range cannot be empty");
         }
 
-        return (T) median(a, fromIndex, toIndex, NATURAL_COMPARATOR);
+        return (T) lowerMedian(a, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -24549,9 +25000,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] a = {"zebra", "apple", "mango"};
-     * N.median(a, Comparator.naturalOrder());                 // returns "mango" (middle of sorted {apple, mango, zebra})
-     * N.median(a, Comparator.reverseOrder());                 // returns "mango" (still the middle element)
-     * N.median(new String[] {}, Comparator.naturalOrder());   // throws IllegalArgumentException (empty array)
+     * N.lowerMedian(a, Comparator.naturalOrder());                 // returns "mango" (middle of sorted {apple, mango, zebra}; odd count)
+     * N.lowerMedian(new String[] {"zebra", "apple", "mango", "kiwi"}, Comparator.naturalOrder());   // returns "kiwi" (lower of the two middle values "kiwi" and "mango"; even count)
+     * N.lowerMedian(new String[] {}, Comparator.naturalOrder());   // throws IllegalArgumentException (empty array)
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -24559,19 +25010,19 @@ public final class N extends CommonUtil {
      * @param cmp the comparator to determine the order of the values
      * @return the median in the specified array; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the array is {@code null} or empty, or if {@code cmp} is {@code null}.
-     * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
+     * @see #lowerMedian(int[])
+     * @see Iterables#lowerMedian(Collection, Comparator)
      * @see Median#of(Comparable[])
      * @see Median#of(Comparable[], int, int)
      * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
     @MayReturnNull
-    public static <T> T median(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T lowerMedian(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, "The specified array cannot be null or empty");
         N.checkArgNotNull(cmp, cs.cmp);
 
-        return median(a, 0, a.length, cmp);
+        return lowerMedian(a, 0, a.length, cmp);
     }
 
     /**
@@ -24584,9 +25035,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] a = {"zebra", "apple", "mango", "kiwi"};
-     * N.median(a, 1, 4, Comparator.naturalOrder());   // returns "kiwi" (middle of sorted {apple, kiwi, mango})
-     * N.median(a, 0, 4, Comparator.naturalOrder());   // returns "kiwi" (lower of two middles of {apple, kiwi, mango, zebra})
-     * N.median(a, 1, 1, Comparator.naturalOrder());   // throws IllegalArgumentException (empty range)
+     * N.lowerMedian(a, 1, 4, Comparator.naturalOrder());   // returns "kiwi" (middle of sorted {apple, kiwi, mango}; odd count)
+     * N.lowerMedian(a, 0, 2, Comparator.naturalOrder());   // returns "apple" (lower of the two middle values "apple" and "zebra"; even count)
+     * N.lowerMedian(a, 1, 1, Comparator.naturalOrder());   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -24598,14 +25049,14 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the specified array or range is {@code null} or empty, or if {@code cmp} is
      *         {@code null}.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
-     * @see #median(int[])
+     * @see #lowerMedian(int[])
      * @see Median#of(Comparable[])
      * @see Median#of(Comparable[], int, int)
      * @see Median#of(Object[], Comparator)
      * @see Median#of(Object[], int, int, Comparator)
      */
     @MayReturnNull
-    public static <T> T median(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+    public static <T> T lowerMedian(final T[] a, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a));
         N.checkArgNotNull(cmp, cs.cmp);
@@ -24619,7 +25070,7 @@ public final class N extends CommonUtil {
         final T ret = kthLargest(a, fromIndex, toIndex, len / 2 + 1, cmp);
         final T element = a[toIndex - (len / 2 + 1)];
 
-        // fix for N.median(["ant", "bee", "tiger"], Comparator.comparing(String::length)));
+        // fix for N.lowerMedian(["ant", "bee", "tiger"], Comparator.comparing(String::length)));
         if (element != ret && cmp.compare(element, ret) == 0) {
             return element;
         } else {
@@ -24636,26 +25087,26 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * N.median(Arrays.asList(5, 2, 8, 1, 9));   // returns 5 (middle of sorted {1,2,5,8,9})
-     * N.median(Arrays.asList(5, 2, 8, 1));      // returns 2 (lower of two middles of sorted {1,2,5,8})
-     * N.median(N.<Integer> emptyList());        // throws IllegalArgumentException (empty collection)
+     * N.lowerMedian(Arrays.asList(5, 2, 8, 1, 9));   // returns 5 (middle of sorted {1,2,5,8,9})
+     * N.lowerMedian(Arrays.asList(5, 2, 8, 1));      // returns 2 (lower of two middles of sorted {1,2,5,8})
+     * N.lowerMedian(N.<Integer> emptyList());        // throws IllegalArgumentException (empty collection)
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
      * @param c the collection of values to find the median of
      * @return the median in the specified collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null} or empty.
-     * @see #median(int[])
+     * @see #lowerMedian(int[])
      * @see Median#of(Collection)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
     @MayReturnNull
-    public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c) throws IllegalArgumentException {
+    public static <T extends Comparable<? super T>> T lowerMedian(final Collection<? extends T> c) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
 
-        return median(c, 0, c.size());
+        return lowerMedian(c, 0, c.size());
     }
 
     /**
@@ -24668,9 +25119,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> c = Arrays.asList(5, 2, 8, 1, 9);
-     * N.median(c, 1, 4);   // returns 2 (middle of sorted {1,2,8} from indices 1..3)
-     * N.median(c, 0, 5);   // returns 5 (middle of sorted {1,2,5,8,9})
-     * N.median(c, 1, 1);   // throws IllegalArgumentException (empty range)
+     * N.lowerMedian(c, 1, 4);   // returns 2 (middle of sorted {1, 2, 8}; odd count)
+     * N.lowerMedian(c, 3, 5);   // returns 1 (lower of the two middle values 1 and 9; even count)
+     * N.lowerMedian(c, 1, 1);   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -24680,16 +25131,16 @@ public final class N extends CommonUtil {
      * @return the median within the specified range in the input collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty.
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
-     * @see #median(int[])
+     * @see #lowerMedian(int[])
      * @see Median#of(Collection)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
     @MayReturnNull
-    public static <T extends Comparable<? super T>> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex)
+    public static <T extends Comparable<? super T>> T lowerMedian(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        return (T) median(c, fromIndex, toIndex, NATURAL_COMPARATOR);
+        return (T) lowerMedian(c, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
     /**
@@ -24702,8 +25153,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> c = Arrays.asList("zebra", "apple", "mango");
-     * N.median(c, Comparator.naturalOrder());                        // returns "mango" (middle of sorted {apple, mango, zebra})
-     * N.median(N.<String> emptyList(), Comparator.naturalOrder());   // throws IllegalArgumentException (empty collection)
+     * N.lowerMedian(c, Comparator.naturalOrder());                        // returns "mango" (middle of sorted {apple, mango, zebra}; odd count)
+     * N.lowerMedian(Arrays.asList("zebra", "apple", "mango", "kiwi"), Comparator.naturalOrder());   // returns "kiwi" (lower of the two middle values "kiwi" and "mango"; even count)
+     * N.lowerMedian(N.<String> emptyList(), Comparator.naturalOrder());   // throws IllegalArgumentException (empty collection)
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -24711,19 +25163,19 @@ public final class N extends CommonUtil {
      * @param cmp the comparator to determine the order of the values
      * @return the median in the specified collection; {@code null} if the median element is itself {@code null}
      * @throws IllegalArgumentException if the collection is {@code null} or empty, or if {@code cmp} is {@code null}.
-     * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
+     * @see #lowerMedian(int[])
+     * @see Iterables#lowerMedian(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
     @MayReturnNull
-    public static <T> T median(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
+    public static <T> T lowerMedian(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(c, "The specified collection cannot be null or empty");
         N.checkArgNotNull(cmp, cs.cmp);
 
-        return median(c, 0, c.size(), cmp);
+        return lowerMedian(c, 0, c.size(), cmp);
     }
 
     /**
@@ -24736,9 +25188,9 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> c = Arrays.asList("zebra", "apple", "mango", "kiwi");
-     * N.median(c, 1, 4, Comparator.naturalOrder());   // returns "kiwi" (middle of sorted {apple, kiwi, mango})
-     * N.median(c, 0, 4, Comparator.naturalOrder());   // returns "kiwi" (lower of two middles of {apple, kiwi, mango, zebra})
-     * N.median(c, 1, 1, Comparator.naturalOrder());   // throws IllegalArgumentException (empty range)
+     * N.lowerMedian(c, 1, 4, Comparator.naturalOrder());   // returns "kiwi" (middle of sorted {apple, kiwi, mango}; odd count)
+     * N.lowerMedian(c, 0, 2, Comparator.naturalOrder());   // returns "apple" (lower of the two middle values "apple" and "zebra"; even count)
+     * N.lowerMedian(c, 1, 1, Comparator.naturalOrder());   // throws IllegalArgumentException (empty range)
      * }</pre>
      *
      * @param <T> the type of elements in the input collection
@@ -24750,15 +25202,15 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty, or if
      *         {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if the range is out of the collection bounds
-     * @see #median(int[])
-     * @see Iterables#median(Collection, Comparator)
+     * @see #lowerMedian(int[])
+     * @see Iterables#lowerMedian(Collection, Comparator)
      * @see Median#of(Collection)
      * @see Median#of(Collection, int, int)
      * @see Median#of(Collection, Comparator)
      * @see Median#of(Collection, int, int, Comparator)
      */
     @MayReturnNull
-    public static <T> T median(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
+    public static <T> T lowerMedian(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, size(c));
         N.checkArgNotNull(cmp, cs.cmp);
@@ -24771,7 +25223,7 @@ public final class N extends CommonUtil {
 
         final T ret = kthLargest(c, fromIndex, toIndex, len / 2 + 1, cmp);
         final T element = N.getElement(c, toIndex - (len / 2 + 1));
-        // fix for N.median(("ant", "bee", "tiger"), Comparator.comparing(String::length)));
+        // fix for N.lowerMedian(("ant", "bee", "tiger"), Comparator.comparing(String::length)));
         if (element != ret && cmp.compare(element, ret) == 0) {
             return element;
         } else {

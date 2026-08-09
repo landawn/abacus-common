@@ -1221,7 +1221,10 @@ public class ParallelArrayIntStreamTest extends TestBase {
 
     @Test
     public void testZipWithBinaryDefaults_SequentialFallback() {
-        List<Integer> result = IntStream.of(1, 2, 3).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).zipWith(IntStream.of(10), 0, -1, Integer::sum).toList();
+        List<Integer> result = IntStream.of(1, 2, 3)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
+                .zipWith(IntStream.of(10), 0, -1, Integer::sum)
+                .toList();
 
         assertEquals(Arrays.asList(11, 1, 2), result);
     }

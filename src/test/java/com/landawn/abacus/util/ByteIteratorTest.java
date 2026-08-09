@@ -21,7 +21,6 @@ import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
 public class ByteIteratorTest extends TestBase {
-  
 
     // =================================================
     // empty()

@@ -11,7 +11,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.Stream;
 
 public class BooleanIteratorTest extends TestBase {
-  
 
     @Test
     public void testEmpty() {

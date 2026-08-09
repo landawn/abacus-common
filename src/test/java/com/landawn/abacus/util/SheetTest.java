@@ -6214,10 +6214,8 @@ public class SheetTest extends AbstractTest {
         // had no data yet, contradicting the documented IllegalArgumentException
         final Sheet<String, String, Integer> sheet = new Sheet<>(N.asList("r1"), N.asList("c1"));
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> sheet.sortRowsByColumnValues("missing", Comparator.naturalOrder()));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> sheet.sortColumnsByRowValues("missing", Comparator.naturalOrder()));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortRowsByColumnValues("missing", Comparator.naturalOrder()));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> sheet.sortColumnsByRowValues("missing", Comparator.naturalOrder()));
 
         // valid keys remain a harmless no-op on an uninitialized sheet
         sheet.sortRowsByColumnValues("c1", Comparator.naturalOrder());

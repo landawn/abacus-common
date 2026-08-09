@@ -4264,14 +4264,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     private static final Function TO_LINE_OF_STRING = N::stringOf;
 
     @Override
-    public Stream<T> saveEach(final File output) {
+    public Stream<T> onEachSave(final File output) {
         assertNotClosed();
 
-        return saveEach(TO_LINE_OF_STRING, output);
+        return onEachSave(TO_LINE_OF_STRING, output);
     }
 
     @Override
-    public Stream<T> saveEach(final Function<? super T, String> toLine, final File output) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> onEachSave(final Function<? super T, String> toLine, final File output) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(toLine, cs.toLine);
@@ -4336,7 +4336,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final Function<? super T, String> toLine, final OutputStream output) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> onEachSave(final Function<? super T, String> toLine, final OutputStream output) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(toLine, cs.toLine);
@@ -4393,7 +4393,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final Function<? super T, String> toLine, final Writer output) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> onEachSave(final Function<? super T, String> toLine, final Writer output) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(toLine, cs.toLine);
@@ -4454,7 +4454,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
+    public Stream<T> onEachSave(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
             throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
@@ -4520,7 +4520,7 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
+    public Stream<T> onEachSave(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
             throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
@@ -4582,17 +4582,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    public Stream<T> onEachSave(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(stmtSetter, cs.stmtSetter);
 
-        return saveEach(stmt, 1, 0, stmtSetter);
+        return onEachSave(stmt, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> saveEach(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
@@ -4667,17 +4667,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final Connection conn, final String insertSQL,
+    public Stream<T> onEachSave(final Connection conn, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(stmtSetter, cs.stmtSetter);
 
-        return saveEach(conn, insertSQL, 1, 0, stmtSetter);
+        return onEachSave(conn, insertSQL, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> saveEach(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
@@ -4773,17 +4773,17 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> saveEach(final javax.sql.DataSource ds, final String insertSQL,
+    public Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalArgumentException, IllegalStateException {
         assertNotClosed();
 
         checkArgNotNull(stmtSetter, cs.stmtSetter);
 
-        return saveEach(ds, insertSQL, 1, 0, stmtSetter);
+        return onEachSave(ds, insertSQL, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> saveEach(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 

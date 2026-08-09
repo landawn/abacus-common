@@ -44,7 +44,9 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     private LongStream parallelStream;
 
     protected LongStream createLongStream(long... elements) {
-        return LongStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return LongStream.of(elements)
+                .map(e -> (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test

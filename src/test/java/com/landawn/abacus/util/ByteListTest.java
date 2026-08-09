@@ -37,7 +37,8 @@ public class ByteListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ByteConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ByteConsumer) null));
     }
 
     @Test
@@ -319,7 +320,7 @@ public class ByteListTest extends TestBase {
         list.removeRange(1, 3);
         assertArrayEquals(new byte[] { 1, 5, 6 }, list.toArray());
 
-        list.removeAt(0, 2);
+        list.removeAllAt(0, 2);
         assertArrayEquals(new byte[] { 5 }, list.toArray());
     }
 
@@ -415,12 +416,12 @@ public class ByteListTest extends TestBase {
         ByteList list = ByteList.of((byte) 9, (byte) 2, (byte) 7, (byte) 5, (byte) 1);
         assertEquals(OptionalByte.of((byte) 1), list.min());
         assertEquals(OptionalByte.of((byte) 9), list.max());
-        assertEquals(OptionalByte.of((byte) 5), list.median());
+        assertEquals(OptionalByte.of((byte) 5), list.lowerMedian());
 
         ByteList emptyList = new ByteList();
         assertEquals(OptionalByte.empty(), emptyList.min());
         assertEquals(OptionalByte.empty(), emptyList.max());
-        assertEquals(OptionalByte.empty(), emptyList.median());
+        assertEquals(OptionalByte.empty(), emptyList.lowerMedian());
     }
 
     @Test
@@ -1206,7 +1207,7 @@ public class ByteListTest extends TestBase {
     @Test
     public void test_removeAt() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertArrayEquals(new byte[] { 10, 30, 50 }, list.toArray());
     }
@@ -1214,7 +1215,7 @@ public class ByteListTest extends TestBase {
     @Test
     public void test_removeAt_empty() {
         ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
@@ -1229,14 +1230,14 @@ public class ByteListTest extends TestBase {
     @Test
     public void testRemoveAtMultipleIndices() {
         list.addAll(new byte[] { 10, 20, 30, 40, 50 });
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
     }
 
     @Test
     public void testRemoveAt_MultipleIndices() {
         ByteList bl = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50);
-        bl.removeAt(1, 3);
+        bl.removeAllAt(1, 3);
         assertEquals(3, bl.size());
         assertEquals((byte) 10, bl.get(0));
         assertEquals((byte) 30, bl.get(1));
@@ -1421,7 +1422,8 @@ public class ByteListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.ByteUnaryOperator) null));
 
         ByteList empty = new ByteList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.ByteUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.ByteUnaryOperator) null));
     }
 
     @Test
@@ -2067,12 +2069,12 @@ public class ByteListTest extends TestBase {
     public void testMinMaxMedian() {
         assertFalse(list.min().isPresent());
         assertFalse(list.max().isPresent());
-        assertFalse(list.median().isPresent());
+        assertFalse(list.lowerMedian().isPresent());
 
         list.add((byte) 5);
         assertEquals(OptionalByte.of((byte) 5), list.min());
         assertEquals(OptionalByte.of((byte) 5), list.max());
-        assertEquals(OptionalByte.of((byte) 5), list.median());
+        assertEquals(OptionalByte.of((byte) 5), list.lowerMedian());
 
         list.clear();
         list.add((byte) 3);
@@ -2083,15 +2085,15 @@ public class ByteListTest extends TestBase {
 
         assertEquals(OptionalByte.of((byte) 1), list.min());
         assertEquals(OptionalByte.of((byte) 5), list.max());
-        assertEquals(OptionalByte.of((byte) 3), list.median());
+        assertEquals(OptionalByte.of((byte) 3), list.lowerMedian());
 
         assertEquals(OptionalByte.of((byte) 1), list.min(1, 4));
         assertEquals(OptionalByte.of((byte) 4), list.max(1, 4));
-        assertEquals(OptionalByte.of((byte) 1), list.median(1, 4));
+        assertEquals(OptionalByte.of((byte) 1), list.lowerMedian(1, 4));
 
         assertFalse(list.min(2, 2).isPresent());
         assertFalse(list.max(2, 2).isPresent());
-        assertFalse(list.median(2, 2).isPresent());
+        assertFalse(list.lowerMedian(2, 2).isPresent());
     }
 
     @Test
@@ -2160,9 +2162,9 @@ public class ByteListTest extends TestBase {
     }
 
     @Test
-    public void test_median() {
+    public void test_lowerMedian() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        OptionalByte median = list.median();
+        OptionalByte median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(3, median.getAsByte());
     }
@@ -2170,14 +2172,14 @@ public class ByteListTest extends TestBase {
     @Test
     public void test_median_withRange() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        OptionalByte median = list.median(0, 3);
+        OptionalByte median = list.lowerMedian(0, 3);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void testMedian() {
         ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        OptionalByte median = list.median();
+        OptionalByte median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals((byte) 3, median.getAsByte());
     }
@@ -2185,20 +2187,20 @@ public class ByteListTest extends TestBase {
     @Test
     public void testMedianRange() {
         ByteList list = ByteList.of((byte) 1, (byte) 5, (byte) 3, (byte) 4, (byte) 2);
-        OptionalByte median = list.median(0, 3);
+        OptionalByte median = list.lowerMedian(0, 3);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void test_median_empty() {
         ByteList list = new ByteList();
-        OptionalByte median = list.median();
+        OptionalByte median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
     @Test
     public void testMedianEmpty() {
-        assertFalse(list.median().isPresent());
+        assertFalse(list.lowerMedian().isPresent());
     }
 
     @Test
@@ -3729,9 +3731,12 @@ public class ByteListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final ByteList empty = new ByteList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.BytePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.BytePredicate) null, (byte) 0));
 
         final ByteList nonEmpty = ByteList.of((byte) 1, (byte) 2);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ByteConsumer) null));

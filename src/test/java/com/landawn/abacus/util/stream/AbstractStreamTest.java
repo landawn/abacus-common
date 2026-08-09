@@ -1123,8 +1123,7 @@ public class AbstractStreamTest extends TestBase {
         assertSplitAtKeepsIteratorSourceOpen(source -> source.splitAt(value -> value == 3));
     }
 
-    private static void assertSplitAtKeepsIteratorSourceOpen(
-            final java.util.function.Function<Stream<Integer>, Stream<Stream<Integer>>> splitter) {
+    private static void assertSplitAtKeepsIteratorSourceOpen(final java.util.function.Function<Stream<Integer>, Stream<Stream<Integer>>> splitter) {
         final AtomicInteger closeCount = new AtomicInteger();
         final Stream<Integer> source = Stream.of(Arrays.asList(1, 2, 3, 4).iterator()).onClose(closeCount::incrementAndGet);
         final List<Stream<Integer>> parts = splitter.apply(source).toList();
@@ -3315,7 +3314,7 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void test_saveEach_withStmtSetter() throws SQLException {
+    public void test_onEachSave_withStmtSetter() throws SQLException {
         PreparedStatement stmtMock = mock(PreparedStatement.class);
         final AtomicInteger counter = new AtomicInteger(0);
 
@@ -3324,7 +3323,7 @@ public class AbstractStreamTest extends TestBase {
             return null;
         }).when(stmtMock).addBatch();
 
-        Stream.of("a", "b", "c").saveEach(stmtMock, 2, 0, (val, ps) -> ps.setString(1, val)).count();
+        Stream.of("a", "b", "c").onEachSave(stmtMock, 2, 0, (val, ps) -> ps.setString(1, val)).count();
 
         verify(stmtMock, times(3)).setString(anyInt(), anyString());
         verify(stmtMock, times(3)).addBatch();
@@ -3333,12 +3332,12 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void test_saveEach_withConnection() throws SQLException {
+    public void test_onEachSave_withConnection() throws SQLException {
         Connection connMock = mock(Connection.class);
         PreparedStatement stmtMock = mock(PreparedStatement.class);
         when(connMock.prepareStatement(anyString())).thenReturn(stmtMock);
 
-        Stream.of("a", "b").saveEach(connMock, "INSERT INTO foo VALUES(?)", (val, ps) -> ps.setString(1, val)).count();
+        Stream.of("a", "b").onEachSave(connMock, "INSERT INTO foo VALUES(?)", (val, ps) -> ps.setString(1, val)).count();
 
         verify(connMock, times(1)).prepareStatement("INSERT INTO foo VALUES(?)");
         verify(stmtMock, times(2)).setString(anyInt(), anyString());
@@ -3347,22 +3346,22 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testSaveEachToFile() throws IOException {
+    public void testonEachSaveToFile() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
 
         stringStream = createStream("line1", "line2", "line3");
-        stringStream.saveEach(tempFile).toList();
+        stringStream.onEachSave(tempFile).toList();
 
         List<String> lines = Files.readAllLines(tempFile);
         assertEquals(Arrays.asList("line1", "line2", "line3"), lines);
     }
 
     @Test
-    public void testSaveEachToOutputStream() throws IOException {
+    public void testonEachSaveToOutputStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         stringStream = createStream("line1", "line2", "line3");
-        stringStream.saveEach(Fn.identity(), baos).toList();
+        stringStream.onEachSave(Fn.identity(), baos).toList();
 
         String result = baos.toString();
         assertTrue(result.contains("line1"));
@@ -3371,10 +3370,10 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testSaveEachToWriter() throws IOException {
+    public void testonEachSaveToWriter() throws IOException {
         StringWriter writer = new StringWriter();
         stringStream = createStream("line1", "line2", "line3");
-        stringStream.saveEach(Fn.identity(), writer).toList();
+        stringStream.onEachSave(Fn.identity(), writer).toList();
 
         String result = writer.toString();
         assertTrue(result.contains("line1"));
@@ -3383,42 +3382,42 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testSaveEachWithBiConsumer() throws IOException {
+    public void testonEachSaveWithBiConsumer() throws IOException {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
 
         stringStream = createStream("line1", "line2", "line3");
-        stringStream.saveEach((s, writer) -> writer.write(s.toUpperCase()), tempFile).toList();
+        stringStream.onEachSave((s, writer) -> writer.write(s.toUpperCase()), tempFile).toList();
 
         List<String> lines = Files.readAllLines(tempFile);
         assertEquals(Arrays.asList("LINE1", "LINE2", "LINE3"), lines);
     }
 
     @Test
-    public void testSaveEachToPreparedStatement() throws SQLException {
+    public void testonEachSaveToPreparedStatement() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         stream = createStream(1, 2, 3);
-        stream.saveEach(stmt, (i, ps) -> ps.setInt(1, i)).toList();
+        stream.onEachSave(stmt, (i, ps) -> ps.setInt(1, i)).toList();
 
         verify(stmt, times(3)).setInt(anyInt(), anyInt());
         verify(stmt, times(3)).execute();
     }
 
     @Test
-    public void testSaveEachToConnection() throws SQLException {
+    public void testonEachSaveToConnection() throws SQLException {
         Connection conn = mock(Connection.class);
         PreparedStatement stmt = mock(PreparedStatement.class);
         when(conn.prepareStatement(anyString())).thenReturn(stmt);
 
         stream = createStream(1, 2, 3);
-        stream.saveEach(conn, "INSERT INTO test VALUES (?)", (i, ps) -> ps.setInt(1, i)).toList();
+        stream.onEachSave(conn, "INSERT INTO test VALUES (?)", (i, ps) -> ps.setInt(1, i)).toList();
 
         verify(stmt, times(3)).setInt(anyInt(), anyInt());
         verify(stmt, times(3)).execute();
     }
 
     @Test
-    public void testSaveEachToDataSource() throws SQLException {
+    public void testonEachSaveToDataSource() throws SQLException {
         javax.sql.DataSource ds = mock(javax.sql.DataSource.class);
         Connection conn = mock(Connection.class);
         PreparedStatement stmt = mock(PreparedStatement.class);
@@ -3426,19 +3425,19 @@ public class AbstractStreamTest extends TestBase {
         when(conn.prepareStatement(anyString())).thenReturn(stmt);
 
         stream = createStream(1, 2, 3);
-        stream.saveEach(ds, "INSERT INTO test VALUES (?)", (i, ps) -> ps.setInt(1, i)).toList();
+        stream.onEachSave(ds, "INSERT INTO test VALUES (?)", (i, ps) -> ps.setInt(1, i)).toList();
 
         verify(stmt, times(3)).setInt(anyInt(), anyInt());
         verify(stmt, times(3)).execute();
     }
 
     @Test
-    public void testSaveEachWithBatchSize() throws SQLException {
+    public void testonEachSaveWithBatchSize() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         List<TestBean> input = Arrays.asList(new TestBean("A", 1), new TestBean("B", 2), new TestBean("C", 3), new TestBean("D", 4));
         Stream<TestBean> stream = createStream(input);
 
-        List<TestBean> result = stream.saveEach(stmt, 2, 0, (bean, ps) -> {
+        List<TestBean> result = stream.onEachSave(stmt, 2, 0, (bean, ps) -> {
             ps.setString(1, bean.getName());
             ps.setInt(2, bean.getAge());
         }).toList();
@@ -3449,25 +3448,25 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testSaveEach() throws IOException {
+    public void testonEachSave() throws IOException {
         File file = java.nio.file.Files.createTempFile(tempFolder, null, null).toFile();
         List<String> input = Arrays.asList("line1", "line2", "line3");
         Stream<String> stream = createStream(input);
 
-        stream.saveEach(file).toList();
+        stream.onEachSave(file).toList();
 
         List<String> lines = IOUtil.readAllLines(file);
         assertEquals(input, lines);
     }
 
     @Test
-    public void testSaveEach_2() throws IOException {
+    public void testonEachSave_2() throws IOException {
         File file = java.nio.file.Files.createTempFile(tempFolder, null, null).toFile();
         List<String> input = Arrays.asList("line1", "line2", "line3");
         Stream<String> stream = createStream(input);
 
         try (FileWriter writer = new FileWriter(file)) {
-            stream.saveEach((e, w) -> IOUtil.write(e, w), writer).toList();
+            stream.onEachSave((e, w) -> IOUtil.write(e, w), writer).toList();
         }
 
         List<String> lines = IOUtil.readAllLines(file);

@@ -64,6 +64,16 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *   <li><b>Type Safety:</b> Strong generic typing maintained throughout all composition operations</li>
  * </ul>
  *
+ * <p><b>{@code compose} vs {@code combine} (do not confuse):</b>
+ * <ul>
+ *   <li><b>{@code compose(...)}:</b> the zip/action function receives the {@link Future} handles themselves
+ *       (call {@code get()} inside when you need values). Use this for conditional retrieval, short-circuiting,
+ *       or custom timeout strategies against the futures.</li>
+ *   <li><b>{@code combine(...)}:</b> the action receives the <b>unwrapped result values</b> after the inputs
+ *       complete (or packs them into a {@code Tuple}). Prefer this for ordinary map/aggregate of completed results.</li>
+ * </ul>
+ * Many lambda shapes compile for both; picking the wrong family silently changes whether you work with futures or values.
+ *
  * <p><b>Design Philosophy:</b>
  * <ul>
  *   <li><b>Simplicity Over Complexity:</b> Intuitive API that handles complex concurrency patterns transparently</li>
@@ -358,6 +368,11 @@ public final class Futures {
      * This method allows you to create custom logic that operates on the Future objects directly, enabling
      * advanced composition patterns. The zip function receives the Future objects and can call get() on them
      * to retrieve their values.
+     *
+     * <p><b>Vs {@link #combine(Future, Future, Throwables.BiFunction)}:</b> {@code compose} passes
+     * <b>{@code Future} handles</b> into the function; {@code combine} waits for completion and passes
+     * <b>unwrapped values</b>. Prefer {@code combine} for simple value aggregation; use {@code compose}
+     * when you need conditional {@code get()}, short-circuiting, or custom timeout handling on the futures.</p>
      *
      * <p>This overload uses the same function for both regular get() and timeout-based get() operations.
      * The function is executed when get() or get(timeout, unit) is called on the returned future, allowing
@@ -1391,6 +1406,11 @@ public final class Futures {
      * A successful {@code get()} retrieves both results in input order and applies the provided
      * function. If the first input fails, that failure can be reported without waiting for the second.
      *
+     * <p><b>Vs {@link #compose(Future, Future, Throwables.BiFunction)}:</b> {@code combine} passes
+     * <b>unwrapped values</b> into {@code action}; {@code compose} passes the <b>{@code Future}
+     * handles</b> so the function controls when/whether to call {@code get()}. Prefer this method for
+     * ordinary value aggregation.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Future<Integer> priceFuture = fetchPrice();
@@ -1417,6 +1437,7 @@ public final class Futures {
      *         if {@code action} throws, the exception is propagated
      *         (wrapped in a {@link RuntimeException} if it is a checked exception).
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @see #compose(Future, Future, Throwables.BiFunction)
      */
     public static <T1, T2, R> ContinuableFuture<R> combine(final Future<? extends T1> cf1, final Future<? extends T2> cf2,
             final Throwables.BiFunction<? super T1, ? super T2, ? extends R, ? extends Exception> action) throws IllegalArgumentException {

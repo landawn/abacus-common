@@ -2754,7 +2754,8 @@ public class DifferenceTest extends AbstractTest {
     public void testMapDifferenceNullTriPredicateEquivalence() {
         Map<String, Integer> map1 = new HashMap<>();
         Map<String, Integer> map2 = new HashMap<>();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> MapDifference.of(map1, map2, (com.landawn.abacus.util.function.TriPredicate<String, Integer, Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> MapDifference.of(map1, map2, (com.landawn.abacus.util.function.TriPredicate<String, Integer, Integer>) null));
     }
 
     // --- regression tests for 2026-06-11 deep-review fixes ---

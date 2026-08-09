@@ -2935,7 +2935,8 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testMergeElement_NullFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.merge("key1", 1, (BiFunction<? super List<Integer>, ? super Integer, ? extends List<Integer>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> listMultimap.merge("key1", 1, (BiFunction<? super List<Integer>, ? super Integer, ? extends List<Integer>>) null));
     }
 
     @Test
@@ -3423,7 +3424,8 @@ public class MultimapTest extends AbstractTest {
 
     @Test
     public void testForEach_NullAction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.forEach((java.util.function.BiConsumer<? super String, ? super Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> listMultimap.forEach((java.util.function.BiConsumer<? super String, ? super Integer>) null));
     }
 
     @Test

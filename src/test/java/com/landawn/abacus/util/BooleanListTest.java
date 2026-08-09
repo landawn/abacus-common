@@ -35,7 +35,8 @@ public class BooleanListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.BooleanConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> list.forEach(0, 0, (com.landawn.abacus.util.function.BooleanConsumer) null));
     }
 
     @Test
@@ -318,7 +319,7 @@ public class BooleanListTest extends TestBase {
     @DisplayName("Test deleting elements by multiple indices")
     public void testDeleteAllByIndices() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.removeAt(0, 2, 4);
+        list.removeAllAt(0, 2, 4);
         assertArrayEquals(new boolean[] { false, false }, list.toArray());
     }
 
@@ -1063,7 +1064,7 @@ public class BooleanListTest extends TestBase {
     @Test
     public void test_removeAt() {
         BooleanList list = BooleanList.of(true, false, true, false, true);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertTrue(list.get(0));
         assertTrue(list.get(1));
@@ -1073,7 +1074,7 @@ public class BooleanListTest extends TestBase {
     @Test
     public void test_removeAt_empty() {
         BooleanList list = BooleanList.of(true, false);
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(2, list.size());
     }
 
@@ -1083,7 +1084,7 @@ public class BooleanListTest extends TestBase {
         list.add(false);
         list.add(true);
         list.add(false);
-        list.removeAt(0, 2);
+        list.removeAllAt(0, 2);
         assertEquals(2, list.size());
         assertFalse(list.get(0));
         assertFalse(list.get(1));
@@ -1092,7 +1093,7 @@ public class BooleanListTest extends TestBase {
     @Test
     public void testRemoveAt_multipleIndices_empty() {
         list.add(true);
-        list.removeAt(new int[] {});
+        list.removeAllAt(new int[] {});
         assertEquals(1, list.size());
     }
 
@@ -1312,7 +1313,8 @@ public class BooleanListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
 
         BooleanList empty = new BooleanList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.BooleanUnaryOperator) null));
     }
 
     @Test
@@ -3341,9 +3343,12 @@ public class BooleanListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final BooleanList empty = new BooleanList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.BooleanPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.BooleanPredicate) null, true));
 
         final BooleanList nonEmpty = BooleanList.of(true, false);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.BooleanConsumer) null));

@@ -1096,13 +1096,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeAt(5);                     // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code boolean} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code boolean} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public boolean removeAt(final int index) {
         rangeCheck(index);
@@ -1125,11 +1125,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * list.removeAt(1, 3);   // removes elements at indices 1 and 3
+     * list.removeAllAt(1, 3);   // removes elements at indices 1 and 3
      * // list is now [true, true, true]
      * }</pre>
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code boolean} value.</p>
      *
      * @param indices the indices of elements to be removed. Duplicate indices are allowed
@@ -1139,7 +1139,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2058,6 +2058,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @return an {@code OptionalBoolean} containing the first element, or empty if the list is empty
+     * @see #getFirst()
      */
     public OptionalBoolean first() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[0]);
@@ -2078,6 +2079,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @return an {@code OptionalBoolean} containing the last element, or empty if the list is empty
+     * @see #getLast()
      */
     public OptionalBoolean last() {
         return size() == 0 ? OptionalBoolean.empty() : OptionalBoolean.of(elementData[size() - 1]);
@@ -2603,6 +2605,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return the first boolean value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public boolean getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2629,6 +2633,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return the last boolean value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public boolean getLast() {
         throwNoSuchElementExceptionIfEmpty();

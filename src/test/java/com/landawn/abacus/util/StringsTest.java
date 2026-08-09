@@ -2441,8 +2441,7 @@ public class StringsTest extends AbstractTest {
     public void testCapitalizeFullyLegacyDelegates() {
         assertEquals(Strings.capitalizeWords("hELLO wORLD"), Strings.capitalizeFully("hELLO wORLD"));
         assertEquals(Strings.capitalizeWords("hELLO-wORLD", "-"), Strings.capitalizeFully("hELLO-wORLD", "-"));
-        assertEquals(Strings.capitalizeWords("the lord of the rings", " ", "of", "the"),
-                Strings.capitalizeFully("the lord of the rings", " ", "of", "the"));
+        assertEquals(Strings.capitalizeWords("the lord of the rings", " ", "of", "the"), Strings.capitalizeFully("the lord of the rings", " ", "of", "the"));
 
         List<String> excludedWords = Arrays.asList("the", "of", "and");
         assertEquals(Strings.capitalizeWords("the lord of the rings", " ", excludedWords),
@@ -9268,26 +9267,35 @@ public class StringsTest extends AbstractTest {
     public void test_substringIndicesBetween() {
 
         {
-            assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
-            assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
-            assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
+            assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)),
+                    Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7), new IndexRange(10, 11)),
+                    Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)),
+                    Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
-            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
-            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
-            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)), Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)),
+                    Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)),
+                    Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(2, 5), new IndexRange(9, 10)),
+                    Strings.substringIndicesBetween("3[a2c]]2[a]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
             assertEquals(List.of(new IndexRange(1, 5)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
-            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(2, 6), new IndexRange(1, 8)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(2, 6), new IndexRange(1, 8)),
+                    Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
             assertEquals(List.of(new IndexRange(1, 8)), Strings.substringIndicesBetween("[[b[a]]c]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
         {
-            assertEquals(List.of(new IndexRange(1, 5), new IndexRange(7, 8)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
-            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(7, 8), new IndexRange(2, 10)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
+            assertEquals(List.of(new IndexRange(1, 5), new IndexRange(7, 8)),
+                    Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.SEQUENTIAL));
+            assertEquals(List.of(new IndexRange(4, 5), new IndexRange(7, 8), new IndexRange(2, 10)),
+                    Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.ALL_LEVELS));
             assertEquals(List.of(new IndexRange(2, 10)), Strings.substringIndicesBetween("[[b[a][c]d]", '[', ']', DelimiterMatchMode.OUTERMOST_ONLY));
         }
 
@@ -9299,17 +9307,21 @@ public class StringsTest extends AbstractTest {
 
         // SEQUENTIAL: maxCount simply limits sequential matches.
         assertEquals(List.of(new IndexRange(2, 6)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 1));
-        assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 2));
+        assertEquals(List.of(new IndexRange(2, 6), new IndexRange(10, 11)),
+                Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.SEQUENTIAL, 2));
 
         // ALL_LEVELS: matches are reported inner-first, so maxCount limits in that discovery order.
         assertEquals(List.of(new IndexRange(5, 6)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 1));
-        assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 2));
+        assertEquals(List.of(new IndexRange(5, 6), new IndexRange(2, 7)),
+                Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.ALL_LEVELS, 2));
 
         // OUTERMOST_ONLY: nested matches must never be returned, even when maxCount stops the scan early.
         // Before the fix, maxCount=1 returned [[5, 6]] ("c"), a nested match that the strategy promises to ignore.
         assertEquals(List.of(new IndexRange(2, 7)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
-        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 2));
-        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)), Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10));
+        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)),
+                Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 2));
+        assertEquals(List.of(new IndexRange(2, 7), new IndexRange(10, 11)),
+                Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10));
 
         // Value-returning variant goes through the same code path.
         assertEquals(N.toList("a2[c]"), Strings.substringsBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
@@ -9318,7 +9330,8 @@ public class StringsTest extends AbstractTest {
         final String unclosed = "[a[b]c[d]";
         assertEquals(List.of(new IndexRange(3, 4), new IndexRange(7, 8)),
                 Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 10));
-        assertEquals(List.of(new IndexRange(3, 4)), Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
+        assertEquals(List.of(new IndexRange(3, 4)),
+                Strings.substringIndicesBetween(unclosed, 0, unclosed.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 1));
 
         // maxCount == 0 returns an empty list.
         assertTrue(Strings.substringIndicesBetween(str, 0, str.length(), "[", "]", DelimiterMatchMode.OUTERMOST_ONLY, 0).isEmpty());

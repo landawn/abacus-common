@@ -754,15 +754,16 @@ public class ParallelArrayShortStreamTest extends TestBase {
 
     @Test
     public void testIteratorSplitStrategyReduceAndFindOperations_SparseMatch() {
-        assertEquals((short) 72, createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
-                .reduce((short) 0, (left, right) -> (short) (left + right)));
+        assertEquals((short) 72,
+                createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
+                        .reduce((short) 0, (left, right) -> (short) (left + right)));
 
         OptionalShort reduced = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4).reduce((left, right) -> (short) (left + right));
         assertTrue(reduced.isPresent());
         assertEquals((short) 27, reduced.get());
 
-        OptionalShort firstMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
-                .findFirst(s -> {
+        OptionalShort firstMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8,
+                (short) 13).findFirst(s -> {
                     if (s == 21) {
                         try {
                             Thread.sleep(10L);
@@ -776,13 +777,13 @@ public class ParallelArrayShortStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals((short) 21, firstMatch.get());
 
-        OptionalShort anyMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
-                .findAny(s -> s > 5 && (s & 1) == 1);
+        OptionalShort anyMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8,
+                (short) 13).findAny(s -> s > 5 && (s & 1) == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21 || anyMatch.get() == 7 || anyMatch.get() == 11 || anyMatch.get() == 13);
 
-        OptionalShort lastMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8, (short) 13)
-                .findLast(s -> {
+        OptionalShort lastMatch = createIteratorSplitStrategyShortStream((short) 21, (short) 2, (short) 4, (short) 7, (short) 6, (short) 11, (short) 8,
+                (short) 13).findLast(s -> {
                     if (s == 13) {
                         try {
                             Thread.sleep(10L);

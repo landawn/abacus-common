@@ -1155,7 +1155,7 @@ public class IterablesTest extends AbstractTest {
     public void testNullInputHandling() {
         assertFalse(Iterables.min((int[]) null).isPresent());
         assertFalse(Iterables.max((String[]) null).isPresent());
-        assertFalse(Iterables.median((Integer[]) null).isPresent());
+        assertFalse(Iterables.lowerMedian((Integer[]) null).isPresent());
         assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
         assertFalse(Iterables.averageDouble((Double[]) null).isPresent());
     }
@@ -1164,7 +1164,7 @@ public class IterablesTest extends AbstractTest {
     public void testEmptyInputHandling() {
         assertFalse(Iterables.min(new int[0]).isPresent());
         assertFalse(Iterables.max(new String[0]).isPresent());
-        assertFalse(Iterables.median(Collections.emptyList()).isPresent());
+        assertFalse(Iterables.lowerMedian(Collections.emptyList()).isPresent());
         assertFalse(Iterables.sumLong(Collections.emptyList()).isPresent());
         assertFalse(Iterables.averageInt(new Integer[0]).isPresent());
     }
@@ -1173,7 +1173,7 @@ public class IterablesTest extends AbstractTest {
     public void testSingleElementCollections() {
         assertEquals(5, Iterables.min(new int[] { 5 }).get());
         assertEquals("test", Iterables.max(new String[] { "test" }).get());
-        assertEquals(Integer.valueOf(42), Iterables.median(Arrays.asList(42)).get());
+        assertEquals(Integer.valueOf(42), Iterables.lowerMedian(Arrays.asList(42)).get());
         assertEquals(10, Iterables.sumInt(Arrays.asList(10)).get());
         assertEquals(7.5, Iterables.averageDouble(new Double[] { 7.5 }).get());
     }
@@ -1212,7 +1212,7 @@ public class IterablesTest extends AbstractTest {
         assertTrue(Iterables.max(empty).isEmpty());
         assertFalse(Iterables.sumInt(empty).isPresent());
         assertFalse(Iterables.averageInt(empty).isPresent());
-        assertTrue(Iterables.median(empty).isEmpty());
+        assertTrue(Iterables.lowerMedian(empty).isEmpty());
     }
 
     @Test
@@ -2767,19 +2767,19 @@ public class IterablesTest extends AbstractTest {
     @Test
     public void testMedianArray() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
-        Nullable<Integer> result = Iterables.median(arr);
+        Nullable<Integer> result = Iterables.lowerMedian(arr);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(3), result.get());
 
-        assertTrue(Iterables.median(new Integer[0]).isEmpty());
-        assertTrue(Iterables.median((Integer[]) null).isEmpty());
+        assertTrue(Iterables.lowerMedian(new Integer[0]).isEmpty());
+        assertTrue(Iterables.lowerMedian((Integer[]) null).isEmpty());
     }
 
     @Test
     public void testMedianArrayWithComparator() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
         Comparator<Integer> naturalOrder = Comparator.naturalOrder();
-        Nullable<Integer> result = Iterables.median(arr, naturalOrder);
+        Nullable<Integer> result = Iterables.lowerMedian(arr, naturalOrder);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(3), result.get());
     }
@@ -2787,55 +2787,55 @@ public class IterablesTest extends AbstractTest {
     @Test
     public void testMedianCollection() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Nullable<Integer> result = Iterables.median(list);
+        Nullable<Integer> result = Iterables.lowerMedian(list);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(3), result.get());
 
-        assertTrue(Iterables.median((Collection<Integer>) null).isEmpty());
-        assertTrue(Iterables.median(new ArrayList<Integer>()).isEmpty());
+        assertTrue(Iterables.lowerMedian((Collection<Integer>) null).isEmpty());
+        assertTrue(Iterables.lowerMedian(new ArrayList<Integer>()).isEmpty());
     }
 
     @Test
     public void testMedianCollectionWithComparator() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         Comparator<Integer> naturalOrder = Comparator.naturalOrder();
-        Nullable<Integer> result = Iterables.median(list, naturalOrder);
+        Nullable<Integer> result = Iterables.lowerMedian(list, naturalOrder);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(3), result.get());
     }
 
     @Test
     public void testMedianArrayComparable() {
-        assertTrue(Iterables.median((String[]) null).isEmpty());
-        assertTrue(Iterables.median(new String[0]).isEmpty());
-        assertEquals("b", Iterables.median(new String[] { "a", "b", "c" }).get());
-        assertEquals("b", Iterables.median(new String[] { "c", "b", "a" }).get());
-        assertEquals("a", Iterables.median(new String[] { "a", "b" }).get());
-        assertEquals("b", Iterables.median(new String[] { "a", "b", "c", "d" }).get());
+        assertTrue(Iterables.lowerMedian((String[]) null).isEmpty());
+        assertTrue(Iterables.lowerMedian(new String[0]).isEmpty());
+        assertEquals("b", Iterables.lowerMedian(new String[] { "a", "b", "c" }).get());
+        assertEquals("b", Iterables.lowerMedian(new String[] { "c", "b", "a" }).get());
+        assertEquals("a", Iterables.lowerMedian(new String[] { "a", "b" }).get());
+        assertEquals("b", Iterables.lowerMedian(new String[] { "a", "b", "c", "d" }).get());
     }
 
     @Test
     public void testMedianArrayComparator() {
         Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.median((String[]) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.median(new String[0], reverseOrder).isEmpty());
-        assertEquals("b", Iterables.median(new String[] { "a", "b", "c" }, reverseOrder).get());
-        assertEquals("b", Iterables.median(new String[] { "a", "b" }, reverseOrder).get());
+        assertTrue(Iterables.lowerMedian((String[]) null, reverseOrder).isEmpty());
+        assertTrue(Iterables.lowerMedian(new String[0], reverseOrder).isEmpty());
+        assertEquals("b", Iterables.lowerMedian(new String[] { "a", "b", "c" }, reverseOrder).get());
+        assertEquals("b", Iterables.lowerMedian(new String[] { "a", "b" }, reverseOrder).get());
     }
 
     @Test
     public void testMedianCollectionComparable() {
-        assertTrue(Iterables.median((Collection<String>) null).isEmpty());
-        assertTrue(Iterables.median(list()).isEmpty());
-        assertEquals("b", Iterables.median(list("a", "b", "c")).get());
+        assertTrue(Iterables.lowerMedian((Collection<String>) null).isEmpty());
+        assertTrue(Iterables.lowerMedian(list()).isEmpty());
+        assertEquals("b", Iterables.lowerMedian(list("a", "b", "c")).get());
     }
 
     @Test
     public void testMedianCollectionComparator() {
         Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.median((Collection<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.median(list(), reverseOrder).isEmpty());
-        assertEquals("b", Iterables.median(list("a", "b", "c"), reverseOrder).get());
+        assertTrue(Iterables.lowerMedian((Collection<String>) null, reverseOrder).isEmpty());
+        assertTrue(Iterables.lowerMedian(list(), reverseOrder).isEmpty());
+        assertEquals("b", Iterables.lowerMedian(list("a", "b", "c"), reverseOrder).get());
     }
 
     @Test
@@ -2843,7 +2843,7 @@ public class IterablesTest extends AbstractTest {
         List<String> list = Arrays.asList("a", "bb", "ccc");
         Comparator<String> lengthComparator = Comparator.comparing(String::length);
 
-        Nullable<String> result = Iterables.median(list, lengthComparator);
+        Nullable<String> result = Iterables.lowerMedian(list, lengthComparator);
         assertTrue(result.isPresent());
         assertEquals("bb", result.get());
     }
@@ -2851,30 +2851,30 @@ public class IterablesTest extends AbstractTest {
     @Test
     public void testMedian() {
         Integer[] arr = { 1, 2, 3, 4, 5 };
-        Nullable<Integer> result = Iterables.median(arr);
+        Nullable<Integer> result = Iterables.lowerMedian(arr);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(3), result.get());
 
-        assertTrue(Iterables.median(new Integer[0]).isEmpty());
+        assertTrue(Iterables.lowerMedian(new Integer[0]).isEmpty());
     }
 
     @Test
     public void testMedian_EmptyCollection() {
-        assertFalse(Iterables.median(Collections.<Integer> emptyList()).isPresent());
+        assertFalse(Iterables.lowerMedian(Collections.<Integer> emptyList()).isPresent());
     }
 
     // ===================== median edge cases =====================
 
     @Test
     public void testMedian_SingleElement() {
-        Nullable<Integer> result = Iterables.median(new Integer[] { 42 });
+        Nullable<Integer> result = Iterables.lowerMedian(new Integer[] { 42 });
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(42), result.get());
     }
 
     @Test
     public void testMedian_TwoElements() {
-        Nullable<Integer> result = Iterables.median(new Integer[] { 1, 2 });
+        Nullable<Integer> result = Iterables.lowerMedian(new Integer[] { 1, 2 });
         assertTrue(result.isPresent());
         // median of [1,2] is element at index (2-1)/2 = 0, which is the smaller element
         assertEquals(Integer.valueOf(1), result.get());
@@ -2987,7 +2987,7 @@ public class IterablesTest extends AbstractTest {
 
     @Test
     public void testMedian_EmptyArray() {
-        assertFalse(Iterables.median(new Integer[0]).isPresent());
+        assertFalse(Iterables.lowerMedian(new Integer[0]).isPresent());
     }
 
     @Test
@@ -5050,7 +5050,8 @@ public class IterablesTest extends AbstractTest {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
     }
 
     @Test
@@ -6118,10 +6119,10 @@ public class IterablesTest extends AbstractTest {
 
     @Test
     public void testOrderedPermutations_RejectsNullComparatorForEveryInputSize() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.<Integer> emptyList(), null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.singletonList(1), null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Iterables.orderedPermutations(Arrays.asList(2, 1, 3), null));
+                () -> Iterables.orderedPermutations(Collections.<Integer> emptyList(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Collections.singletonList(1), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.orderedPermutations(Arrays.asList(2, 1, 3), null));
     }
 
     @Test

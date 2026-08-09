@@ -34,7 +34,8 @@ public class FloatListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.FloatConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> list.forEach(0, 0, (com.landawn.abacus.util.function.FloatConsumer) null));
     }
 
     @Test
@@ -204,7 +205,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testDeleteAllByIndices() {
         FloatList list = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(1.0f, list.get(0), 0.0001f);
         assertEquals(3.0f, list.get(1), 0.0001f);
@@ -274,7 +275,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testDeleteAllByIndices_empty() {
         FloatList list = FloatList.of(1.0f, 2.0f);
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(2, list.size());
     }
 
@@ -939,7 +940,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testRemoveAtIndices() {
         FloatList fl = FloatList.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
-        fl.removeAt(1, 3);
+        fl.removeAllAt(1, 3);
         assertEquals(3, fl.size());
         assertEquals(1.0f, fl.get(0), 0.0001f);
         assertEquals(3.0f, fl.get(1), 0.0001f);
@@ -948,25 +949,25 @@ public class FloatListTest extends TestBase {
 
     @Test
     public void testDeleteAllByIndicesEmpty() {
-        list.removeAt();
+        list.removeAllAt();
         assertTrue(list.isEmpty());
 
         list.addAll(new float[] { 1.1f, 2.2f, 3.3f });
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
     @Test
     public void testRemoveAtIndices_empty() {
         FloatList fl = FloatList.of(1.0f, 2.0f, 3.0f);
-        fl.removeAt();
+        fl.removeAllAt();
         assertEquals(3, fl.size());
     }
 
     @Test
     public void testRemoveAt_multipleIndices() {
         FloatList fl = FloatList.of(10.0f, 20.0f, 30.0f, 40.0f, 50.0f);
-        fl.removeAt(new int[] { 1, 3 });
+        fl.removeAllAt(new int[] { 1, 3 });
         assertEquals(3, fl.size());
         assertEquals(10.0f, fl.get(0), 0.0001f);
         assertEquals(30.0f, fl.get(1), 0.0001f);
@@ -976,7 +977,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testRemoveAt_multipleIndices_singleElement() {
         FloatList fl = FloatList.of(1.0f, 2.0f, 3.0f);
-        fl.removeAt(new int[] { 0 });
+        fl.removeAllAt(new int[] { 0 });
         assertEquals(2, fl.size());
         assertEquals(2.0f, fl.get(0), 0.0001f);
         assertEquals(3.0f, fl.get(1), 0.0001f);
@@ -985,7 +986,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testRemoveAt_multipleIndices_empty() {
         FloatList fl = FloatList.of(1.0f, 2.0f, 3.0f);
-        fl.removeAt(new int[] {});
+        fl.removeAllAt(new int[] {});
         assertEquals(3, fl.size());
     }
 
@@ -1104,7 +1105,8 @@ public class FloatListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.FloatUnaryOperator) null));
 
         FloatList empty = new FloatList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.FloatUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.FloatUnaryOperator) null));
     }
 
     @Test
@@ -1751,7 +1753,7 @@ public class FloatListTest extends TestBase {
 
         assertFalse(list.min(1, 1).isPresent());
         assertFalse(list.max(1, 1).isPresent());
-        assertFalse(list.median(1, 1).isPresent());
+        assertFalse(list.lowerMedian(1, 1).isPresent());
     }
 
     @Test
@@ -1793,7 +1795,7 @@ public class FloatListTest extends TestBase {
     @Test
     public void testMedian() {
         FloatList list = FloatList.of(3.0f, 1.0f, 2.0f);
-        OptionalFloat median = list.median();
+        OptionalFloat median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(2.0f, median.get(), 0.0001f);
     }
@@ -1801,14 +1803,14 @@ public class FloatListTest extends TestBase {
     @Test
     public void testMedian_range() {
         FloatList list = FloatList.of(5.0f, 3.0f, 1.0f, 2.0f, 4.0f);
-        OptionalFloat median = list.median(1, 4);
+        OptionalFloat median = list.lowerMedian(1, 4);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void testMedian_emptyList() {
         FloatList list = new FloatList();
-        OptionalFloat median = list.median();
+        OptionalFloat median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
@@ -2686,9 +2688,12 @@ public class FloatListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final FloatList empty = new FloatList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.FloatPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.FloatPredicate) null, 0f));
 
         final FloatList nonEmpty = FloatList.of(1f, 2f);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.FloatConsumer) null));

@@ -2213,7 +2213,8 @@ public class IteratorsTest extends TestBase {
         result = Iterators.merge((Iterator<Integer>) null, Arrays.asList(1).iterator(), selector);
         assertEquals(Arrays.asList(1), result.toList());
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.merge(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.merge(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
     }
 
     @Test
@@ -2455,7 +2456,8 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testMergeSortedIteratorsWithComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
 
         Comparator<String> cmp = (a, b) -> a.compareTo(b);
         Iterator<String> iter1 = Arrays.asList("a", "c", "e").iterator();
@@ -2473,7 +2475,8 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testMergeSortedWithComparator_NullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.mergeSorted(Arrays.asList(1).iterator(), Arrays.asList(2).iterator(), null));
     }
 
     @Test
@@ -2824,7 +2827,8 @@ public class IteratorsTest extends TestBase {
         result = Iterators.zip(Arrays.asList(1, 2).iterator(), Arrays.asList("a", "b", "c").iterator(), zipFn);
         assertEquals(Arrays.asList("1a", "2b"), result.toList());
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.zip(Arrays.asList(1).iterator(), Arrays.asList("a").iterator(), null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.zip(Arrays.asList(1).iterator(), Arrays.asList("a").iterator(), null));
     }
 
     @Test
@@ -2932,7 +2936,8 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testUnzip_NullUnzipFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.unzip(Arrays.asList("a").iterator(), (com.landawn.abacus.util.function.BiConsumer<String, Pair<String, Integer>>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.unzip(Arrays.asList("a").iterator(), (com.landawn.abacus.util.function.BiConsumer<String, Pair<String, Integer>>) null));
     }
 
     @Test
@@ -5404,8 +5409,8 @@ public class IteratorsTest extends TestBase {
         assertEquals(1, consumerCalls.get(), "Only the worker already inside iterator access may finish after cancellation");
     }
 
-    private static Throwable awaitAggregatedWorkerFailure(final Throwable firstFailure, final Throwable secondFailure, final long timeout,
-            final TimeUnit unit) throws InterruptedException {
+    private static Throwable awaitAggregatedWorkerFailure(final Throwable firstFailure, final Throwable secondFailure, final long timeout, final TimeUnit unit)
+            throws InterruptedException {
         final long deadline = System.nanoTime() + unit.toNanos(timeout);
 
         while (System.nanoTime() - deadline < 0) {
@@ -5709,8 +5714,7 @@ public class IteratorsTest extends TestBase {
     public void testForEachCollection_WithThreads() throws Exception {
         List<Iterator<? extends Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5).iterator());
         AtomicInteger count = new AtomicInteger(0);
-        assertThrows(IllegalArgumentException.class,
-                () -> Iterators.forEach(iterators, 0, Long.MAX_VALUE, 0, 0, 0, e -> count.incrementAndGet(), null));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(iterators, 0, Long.MAX_VALUE, 0, 0, 0, e -> count.incrementAndGet(), null));
         assertEquals(0, count.get());
     }
 
@@ -6016,7 +6020,8 @@ public class IteratorsTest extends TestBase {
 
     @Test
     public void testForEachEmptyIteratorCollectionDoesNotEvaluateConsumer() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(Collections.<Iterator<Integer>> emptyList(), (Throwables.Consumer<Integer, RuntimeException>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterators.forEach(Collections.<Iterator<Integer>> emptyList(), (Throwables.Consumer<Integer, RuntimeException>) null));
     }
 
     // --- tests for the IterateOptions builder + forEach(Collection, IterateOptions, ...) overloads (R-2) ---

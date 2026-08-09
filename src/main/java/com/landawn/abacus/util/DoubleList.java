@@ -86,7 +86,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * // Mathematical operations for high-precision data
  * OptionalDouble min = prices.min();                        // Find minimum value
  * OptionalDouble max = prices.max();                        // Find maximum value
- * OptionalDouble median = prices.median();                  // Calculate median value
+ * OptionalDouble median = prices.lowerMedian();             // Calculate lower median value
  * double sum = prices.stream().sum();                       // Calculate sum
  * double average = prices.stream().average().orElse(0.0);   // Calculate average
  *
@@ -145,12 +145,12 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *       use {@link java.math.BigDecimal} when exact decimal arithmetic is required</li>
  *   <li><b>Aggregation:</b> {@code min()} and {@code max()} <i>propagate</i> NaN (they do not skip it);
  *       any NaN present makes the result NaN. Use {@code stream().filter(Double::isFinite)} first to ignore NaN.
- *       ({@code median()} instead orders NaN as the largest value, so it is only NaN when NaN occupies the middle position.)</li>
+ *       ({@code lowerMedian()} instead orders NaN as the largest value, so it is only NaN when NaN occupies the middle position.)</li>
  * </ul>
  *
  * <p><b>Double-Specific Operations:</b>
  * <ul>
- *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code lowerMedian()}</li>
  *   <li><b>Statistical Analysis:</b> Full integration with DoubleStream for advanced operations</li>
  *   <li><b>Random Generation:</b> {@code random(int)} for simulations and testing</li>
  *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
@@ -1119,13 +1119,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.removeAt(5);                    // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code double} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code double} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public double removeAt(final int index) {
         rangeCheck(index);
@@ -1142,7 +1142,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The indices array is processed to handle removal correctly even for duplicate or unordered indices.
      * After removal, remaining elements are shifted to fill gaps, maintaining their relative order.
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code double} value.</p>
      *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
@@ -1151,7 +1151,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2104,13 +2104,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
-     * OptionalDouble median = list.median();  // returns sorted: [1.0, 2.0, 5.0, 8.0, 9.0]; median = OptionalDouble[5.0]
+     * OptionalDouble median = list.lowerMedian();  // returns sorted: [1.0, 2.0, 5.0, 8.0, 9.0]; median = OptionalDouble[5.0]
      * }</pre>
      *
      * @return an OptionalDouble containing the median value if the list is non-empty, or an empty OptionalDouble if the list is empty
      */
-    public OptionalDouble median() {
-        return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, 0, size));
+    public OptionalDouble lowerMedian() {
+        return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2123,7 +2123,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list = DoubleList.of(5.0, 2.0, 8.0, 1.0, 9.0);
-     * OptionalDouble median = list.median(1, 4);  // returns median of [2.0, 8.0, 1.0] = OptionalDouble[2.0]
+     * OptionalDouble median = list.lowerMedian(1, 4);  // returns median of [2.0, 8.0, 1.0] = OptionalDouble[2.0]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2131,10 +2131,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return an OptionalDouble containing the median value if the range is non-empty, or an empty OptionalDouble if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalDouble median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalDouble lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalDouble.empty() : OptionalDouble.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2226,6 +2226,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return an {@code OptionalDouble} containing the first element if present,
      *         otherwise an empty {@code OptionalDouble}
+     * @see #getFirst()
      */
     public OptionalDouble first() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[0]);
@@ -2248,6 +2249,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return an {@code OptionalDouble} containing the last element if present,
      *         otherwise an empty {@code OptionalDouble}
+     * @see #getLast()
      */
     public OptionalDouble last() {
         return size() == 0 ? OptionalDouble.empty() : OptionalDouble.of(elementData[size() - 1]);

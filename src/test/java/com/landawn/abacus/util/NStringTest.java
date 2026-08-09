@@ -1337,8 +1337,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals('1', N.min('2', '1'));
             assertEquals('2', N.max('1', '2'));
             assertEquals('2', N.max('2', '2'));
-            assertEquals('1', N.median('1', '2'));
-            assertEquals('1', N.median('2', '1'));
+            assertEquals('1', N.lowerMedian('1', '2'));
+            assertEquals('1', N.lowerMedian('2', '1'));
 
             assertEquals('1', N.min('1', '2', '3'));
             assertEquals('1', N.min('2', '1', '3'));
@@ -1370,7 +1370,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final int median = N.median(a);
+            final int median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1382,13 +1382,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of('1');
-            assertEquals('1', N.median(a));
+            assertEquals('1', N.lowerMedian(a));
 
             a = Array.of('2', '1');
-            assertEquals('1', N.median(a));
+            assertEquals('1', N.lowerMedian(a));
 
             a = Array.of('2', '1', '3');
-            assertEquals('2', N.median(a));
+            assertEquals('2', N.lowerMedian(a));
 
             a = null;
             try {
@@ -1404,7 +1404,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1416,8 +1416,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals((byte) 1, N.min((byte) 2, (byte) 1));
             assertEquals((byte) 2, N.max((byte) 1, (byte) 2));
             assertEquals((byte) 2, N.max((byte) 2, (byte) 2));
-            assertEquals((byte) 1, N.median((byte) 1, (byte) 2));
-            assertEquals((byte) 1, N.median((byte) 2, (byte) 1));
+            assertEquals((byte) 1, N.lowerMedian((byte) 1, (byte) 2));
+            assertEquals((byte) 1, N.lowerMedian((byte) 2, (byte) 1));
 
             assertEquals((byte) 1, N.min((byte) 1, (byte) 2, (byte) 3));
             assertEquals((byte) 1, N.min((byte) 2, (byte) 1, (byte) 3));
@@ -1449,7 +1449,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final int median = N.median(a);
+            final int median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1463,13 +1463,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of((byte) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((byte) 2, (byte) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((byte) 2, (byte) 1, (byte) 3);
-            assertEquals(2, N.median(a));
+            assertEquals(2, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1485,7 +1485,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1497,8 +1497,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals((short) 1, N.min((short) 2, (short) 1));
             assertEquals((short) 2, N.max((short) 1, (short) 2));
             assertEquals((short) 2, N.max((short) 2, (short) 2));
-            assertEquals((short) 1, N.median((short) 1, (short) 2));
-            assertEquals((short) 1, N.median((short) 2, (short) 1));
+            assertEquals((short) 1, N.lowerMedian((short) 1, (short) 2));
+            assertEquals((short) 1, N.lowerMedian((short) 2, (short) 1));
 
             assertEquals((short) 1, N.min((short) 1, (short) 2, (short) 3));
             assertEquals((short) 1, N.min((short) 2, (short) 1, (short) 3));
@@ -1530,7 +1530,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final int median = N.median(a);
+            final int median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1542,13 +1542,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of((short) 1);
-            assertEquals((short) 1, N.median(a));
+            assertEquals((short) 1, N.lowerMedian(a));
 
             a = Array.of((short) 2, (short) 1);
-            assertEquals((short) 1, N.median(a));
+            assertEquals((short) 1, N.lowerMedian(a));
 
             a = Array.of((short) 2, (short) 1, (short) 3);
-            assertEquals(2, N.median(a));
+            assertEquals(2, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1564,7 +1564,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1576,8 +1576,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(1, N.min(2, 1));
             assertEquals(2, N.max(1, 2));
             assertEquals(2, N.max(2, 2));
-            assertEquals(1, N.median(1, 2));
-            assertEquals(1, N.median(2, 1));
+            assertEquals(1, N.lowerMedian(1, 2));
+            assertEquals(1, N.lowerMedian(2, 1));
 
             assertEquals(1, N.min(1, 2, 3));
             assertEquals(1, N.min(2, 1, 3));
@@ -1609,7 +1609,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final int median = N.median(a);
+            final int median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1621,10 +1621,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of(1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of(2, 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1640,7 +1640,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1652,8 +1652,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(1, N.min((long) 2, (long) 1));
             assertEquals(2, N.max((long) 1, (long) 2));
             assertEquals(2, N.max((long) 2, (long) 2));
-            assertEquals(1, N.median((long) 1, (long) 2));
-            assertEquals(1, N.median((long) 2, (long) 1));
+            assertEquals(1, N.lowerMedian((long) 1, (long) 2));
+            assertEquals(1, N.lowerMedian((long) 2, (long) 1));
 
             assertEquals(1, N.min((long) 1, (long) 2, (long) 3));
             assertEquals(1, N.min((long) 2, (long) 1, (long) 3));
@@ -1685,7 +1685,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final long median = N.median(a);
+            final long median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1697,13 +1697,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of((long) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((long) 2, (long) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((long) 2, (long) 1, (long) 3);
-            assertEquals(2, N.median(a));
+            assertEquals(2, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1719,7 +1719,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1731,8 +1731,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(1, N.min((float) 2, (float) 1));
             assertEquals(2, N.max((float) 1, (float) 2));
             assertEquals(2, N.max((float) 2, (float) 2));
-            assertEquals(1, N.median((float) 1, (float) 2));
-            assertEquals(1, N.median((float) 2, (float) 1));
+            assertEquals(1, N.lowerMedian((float) 1, (float) 2));
+            assertEquals(1, N.lowerMedian((float) 2, (float) 1));
 
             assertEquals(1, N.min((float) 1, (float) 2, (float) 3));
             assertEquals(1, N.min((float) 2, (float) 1, (float) 3));
@@ -1764,7 +1764,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final float median = N.median(a);
+            final float median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1776,13 +1776,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of((float) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((float) 2, (float) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((float) 2, (float) 1, (float) 3);
-            assertEquals(2, N.median(a));
+            assertEquals(2, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1798,7 +1798,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1810,8 +1810,8 @@ public class NStringTest extends AbstractParserTest {
             assertEquals(1, N.min((double) 2, (double) 1));
             assertEquals(2, N.max((double) 1, (double) 2));
             assertEquals(2, N.max((double) 2, (double) 2));
-            assertEquals(1, N.median((double) 1, (double) 2));
-            assertEquals(1, N.median((double) 2, (double) 1));
+            assertEquals(1, N.lowerMedian((double) 1, (double) 2));
+            assertEquals(1, N.lowerMedian((double) 2, (double) 1));
 
             assertEquals(1, N.min((double) 1, (double) 2, (double) 3));
             assertEquals(1, N.min((double) 2, (double) 1, (double) 3));
@@ -1843,7 +1843,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a[i] <= max);
             }
 
-            final double median = N.median(a);
+            final double median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1855,13 +1855,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= (a.length) / 2);
 
             a = Array.of((double) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((double) 2, (double) 1);
-            assertEquals(1, N.median(a));
+            assertEquals(1, N.lowerMedian(a));
 
             a = Array.of((double) 2, (double) 1, (double) 3);
-            assertEquals(2, N.median(a));
+            assertEquals(2, N.lowerMedian(a));
 
             a = null;
             try {
@@ -1877,7 +1877,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1903,7 +1903,7 @@ public class NStringTest extends AbstractParserTest {
                 assertTrue(a.get(i) <= max);
             }
 
-            final int median = N.median(a);
+            final int median = N.lowerMedian(a);
 
             int count = 0;
             for (int i = 0; i < len; i++) {
@@ -1915,13 +1915,13 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(count <= len / 2);
 
             a = N.toList(1);
-            assertEquals(1, N.median(a).intValue());
+            assertEquals(1, N.lowerMedian(a).intValue());
 
             a = N.toList(2, 1);
-            assertEquals(1, N.median(a).intValue());
+            assertEquals(1, N.lowerMedian(a).intValue());
 
             a = N.toList(2, 1, 3);
-            assertEquals(2, N.median(a).intValue());
+            assertEquals(2, N.lowerMedian(a).intValue());
 
             a = null;
             try {
@@ -1937,7 +1937,7 @@ public class NStringTest extends AbstractParserTest {
 
             }
             try {
-                N.median(a);
+                N.lowerMedian(a);
                 fail("Should throw IllegalArgumentException");
             } catch (final IllegalArgumentException e) {
 
@@ -1945,19 +1945,19 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(5, N.median(1, 2, 3, 4, 5, 6, 7, 8, 9));
+            assertEquals(5, N.lowerMedian(1, 2, 3, 4, 5, 6, 7, 8, 9));
 
-            assertEquals(5, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 1, 8));
+            assertEquals(5, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 1, 8));
 
-            assertEquals(4, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 7));
+            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 7));
 
-            assertEquals(3, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 6));
+            assertEquals(3, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 6));
 
-            assertEquals(3, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 5));
+            assertEquals(3, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 5));
 
-            assertEquals(4, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 6));
+            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 6));
 
-            assertEquals(4, N.median(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5));
+            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5));
         }
 
         {

@@ -170,7 +170,7 @@ public class IntListTest extends TestBase {
     @Test
     public void testDeleteAllByIndices() {
         IntList list = IntList.of(0, 1, 2, 3, 4, 5);
-        list.removeAt(1, 3, 5);
+        list.removeAllAt(1, 3, 5);
         assertArrayEquals(new int[] { 0, 2, 4 }, list.toArray());
     }
 
@@ -828,7 +828,7 @@ public class IntListTest extends TestBase {
     @Test
     public void testDeleteAllByIndicesOutOfOrder() {
         list.addAll(new int[] { 1, 2, 3, 4, 5 });
-        list.removeAt(4, 1, 2);
+        list.removeAllAt(4, 1, 2);
         assertEquals(2, list.size());
         assertEquals(1, list.get(0));
         assertEquals(4, list.get(1));
@@ -1308,7 +1308,7 @@ public class IntListTest extends TestBase {
     @Test
     public void test_removeAt() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(1, list.get(0));
         assertEquals(3, list.get(1));
@@ -1318,17 +1318,17 @@ public class IntListTest extends TestBase {
     @Test
     public void test_removeAt_empty() {
         IntList list = IntList.of(1, 2, 3);
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
     @Test
     public void testDeleteAllByIndicesEmpty() {
-        list.removeAt();
+        list.removeAllAt();
         assertTrue(list.isEmpty());
 
         list.addAll(new int[] { 1, 2, 3 });
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
@@ -2447,7 +2447,7 @@ public class IntListTest extends TestBase {
         assertTrue(max.isPresent());
         assertEquals(5, max.getAsInt());
 
-        OptionalInt median = list.median();
+        OptionalInt median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(5, median.getAsInt());
     }
@@ -2458,7 +2458,7 @@ public class IntListTest extends TestBase {
 
         assertFalse(list.min(1, 1).isPresent());
         assertFalse(list.max(1, 1).isPresent());
-        assertFalse(list.median(1, 1).isPresent());
+        assertFalse(list.lowerMedian(1, 1).isPresent());
     }
 
     @Test
@@ -2498,29 +2498,29 @@ public class IntListTest extends TestBase {
     }
 
     @Test
-    public void test_median() {
+    public void test_lowerMedian() {
         IntList list = IntList.of(3, 1, 4, 1, 5);
-        OptionalInt median = list.median();
+        OptionalInt median = list.lowerMedian();
         assertTrue(median.isPresent());
     }
 
     @Test
     public void test_median_range() {
         IntList list = IntList.of(3, 1, 4, 1, 5);
-        OptionalInt median = list.median(0, 3);
+        OptionalInt median = list.lowerMedian(0, 3);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void testMedian() {
         IntList list = IntList.of(3, 1, 4, 1, 5, 9, 2, 6);
-        assertEquals(3, list.median().getAsInt());
+        assertEquals(3, list.lowerMedian().getAsInt());
     }
 
     @Test
     public void testMedianEvenElements() {
         list.addAll(new int[] { 1, 2, 3, 4 });
-        OptionalInt median = list.median();
+        OptionalInt median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(2, median.getAsInt());
     }
@@ -2528,14 +2528,14 @@ public class IntListTest extends TestBase {
     @Test
     public void test_median_empty() {
         IntList list = new IntList();
-        OptionalInt median = list.median();
+        OptionalInt median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
     @Test
     public void test_median_range_empty() {
         IntList list = IntList.of(1, 2, 3);
-        OptionalInt median = list.median(1, 1);
+        OptionalInt median = list.lowerMedian(1, 1);
         assertFalse(median.isPresent());
     }
 

@@ -321,7 +321,7 @@ public final class Median {
      * @see #of(char[], int, int)
      * @see Pair
      * @see OptionalChar
-     * @see N#median(char[])
+     * @see N#lowerMedian(char[])
      */
     public static Pair<Character, OptionalChar> of(final char... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty"); //NOSONAR
@@ -362,7 +362,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(char...)
-     * @see N#median(char[], int, int)
+     * @see N#lowerMedian(char[], int, int)
      */
     public static Pair<Character, OptionalChar> of(final char[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -379,7 +379,7 @@ public final class Median {
             return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalChar.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalChar.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalChar.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalChar.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Character> queue = new PriorityQueue<>(k);
@@ -433,7 +433,7 @@ public final class Median {
      * @see #of(byte[], int, int)
      * @see Pair
      * @see OptionalByte
-     * @see N#median(byte[])
+     * @see N#lowerMedian(byte[])
      */
     public static Pair<Byte, OptionalByte> of(final byte... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -475,7 +475,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(byte...)
-     * @see N#median(byte[], int, int)
+     * @see N#lowerMedian(byte[], int, int)
      */
     public static Pair<Byte, OptionalByte> of(final byte[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -492,7 +492,7 @@ public final class Median {
             return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalByte.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalByte.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalByte.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalByte.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Byte> queue = new PriorityQueue<>(k);
@@ -546,7 +546,7 @@ public final class Median {
      * @see #of(short[], int, int)
      * @see Pair
      * @see OptionalShort
-     * @see N#median(short[])
+     * @see N#lowerMedian(short[])
      */
     public static Pair<Short, OptionalShort> of(final short... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -588,7 +588,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(short...)
-     * @see N#median(short[], int, int)
+     * @see N#lowerMedian(short[], int, int)
      */
     public static Pair<Short, OptionalShort> of(final short[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -605,7 +605,7 @@ public final class Median {
             return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalShort.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalShort.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalShort.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalShort.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Short> queue = new PriorityQueue<>(k);
@@ -660,7 +660,7 @@ public final class Median {
      * @see #of(int[], int, int)
      * @see Pair
      * @see OptionalInt
-     * @see N#median(int[])
+     * @see N#lowerMedian(int[])
      */
     public static Pair<Integer, OptionalInt> of(final int... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -702,7 +702,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(int...)
-     * @see N#median(int[], int, int)
+     * @see N#lowerMedian(int[], int, int)
      */
     public static Pair<Integer, OptionalInt> of(final int[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -719,7 +719,7 @@ public final class Median {
             return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalInt.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalInt.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalInt.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalInt.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Integer> queue = new PriorityQueue<>(k);
@@ -774,7 +774,7 @@ public final class Median {
      * @see #of(long[], int, int)
      * @see Pair
      * @see OptionalLong
-     * @see N#median(long[])
+     * @see N#lowerMedian(long[])
      */
     public static Pair<Long, OptionalLong> of(final long... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -816,7 +816,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(long...)
-     * @see N#median(long[], int, int)
+     * @see N#lowerMedian(long[], int, int)
      */
     public static Pair<Long, OptionalLong> of(final long[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -833,7 +833,7 @@ public final class Median {
             return source[fromIndex] <= source[fromIndex + 1] ? Pair.of(source[fromIndex], OptionalLong.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalLong.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalLong.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalLong.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Long> queue = new PriorityQueue<>(k);
@@ -889,7 +889,7 @@ public final class Median {
      * @see #of(float[], int, int)
      * @see Pair
      * @see OptionalFloat
-     * @see N#median(float[])
+     * @see N#lowerMedian(float[])
      */
     public static Pair<Float, OptionalFloat> of(final float... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -932,7 +932,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(float...)
-     * @see N#median(float[], int, int)
+     * @see N#lowerMedian(float[], int, int)
      */
     public static Pair<Float, OptionalFloat> of(final float[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -949,7 +949,7 @@ public final class Median {
             return Float.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], OptionalFloat.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalFloat.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalFloat.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalFloat.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Float> queue = new PriorityQueue<>(k);
@@ -1007,7 +1007,7 @@ public final class Median {
      * @see #of(double[], int, int)
      * @see Pair
      * @see OptionalDouble
-     * @see N#median(double[])
+     * @see N#lowerMedian(double[])
      */
     public static Pair<Double, OptionalDouble> of(final double... source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -1051,7 +1051,7 @@ public final class Median {
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *                                   the length of the array
      * @see #of(double...)
-     * @see N#median(double[], int, int)
+     * @see N#lowerMedian(double[], int, int)
      */
     public static Pair<Double, OptionalDouble> of(final double[] source, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         if (N.isEmpty(source) || fromIndex >= toIndex) {
@@ -1068,7 +1068,7 @@ public final class Median {
             return Double.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], OptionalDouble.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], OptionalDouble.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex), OptionalDouble.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalDouble.empty());
         } else {
             final int k = len / 2 + 1;
             final Queue<Double> queue = new PriorityQueue<>(k);
@@ -1124,7 +1124,7 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty.
      * @see #of(Comparable[], int, int)
      * @see #of(Object[], Comparator)
-     * @see N#median(Comparable[])
+     * @see N#lowerMedian(Comparable[])
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] source) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -1168,7 +1168,7 @@ public final class Median {
      *                                   the length of the array
      * @see #of(Comparable[])
      * @see #of(Object[], int, int, Comparator)
-     * @see N#median(Comparable[], int, int)
+     * @see N#lowerMedian(Comparable[], int, int)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex) {
         return of(source, fromIndex, toIndex, Comparators.naturalOrder());
@@ -1210,7 +1210,7 @@ public final class Median {
      *         {@code null}.
      * @see #of(Object[], int, int, Comparator)
      * @see #of(Comparable[])
-     * @see N#median(Object[], Comparator)
+     * @see N#lowerMedian(Object[], Comparator)
      */
     public static <T> Pair<T, Optional<T>> of(final T[] source, final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
@@ -1263,7 +1263,7 @@ public final class Median {
      *                                   the length of the array
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
-     * @see N#median(Object[], int, int, Comparator)
+     * @see N#lowerMedian(Object[], int, int, Comparator)
      */
     public static <T> Pair<T, Optional<T>> of(final T[] source, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -1283,7 +1283,7 @@ public final class Median {
             return cmp.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Optional.ofNullable(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], Optional.ofNullable(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.median(source, fromIndex, toIndex, cmp), Optional.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex, cmp), Optional.empty());
         } else {
             boolean hasNull = false;
 
@@ -1353,8 +1353,8 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty.
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
-     * @see N#median(Collection)
-     * @see Iterables#median(Collection)
+     * @see N#lowerMedian(Collection)
+     * @see Iterables#lowerMedian(Collection)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> source) {
         return of(source, Comparators.naturalOrder());
@@ -1399,8 +1399,8 @@ public final class Median {
      *         {@code null}.
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
-     * @see N#median(Collection, Comparator)
-     * @see Iterables#median(Collection, Comparator)
+     * @see N#lowerMedian(Collection, Comparator)
+     * @see Iterables#lowerMedian(Collection, Comparator)
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
@@ -1419,7 +1419,7 @@ public final class Median {
             final T second = iter.next();
             return cmp.compare(first, second) <= 0 ? Pair.of(first, Optional.ofNullable(second)) : Pair.of(second, Optional.ofNullable(first));
         } else if (len == 3) {
-            return Pair.of(N.median(source, cmp), Optional.empty());
+            return Pair.of(N.lowerMedian(source, cmp), Optional.empty());
         } else {
             // Scan for nulls manually instead of calling source.contains(null): null-hostile
             // collections such as List.of(...) or TreeSet throw NullPointerException from
@@ -1502,7 +1502,7 @@ public final class Median {
      *                                   the size of the collection
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
-     * @see N#median(Collection, int, int)
+     * @see N#lowerMedian(Collection, int, int)
      */
     public static <T extends Comparable<? super T>> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex) {
         return of(source, fromIndex, toIndex, Comparators.naturalOrder());
@@ -1553,7 +1553,7 @@ public final class Median {
      *                                   the size of the collection
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
-     * @see N#median(Collection, int, int, Comparator)
+     * @see N#lowerMedian(Collection, int, int, Comparator)
      */
     public static <T> Pair<T, Optional<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {

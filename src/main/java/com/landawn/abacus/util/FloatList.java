@@ -86,7 +86,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * // Mathematical operations for floating-point data
  * OptionalFloat min = coordinates.min();         // find minimum value
  * OptionalFloat max = coordinates.max();         // find maximum value
- * OptionalFloat median = coordinates.median();   // calculate median value
+ * OptionalFloat median = coordinates.lowerMedian();   // calculate lower median value
  * double sum = coordinates.stream().sum();       // calculate the sum as a double
  *
  * // Set operations for data analysis
@@ -136,13 +136,13 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li><b>Precision:</b> ~7 decimal digits of precision (24-bit mantissa)</li>
  *   <li><b>Range:</b> Approximately ±3.4 × 10^38 with subnormal support</li>
  *   <li><b>Comparison:</b> NaN-aware comparison operations</li>
- *   <li><b>Aggregation:</b> {@code min()} and {@code max()} propagate NaN; {@code median()}
+ *   <li><b>Aggregation:</b> {@code min()} and {@code max()} propagate NaN; {@code lowerMedian()}
  *       orders NaN after finite and infinite values</li>
  * </ul>
  *
  * <p><b>Float-Specific Operations:</b>
  * <ul>
- *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code lowerMedian()}</li>
  *   <li><b>Type Conversions:</b> {@code toDoubleList()} for increased precision</li>
  *   <li><b>Random Generation:</b> {@code random(int)} for simulations and testing</li>
  *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
@@ -1099,13 +1099,13 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * list.removeAt(5);                   // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code float} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code float} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public float removeAt(final int index) {
         rangeCheck(index);
@@ -1122,7 +1122,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * to remove elements efficiently, with remaining elements shifted to fill gaps. The indices
      * must be valid positions within the list.
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code float} value.</p>
      *
      * @param indices the array of indices at which elements should be removed. May be {@code null} or empty.
@@ -1131,7 +1131,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2086,17 +2086,17 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList odd = FloatList.of(3f, 1f, 2f);
-     * odd.median().getAsFloat();        // returns 2.0 (middle of sorted [1, 2, 3])
+     * odd.lowerMedian().getAsFloat();        // returns 2.0 (middle of sorted [1, 2, 3])
      * FloatList even = FloatList.of(4f, 1f, 3f, 2f);
-     * even.median().getAsFloat();       // returns 2.0 (lower of two middles in sorted [1, 2, 3, 4])
+     * even.lowerMedian().getAsFloat();       // returns 2.0 (lower of two middles in sorted [1, 2, 3, 4])
      * FloatList empty = new FloatList();
-     * empty.median().isPresent();       // returns false
+     * empty.lowerMedian().isPresent();       // returns false
      * }</pre>
      *
      * @return an OptionalFloat containing the median value if the list is non-empty, or an empty OptionalFloat if the list is empty
      */
-    public OptionalFloat median() {
-        return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.median(elementData, 0, size));
+    public OptionalFloat lowerMedian() {
+        return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2112,9 +2112,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatList list = FloatList.of(10f, 3f, 1f, 2f, 9f);
-     * list.median(1, 4).getAsFloat();   // returns 2.0 (median of [3, 1, 2])
-     * list.median(2, 2).isPresent();    // returns false (empty range)
-     * list.median(0, 99);               // throws IndexOutOfBoundsException
+     * list.lowerMedian(1, 4).getAsFloat();   // returns 2.0 (median of [3, 1, 2])
+     * list.lowerMedian(2, 2).isPresent();    // returns false (empty range)
+     * list.lowerMedian(0, 99);               // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2122,10 +2122,10 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @return an OptionalFloat containing the median value if the range is non-empty, or an empty OptionalFloat if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalFloat median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalFloat lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalFloat.empty() : OptionalFloat.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalFloat.empty() : OptionalFloat.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2206,6 +2206,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * @return an OptionalFloat containing the first element, or an empty OptionalFloat if this list is empty
+     * @see #getFirst()
      */
     public OptionalFloat first() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[0]);
@@ -2223,6 +2224,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * @return an OptionalFloat containing the last element, or an empty OptionalFloat if this list is empty
+     * @see #getLast()
      */
     public OptionalFloat last() {
         return size() == 0 ? OptionalFloat.empty() : OptionalFloat.of(elementData[size() - 1]);
@@ -2787,6 +2789,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @return the first float value in the list
      * @throws NoSuchElementException if this list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public float getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -2806,6 +2810,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @return the last float value in the list
      * @throws NoSuchElementException if this list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public float getLast() {
         throwNoSuchElementExceptionIfEmpty();

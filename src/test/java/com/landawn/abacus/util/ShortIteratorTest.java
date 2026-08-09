@@ -24,7 +24,6 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 public class ShortIteratorTest extends TestBase {
- 
 
     // ===================== Additional tests for untested ShortIterator methods =====================
 

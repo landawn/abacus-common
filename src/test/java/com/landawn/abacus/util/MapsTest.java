@@ -774,7 +774,8 @@ public class MapsTest extends AbstractTest {
 
         assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, (IntFunction<Map<String, Integer>>) null));
         assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, ignored -> (Map<String, Integer>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, (BiFunction<Integer, Integer, Integer>) null, HashMap::new));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Maps.zip(emptyKeys, values, (BiFunction<Integer, Integer, Integer>) null, HashMap::new));
         assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, Integer::sum, ignored -> (Map<String, Integer>) null));
     }
 

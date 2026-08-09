@@ -436,8 +436,7 @@ public class ParserFactoryTest extends TestBase {
             }
 
             @Override
-            public DuplicateIdRegistrationTargetD read(final Kryo kryo, final Input input,
-                    final Class<? extends DuplicateIdRegistrationTargetD> type) {
+            public DuplicateIdRegistrationTargetD read(final Kryo kryo, final Input input, final Class<? extends DuplicateIdRegistrationTargetD> type) {
                 return new DuplicateIdRegistrationTargetD();
             }
         };
@@ -456,8 +455,7 @@ public class ParserFactoryTest extends TestBase {
             assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetD.class, serializerRegistrationId));
             assertThrows(IllegalArgumentException.class,
                     () -> ParserFactory.registerKryo(DuplicateIdRegistrationTargetD.class, new TestStringSerializer(), serializerRegistrationId));
-            assertEquals(retainedSerializerRegistrationId,
-                    ParserFactory._kryoClassSerializerIdMap.get(DuplicateIdRegistrationTargetD.class)._2.intValue());
+            assertEquals(retainedSerializerRegistrationId, ParserFactory._kryoClassSerializerIdMap.get(DuplicateIdRegistrationTargetD.class)._2.intValue());
             assertSame(retainedSerializer, ParserFactory._kryoClassSerializerIdMap.get(DuplicateIdRegistrationTargetD.class)._1);
             assertTrue(!ParserFactory._kryoClassIdMap.containsKey(DuplicateIdRegistrationTargetD.class));
         } finally {

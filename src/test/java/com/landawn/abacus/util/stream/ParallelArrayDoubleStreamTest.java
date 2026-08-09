@@ -886,7 +886,8 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
         assertTrue(firstMatch.isPresent());
         assertEquals(21.0, firstMatch.get(), 0.0001);
 
-        OptionalDouble anyMatch = createIteratorSplitStrategyDoubleStream(21.0, 2.0, 4.0, 7.0, 6.0, 11.0, 8.0, 13.0).findAny(d -> d > 5.0 && ((int) d) % 2 == 1);
+        OptionalDouble anyMatch = createIteratorSplitStrategyDoubleStream(21.0, 2.0, 4.0, 7.0, 6.0, 11.0, 8.0, 13.0)
+                .findAny(d -> d > 5.0 && ((int) d) % 2 == 1);
         assertTrue(anyMatch.isPresent());
         assertTrue(anyMatch.get() == 21.0 || anyMatch.get() == 7.0 || anyMatch.get() == 11.0 || anyMatch.get() == 13.0);
 

@@ -2176,11 +2176,13 @@ public class RegExUtilTest extends AbstractTest {
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (Function<String, String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", "x", (IntBiFunction<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> RegExUtil.replaceFirst("", pattern, (Function<String, String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("", pattern, (IntBiFunction<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (Function<String, String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", "x", (IntBiFunction<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (Function<String, String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> RegExUtil.replaceLast("", pattern, (Function<String, String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("", pattern, (IntBiFunction<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (Function<String, String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("", "x", (IntBiFunction<String>) null));

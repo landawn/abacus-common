@@ -85,7 +85,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * // Mathematical operations for 16-bit data
  * OptionalShort min = audioSamples.min();         // Find minimum sample
  * OptionalShort max = audioSamples.max();         // Find maximum sample
- * OptionalShort median = audioSamples.median();   // Calculate median sample
+ * OptionalShort median = audioSamples.lowerMedian();   // Calculate lower median sample
  *
  * // Multiset-style operations for data analysis
  * ShortList set1 = ShortList.of((short) 100, (short) 200, (short) 300);
@@ -127,7 +127,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <p><b>Short-Specific Operations:</b>
  * <ul>
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
- *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code lowerMedian()}</li>
  *   <li><b>Type Conversions:</b> {@code toIntList()}</li>
  *   <li><b>Random Generation:</b> {@code random(int)} for test data and simulations</li>
  *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
@@ -1183,13 +1183,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.removeAt(5);                   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code short} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code short} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public short removeAt(final int index) {
         rangeCheck(index);
@@ -1205,7 +1205,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Removes all elements at the specified indices from this list. The indices array may contain
      * duplicates and does not need to be sorted. Elements are removed efficiently in a single pass.
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code short} value.</p>
      *
      * @param indices the indices of elements to be removed; may be empty or {@code null} (no-op), may contain duplicates
@@ -1213,7 +1213,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2160,13 +2160,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)5, (short)2, (short)8, (short)1, (short)9);
-     * OptionalShort median = list.median();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalShort[5]
+     * OptionalShort median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalShort[5]
      * }</pre>
      *
      * @return an OptionalShort containing the median value if the list is non-empty, or an empty OptionalShort if the list is empty
      */
-    public OptionalShort median() {
-        return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, 0, size));
+    public OptionalShort lowerMedian() {
+        return size() == 0 ? OptionalShort.empty() : OptionalShort.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2179,7 +2179,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)5, (short)2, (short)8, (short)1, (short)9);
-     * OptionalShort median = list.median(1, 4);  // returns median of [2, 8, 1] = OptionalShort[2]
+     * OptionalShort median = list.lowerMedian(1, 4);  // returns median of [2, 8, 1] = OptionalShort[2]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2187,10 +2187,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return an OptionalShort containing the median value if the range is non-empty, or an empty OptionalShort if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalShort median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalShort lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalShort.empty() : OptionalShort.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalShort.empty() : OptionalShort.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2267,6 +2267,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @return an OptionalShort containing the first element, or empty if the list is empty
+     * @see #getFirst()
      */
     public OptionalShort first() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[0]);
@@ -2283,6 +2284,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @return an OptionalShort containing the last element, or empty if the list is empty
+     * @see #getLast()
      */
     public OptionalShort last() {
         return size() == 0 ? OptionalShort.empty() : OptionalShort.of(elementData[size() - 1]);

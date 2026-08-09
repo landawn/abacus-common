@@ -44,7 +44,9 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
     private DoubleStream parallelStream;
 
     protected DoubleStream createDoubleStream(double... elements) {
-        return DoubleStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return DoubleStream.of(elements)
+                .map(e -> (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test

@@ -1810,12 +1810,14 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testRemoveAllOccurrencesIf_Predicate_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((java.util.function.Predicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> multiset.removeAllOccurrencesIf((java.util.function.Predicate<String>) null));
     }
 
     @Test
     public void testRemoveAllOccurrencesIf_ObjIntPredicate_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((com.landawn.abacus.util.function.ObjIntPredicate<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> multiset.removeAllOccurrencesIf((com.landawn.abacus.util.function.ObjIntPredicate<String>) null));
     }
 
     @Test
@@ -3358,7 +3360,8 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testForEach_ObjIntConsumer_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((com.landawn.abacus.util.function.ObjIntConsumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> multiset.forEach((com.landawn.abacus.util.function.ObjIntConsumer<String>) null));
     }
 
     @Test

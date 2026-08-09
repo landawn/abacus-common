@@ -41,7 +41,9 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     private CharStream stream;
 
     protected CharStream createCharStream(char... elements) {
-        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return CharStream.of(elements)
+                .map(e -> (char) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -96,7 +98,9 @@ public class ParallelIteratorCharStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private CharStream createSingleThreadStream(char... elements) {
-        return CharStream.of(elements).map(e -> (char) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
+        return CharStream.of(elements)
+                .map(e -> (char) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test

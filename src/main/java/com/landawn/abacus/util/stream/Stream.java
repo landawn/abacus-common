@@ -9856,13 +9856,18 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The line separator is automatically added after each write.
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
+     * <p><b>Intermediate vs terminal:</b> {@code onEachSave} is an {@link IntermediateOp intermediate}
+     * side-effect (like {@link #onEach(Consumer)}): it does <b>not</b> flush/close by itself and writes
+     * only when a later terminal operation pulls elements. Prefer {@link #persist(File)} when the stream
+     * should be fully consumed and closed as the write sink.</p>
+     *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
      * occurs when a terminal operation is invoked on the returned stream.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of("Hello", "World")
-     *       .saveEach(new File("output.txt"))
+     *       .onEachSave(new File("output.txt"))
      *       .map(String::toUpperCase)
      *       .toList();   // file contains "Hello\nWorld\n", returns ["HELLO", "WORLD"]
      * }</pre>
@@ -9880,7 +9885,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(File output) throws IllegalStateException, UncheckedIOException;
+    public abstract Stream<T> onEachSave(File output) throws IllegalStateException, UncheckedIOException;
 
     /**
      * Writes each element of this stream as a separate line to the specified file, using the provided function to convert elements to strings.
@@ -9893,7 +9898,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of(1, 2, 3)
-     *       .saveEach(x -> "Number: " + x, new File("output.txt"))
+     *       .onEachSave(x -> "Number: " + x, new File("output.txt"))
      *       .mapToInt(Integer::intValue).sum();   // file contains "Number: 1\nNumber: 2\nNumber: 3\n", returns 6
      * }</pre>
      *
@@ -9911,7 +9916,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(Function<? super T, String> toLine, File output) throws IllegalStateException, UncheckedIOException;
+    public abstract Stream<T> onEachSave(Function<? super T, String> toLine, File output) throws IllegalStateException, UncheckedIOException;
 
     /**
      * Writes each element of this stream as a separate line to the specified output stream, using the provided function to convert elements to strings.
@@ -9927,7 +9932,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * try (FileOutputStream fos = new FileOutputStream("output.txt")) {
      *     Stream.of("a", "b", "c")
-     *           .saveEach(String::toUpperCase, fos)
+     *           .onEachSave(String::toUpperCase, fos)
      *           .count();   // output contains "A\nB\nC\n", returns 3
      * }
      * }</pre>
@@ -9946,7 +9951,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(Function<? super T, String> toLine, OutputStream output) throws IllegalStateException, UncheckedIOException;
+    public abstract Stream<T> onEachSave(Function<? super T, String> toLine, OutputStream output) throws IllegalStateException, UncheckedIOException;
 
     /**
      * Writes each element of this stream as a separate line to the specified writer, using the provided function to convert elements to strings.
@@ -9962,7 +9967,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * try (FileWriter writer = new FileWriter("output.txt")) {
      *     Stream.of(1, 2, 3)
-     *           .saveEach(x -> x + " squared = " + (x * x), writer)
+     *           .onEachSave(x -> x + " squared = " + (x * x), writer)
      *           .toList();   // writer contains "1 squared = 1\n2 squared = 4\n3 squared = 9\n"
      * }
      * }</pre>
@@ -9981,7 +9986,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(Function<? super T, String> toLine, Writer output) throws IllegalStateException, UncheckedIOException;
+    public abstract Stream<T> onEachSave(Function<? super T, String> toLine, Writer output) throws IllegalStateException, UncheckedIOException;
 
     /**
      * Writes each element of this stream as a separate line to the specified file using the provided function to write each element.
@@ -9994,7 +9999,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of("Hello", "World")
-     *       .saveEach((str, writer) -> writer.write("[" + str + "]"), new File("output.txt"))
+     *       .onEachSave((str, writer) -> writer.write("[" + str + "]"), new File("output.txt"))
      *       .count();   // file contains "[Hello]\n[World]\n", returns 2
      * }</pre>
      *
@@ -10012,7 +10017,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
+    public abstract Stream<T> onEachSave(final Throwables.BiConsumer<? super T, Writer, IOException> write, final File output)
             throws IllegalStateException, UncheckedIOException;
 
     /**
@@ -10029,7 +10034,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * try (StringWriter writer = new StringWriter()) {
      *     Stream.of(1, 2, 3)
-     *           .saveEach((num, w) -> w.write("Value: " + num), writer)
+     *           .onEachSave((num, w) -> w.write("Value: " + num), writer)
      *           .mapToInt(Integer::intValue).sum();   // writer contains "Value: 1\nValue: 2\nValue: 3\n", returns 6
      * }
      * }</pre>
@@ -10048,7 +10053,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
+    public abstract Stream<T> onEachSave(final Throwables.BiConsumer<? super T, Writer, IOException> write, final Writer output)
             throws IllegalStateException, UncheckedIOException;
 
     /**
@@ -10063,7 +10068,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)");
      * Stream.of("Alice", "Bob", "Charlie")
-     *       .saveEach(stmt, (name, ps) -> ps.setString(1, name))
+     *       .onEachSave(stmt, (name, ps) -> ps.setString(1, name))
      *       .count();   // inserts 3 records, returns 3
      * }</pre>
      *
@@ -10081,7 +10086,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    public abstract Stream<T> onEachSave(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException, UncheckedSQLException;
 
     /**
@@ -10096,7 +10101,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (id, name) VALUES (?, ?)");
      * Stream.of(new User(1, "Alice"), new User(2, "Bob"), new User(3, "Charlie"))
-     *       .saveEach(stmt, 2, 1000, (user, ps) -> {
+     *       .onEachSave(stmt, 2, 1000, (user, ps) -> {
      *           ps.setInt(1, user.getId());
      *           ps.setString(2, user.getName());
      *       })
@@ -10120,7 +10125,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    public abstract Stream<T> onEachSave(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
@@ -10134,7 +10139,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of("Product A", "Product B")
-     *       .saveEach(conn, "INSERT INTO products (name) VALUES (?)",
+     *       .onEachSave(conn, "INSERT INTO products (name) VALUES (?)",
      *                 (name, ps) -> ps.setString(1, name))
      *       .count();   // inserts 2 records, returns 2
      * }</pre>
@@ -10154,7 +10159,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final Connection conn, final String insertSQL,
+    public abstract Stream<T> onEachSave(final Connection conn, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
@@ -10168,7 +10173,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of(new Product(1, "A", 10.99), new Product(2, "B", 20.99))
-     *       .saveEach(conn, "INSERT INTO products (id, name, price) VALUES (?, ?, ?)",
+     *       .onEachSave(conn, "INSERT INTO products (id, name, price) VALUES (?, ?, ?)",
      *                 100, 5000,
      *                 (product, ps) -> {
      *                     ps.setInt(1, product.getId());
@@ -10196,7 +10201,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public abstract Stream<T> onEachSave(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
@@ -10211,7 +10216,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of("Category 1", "Category 2")
-     *       .saveEach(dataSource, "INSERT INTO categories (name) VALUES (?)",
+     *       .onEachSave(dataSource, "INSERT INTO categories (name) VALUES (?)",
      *                 (name, ps) -> ps.setString(1, name))
      *       .forEach(System.out::println);   // inserts and prints each category
      * }</pre>
@@ -10231,7 +10236,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final javax.sql.DataSource ds, final String insertSQL,
+    public abstract Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
@@ -10247,7 +10252,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.generate(() -> UUID.randomUUID().toString())
      *       .limit(1000)
-     *       .saveEach(dataSource, "INSERT INTO tokens (token) VALUES (?)",
+     *       .onEachSave(dataSource, "INSERT INTO tokens (token) VALUES (?)",
      *                 50, 2000,
      *                 (token, ps) -> ps.setString(1, token))
      *       .count();   // inserts 1000 tokens in batches of 50, returns 1000
@@ -10271,13 +10276,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> saveEach(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public abstract Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
      * Saves each element of this stream as a separate line to the specified file.
      * The line separator is automatically added after each write.
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
+     *
+     * <p><b>Terminal vs intermediate:</b> {@code persist} is a {@link TerminalOp terminal} write that
+     * consumes and closes this stream. For a side-effect write that leaves the stream open for further
+     * pipeline steps, use {@link #onEachSave(File)} (and still run a terminal operation to pull elements).</p>
      *
      * <p>This is a terminal operation and will close the stream after execution.</p>
      *
@@ -10294,6 +10303,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
      * @throws IOException if an I/O error occurs
+     * @see #onEachSave(File)
      * @see N#stringOf(Object)
      */
     @SequentialOnly

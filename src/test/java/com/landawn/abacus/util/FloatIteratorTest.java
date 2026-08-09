@@ -22,7 +22,6 @@ import com.landawn.abacus.util.function.FloatSupplier;
 import com.landawn.abacus.util.stream.FloatStream;
 
 public class FloatIteratorTest extends TestBase {
-  
 
     @Test
     public void testEmpty_SameSingleton() {

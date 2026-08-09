@@ -921,9 +921,8 @@ public class TypeFactoryTest extends TestBase {
             }
         }
 
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(ClassBiFunctionTarget.class, (BiFunction<ClassBiFunctionTarget, JsonParser, String>) null,
-                        (str, parser) -> new ClassBiFunctionTarget(str)));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(ClassBiFunctionTarget.class,
+                (BiFunction<ClassBiFunctionTarget, JsonParser, String>) null, (str, parser) -> new ClassBiFunctionTarget(str)));
         TypeFactory.registerType(ClassBiFunctionTarget.class, (value, parser) -> value.value, (str, parser) -> new ClassBiFunctionTarget(str));
 
         class ClassFunctionTarget {
@@ -934,9 +933,8 @@ public class TypeFactoryTest extends TestBase {
             }
         }
 
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(ClassFunctionTarget.class, (Function<ClassFunctionTarget, String>) value -> value.value,
-                        (Function<String, ClassFunctionTarget>) null));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(ClassFunctionTarget.class,
+                (Function<ClassFunctionTarget, String>) value -> value.value, (Function<String, ClassFunctionTarget>) null));
         TypeFactory.registerType(ClassFunctionTarget.class, value -> value.value, ClassFunctionTarget::new);
 
         class NamedBiFunctionTarget {
@@ -964,9 +962,8 @@ public class TypeFactoryTest extends TestBase {
         }
 
         final String namedFunctionType = "TypeFactoryNullNamedFunction_" + System.nanoTime();
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(namedFunctionType, NamedFunctionTarget.class, (Function<NamedFunctionTarget, String>) null,
-                        NamedFunctionTarget::new));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(namedFunctionType, NamedFunctionTarget.class,
+                (Function<NamedFunctionTarget, String>) null, NamedFunctionTarget::new));
         TypeFactory.registerType(namedFunctionType, NamedFunctionTarget.class, value -> value.value, NamedFunctionTarget::new);
     }
 

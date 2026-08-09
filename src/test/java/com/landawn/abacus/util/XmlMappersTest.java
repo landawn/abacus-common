@@ -111,8 +111,7 @@ public class XmlMappersTest extends TestBase {
         fieldMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         final String xml = "<DeserializationVisibilityBean><value>secret</value></DeserializationVisibilityBean>";
 
-        final DeserializationVisibilityBean bean = XmlMappers.fromXml(xml, DeserializationVisibilityBean.class,
-                fieldMapper.getDeserializationConfig());
+        final DeserializationVisibilityBean bean = XmlMappers.fromXml(xml, DeserializationVisibilityBean.class, fieldMapper.getDeserializationConfig());
         assertEquals("secret", bean.value());
 
         final DeserializationConfig defaultConfig = XmlMappers.createDeserializationConfig();

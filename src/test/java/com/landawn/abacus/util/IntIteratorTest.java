@@ -26,7 +26,7 @@ public class IntIteratorTest extends TestBase {
     @Test
     public void testEmpty_SameSingleton() {
         assertSame(IntIterator.EMPTY, IntIterator.empty());
-    } 
+    }
 
     // =================================================
     // empty()

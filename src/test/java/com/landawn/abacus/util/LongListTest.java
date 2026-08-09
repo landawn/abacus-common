@@ -461,7 +461,7 @@ public class LongListTest extends TestBase {
     @Test
     public void testDeleteAllByIndicesOutOfOrder() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L, 5L });
-        list.removeAt(4, 1, 2);
+        list.removeAllAt(4, 1, 2);
         assertEquals(2, list.size());
         assertEquals(1L, list.get(0));
         assertEquals(4L, list.get(1));
@@ -473,7 +473,7 @@ public class LongListTest extends TestBase {
         padded.addAll(new long[] { 10L, 20L, 30L, 40L, 50L });
         final long[] backingArray = padded.internalArray();
 
-        padded.removeAt(3, 1, 3, 1);
+        padded.removeAllAt(3, 1, 3, 1);
 
         assertSame(backingArray, padded.internalArray());
         assertArrayEquals(new long[] { 10L, 30L, 50L }, padded.toArray());
@@ -833,7 +833,7 @@ public class LongListTest extends TestBase {
         list.add(2L);
         list.add(3L);
         list.add(4L);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(2, list.size());
         assertEquals(1L, list.get(0));
         assertEquals(3L, list.get(1));
@@ -841,11 +841,11 @@ public class LongListTest extends TestBase {
 
     @Test
     public void testDeleteAllByIndicesEmpty() {
-        list.removeAt();
+        list.removeAllAt();
         assertTrue(list.isEmpty());
 
         list.addAll(new long[] { 1L, 2L, 3L });
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
@@ -1043,7 +1043,8 @@ public class LongListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.LongUnaryOperator) null));
 
         LongList empty = new LongList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.LongUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.LongUnaryOperator) null));
     }
 
     @Test
@@ -1556,12 +1557,12 @@ public class LongListTest extends TestBase {
         LongList list = LongList.of(3L, 1L, 4L, 1L, 5L, 9L, 2L, 6L, 5L);
         assertEquals(1L, list.min().getAsLong());
         assertEquals(9L, list.max().getAsLong());
-        assertEquals(4L, list.median().getAsLong());
+        assertEquals(4L, list.lowerMedian().getAsLong());
 
         LongList emptyList = new LongList();
         assertTrue(emptyList.min().isEmpty());
         assertTrue(emptyList.max().isEmpty());
-        assertTrue(emptyList.median().isEmpty());
+        assertTrue(emptyList.lowerMedian().isEmpty());
     }
 
     @Test
@@ -1576,7 +1577,7 @@ public class LongListTest extends TestBase {
         assertTrue(max.isPresent());
         assertEquals(5L, max.getAsLong());
 
-        OptionalLong median = list.median();
+        OptionalLong median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(5L, median.getAsLong());
     }
@@ -1587,7 +1588,7 @@ public class LongListTest extends TestBase {
 
         assertFalse(list.min(1, 1).isPresent());
         assertFalse(list.max(1, 1).isPresent());
-        assertFalse(list.median(1, 1).isPresent());
+        assertFalse(list.lowerMedian(1, 1).isPresent());
     }
 
     @Test
@@ -1614,7 +1615,7 @@ public class LongListTest extends TestBase {
         list.add(1L);
         list.add(3L);
         list.add(2L);
-        OptionalLong median = list.median();
+        OptionalLong median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(2L, median.get());
     }
@@ -1625,7 +1626,7 @@ public class LongListTest extends TestBase {
         list.add(3L);
         list.add(2L);
         list.add(5L);
-        OptionalLong median = list.median(0, 3);
+        OptionalLong median = list.lowerMedian(0, 3);
         assertTrue(median.isPresent());
         assertEquals(2L, median.get());
     }
@@ -1633,7 +1634,7 @@ public class LongListTest extends TestBase {
     @Test
     public void testMedianEvenElements() {
         list.addAll(new long[] { 1L, 2L, 3L, 4L });
-        OptionalLong median = list.median();
+        OptionalLong median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(2L, median.getAsLong());
     }
@@ -2721,9 +2722,12 @@ public class LongListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final LongList empty = new LongList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.LongConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.LongPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.LongPredicate) null, 0L));
 
         final LongList nonEmpty = LongList.of(1L, 2L);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.LongConsumer) null));

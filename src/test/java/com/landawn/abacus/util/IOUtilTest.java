@@ -9012,7 +9012,8 @@ public class IOUtilTest extends TestBase {
     public void testForLinesValidatesEmptyInputsAndMissingFiles() {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), -1, 0, 0, 0, line -> {
         }));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
         assertThrows(UncheckedIOException.class, () -> IOUtil.forLines(tempFolder.resolve("missing-lines.txt").toFile(), line -> {
         }));
     }

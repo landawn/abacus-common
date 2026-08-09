@@ -1397,7 +1397,6 @@ public class CharStreamTest extends TestBase {
         assertNotNull(stream);
         assertArrayEquals(new char[] { 'a', 'b', 'c' }, stream.toArray());
     }
-  
 
     @Test
     public void testDeferRejectsNullSupplier() {

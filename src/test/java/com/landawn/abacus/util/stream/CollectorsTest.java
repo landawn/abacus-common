@@ -106,8 +106,7 @@ public class CollectorsTest extends TestBase {
                 () -> Collectors.<String, StringBuilder> create(null, StringBuilder::append, (left, right) -> left.append(right)));
         assertThrows(IllegalArgumentException.class,
                 () -> Collectors.<String, StringBuilder> create(StringBuilder::new, null, (left, right) -> left.append(right)));
-        assertThrows(IllegalArgumentException.class,
-                () -> Collectors.<String, StringBuilder> create(StringBuilder::new, StringBuilder::append, null));
+        assertThrows(IllegalArgumentException.class, () -> Collectors.<String, StringBuilder> create(StringBuilder::new, StringBuilder::append, null));
         assertThrows(IllegalArgumentException.class, () -> Collectors.toCollection(null));
     }
 
@@ -4689,14 +4688,14 @@ public class CollectorsTest extends TestBase {
         downstreams.add(null);
         assertThrows(IllegalArgumentException.class, () -> MoreCollectors.combine(downstreams, values -> values));
 
-        assertThrows(IllegalArgumentException.class, () -> java.util.stream.Stream.of(1)
-                .collect(Collectors.filtering((java.util.function.Predicate<Integer>) null, Collectors.toList())));
-        assertThrows(IllegalArgumentException.class, () -> java.util.stream.Stream.of(1)
-                .collect(Collectors.toArray((java.util.function.IntFunction<Integer[]>) null)));
-        assertThrows(IllegalArgumentException.class, () -> java.util.stream.Stream.of(1)
-                .collect(Collectors.toMap((Function<Integer, Integer>) null, Function.identity())));
-        assertThrows(IllegalArgumentException.class, () -> java.util.stream.Stream.of(1)
-                .collect(Collectors.partitioningBy((java.util.function.Predicate<Integer>) null)));
+        assertThrows(IllegalArgumentException.class,
+                () -> java.util.stream.Stream.of(1).collect(Collectors.filtering((java.util.function.Predicate<Integer>) null, Collectors.toList())));
+        assertThrows(IllegalArgumentException.class,
+                () -> java.util.stream.Stream.of(1).collect(Collectors.toArray((java.util.function.IntFunction<Integer[]>) null)));
+        assertThrows(IllegalArgumentException.class,
+                () -> java.util.stream.Stream.of(1).collect(Collectors.toMap((Function<Integer, Integer>) null, Function.identity())));
+        assertThrows(IllegalArgumentException.class,
+                () -> java.util.stream.Stream.of(1).collect(Collectors.partitioningBy((java.util.function.Predicate<Integer>) null)));
     }
 
     @Test

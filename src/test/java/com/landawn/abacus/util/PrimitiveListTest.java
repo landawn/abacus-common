@@ -318,7 +318,7 @@ public class PrimitiveListTest extends AbstractTest {
     public void test_removeAt() {
         final LongList list = LongList.of(1, 2, 3, 4, 5, 6);
 
-        list.removeAt(1, 3, 5);
+        list.removeAllAt(1, 3, 5);
 
         assertEquals(3, list.size());
 
@@ -328,10 +328,10 @@ public class PrimitiveListTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test removeAt(int...) with multiple indices")
+    @DisplayName("Test removeAllAt(int...) with multiple indices")
     public void testRemoveAtMultipleIndices() {
         IntList l = IntList.of(10, 20, 30, 40, 50);
-        l.removeAt(new int[] { 1, 3 });
+        l.removeAllAt(new int[] { 1, 3 });
         assertEquals(3, l.size());
     }
 

@@ -22625,7 +22625,7 @@ public class CommonUtilTest extends TestBase {
     @Test
     public void testMedian_IntArray() {
         int[] arr = { 3, 1, 4, 1, 5 };
-        assertEquals(3, N.median(arr));
+        assertEquals(3, N.lowerMedian(arr));
     }
 
     @Test
@@ -23398,8 +23398,7 @@ public class CommonUtilTest extends TestBase {
     public void testNullFunctionalInterfaceArgumentsAreRejected() {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(Runnable.class, null));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(new Class<?>[] { Runnable.class }, null));
-        assertThrows(IllegalArgumentException.class,
-                () -> N.splitByChunkCount(1, 1, (com.landawn.abacus.util.function.IntBiFunction<Object>) null));
+        assertThrows(IllegalArgumentException.class, () -> N.splitByChunkCount(1, 1, (com.landawn.abacus.util.function.IntBiFunction<Object>) null));
     }
 
 }

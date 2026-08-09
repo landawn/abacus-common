@@ -19,7 +19,6 @@ import com.landawn.abacus.util.function.CharSupplier;
 import com.landawn.abacus.util.stream.CharStream;
 
 public class CharIteratorTest extends TestBase {
- 
 
     @Test
     public void testEmpty_singleton() {

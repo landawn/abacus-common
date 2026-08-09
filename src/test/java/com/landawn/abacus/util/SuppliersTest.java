@@ -1180,9 +1180,8 @@ public class SuppliersTest extends TestBase {
         final Class<? extends Collection> targetType = (Class) Proxy.getProxyClass(classLoader, List.class, RandomAccess.class, Serializable.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForCollection(targetType, null));
-        Assertions.assertTrue(Suppliers.registerForCollection((Class) targetType,
-                () -> (Collection) Proxy.newProxyInstance(classLoader, new Class<?>[] { List.class, RandomAccess.class, Serializable.class },
-                        new MarkerInvocationHandler(101))));
+        Assertions.assertTrue(Suppliers.registerForCollection((Class) targetType, () -> (Collection) Proxy.newProxyInstance(classLoader,
+                new Class<?>[] { List.class, RandomAccess.class, Serializable.class }, new MarkerInvocationHandler(101))));
         Assertions.assertTrue(targetType.isInstance(Suppliers.ofCollection(targetType).get()));
     }
 
@@ -1215,9 +1214,8 @@ public class SuppliersTest extends TestBase {
         final Class<? extends Map> targetType = (Class) Proxy.getProxyClass(classLoader, Map.class, Cloneable.class, Serializable.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.registerForMap(targetType, null));
-        Assertions.assertTrue(Suppliers.registerForMap((Class) targetType,
-                () -> (Map) Proxy.newProxyInstance(classLoader, new Class<?>[] { Map.class, Cloneable.class, Serializable.class },
-                        new MarkerInvocationHandler(102))));
+        Assertions.assertTrue(Suppliers.registerForMap((Class) targetType, () -> (Map) Proxy.newProxyInstance(classLoader,
+                new Class<?>[] { Map.class, Cloneable.class, Serializable.class }, new MarkerInvocationHandler(102))));
         Assertions.assertTrue(targetType.isInstance(Suppliers.ofMap(targetType).get()));
     }
 
@@ -1462,7 +1460,8 @@ public class SuppliersTest extends TestBase {
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap.class, (Class<? extends List>) null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((java.util.function.Supplier<Map<Object, List<Object>>>) null, ArrayList::new));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofListMultimap((java.util.function.Supplier<Map<Object, List<Object>>>) null, ArrayList::new));
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap(HashMap::new, (java.util.function.Supplier<List<Object>>) null));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));

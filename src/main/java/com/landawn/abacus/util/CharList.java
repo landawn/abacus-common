@@ -1251,13 +1251,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.removeAt(5);                  // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code char} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code char} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public char removeAt(final int index) {
         rangeCheck(index);
@@ -1276,11 +1276,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
-     * list.removeAt(0, 2, 4);   // list is now ['b', 'd']
-     * list.removeAt();          // list unchanged (no indices)
+     * list.removeAllAt(0, 2, 4);   // list is now ['b', 'd']
+     * list.removeAllAt();          // list unchanged (no indices)
      * }</pre>
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code char} value.</p>
      *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
@@ -1288,7 +1288,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2228,13 +2228,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
-     * OptionalChar median = list.median();  // returns sorted: ['a', 'b', 'e', 'h', 'i']; median = OptionalChar['e']
+     * OptionalChar median = list.lowerMedian();  // returns sorted: ['a', 'b', 'e', 'h', 'i']; median = OptionalChar['e']
      * }</pre>
      *
      * @return an OptionalChar containing the median value if the list is non-empty, or an empty OptionalChar if the list is empty
      */
-    public OptionalChar median() {
-        return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, 0, size));
+    public OptionalChar lowerMedian() {
+        return size() == 0 ? OptionalChar.empty() : OptionalChar.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2247,7 +2247,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharList list = CharList.of('e', 'b', 'h', 'a', 'i');
-     * OptionalChar median = list.median(1, 4);  // returns median of ['b', 'h', 'a'] = OptionalChar['b']
+     * OptionalChar median = list.lowerMedian(1, 4);  // returns median of ['b', 'h', 'a'] = OptionalChar['b']
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2255,10 +2255,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return an OptionalChar containing the median value if the range is non-empty, or an empty OptionalChar if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalChar median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalChar lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalChar.empty() : OptionalChar.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2334,6 +2334,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @return an OptionalChar containing the first element, or an empty OptionalChar if this list is empty
+     * @see #getFirst()
      */
     public OptionalChar first() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[0]);
@@ -2350,6 +2351,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @return an OptionalChar containing the last element, or an empty OptionalChar if this list is empty
+     * @see #getLast()
      */
     public OptionalChar last() {
         return size() == 0 ? OptionalChar.empty() : OptionalChar.of(elementData[size() - 1]);
@@ -3078,6 +3080,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return the first char value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public char getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -3100,6 +3104,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return the last char value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public char getLast() {
         throwNoSuchElementExceptionIfEmpty();

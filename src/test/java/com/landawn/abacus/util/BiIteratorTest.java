@@ -52,8 +52,10 @@ public class BiIteratorTest extends TestBase {
     public void testEmptyRejectsNullTypedActions() {
         BiIterator<String, Integer> iter = BiIterator.empty();
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.forEachRemaining((com.landawn.abacus.util.function.BiConsumer<? super String, ? super Integer>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> iter.forEachRemaining((com.landawn.abacus.util.function.BiConsumer<? super String, ? super Integer>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> iter.foreachRemaining((Throwables.BiConsumer<? super String, ? super Integer, RuntimeException>) null));
     }
 
     @Test

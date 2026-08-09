@@ -1294,8 +1294,7 @@ public class IntFunctionsTest extends TestBase {
 
     @Test
     public void testRegisterForMap_NullCreator() {
-        final IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> IntFunctions.registerForMap(HashMap.class, null));
+        final IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.registerForMap(HashMap.class, null));
 
         // Creator validation intentionally precedes the built-in-class policy check.
         Assertions.assertEquals("'creator' cannot be null", thrown.getMessage());

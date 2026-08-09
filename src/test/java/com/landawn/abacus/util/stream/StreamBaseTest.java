@@ -1061,37 +1061,61 @@ public class StreamBaseTest extends TestBase {
     @Test
     public void testNewStream_ByteArray_WithRange_Parallel() {
         // Tests newStream(byte[], int, int, boolean) via parallel mapToByte
-        byte[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToByte(i -> i.byteValue()).sorted().toArray();
+        byte[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToByte(i -> i.byteValue())
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, result);
     }
 
     @Test
     public void testNewStream_ShortArray_WithRange_Parallel() {
-        short[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToShort(i -> i.shortValue()).sorted().toArray();
+        short[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToShort(i -> i.shortValue())
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, result);
     }
 
     @Test
     public void testNewStream_IntArray_WithRange_Parallel() {
-        int[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToInt(i -> i).sorted().toArray();
+        int[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToInt(i -> i)
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, result);
     }
 
     @Test
     public void testNewStream_LongArray_WithRange_Parallel() {
-        long[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToLong(i -> i.longValue()).sorted().toArray();
+        long[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToLong(i -> i.longValue())
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, result);
     }
 
     @Test
     public void testNewStream_FloatArray_WithRange_Parallel() {
-        float[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToFloat(i -> i.floatValue()).sorted().toArray();
+        float[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToFloat(i -> i.floatValue())
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new float[] { 1f, 2f, 3f, 4f, 5f }, result, 0.001f);
     }
 
     @Test
     public void testNewStream_DoubleArray_WithRange_Parallel() {
-        double[] result = Stream.of(1, 2, 3, 4, 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build()).mapToDouble(i -> i.doubleValue()).sorted().toArray();
+        double[] result = Stream.of(1, 2, 3, 4, 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .mapToDouble(i -> i.doubleValue())
+                .sorted()
+                .toArray();
         Assertions.assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, result, 0.001);
     }
 

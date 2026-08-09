@@ -1298,7 +1298,6 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(1, counter.get());
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.0001);
     }
- 
 
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {
@@ -2786,8 +2785,10 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toList());
         assertEquals(5, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).count());
         assertEquals(4, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).count());
-        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).toArray(), 0.0);
-        assertArrayEquals(new double[] { 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
+        assertArrayEquals(new double[] { 2, 4, 6, 8, 10 }, DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).toArray(),
+                0.0);
+        assertArrayEquals(new double[] { 4, 6, 8, 10 },
+                DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toArray(), 0.0);
         assertEquals(N.toList(2.0, 4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).toList());
         assertEquals(N.toList(4.0, 6.0, 8.0, 10.0), DoubleStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(d -> d * 2)).skip(1).toList());
     }

@@ -90,7 +90,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * // Mathematical operations for large numbers
  * OptionalLong min = timestamps.min();         // Find earliest timestamp
  * OptionalLong max = timestamps.max();         // Find latest timestamp
- * OptionalLong median = timestamps.median();   // Calculate median timestamp
+ * OptionalLong median = timestamps.lowerMedian();   // Calculate lower median timestamp
  *
  * // Set operations for data analysis
  * LongList set1 = LongList.of(100L, 200L, 300L, 400L);
@@ -133,7 +133,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * <p><b>Long-Specific Operations:</b>
  * <ul>
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
- *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code lowerMedian()}</li>
  *   <li><b>Type Conversions:</b> {@code toFloatList()}, {@code toDoubleList()}</li>
  *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
  *   <li><b>Parallel Operations:</b> {@code parallelSort()} for large dataset optimization</li>
@@ -273,7 +273,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * systemEvents.sort();                               // Sort chronologically
  * OptionalLong firstEvent = systemEvents.first();    // Earliest event
  * OptionalLong lastEvent = systemEvents.last();      // Latest event
- * OptionalLong medianTime = systemEvents.median();   // Median timestamp
+ * OptionalLong medianTime = systemEvents.lowerMedian();   // Lower median timestamp
  *
  * // Calculate duration and intervals
  * long totalDuration = lastEvent.orElse(0L) - firstEvent.orElse(0L);
@@ -1221,13 +1221,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * list.removeAt(5);                  // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code long} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code long} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      * @see #remove(long)
      */
     public long removeAt(final int index) {
@@ -1246,7 +1246,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>The indices array may contain duplicate values and does not need to be sorted.
      * The remaining elements maintain their relative order.
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code long} value.</p>
      *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
@@ -1254,7 +1254,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2246,13 +2246,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
-     * OptionalLong median = list.median();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalLong[5]
+     * OptionalLong median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalLong[5]
      * }</pre>
      *
      * @return an OptionalLong containing the median value if the list is non-empty, or an empty OptionalLong if the list is empty
      */
-    public OptionalLong median() {
-        return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, 0, size));
+    public OptionalLong lowerMedian() {
+        return size() == 0 ? OptionalLong.empty() : OptionalLong.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2265,7 +2265,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
-     * OptionalLong median = list.median(1, 4);  // returns median of [2L, 8L, 1L] = OptionalLong[2]
+     * OptionalLong median = list.lowerMedian(1, 4);  // returns median of [2L, 8L, 1L] = OptionalLong[2]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2273,10 +2273,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return an OptionalLong containing the median value if the range is non-empty, or an empty OptionalLong if the range is empty
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
      */
-    public OptionalLong median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalLong lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalLong.empty() : OptionalLong.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2366,6 +2366,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return an {@code OptionalLong} containing the first element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
+     * @see #getFirst()
      */
     public OptionalLong first() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[0]);
@@ -2384,6 +2385,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return an {@code OptionalLong} containing the last element of this list,
      *         or an empty {@code OptionalLong} if this list is empty
+     * @see #getLast()
      */
     public OptionalLong last() {
         return size() == 0 ? OptionalLong.empty() : OptionalLong.of(elementData[size() - 1]);
@@ -3068,6 +3070,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return the first long value in this list
      * @throws NoSuchElementException if this list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public long getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -3090,6 +3094,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return the last long value in this list
      * @throws NoSuchElementException if this list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public long getLast() {
         throwNoSuchElementExceptionIfEmpty();

@@ -113,6 +113,16 @@ import com.landawn.abacus.annotation.Beta;
  *   <li><b>Conversion:</b> toArray, boxed, toSet, toCollection</li>
  * </ul>
  *
+ * <p><b>Empty-list access style (first/last vs getFirst/getLast):</b>
+ * Concrete subclasses expose two complementary pairs for end-element access:
+ * <ul>
+ *   <li><b>{@code first()}/{@code last()}:</b> return an {@code Optional*} (empty list → empty optional)</li>
+ *   <li><b>{@code getFirst()}/{@code getLast()}:</b> return the primitive value, or throw
+ *       {@link NoSuchElementException} if the list is empty (JDK {@code SequencedCollection} style)</li>
+ * </ul>
+ * Prefer {@code first()}/{@code last()} when absence is expected; prefer {@code getFirst()}/{@code getLast()}
+ * when the list is known non-empty and a missing element should fail fast.
+ *
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li><b>Access:</b> O(1) random access by index</li>
@@ -499,13 +509,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * correct element positions during removal.
      *
      * <p>This method efficiently removes multiple elements in a single operation,
-     * which is more efficient than calling remove() multiple times. The indices
+     * which is more efficient than calling remove-by-index multiple times. The indices
      * can be specified in any order and may contain duplicates (which are ignored).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30, 40, 50);
-     * list.removeAt(1, 3);   // removes elements at indices 1 and 3
+     * list.removeAllAt(1, 3);   // removes elements at indices 1 and 3
      * // list now contains [10, 30, 50]
      * }</pre>
      *
@@ -513,7 +523,7 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @throws IndexOutOfBoundsException if any of the specified indices is out of range
      *         ({@code index < 0 || index >= size()})
      */
-    public abstract void removeAt(int... indices);
+    public abstract void removeAllAt(int... indices);
 
     /**
      * Removes from this list all elements whose index is between fromIndex (inclusive)

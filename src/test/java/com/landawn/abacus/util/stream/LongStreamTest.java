@@ -1576,7 +1576,7 @@ public class LongStreamTest extends TestBase {
         long[] result = stream.toArray();
         assertEquals(1, counter.get());
         assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
-    } 
+    }
 
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {

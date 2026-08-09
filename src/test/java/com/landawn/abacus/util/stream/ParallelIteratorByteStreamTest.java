@@ -33,7 +33,9 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     private static final byte[] TEST_ARRAY = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3 };
 
     private ByteStream createStream(byte... elements) {
-        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return ByteStream.of(elements)
+                .map(e -> (byte) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -87,7 +89,9 @@ public class ParallelIteratorByteStreamTest extends TestBase {
     // ---- Sequential-fallback path: 1-thread iterator stream => canBeSequential(maxThreadNum) == true ----
 
     private ByteStream createSingleThreadStream(byte... elements) {
-        return ByteStream.of(elements).map(e -> (byte) (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
+        return ByteStream.of(elements)
+                .map(e -> (byte) (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build());
     }
 
     @Test

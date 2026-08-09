@@ -449,7 +449,7 @@ public class ObjIteratorTest extends TestBase {
         assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
         assertEquals(1, callCount.get());
     }
-    
+
     // ==================== generate(Supplier) ====================
 
     @Test

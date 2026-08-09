@@ -37,7 +37,8 @@ public class CharListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.CharConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> list.forEach(0, 0, (com.landawn.abacus.util.function.CharConsumer) null));
     }
 
     @Test
@@ -1119,7 +1120,7 @@ public class CharListTest extends TestBase {
     @DisplayName("Test removeAt()")
     public void testDeleteAllByIndices() {
         CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertEquals('a', list.get(0));
         assertEquals('c', list.get(1));
@@ -1130,7 +1131,7 @@ public class CharListTest extends TestBase {
     @DisplayName("Test removeAt() with empty indices")
     public void testDeleteAllByIndicesEmpty() {
         CharList list = CharList.of('a', 'b', 'c');
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
@@ -1140,7 +1141,7 @@ public class CharListTest extends TestBase {
         list.add('b');
         list.add('c');
         list.add('d');
-        list.removeAt(0, 2);
+        list.removeAllAt(0, 2);
         assertEquals(2, list.size());
         assertEquals('b', list.get(0));
         assertEquals('d', list.get(1));
@@ -1149,7 +1150,7 @@ public class CharListTest extends TestBase {
     @Test
     public void testRemoveAt_multipleIndices_empty() {
         list.add('a');
-        list.removeAt(new int[] {});
+        list.removeAllAt(new int[] {});
         assertEquals(1, list.size());
     }
 
@@ -1407,7 +1408,8 @@ public class CharListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.CharUnaryOperator) null));
 
         CharList empty = new CharList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.CharUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.CharUnaryOperator) null));
     }
 
     @Test
@@ -2199,17 +2201,17 @@ public class CharListTest extends TestBase {
     public void testMinMaxMedian() {
         assertTrue(list.min().isEmpty());
         assertTrue(list.max().isEmpty());
-        assertTrue(list.median().isEmpty());
+        assertTrue(list.lowerMedian().isEmpty());
 
         list.addAll(CharList.of('d', 'a', 'e', 'b', 'c'));
         assertEquals('a', list.min().get());
         assertEquals('e', list.max().get());
-        assertEquals('c', list.median().get());
+        assertEquals('c', list.lowerMedian().get());
 
         assertEquals('a', list.min(1, 4).get());
         assertEquals('a', list.min(0, 2).get());
         assertEquals('e', list.max(1, 4).get());
-        assertEquals('c', list.median(0, 5).get());
+        assertEquals('c', list.lowerMedian(0, 5).get());
     }
 
     @Test
@@ -2277,19 +2279,19 @@ public class CharListTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test median()")
+    @DisplayName("Test lowerMedian()")
     public void testMedian() {
         CharList list = CharList.of('a', 'c', 'b');
-        OptionalChar median = list.median();
+        OptionalChar median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals('b', median.get());
     }
 
     @Test
-    @DisplayName("Test median() with range")
+    @DisplayName("Test lowerMedian() with range")
     public void testMedianRange() {
         CharList list = CharList.of('a', 'e', 'c', 'b', 'd');
-        OptionalChar median = list.median(1, 4);
+        OptionalChar median = list.lowerMedian(1, 4);
         assertTrue(median.isPresent());
         assertEquals('c', median.get());
     }
@@ -2298,33 +2300,33 @@ public class CharListTest extends TestBase {
     public void testMedian_twoElements() {
         list.add('a');
         list.add('c');
-        assertTrue(list.median().isPresent());
+        assertTrue(list.lowerMedian().isPresent());
     }
 
     @Test
-    @DisplayName("Test median() on empty list")
+    @DisplayName("Test lowerMedian() on empty list")
     public void testMedianEmpty() {
         CharList list = new CharList();
-        OptionalChar median = list.median();
+        OptionalChar median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
     @Test
-    @DisplayName("Test median() with range")
+    @DisplayName("Test lowerMedian() with range")
     public void testMedianWithRange() {
         list.addAll(CharList.of('e', 'b', 'd', 'a', 'c', 'f'));
 
-        OptionalChar median = list.median(1, 5);
+        OptionalChar median = list.lowerMedian(1, 5);
         assertTrue(median.isPresent());
 
-        OptionalChar emptyMedian = list.median(3, 3);
+        OptionalChar emptyMedian = list.lowerMedian(3, 3);
         assertFalse(emptyMedian.isPresent());
     }
 
     @Test
     public void testMedian_singleElement() {
         list.add('m');
-        assertEquals('m', list.median().getAsChar());
+        assertEquals('m', list.lowerMedian().getAsChar());
     }
 
     @Test
@@ -3783,9 +3785,12 @@ public class CharListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final CharList empty = new CharList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.CharConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.CharPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.CharPredicate) null, 'x'));
 
         final CharList nonEmpty = CharList.of('a', 'b');
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.CharConsumer) null));

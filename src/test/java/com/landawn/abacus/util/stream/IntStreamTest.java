@@ -1876,7 +1876,7 @@ public class IntStreamTest extends TestBase {
         stream.count();
         assertEquals(1, counter.get());
     }
- 
+
     @Test
     public void testDefer_supplierReturningNullProducesEmptyStream() {
         final AtomicInteger supplierCalls = new AtomicInteger();
@@ -3654,7 +3654,8 @@ public class IntStreamTest extends TestBase {
         assertEquals(5, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).count());
         assertEquals(4, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).count());
         assertArrayEquals(new int[] { 2, 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).toArray());
-        assertArrayEquals(new int[] { 4, 6, 8, 10 }, IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toArray());
+        assertArrayEquals(new int[] { 4, 6, 8, 10 },
+                IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toArray());
         assertEquals(N.toList(2, 4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).toList());
         assertEquals(N.toList(4, 6, 8, 10), IntStream.of(1, 2, 3, 4, 5).map(e -> e).transformViaJdkStream(s -> s.map(i -> i * 2), true).skip(1).toList());
     }

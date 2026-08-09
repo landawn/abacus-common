@@ -51,7 +51,8 @@ public class ParallelArrayByteStreamTest extends TestBase {
     // Covers the iterator-based terminal-operation branch in ParallelArrayByteStream.
     @Test
     public void testReduceAndFindMethods_IteratorSplitStrategy() {
-        assertEquals((byte) 15, createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((byte) 0, (a, b) -> (byte) (a + b)));
+        assertEquals((byte) 15,
+                createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((byte) 0, (a, b) -> (byte) (a + b)));
 
         OptionalByte reduced = createStreamWithIteratorSplitStrategy((byte) 4, (byte) 2, (byte) 1, (byte) 3, (byte) 5).reduce((a, b) -> (byte) (a + b));
         assertTrue(reduced.isPresent());
@@ -532,10 +533,14 @@ public class ParallelArrayByteStreamTest extends TestBase {
 
     @Test
     public void testReduce_SequentialFallback() {
-        byte result = ByteStream.of((byte) 5).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).reduce((byte) 0, (left, right) -> (byte) (left + right));
+        byte result = ByteStream.of((byte) 5)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
+                .reduce((byte) 0, (left, right) -> (byte) (left + right));
         assertEquals((byte) 5, result);
 
-        OptionalByte optional = ByteStream.of((byte) 7).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build()).reduce((left, right) -> (byte) (left + right));
+        OptionalByte optional = ByteStream.of((byte) 7)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(1).build())
+                .reduce((left, right) -> (byte) (left + right));
         assertTrue(optional.isPresent());
         assertEquals((byte) 7, optional.get());
     }

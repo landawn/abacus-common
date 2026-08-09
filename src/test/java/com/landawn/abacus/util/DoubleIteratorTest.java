@@ -24,7 +24,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 public class DoubleIteratorTest extends TestBase {
- 
 
     // =================================================
     // empty()
@@ -1444,7 +1443,8 @@ public class DoubleIteratorTest extends TestBase {
         Assertions.assertEquals(3, count.get());
         Assertions.assertArrayEquals(new double[] { 1.5, 2.5, 3.5 }, values);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).forEachRemaining((java.util.function.Consumer<? super Double>) null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> DoubleIterator.of(1.0).forEachRemaining((java.util.function.Consumer<? super Double>) null));
     }
 
     @Test

@@ -47,7 +47,9 @@ public class ParallelIteratorIntStreamTest extends TestBase {
     private IntStream parallelStream;
 
     protected IntStream createIntStream(int... elements) {
-        return IntStream.of(elements).map(e -> (e + 0)).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
+        return IntStream.of(elements)
+                .map(e -> (e + 0))
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(testMaxThreadNum).build());
     }
 
     @Test
@@ -172,7 +174,11 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testTakeWhile_SequentialFallback_maxThreadNum1() {
-        List<Integer> result = IntStream.of(1, 2, 3, 4, 5).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).takeWhile(i -> i < 4).toList();
+        List<Integer> result = IntStream.of(1, 2, 3, 4, 5)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .takeWhile(i -> i < 4)
+                .toList();
         assertEquals(3, result.size());
     }
 
@@ -193,7 +199,11 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testDropWhile_SequentialFallback_maxThreadNum1() {
-        List<Integer> result = IntStream.of(1, 2, 3, 4, 5).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).dropWhile(i -> i < 3).toList();
+        List<Integer> result = IntStream.of(1, 2, 3, 4, 5)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .dropWhile(i -> i < 3)
+                .toList();
         assertEquals(3, result.size());
     }
 
@@ -300,7 +310,11 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testMapToByte_SequentialFallback_maxThreadNum1() {
-        List<Byte> result = IntStream.of(1, 2, 3).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).mapToByte(i -> (byte) i).toList();
+        List<Byte> result = IntStream.of(1, 2, 3)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .mapToByte(i -> (byte) i)
+                .toList();
         assertEquals(3, result.size());
     }
 
@@ -352,7 +366,11 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testMapToFloat_SequentialFallback_maxThreadNum1() {
-        List<Float> result = IntStream.of(2, 4).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).mapToFloat(i -> i * 0.5f).toList();
+        List<Float> result = IntStream.of(2, 4)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .mapToFloat(i -> i * 0.5f)
+                .toList();
         assertEquals(2, result.size());
         assertTrue(result.contains(1.0f));
     }
@@ -370,13 +388,21 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testMapToDouble_SequentialFallback_maxThreadNum1() {
-        List<Double> result = IntStream.of(3, 6).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).mapToDouble(i -> i * 1.5).toList();
+        List<Double> result = IntStream.of(3, 6)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .mapToDouble(i -> i * 1.5)
+                .toList();
         assertEquals(2, result.size());
     }
 
     @Test
     public void testMapToObj_SequentialFallback_maxThreadNum1() {
-        List<String> result = IntStream.of(10, 20).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).mapToObj(i -> "n" + i).toList();
+        List<String> result = IntStream.of(10, 20)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .mapToObj(i -> "n" + i)
+                .toList();
         assertEquals(2, result.size());
         assertTrue(result.contains("n10"));
     }
@@ -708,7 +734,10 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testReduceWithIdentity_SequentialFallback() {
-        int result = IntStream.of(1, 2, 3).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).reduce(10, Integer::sum);
+        int result = IntStream.of(1, 2, 3)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .reduce(10, Integer::sum);
 
         assertEquals(16, result);
     }
@@ -1043,7 +1072,11 @@ public class ParallelIteratorIntStreamTest extends TestBase {
     // maxThreadNum=1 triggers canBeSequential=true, using sequential fallback for all operations
     @Test
     public void testFilter_SequentialFallback_maxThreadNum1() {
-        List<Integer> result = IntStream.of(1, 2, 3, 4, 5).map(e -> e + 0).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build()).filter(i -> i > 3).toList();
+        List<Integer> result = IntStream.of(1, 2, 3, 4, 5)
+                .map(e -> e + 0)
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(1).build())
+                .filter(i -> i > 3)
+                .toList();
         assertEquals(2, result.size());
         assertTrue(result.contains(4));
         assertTrue(result.contains(5));
@@ -1056,8 +1089,8 @@ public class ParallelIteratorIntStreamTest extends TestBase {
 
     @Test
     public void testCancelUncompletedThreadsIsPreserved() {
-        try (ParallelIteratorIntStream stream = new ParallelIteratorIntStream(IntStream.of(1, 2, 3), false, testMaxThreadNum, SplitStrategy.ITERATOR, null, true,
-                null)) {
+        try (ParallelIteratorIntStream stream = new ParallelIteratorIntStream(IntStream.of(1, 2, 3), false, testMaxThreadNum, SplitStrategy.ITERATOR, null,
+                true, null)) {
             assertTrue(stream.cancelUncompletedThreads());
 
             try (IntStream prepended = stream.prepend(IntStream.of(0))) {

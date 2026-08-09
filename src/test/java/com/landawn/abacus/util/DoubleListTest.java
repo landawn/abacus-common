@@ -579,7 +579,7 @@ public class DoubleListTest extends TestBase {
     public void testDeleteAllByIndices() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5, 50.5 });
 
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(30.5, list.get(1), DELTA);
@@ -589,7 +589,7 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testDeleteAllByIndicesDuplicates() {
         list.addAll(new double[] { 10.5, 20.5, 30.5, 40.5 });
-        list.removeAt(1, 1, 2);
+        list.removeAllAt(1, 1, 2);
         assertEquals(2, list.size());
         assertEquals(10.5, list.get(0), DELTA);
         assertEquals(40.5, list.get(1), DELTA);
@@ -646,7 +646,7 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testDeleteAllByIndicesOutOfOrder() {
         list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
-        list.removeAt(4, 1, 2);
+        list.removeAllAt(4, 1, 2);
         assertEquals(2, list.size());
         assertEquals(1.1, list.get(0), DELTA);
         assertEquals(4.4, list.get(1), DELTA);
@@ -736,7 +736,7 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testDeleteAllByIndicesEmpty() {
         list.addAll(new double[] { 10.5, 20.5, 30.5 });
-        list.removeAt();
+        list.removeAllAt();
         assertEquals(3, list.size());
     }
 
@@ -1146,7 +1146,7 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testRemoveAt_multipleIndices() {
         DoubleList dl = DoubleList.of(1.0, 2.0, 3.0, 4.0, 5.0);
-        dl.removeAt(1, 3);
+        dl.removeAllAt(1, 3);
         assertEquals(3, dl.size());
         assertEquals(1.0, dl.get(0), DELTA);
         assertEquals(3.0, dl.get(1), DELTA);
@@ -1168,8 +1168,8 @@ public class DoubleListTest extends TestBase {
         assertEquals(3.3, removed, DELTA);
         assertEquals(4, list.size());
 
-        // removeAt(int...) - multiple indices
-        list.removeAt(0, 2);
+        // removeAllAt(int...) - multiple indices
+        list.removeAllAt(0, 2);
         assertEquals(2, list.size());
         assertEquals(2.2, list.get(0), DELTA);
         assertEquals(5.5, list.get(1), DELTA);
@@ -1411,7 +1411,8 @@ public class DoubleListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
 
         DoubleList empty = new DoubleList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.DoubleUnaryOperator) null));
     }
 
     @Test
@@ -2077,7 +2078,7 @@ public class DoubleListTest extends TestBase {
         assertTrue(max.isPresent());
         assertEquals(5.5, max.getAsDouble(), DELTA);
 
-        OptionalDouble median = list.median();
+        OptionalDouble median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(5.5, median.getAsDouble(), DELTA);
     }
@@ -2088,7 +2089,7 @@ public class DoubleListTest extends TestBase {
 
         assertFalse(list.min(1, 1).isPresent());
         assertFalse(list.max(1, 1).isPresent());
-        assertFalse(list.median(1, 1).isPresent());
+        assertFalse(list.lowerMedian(1, 1).isPresent());
     }
 
     @Test
@@ -2150,7 +2151,7 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testMedian() {
         list.addAll(new double[] { 3.3, 1.1, 5.5, 2.2, 4.4 });
-        OptionalDouble median = list.median();
+        OptionalDouble median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(3.3, median.get(), DELTA);
     }
@@ -2158,28 +2159,28 @@ public class DoubleListTest extends TestBase {
     @Test
     public void testMedianRange() {
         list.addAll(new double[] { 1.1, 3.3, 5.5, 2.2, 4.4 });
-        OptionalDouble median = list.median(1, 4);
+        OptionalDouble median = list.lowerMedian(1, 4);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void testMedianEvenElements() {
         list.addAll(new double[] { 1.0, 2.0, 3.0, 4.0 });
-        OptionalDouble median = list.median();
+        OptionalDouble median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals(2.0, median.getAsDouble(), DELTA);
     }
 
     @Test
     public void testMedianEmpty() {
-        OptionalDouble median = list.median();
+        OptionalDouble median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
     @Test
     public void testMedianRangeEmpty() {
         list.addAll(new double[] { 1.0, 2.0, 3.0 });
-        assertFalse(list.median(1, 1).isPresent());
+        assertFalse(list.lowerMedian(1, 1).isPresent());
     }
 
     @Test
@@ -3206,9 +3207,12 @@ public class DoubleListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final DoubleList empty = new DoubleList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.DoublePredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.DoublePredicate) null, 0d));
 
         final DoubleList nonEmpty = DoubleList.of(1d, 2d);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.DoubleConsumer) null));

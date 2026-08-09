@@ -38,7 +38,8 @@ public class ShortListTest extends TestBase {
 
     @Test
     public void testRangedForEachRejectsNullActionForEmptyRange() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ShortConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ShortConsumer) null));
     }
 
     @Test
@@ -205,7 +206,7 @@ public class ShortListTest extends TestBase {
     @Test
     public void testDeleteAllByIndices() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        list.removeAt(1, 3);
+        list.removeAllAt(1, 3);
         assertEquals(3, list.size());
         assertEquals((short) 1, list.get(0));
         assertEquals((short) 3, list.get(1));
@@ -250,7 +251,7 @@ public class ShortListTest extends TestBase {
         list.removeRange(1, 3);
         assertArrayEquals(new short[] { 1, 5, 6 }, list.toArray());
 
-        list.removeAt(0, 2);
+        list.removeAllAt(0, 2);
         assertArrayEquals(new short[] { 5 }, list.toArray());
     }
 
@@ -319,7 +320,7 @@ public class ShortListTest extends TestBase {
         ShortList list = ShortList.of((short) 9, (short) 2, (short) 7, (short) 5, (short) 2);
         assertEquals(OptionalShort.of((short) 2), list.min(1, 4));
         assertEquals(OptionalShort.of((short) 7), list.max(1, 4));
-        assertEquals(OptionalShort.of((short) 5), list.median(1, 4));
+        assertEquals(OptionalShort.of((short) 5), list.lowerMedian(1, 4));
         assertEquals(2, list.frequency((short) 2));
     }
 
@@ -1217,11 +1218,11 @@ public class ShortListTest extends TestBase {
         assertFalse(sl.contains((short) 5));
     }
 
-    // removeAt(int...) with no indices is a no-op
+    // removeAllAt(int...) with no indices is a no-op
     @Test
     public void testRemoveAt_EmptyIndices_NoOp() {
         ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3);
-        sl.removeAt();
+        sl.removeAllAt();
         assertEquals(3, sl.size());
     }
 
@@ -1358,7 +1359,8 @@ public class ShortListTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.replaceAll((com.landawn.abacus.util.function.ShortUnaryOperator) null));
 
         ShortList empty = new ShortList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceAll((com.landawn.abacus.util.function.ShortUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceAll((com.landawn.abacus.util.function.ShortUnaryOperator) null));
     }
 
     @Test
@@ -1961,14 +1963,14 @@ public class ShortListTest extends TestBase {
         }
         assertEquals(OptionalShort.of((short) 42), list.min());
         assertEquals(OptionalShort.of((short) 42), list.max());
-        assertEquals(OptionalShort.of((short) 42), list.median());
+        assertEquals(OptionalShort.of((short) 42), list.lowerMedian());
 
         list.clear();
         list.add((short) 1);
         list.add((short) 2);
         list.add((short) 3);
         list.add((short) 4);
-        OptionalShort median = list.median();
+        OptionalShort median = list.lowerMedian();
         assertTrue(median.isPresent());
         short medianValue = median.get();
         assertTrue(medianValue == 2 || medianValue == 3);
@@ -1983,7 +1985,7 @@ public class ShortListTest extends TestBase {
 
         OptionalShort min = list.min();
         OptionalShort max = list.max();
-        OptionalShort median = list.median();
+        OptionalShort median = list.lowerMedian();
 
         assertTrue(min.isPresent());
         assertTrue(max.isPresent());
@@ -2003,12 +2005,12 @@ public class ShortListTest extends TestBase {
     public void testMinMaxMedian() {
         assertFalse(list.min().isPresent());
         assertFalse(list.max().isPresent());
-        assertFalse(list.median().isPresent());
+        assertFalse(list.lowerMedian().isPresent());
 
         list.add((short) 5);
         assertEquals(OptionalShort.of((short) 5), list.min());
         assertEquals(OptionalShort.of((short) 5), list.max());
-        assertEquals(OptionalShort.of((short) 5), list.median());
+        assertEquals(OptionalShort.of((short) 5), list.lowerMedian());
 
         list.clear();
         list.add((short) 3);
@@ -2019,15 +2021,15 @@ public class ShortListTest extends TestBase {
 
         assertEquals(OptionalShort.of((short) 1), list.min());
         assertEquals(OptionalShort.of((short) 5), list.max());
-        assertEquals(OptionalShort.of((short) 3), list.median());
+        assertEquals(OptionalShort.of((short) 3), list.lowerMedian());
 
         assertEquals(OptionalShort.of((short) 1), list.min(1, 4));
         assertEquals(OptionalShort.of((short) 4), list.max(1, 4));
-        assertEquals(OptionalShort.of((short) 1), list.median(1, 4));
+        assertEquals(OptionalShort.of((short) 1), list.lowerMedian(1, 4));
 
         assertFalse(list.min(2, 2).isPresent());
         assertFalse(list.max(2, 2).isPresent());
-        assertFalse(list.median(2, 2).isPresent());
+        assertFalse(list.lowerMedian(2, 2).isPresent());
     }
 
     @Test
@@ -2056,7 +2058,7 @@ public class ShortListTest extends TestBase {
     @Test
     public void testMedian() {
         ShortList list = ShortList.of((short) 3, (short) 1, (short) 2);
-        OptionalShort median = list.median();
+        OptionalShort median = list.lowerMedian();
         assertTrue(median.isPresent());
         assertEquals((short) 2, median.get());
     }
@@ -2064,14 +2066,14 @@ public class ShortListTest extends TestBase {
     @Test
     public void testMedianRange() {
         ShortList list = ShortList.of((short) 1, (short) 5, (short) 2, (short) 8, (short) 3);
-        OptionalShort median = list.median(1, 4);
+        OptionalShort median = list.lowerMedian(1, 4);
         assertTrue(median.isPresent());
     }
 
     @Test
     public void testMedianEmpty() {
         ShortList list = new ShortList();
-        OptionalShort median = list.median();
+        OptionalShort median = list.lowerMedian();
         assertFalse(median.isPresent());
     }
 
@@ -2695,7 +2697,7 @@ public class ShortListTest extends TestBase {
 
         assertFalse(list.min().isPresent());
         assertFalse(list.max().isPresent());
-        assertFalse(list.median().isPresent());
+        assertFalse(list.lowerMedian().isPresent());
         assertFalse(list.first().isPresent());
         assertFalse(list.last().isPresent());
 
@@ -3211,9 +3213,12 @@ public class ShortListTest extends TestBase {
     public void test_forEach_removeIf_replaceIf_null_func() {
         // Empty lists do not evaluate callbacks; non-empty lists fail naturally when invoking them.
         final ShortList empty = new ShortList();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> empty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.removeIf((com.landawn.abacus.util.function.ShortPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> empty.replaceIf((com.landawn.abacus.util.function.ShortPredicate) null, (short) 0));
 
         final ShortList nonEmpty = ShortList.of((short) 1, (short) 2);
         assertThrows(IllegalArgumentException.class, () -> nonEmpty.forEach((com.landawn.abacus.util.function.ShortConsumer) null));

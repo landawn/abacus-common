@@ -89,7 +89,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * // Mathematical operations
  * OptionalInt min = numbers.min();         // Find minimum value
  * OptionalInt max = numbers.max();         // Find maximum value
- * OptionalInt median = numbers.median();   // Calculate median
+ * OptionalInt median = numbers.lowerMedian();   // Calculate lower median
  * int sum = numbers.stream().sum();        // Calculate sum (returns int; may overflow for large lists)
  *
  * // Set operations for data analysis
@@ -134,7 +134,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * <p><b>Integer-Specific Operations:</b>
  * <ul>
  *   <li><b>Range Generation:</b> {@code range()}, {@code rangeClosed()} for arithmetic sequences</li>
- *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code median()}</li>
+ *   <li><b>Mathematical Functions:</b> {@code min()}, {@code max()}, {@code lowerMedian()}</li>
  *   <li><b>Type Conversions:</b> {@code toLongList()}, {@code toFloatList()}, {@code toDoubleList()}</li>
  *   <li><b>Random Generation:</b> {@code random()} methods for test data and simulations</li>
  *   <li><b>Bulk Updates:</b> {@code replaceAll()}, {@code replaceIf()} for value transformations</li>
@@ -272,7 +272,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * dataset.sort();                          // Sort for median calculation
  * OptionalInt min = dataset.min();         // Minimum value
  * OptionalInt max = dataset.max();         // Maximum value
- * OptionalInt median = dataset.median();   // Median value
+ * OptionalInt median = dataset.lowerMedian();   // Lower median value
  *
  * // Functional processing
  * long sum = dataset.stream().sum();                         // Total sum
@@ -1228,13 +1228,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * a.removeAt(5);   // throws IndexOutOfBoundsException (index >= size)
      * }</pre>
      *
-     * <p><b>Note:</b> this single-index form returns the removed {@code int} value; the varargs
-     * {@link #removeAt(int...)} form removes several elements in place and returns {@code void}.</p>
+     * <p><b>Note:</b> this single-index form returns the removed {@code int} value; the multi-index
+     * {@link #removeAllAt(int...)} form removes several elements in place and returns {@code void}.</p>
      *
      * @param index the index of the element to remove
      * @return the removed element
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
-     * @see #removeAt(int...)
+     * @see #removeAllAt(int...)
      */
     public int removeAt(final int index) {
         rangeCheck(index);
@@ -1251,7 +1251,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The indices array is processed to remove elements efficiently, handling
      * duplicate indices and maintaining the correct element positions during removal.
      *
-     * <p><b>Note:</b> this varargs form removes several elements in place and returns {@code void}; the
+     * <p><b>Note:</b> this multi-index form removes several elements in place and returns {@code void}; the
      * single-index {@link #removeAt(int)} form returns the removed {@code int} value.</p>
      *
      * @param indices the indices of elements to be removed. If {@code null} or empty, this list remains unchanged.
@@ -1260,7 +1260,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAt(final int... indices) {
+    public void removeAllAt(final int... indices) {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -2204,13 +2204,13 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(5, 2, 8, 1, 9);
-     * OptionalInt median = list.median();  // returns elements sorted: [1, 2, 5, 8, 9]; median = OptionalInt[5]
+     * OptionalInt median = list.lowerMedian();  // returns elements sorted: [1, 2, 5, 8, 9]; median = OptionalInt[5]
      * }</pre>
      *
      * @return an OptionalInt containing the median value if the list is non-empty, or an empty OptionalInt if the list is empty
      */
-    public OptionalInt median() {
-        return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, 0, size));
+    public OptionalInt lowerMedian() {
+        return size() == 0 ? OptionalInt.empty() : OptionalInt.of(N.lowerMedian(elementData, 0, size));
     }
 
     /**
@@ -2223,7 +2223,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(5, 2, 8, 1, 9);
-     * OptionalInt median = list.median(1, 4);  // returns median of [2, 8, 1] = OptionalInt[2]
+     * OptionalInt median = list.lowerMedian(1, 4);  // returns median of [2, 8, 1] = OptionalInt[2]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
@@ -2231,10 +2231,10 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @return an OptionalInt containing the median value if the range is non-empty, or an empty OptionalInt if the range is empty
      * @throws IndexOutOfBoundsException if the index is out of range ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
      */
-    public OptionalInt median(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public OptionalInt lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.median(elementData, fromIndex, toIndex));
+        return fromIndex == toIndex ? OptionalInt.empty() : OptionalInt.of(N.lowerMedian(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -2316,6 +2316,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return an OptionalInt containing the first element if the list is not empty,
      *         or an empty OptionalInt if the list is empty
+     * @see #getFirst()
      */
     public OptionalInt first() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[0]);
@@ -2332,6 +2333,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return an OptionalInt containing the last element if the list is not empty,
      *         or an empty OptionalInt if the list is empty
+     * @see #getLast()
      */
     public OptionalInt last() {
         return size() == 0 ? OptionalInt.empty() : OptionalInt.of(elementData[size() - 1]);
@@ -3087,6 +3089,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return the first int value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #first()
+     * @see #getLast()
      */
     public int getFirst() {
         throwNoSuchElementExceptionIfEmpty();
@@ -3106,6 +3110,8 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *
      * @return the last int value in the list
      * @throws NoSuchElementException if the list is empty
+     * @see #last()
+     * @see #getFirst()
      */
     public int getLast() {
         throwNoSuchElementExceptionIfEmpty();

@@ -1529,17 +1529,14 @@ public class OkHttpRequestTest extends TestBase {
                 throw closeFailure;
             }
         };
-        final OkHttpClient baseClient = new OkHttpClient.Builder().addInterceptor(chain -> new Response.Builder().request(chain.request())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("OK")
-                .body(failingBody)
-                .build()).build();
+        final OkHttpClient baseClient = new OkHttpClient.Builder()
+                .addInterceptor(
+                        chain -> new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK").body(failingBody).build())
+                .build();
         final OkHttpRequest request = OkHttpRequest.create(baseUrl, baseClient).connectTimeout(5_000L);
 
         try {
-            final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                    () -> request.execute(HttpMethod.GET, Response.class));
+            final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, Response.class));
             final OkHttpClient.Builder perRequestBuilder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
             final OkHttpClient lifecycleProbe = perRequestBuilder.build();
 
@@ -1723,8 +1720,7 @@ public class OkHttpRequestTest extends TestBase {
         };
         final Response response = attachCleanup(request, body, client);
 
-        final com.landawn.abacus.exception.UncheckedIOException thrown = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
-                response::close);
+        final com.landawn.abacus.exception.UncheckedIOException thrown = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, response::close);
 
         assertSame(bodyFailure, thrown.getCause());
         assertEquals(1, bodyCloseCount.get());
@@ -1832,12 +1828,7 @@ public class OkHttpRequestTest extends TestBase {
             }
         };
         final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor))
-                .addInterceptor(chain -> new Response.Builder().request(chain.request())
-                        .protocol(Protocol.HTTP_1_1)
-                        .code(200)
-                        .message("OK")
-                        .body(body)
-                        .build())
+                .addInterceptor(chain -> new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK").body(body).build())
                 .build();
         final OkHttpRequest request = OkHttpRequest.create(baseUrl, client).closeHttpClientAfterExecution(true);
 

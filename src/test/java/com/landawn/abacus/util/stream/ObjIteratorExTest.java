@@ -416,8 +416,6 @@ public class ObjIteratorExTest extends TestBase {
         Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::next));
         Assertions.assertEquals(1, invocationCount[0]);
     }
- 
-   
 
     @Test
     public void testDeferRejectsNullIteratorFromSupplier() {
