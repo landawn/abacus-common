@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import java.util.Map;
 import java.util.Objects;
 
-import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
@@ -80,7 +79,7 @@ import com.landawn.abacus.util.u.Optional;
  *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept
  *         either the two elements or the pair as a whole)</td>
  *     <td>Rich: {@code accept(BiConsumer)}, {@code map(BiFunction)}, {@code filter(BiPredicate)},
- *         {@code reverse()}, {@code toArray()}, plus integration with the
+ *         {@code reversed()}, {@code toArray()}, plus integration with the
  *         {@link Tuple} hierarchy</td>
  *   </tr>
  *   <tr>
@@ -574,31 +573,6 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
         }
 
         return false;
-    }
-
-    /**
-     * Creates and returns a new Pair with the left and right elements swapped.
-     * The original pair remains unchanged.
-     *
-     * <p>Note: this instance method is non-mutating and returns a <i>new</i> swapped pair, in contrast to the
-     * static {@link N#swap(Pair)} / {@link N#swapIf(Pair, java.util.function.Predicate)} helpers, which
-     * <i>mutate</i> the given pair in place (those require both element types to be the same, {@code Pair<T, T>}).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Pair<String, Integer> original = Pair.of("Hello", 42);
-     * Pair<Integer, String> swapped = original.swap();
-     * // swapped.left() returns 42, swapped.right() returns "Hello"
-     * // original remains unchanged
-     * }</pre>
-     *
-     * @return a new Pair with the right element as the left and the left element as the right.
-     * @see N#swap(Pair)
-     * @see N#swapIf(Pair, java.util.function.Predicate)
-     */
-    @Beta
-    public Pair<R, L> swap() {
-        return new Pair<>(right, left);
     }
 
     /**

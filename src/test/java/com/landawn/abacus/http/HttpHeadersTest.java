@@ -474,7 +474,7 @@ public class HttpHeadersTest extends TestBase {
         final HttpHeaders headers = HttpHeaders.create().set("Content-Type", "text/plain");
 
         assertEquals("text/plain", headers.get("content-type"));
-        assertEquals("text/plain", headers.getFirst("CONTENT-TYPE"));
+        assertEquals("text/plain", headers.getAsString("CONTENT-TYPE"));
         assertTrue(headers.containsHeader("cOnTeNt-TyPe"));
 
         headers.setIfAbsent("CONTENT-TYPE", "application/xml");
@@ -491,13 +491,13 @@ public class HttpHeadersTest extends TestBase {
     @Test
     public void testGetFirst() {
         HttpHeaders headers = HttpHeaders.create();
-        assertNull(headers.getFirst("Accept-Encoding"));
+        assertNull(headers.getAsString("Accept-Encoding"));
 
         headers.set("Accept-Encoding", Arrays.asList("gzip", "deflate"));
-        assertEquals("gzip, deflate", headers.getFirst("Accept-Encoding"));
+        assertEquals("gzip, deflate", headers.getAsString("Accept-Encoding"));
 
         headers.set("X-Num", 42);
-        assertEquals("42", headers.getFirst("X-Num"));
+        assertEquals("42", headers.getAsString("X-Num"));
     }
 
     // --- get ---

@@ -90,9 +90,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple2_Reverse() {
+    public void testTuple2_Reversed() {
         Tuple2<String, Integer> t2 = Tuple.of("hello", 42);
-        Tuple2<Integer, String> reversed = t2.reverse();
+        Tuple2<Integer, String> reversed = t2.reversed();
         Assertions.assertEquals(42, reversed._1);
         Assertions.assertEquals("hello", reversed._2);
     }
@@ -144,9 +144,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple3_Reverse() {
+    public void testTuple3_Reversed() {
         Tuple3<String, Integer, Boolean> t3 = Tuple.of("a", 1, true);
-        Tuple3<Boolean, Integer, String> reversed = t3.reverse();
+        Tuple3<Boolean, Integer, String> reversed = t3.reversed();
         Assertions.assertEquals(true, reversed._1);
         Assertions.assertEquals(1, reversed._2);
         Assertions.assertEquals("a", reversed._3);
@@ -191,9 +191,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple4_Reverse() {
+    public void testTuple4_Reversed() {
         Tuple4<String, Integer, Boolean, Double> t4 = Tuple.of("a", 1, true, 2.0);
-        Tuple4<Double, Boolean, Integer, String> reversed = t4.reverse();
+        Tuple4<Double, Boolean, Integer, String> reversed = t4.reversed();
         Assertions.assertEquals(2.0, reversed._1);
         Assertions.assertEquals(true, reversed._2);
         Assertions.assertEquals(1, reversed._3);
@@ -236,9 +236,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple5_Reverse() {
+    public void testTuple5_Reversed() {
         Tuple5<String, Integer, Boolean, Double, Long> t5 = Tuple.of("a", 1, true, 2.0, 3L);
-        Tuple5<Long, Double, Boolean, Integer, String> reversed = t5.reverse();
+        Tuple5<Long, Double, Boolean, Integer, String> reversed = t5.reversed();
         Assertions.assertEquals(3L, reversed._1);
         Assertions.assertEquals(2.0, reversed._2);
         Assertions.assertEquals(true, reversed._3);
@@ -282,9 +282,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple6_Reverse() {
+    public void testTuple6_Reversed() {
         Tuple6<String, Integer, Boolean, Double, Long, Character> t6 = Tuple.of("a", 1, true, 2.0, 3L, 'x');
-        Tuple6<Character, Long, Double, Boolean, Integer, String> reversed = t6.reverse();
+        Tuple6<Character, Long, Double, Boolean, Integer, String> reversed = t6.reversed();
         Assertions.assertEquals('x', reversed._1);
         Assertions.assertEquals(3L, reversed._2);
         Assertions.assertEquals(2.0, reversed._3);
@@ -329,9 +329,9 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testTuple7_Reverse() {
+    public void testTuple7_Reversed() {
         Tuple7<String, Integer, Boolean, Double, Long, Character, Float> t7 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f);
-        Tuple7<Float, Character, Long, Double, Boolean, Integer, String> reversed = t7.reverse();
+        Tuple7<Float, Character, Long, Double, Boolean, Integer, String> reversed = t7.reversed();
         Assertions.assertEquals(4.0f, reversed._1);
         Assertions.assertEquals('x', reversed._2);
         Assertions.assertEquals(3L, reversed._3);
@@ -382,9 +382,9 @@ public class TupleTest extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testTuple8_Reverse() {
+    public void testTuple8_Reversed() {
         Tuple8<String, Integer, Boolean, Double, Long, Character, Float, Byte> t8 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5);
-        Tuple8<Byte, Float, Character, Long, Double, Boolean, Integer, String> reversed = t8.reverse();
+        Tuple8<Byte, Float, Character, Long, Double, Boolean, Integer, String> reversed = t8.reversed();
         Assertions.assertEquals((byte) 5, reversed._1);
         Assertions.assertEquals(4.0f, reversed._2);
         Assertions.assertEquals('x', reversed._3);
@@ -440,9 +440,9 @@ public class TupleTest extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testTuple9_Reverse() {
+    public void testTuple9_Reversed() {
         Tuple9<String, Integer, Boolean, Double, Long, Character, Float, Byte, Short> t9 = Tuple.of("a", 1, true, 2.0, 3L, 'x', 4.0f, (byte) 5, (short) 6);
-        Tuple9<Short, Byte, Float, Character, Long, Double, Boolean, Integer, String> reversed = t9.reverse();
+        Tuple9<Short, Byte, Float, Character, Long, Double, Boolean, Integer, String> reversed = t9.reversed();
         Assertions.assertEquals((short) 6, reversed._1);
         Assertions.assertEquals((byte) 5, reversed._2);
         Assertions.assertEquals(4.0f, reversed._3);
@@ -1060,22 +1060,22 @@ public class TupleTest extends TestBase {
         Assertions.assertNull(entry.getValue());
     }
 
-    // --- Tuple2 reverse with nulls ---
+    // --- Tuple2 reversed with nulls ---
 
     @Test
-    public void testTuple2_Reverse_WithNulls() {
+    public void testTuple2_Reversed_WithNulls() {
         Tuple2<String, Integer> t2 = Tuple.of(null, null);
-        Tuple2<Integer, String> reversed = t2.reverse();
+        Tuple2<Integer, String> reversed = t2.reversed();
         Assertions.assertNull(reversed._1);
         Assertions.assertNull(reversed._2);
     }
 
-    // --- Tuple3 reverse with nulls ---
+    // --- Tuple3 reversed with nulls ---
 
     @Test
-    public void testTuple3_Reverse_WithNulls() {
+    public void testTuple3_Reversed_WithNulls() {
         Tuple3<String, Integer, Boolean> t3 = Tuple.of(null, null, null);
-        Tuple3<Boolean, Integer, String> reversed = t3.reverse();
+        Tuple3<Boolean, Integer, String> reversed = t3.reversed();
         Assertions.assertNull(reversed._1);
         Assertions.assertNull(reversed._2);
         Assertions.assertNull(reversed._3);
@@ -1349,7 +1349,7 @@ public class TupleTest extends TestBase {
 
         assertEquals(ImmutableEntry.of("a", 1), t2.toImmutableEntry());
 
-        assertEquals(Tuple.of(1, "a"), t2.reverse());
+        assertEquals(Tuple.of(1, "a"), t2.reversed());
 
         String mapped = t2.map((a, b) -> a + b);
         assertEquals("a1", mapped);
@@ -1368,7 +1368,7 @@ public class TupleTest extends TestBase {
 
         assertEquals(Triple.of("a", 1, true), t3.toTriple());
 
-        assertEquals(Tuple.of(true, 1, "a"), t3.reverse());
+        assertEquals(Tuple.of(true, 1, "a"), t3.reversed());
 
         String mapped = t3.map((a, b, c) -> a + b + c);
         assertEquals("a1true", mapped);
@@ -1810,15 +1810,15 @@ public class TupleTest extends TestBase {
     }
 
     @Test
-    public void testReverse() {
-        assertEquals(Tuple.of("a", 1), Tuple.of(1, "a").reverse());
-        assertEquals(Tuple.of(true, "a", 1), Tuple.of(1, "a", true).reverse());
-        assertEquals(Tuple.of(4, 3, 2, 1), Tuple.of(1, 2, 3, 4).reverse());
-        assertEquals(Tuple.of(5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5).reverse());
-        assertEquals(Tuple.of(6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6).reverse());
-        assertEquals(Tuple.of(7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7).reverse());
-        assertEquals(Tuple.of(8, 7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7, 8).reverse());
-        assertEquals(Tuple.of(9, 8, 7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7, 8, 9).reverse());
+    public void testReversed() {
+        assertEquals(Tuple.of("a", 1), Tuple.of(1, "a").reversed());
+        assertEquals(Tuple.of(true, "a", 1), Tuple.of(1, "a", true).reversed());
+        assertEquals(Tuple.of(4, 3, 2, 1), Tuple.of(1, 2, 3, 4).reversed());
+        assertEquals(Tuple.of(5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5).reversed());
+        assertEquals(Tuple.of(6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6).reversed());
+        assertEquals(Tuple.of(7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7).reversed());
+        assertEquals(Tuple.of(8, 7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7, 8).reversed());
+        assertEquals(Tuple.of(9, 8, 7, 6, 5, 4, 3, 2, 1), Tuple.of(1, 2, 3, 4, 5, 6, 7, 8, 9).reversed());
     }
 
     @Test

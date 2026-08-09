@@ -10086,8 +10086,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @Beta
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<T> onEachSave(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
-            throws IllegalStateException, UncheckedSQLException;
+    public abstract Stream<T> onEachSave(final PreparedStatement stmt,
+            final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, UncheckedSQLException;
 
     /**
      * Saves each element of this stream to the database using the provided prepared statement and statement setter with batch processing.

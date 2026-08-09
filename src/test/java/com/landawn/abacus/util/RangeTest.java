@@ -988,66 +988,75 @@ public class RangeTest extends AbstractTest {
     }
 
     @Test
-    public void test_isOverlappedBy_overlapping() {
+    public void test_overlaps_overlapping() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(3, 8);
-        assertTrue(range1.isOverlappedBy(range2));
+        assertTrue(range1.overlaps(range2));
     }
 
     @Test
-    public void test_isOverlappedBy_notOverlapping() {
+    public void test_overlaps_notOverlapping() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(6, 10);
-        assertFalse(range1.isOverlappedBy(range2));
+        assertFalse(range1.overlaps(range2));
     }
 
     @Test
-    public void test_isOverlappedBy_touching() {
+    public void test_overlaps_touching() {
         Range<Integer> range1 = Range.closed(1, 5);
         Range<Integer> range2 = Range.closed(5, 10);
-        assertTrue(range1.isOverlappedBy(range2));
+        assertTrue(range1.overlaps(range2));
     }
 
     @Test
-    public void test_isOverlappedBy_touchingOpenBounds() {
+    public void test_overlaps_touchingOpenBounds() {
         Range<Integer> range1 = Range.closedOpen(1, 5);
         Range<Integer> range2 = Range.open(5, 10);
-        assertFalse(range1.isOverlappedBy(range2));
+        assertFalse(range1.overlaps(range2));
     }
 
     @Test
-    public void test_isOverlappedBy_fullyContained() {
+    public void test_overlaps_fullyContained() {
         Range<Integer> range1 = Range.closed(1, 10);
         Range<Integer> range2 = Range.closed(3, 7);
-        assertTrue(range1.isOverlappedBy(range2));
+        assertTrue(range1.overlaps(range2));
     }
 
     @Test
-    public void testIsOverlappedBy() {
+    public void testOverlapsAdditionalBounds() {
 
-        assertFalse(intRange.isOverlappedBy(null));
+        assertFalse(intRange.overlaps(null));
 
-        assertTrue(intRange.isOverlappedBy(Range.closed(12, 18)));
+        assertTrue(intRange.overlaps(Range.closed(12, 18)));
 
-        assertFalse(intRange.isOverlappedBy(Range.closed(32, 45)));
-        assertFalse(intRange.isOverlappedBy(Range.closed(2, 8)));
+        assertFalse(intRange.overlaps(Range.closed(32, 45)));
+        assertFalse(intRange.overlaps(Range.closed(2, 8)));
 
-        assertTrue(intRange.isOverlappedBy(Range.closed(10, 20)));
+        assertTrue(intRange.overlaps(Range.closed(10, 20)));
 
-        assertTrue(intRange.isOverlappedBy(Range.closed(9, 14)));
-        assertTrue(intRange.isOverlappedBy(Range.closed(16, 21)));
+        assertTrue(intRange.overlaps(Range.closed(9, 14)));
+        assertTrue(intRange.overlaps(Range.closed(16, 21)));
 
-        assertTrue(intRange.isOverlappedBy(Range.closed(10, 19)));
-        assertTrue(intRange.isOverlappedBy(Range.closed(10, 21)));
+        assertTrue(intRange.overlaps(Range.closed(10, 19)));
+        assertTrue(intRange.overlaps(Range.closed(10, 21)));
 
-        assertTrue(intRange.isOverlappedBy(Range.closed(11, 20)));
-        assertTrue(intRange.isOverlappedBy(Range.closed(9, 20)));
+        assertTrue(intRange.overlaps(Range.closed(11, 20)));
+        assertTrue(intRange.overlaps(Range.closed(9, 20)));
 
     }
 
     @Test
-    public void test_isOverlappedBy_null() {
+    public void test_overlaps_null() {
         Range<Integer> range = Range.closed(1, 5);
+        assertFalse(range.overlaps(null));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testIsOverlappedByDeprecatedAlias() {
+        Range<Integer> range = Range.closed(1, 5);
+        assertTrue(range.isOverlappedBy(Range.closed(3, 8)));
+        assertFalse(range.isOverlappedBy(Range.closed(6, 10)));
         assertFalse(range.isOverlappedBy(null));
     }
 
@@ -1426,8 +1435,8 @@ public class RangeTest extends AbstractTest {
         final Range<Integer> range = Range.closed(1, 3);
 
         assertTrue(empty.isEmpty());
-        assertFalse(empty.isOverlappedBy(range));
-        assertFalse(range.isOverlappedBy(empty));
+        assertFalse(empty.overlaps(range));
+        assertFalse(range.overlaps(empty));
         assertFalse(empty.intersection(range).isPresent());
         assertFalse(range.intersection(empty).isPresent());
     }

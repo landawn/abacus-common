@@ -181,7 +181,7 @@ public class EntryStreamTest extends TestBase {
         map.put("a", 1);
         map.put("b", 2);
 
-        Map<Integer, String> result = EntryStream.of(map).invert().toMap();
+        Map<Integer, String> result = EntryStream.of(map).inverted().toMap();
         assertEquals("a", result.get(1));
         assertEquals("b", result.get(2));
     }
@@ -189,7 +189,7 @@ public class EntryStreamTest extends TestBase {
     @Test
     public void testInvert_Parallel() {
         // invert() parallel branch
-        List<Map.Entry<Integer, String>> result = EntryStream.of(testMap).parallel().invert().toList();
+        List<Map.Entry<Integer, String>> result = EntryStream.of(testMap).parallel().inverted().toList();
         assertEquals(5, result.size());
         // All entries should have Integer keys (original values) and String values (original keys)
         for (Map.Entry<Integer, String> e : result) {
@@ -4259,7 +4259,7 @@ public class EntryStreamTest extends TestBase {
 
     @Test
     public void testInversed() {
-        Map<Integer, String> inversed = EntryStream.of(testMap).invert().toMap();
+        Map<Integer, String> inversed = EntryStream.of(testMap).inverted().toMap();
         assertEquals("one", inversed.get(1));
         assertEquals("two", inversed.get(2));
     }
@@ -4378,7 +4378,7 @@ public class EntryStreamTest extends TestBase {
         map.put("b", 2);
 
         EntryStream<String, Integer> stream = EntryStream.of(map);
-        Map<Integer, String> inversed = stream.invertToDisposableEntry().toMap();
+        Map<Integer, String> inversed = stream.invertedToDisposableEntry().toMap();
 
         assertEquals(2, inversed.size());
         assertEquals("a", inversed.get(1));
@@ -4860,7 +4860,7 @@ public class EntryStreamTest extends TestBase {
                 .filterByValue(v -> v <= 4)
                 .mapKey(Fn.toUpperCase())
                 .flatMapValue(v -> Stream.range(1, v + 1))
-                .invert()
+                .inverted()
                 .groupTo();
 
         assertEquals(4, result.size());

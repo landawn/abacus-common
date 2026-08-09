@@ -111,7 +111,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Bulk operations and transformations
  * scores.updateAll(score -> score + 5);   // Add 5 to all scores
  * scores.replaceIf(score -> score < 80, 80);   // Set minimum score
- * Sheet<String, String, Integer> transposed = scores.transpose();
+ * Sheet<String, String, Integer> transposed = scores.transposed();
  *
  * // Stream operations for functional programming
  * double averageScore = scores.rowMajorStream()
@@ -3848,7 +3848,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a new mutable Sheet with independent structure and the same key and cell value references as this Sheet
      * @see #copy(Collection, Collection)
      * @see #clone()
-     * @see #transpose()
+     * @see #transposed()
      */
     public Sheet<R, C, V> copy() {
         final Sheet<R, C, V> copy = new Sheet<>(_rowKeySet, _columnKeySet);
@@ -4136,7 +4136,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // | row2 | 4    | 5    | 6    |
      * // +------+------+------+------+
      *
-     * Sheet<String, String, Integer> transposed = original.transpose();
+     * Sheet<String, String, Integer> transposed = original.transposed();
      * //        +------+------+
      * //        | row1 | row2 |
      * // +------+------+------+
@@ -4149,7 +4149,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a new transposed Sheet where row and column keys are swapped
      * @see #copy()
      */
-    public Sheet<C, R, V> transpose() {
+    public Sheet<C, R, V> transposed() {
         final Sheet<C, R, V> copy = new Sheet<>(_columnKeySet, _rowKeySet);
 
         if (_isInitialized) {

@@ -574,41 +574,6 @@ public class TripleTest extends TestBase {
         assertEquals(true, triple.right());
     }
 
-    // --- swap ---
-
-    @Test
-    public void testSwap() {
-        triple.set("left", 42, true);
-        Triple<Boolean, Integer, String> swapped = triple.swap();
-
-        assertEquals(true, swapped.left());
-        assertEquals(42, swapped.middle());
-        assertEquals("left", swapped.right());
-
-        // Original should be unchanged
-        assertEquals("left", triple.left());
-        assertEquals(42, triple.middle());
-        assertEquals(true, triple.right());
-    }
-
-    @Test
-    public void testSwap_thenSwapBack() {
-        Triple<String, Integer, Boolean> original = Triple.of("left", 42, true);
-        Triple<Boolean, Integer, String> swapped = original.swap();
-        Triple<String, Integer, Boolean> swappedBack = swapped.swap();
-        assertEquals(original, swappedBack);
-    }
-
-    @Test
-    public void testSwap_withNullElements() {
-        triple.set(null, null, null);
-        Triple<Boolean, Integer, String> swapped = triple.swap();
-
-        assertNull(swapped.left());
-        assertNull(swapped.middle());
-        assertNull(swapped.right());
-    }
-
     // --- copy ---
 
     @Test
@@ -1021,11 +986,6 @@ public class TripleTest extends TestBase {
     @Test
     public void testUtilityAndConversionMethods() {
         Triple<String, Integer, Boolean> triple = Triple.of("A", 1, true);
-
-        Triple<Boolean, Integer, String> reversed = triple.swap();
-        assertEquals(true, reversed.left());
-        assertEquals(1, reversed.middle());
-        assertEquals("A", reversed.right());
 
         Triple<String, Integer, Boolean> copy = triple.copy();
         assertEquals(triple, copy);

@@ -3639,7 +3639,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testTranspose_DataIntegrity() {
-        Sheet<String, String, Integer> transposed = sheet.transpose();
+        Sheet<String, String, Integer> transposed = sheet.transposed();
         // row1: {1,2,3} -> col1 of transposed: get(colKey="row1") should have 1,4,7... no wait.
         // transpose swaps rows/columns
         // original: row1,col1 = 1; row2,col1 = 4; row3,col1 = 7
@@ -3652,7 +3652,7 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testTranspose() {
-        Sheet<String, String, Integer> transposed = sheet.transpose();
+        Sheet<String, String, Integer> transposed = sheet.transposed();
         assertNotNull(transposed);
         assertEquals(sheet.columnCount(), transposed.rowCount());
         assertEquals(sheet.rowCount(), transposed.columnCount());
@@ -3664,14 +3664,14 @@ public class SheetTest extends AbstractTest {
 
     @Test
     public void testTransposeEmptySheet() {
-        Sheet<String, String, Integer> transposed = emptySheet.transpose();
+        Sheet<String, String, Integer> transposed = emptySheet.transposed();
         assertTrue(transposed.isEmpty());
     }
 
     @Test
     public void testTranspose_emptySheet() {
         Sheet<String, String, String> empty = new Sheet<>();
-        Sheet<String, String, String> transposedEmpty = empty.transpose();
+        Sheet<String, String, String> transposedEmpty = empty.transposed();
         assertTrue(transposedEmpty.isEmpty());
         assertEquals(0, transposedEmpty.rowCount());
         assertEquals(0, transposedEmpty.columnCount());
@@ -3680,7 +3680,7 @@ public class SheetTest extends AbstractTest {
     @Test
     public void testTranspose_uninitializedSheet() {
         Sheet<String, String, String> uninitialized = new Sheet<>(upperRowKeys, colKeys);
-        Sheet<String, String, String> transposed = uninitialized.transpose();
+        Sheet<String, String, String> transposed = uninitialized.transposed();
         assertEquals(colKeys, new ArrayList<>(transposed.rowKeySet()));
         assertEquals(upperRowKeys, new ArrayList<>(transposed.columnKeySet()));
         assertNull(transposed.get("C1", "R1"));
@@ -5878,7 +5878,7 @@ public class SheetTest extends AbstractTest {
         // A 2x3 sheet and its transposed 3x2 sheet should not be equal as the row/column keys differ.
         Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2", "c3"),
                 new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
-        Sheet<String, String, Integer> tr = orig.transpose();
+        Sheet<String, String, Integer> tr = orig.transposed();
         assertNotEquals(orig, tr);
     }
 
@@ -5888,7 +5888,7 @@ public class SheetTest extends AbstractTest {
     public void testTranspose_RoundTripPreservesData() {
         Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2"),
                 new Integer[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } });
-        Sheet<String, String, Integer> roundTrip = orig.transpose().transpose();
+        Sheet<String, String, Integer> roundTrip = orig.transposed().transposed();
         assertEquals(orig, roundTrip);
         // verify each cell
         for (String r : orig.rowKeySet()) {
@@ -5902,7 +5902,7 @@ public class SheetTest extends AbstractTest {
     public void testTranspose_NonSquareDataPreserved() {
         Sheet<String, String, Integer> orig = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2", "c3"),
                 new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 } });
-        Sheet<String, String, Integer> tr = orig.transpose();
+        Sheet<String, String, Integer> tr = orig.transposed();
         assertEquals(3, tr.rowCount());
         assertEquals(2, tr.columnCount());
         // Cell at (oldRow=r1, oldCol=c2) == 2; in transposed: (newRow=c2, newCol=r1)

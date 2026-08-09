@@ -324,6 +324,24 @@ import com.landawn.abacus.util.function.ToFloatFunction;
  */
 @SuppressWarnings({ "java:S1192", "java:S6539" })
 sealed class CommonUtil permits N {
+
+    static final String THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY = "The specified array cannot be null or empty";
+
+    static final String THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY = "The specified array or range cannot be empty";
+
+    static final String THE_SPECIFIED_ITERABLE_CANNOT_BE_NULL_OR_EMPTY = "The specified iterable cannot be null or empty";
+
+    static final String THE_SPECIFIED_SORTED_LIST_CANNOT_BE_NULL_OR_EMPTY = "The specified 'sortedList' cannot be null or empty";
+
+    static final String THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY = "The specified 'sortedArray' cannot be null or empty";
+
+    static final String THE_SPECIFIED_COLLECTION_ITERABLE_ITERATOR_CANNOT_BE_NULL_OR_EMPTY = "The specified Collection/Iterable/Iterator cannot be null or empty";
+
+    static final String THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY = "The specified collection or range cannot be empty";
+
+    static final String THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY = "The specified collection cannot be null or empty";
+
+    static final String THE_SPECIFIED_ITERATOR_CANNOT_BE_NULL_OR_EMPTY = "The specified iterator cannot be null or empty";
     /**
      * Threshold intended for choosing between linear and binary search strategies.
      * Currently not used by any algorithm in this class.

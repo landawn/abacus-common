@@ -63,7 +63,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>All tuple elements are final fields set only during construction</li>
  *   <li>Immutability is shallow: referenced element objects are neither copied nor frozen</li>
  *   <li>Thread safety therefore also depends on the thread-safety and usage of the contained elements</li>
- *   <li>No operation reassigns a tuple position; transformations such as {@code reverse()} create new tuples</li>
+ *   <li>No operation reassigns a tuple position; transformations such as {@code reversed()} create new tuples</li>
  * </ul>
  *
  * <p><b>Design Philosophy:</b>
@@ -1733,7 +1733,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * Map.Entry<String, Integer> entry = score.toImmutableEntry();
      *
      * // Reversing elements
-     * Tuple2<Integer, String> reversed = score.reverse();   // returns (95, "Alice")
+     * Tuple2<Integer, String> reversed = score.reversed();   // returns (95, "Alice")
      * }</pre>
      *
      * <h2>{@code Tuple2} vs {@link Pair}</h2>
@@ -1768,7 +1768,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   <tr>
      *     <td>Functional/tuple API</td>
      *     <td>Rich: {@link #accept accept(BiConsumer)}, {@link #map map(BiFunction)},
-     *         {@link #filter filter(BiPredicate)}, {@link #reverse()},
+     *         {@link #filter filter(BiPredicate)}, {@link #reversed()},
      *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
      *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept either the two elements or the pair as a whole)</td>
      *   </tr>
@@ -1988,12 +1988,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> original = Tuple.of("name", 42);
-         * Tuple2<Integer, String> reversed = original.reverse();   // returns (42, "name")
+         * Tuple2<Integer, String> reversed = original.reversed();   // returns (42, "name")
          * }</pre>
          *
          * @return a new Tuple2 with elements in reversed order.
          */
-        public Tuple2<T2, T1> reverse() {
+        public Tuple2<T2, T1> reversed() {
             return of(_2, _1); //NOSONAR
         }
 
@@ -2236,7 +2236,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *   <tr>
      *     <td>Functional/tuple API</td>
      *     <td>Rich: {@link #accept accept(TriConsumer)}, {@link #map map(TriFunction)},
-     *         {@link #filter filter(TriPredicate)}, {@link #reverse()},
+     *         {@link #filter filter(TriPredicate)}, {@link #reversed()},
      *         {@link #toArray()}, {@code Tuple.toList(t)}, plus the shared {@link Tuple} hierarchy</td>
      *     <td>Minimal: {@code map}, {@code filter}, {@code accept}, {@code forEach} (overloads accept either the three elements or the triple as a whole)</td>
      *   </tr>
@@ -2387,13 +2387,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple3<String, Integer, Boolean> original = Tuple.of("A", 2, true);
-         * Tuple3<Boolean, Integer, String> reversed = original.reverse();
+         * Tuple3<Boolean, Integer, String> reversed = original.reversed();
          * // reversed contains (true, 2, "A")
          * }</pre>
          *
          * @return a new Tuple3 with elements in reversed order.
          */
-        public Tuple3<T3, T2, T1> reverse() {
+        public Tuple3<T3, T2, T1> reversed() {
             return new Tuple3<>(_3, _2, _1);
         }
 
@@ -2684,13 +2684,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple4<String, Integer, Double, Boolean> original =
          *     Tuple.of("A", 1, 2.0, true);
          * Tuple4<Boolean, Double, Integer, String> reversed =
-         *     original.reverse();
+         *     original.reversed();
          * // reversed contains (true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple4 with elements in reversed order.
          */
-        public Tuple4<T4, T3, T2, T1> reverse() {
+        public Tuple4<T4, T3, T2, T1> reversed() {
             return new Tuple4<>(_4, _3, _2, _1);
         }
 
@@ -2911,13 +2911,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple5<String, Integer, Double, Boolean, Long> original =
          *     Tuple.of("A", 1, 2.0, true, 100L);
          * Tuple5<Long, Boolean, Double, Integer, String> reversed =
-         *     original.reverse();
+         *     original.reversed();
          * // reversed contains (100L, true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple5 with elements in reversed order.
          */
-        public Tuple5<T5, T4, T3, T2, T1> reverse() {
+        public Tuple5<T5, T4, T3, T2, T1> reversed() {
             return new Tuple5<>(_5, _4, _3, _2, _1);
         }
 
@@ -3145,13 +3145,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple6<String, Integer, Double, Boolean, Long, Character> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X');
          * Tuple6<Character, Long, Boolean, Double, Integer, String> reversed =
-         *     original.reverse();
+         *     original.reversed();
          * // reversed contains ('X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple6 with elements in reversed order.
          */
-        public Tuple6<T6, T5, T4, T3, T2, T1> reverse() {
+        public Tuple6<T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple6<>(_6, _5, _4, _3, _2, _1);
         }
 
@@ -3389,13 +3389,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple7<String, Integer, Double, Boolean, Long, Character, Float> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X', 3.14f);
          * Tuple7<Float, Character, Long, Boolean, Double, Integer, String> reversed =
-         *     original.reverse();
+         *     original.reversed();
          * // reversed contains (3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple7 with elements in reversed order.
          */
-        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reverse() {
+        public Tuple7<T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple7<>(_7, _6, _5, _4, _3, _2, _1);
         }
 
@@ -3643,13 +3643,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple8<String, Integer, Double, Boolean, Long, Character, Float, Byte> original =
          *     Tuple.of("A", 1, 2.0, true, 100L, 'X', 3.14f, (byte)5);
          * Tuple8<Byte, Float, Character, Long, Boolean, Double, Integer, String> reversed =
-         *     original.reverse();
+         *     original.reversed();
          * // reversed contains ((byte)5, 3.14f, 'X', 100L, true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple8 with elements in reversed order.
          */
-        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
+        public Tuple8<T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple8<>(_8, _7, _6, _5, _4, _3, _2, _1);
         }
 
@@ -4015,13 +4015,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
          * Tuple9<Byte, Short, Float, Long, Character, Boolean, Double, Integer, String> reversed =
-         *     t.reverse();
+         *     t.reversed();
          * // reversed = ((byte)10, (short)5, 3.14f, 100L, 'X', true, 2.0, 1, "A")
          * }</pre>
          *
          * @return a new Tuple9 with elements in reversed order.
          */
-        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reverse() {
+        public Tuple9<T9, T8, T7, T6, T5, T4, T3, T2, T1> reversed() {
             return new Tuple9<>(_9, _8, _7, _6, _5, _4, _3, _2, _1);
         }
 

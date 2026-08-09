@@ -762,6 +762,42 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public abstract LongStream flattMap(LongFunction<? extends java.util.stream.LongStream> mapper); //NOSONAR
 
     /**
+     * Alias for {@link #flattMap(LongFunction)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * LongStream.of(1, 2, 3)
+     *       .flatMapJdkStream(n -> java.util.stream.LongStream.range(0, n))
+     *       .toLongList();   // returns [0, 0, 1, 0, 1, 2]
+     *
+     * LongStream.of(5, 10)
+     *       .flatMapJdkStream(n -> java.util.stream.LongStream.of(n, n * 2))
+     *       .toLongList();   // returns [5, 10, 10, 20]
+     *
+     * LongStream.empty()
+     *       .flatMapJdkStream(n -> java.util.stream.LongStream.of(n))
+     *       .toLongList();   // returns []
+     * }</pre>
+     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new {@link LongStream} consisting of the flattened contents of the mapped JDK streams
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     */
+    @Beta
+    @ParallelSupported
+    @IntermediateOp
+    public LongStream flatMapJdkStream(final LongFunction<? extends java.util.stream.LongStream> mapper) throws IllegalArgumentException {
+        assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
+
+        return flattMap(mapper);
+    }
+
+    /**
      * Returns an {@code IntStream} consisting of the results of replacing each element of
      * this stream with the contents of a mapped stream produced by applying the provided
      * mapping function to each element. Each non-null mapped stream is closed after

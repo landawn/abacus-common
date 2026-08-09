@@ -407,7 +407,7 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
      * Map<Integer, String> inverted = EntryStream.of(map)
-     *                                             .invert()
+     *                                             .inverted()
      *                                             .toMap();   // returns {1="a", 2="b", 3="c"}
      * }</pre>
      *
@@ -422,7 +422,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<V, K> invert() {
+    public EntryStream<V, K> inverted() {
         _stream.assertNotClosed();
 
         final Function<Map.Entry<K, V>, Map.Entry<V, K>> mapper = Fn.invert();
@@ -8074,7 +8074,7 @@ public final class EntryStream<K, V> extends
      * // Original: {("a", 1), ("b", 2), ("c", 3)}
      * // Inverted: {(1, "a"), (2, "b"), (3, "c")}
      * EntryStream.of(map)
-     *     .invertToDisposableEntry()
+     *     .invertedToDisposableEntry()
      *     .forEach(e -> System.out.println(e.getKey() + " -> " + e.getValue()));
      * }</pre>
      *
@@ -8082,17 +8082,17 @@ public final class EntryStream<K, V> extends
      *
      * @return a new EntryStream with inverted keys and values as DisposableEntry
      * @throws IllegalStateException if the stream is already closed or is parallel
-     * @deprecated Use {@link #invert()} instead, which returns a standard (non-disposable) inverted EntryStream.
-     * @see #invert()
+     * @deprecated Use {@link #inverted()} instead, which returns a standard (non-disposable) inverted EntryStream.
+     * @see #inverted()
      */
     @SequentialOnly
     @IntermediateOp
     @Deprecated
     @Beta
-    public EntryStream<V, K> invertToDisposableEntry() {
+    public EntryStream<V, K> invertedToDisposableEntry() {
         _stream.assertNotClosed();
 
-        checkState(!_stream.isParallel(), "invertToDisposableEntry cannot be applied to parallel stream");
+        checkState(!_stream.isParallel(), "invertedToDisposableEntry cannot be applied to parallel stream");
 
         final Function<Map.Entry<K, V>, DisposableEntry<V, K>> mapper = new Function<>() {
             private final ReusableEntry<V, K> entry = new ReusableEntry<>();
@@ -9441,7 +9441,7 @@ public final class EntryStream<K, V> extends
 
     /**
      * A single mutable {@link DisposableEntry} instance that is re-populated for every element instead of
-     * allocating a new entry per element. It is used by {@link EntryStream#invertToDisposableEntry()} and is only safe
+     * allocating a new entry per element. It is used by {@link EntryStream#invertedToDisposableEntry()} and is only safe
      * in a sequential pipeline that reads each entry before the next one is produced: {@link #set(Object, Object)}
      * throws {@link IllegalStateException} if the previously stored pair has not been read yet.
      *

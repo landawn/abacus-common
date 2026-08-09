@@ -769,6 +769,42 @@ public abstract class DoubleStream
     public abstract DoubleStream flattMap(DoubleFunction<? extends java.util.stream.DoubleStream> mapper); //NOSONAR
 
     /**
+     * Alias for {@link #flattMap(DoubleFunction)}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * DoubleStream.of(1, 2, 3)
+     *       .flatMapJdkStream(d -> java.util.stream.DoubleStream.of(d, d * 2))
+     *       .toDoubleList();   // returns [1.0, 2.0, 2.0, 4.0, 3.0, 6.0]
+     *
+     * DoubleStream.of(5, 10)
+     *       .flatMapJdkStream(d -> java.util.stream.DoubleStream.iterate(d, x -> x - 1).limit(3))
+     *       .toDoubleList();   // returns [5.0, 4.0, 3.0, 10.0, 9.0, 8.0]
+     *
+     * DoubleStream.empty()
+     *       .flatMapJdkStream(d -> java.util.stream.DoubleStream.of(d))
+     *       .toDoubleList();   // returns []
+     * }</pre>
+     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * @param mapper a non-interfering, stateless function to apply to each element
+     * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped JDK streams
+     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     */
+    @Beta
+    @ParallelSupported
+    @IntermediateOp
+    public DoubleStream flatMapJdkStream(final DoubleFunction<? extends java.util.stream.DoubleStream> mapper) throws IllegalArgumentException {
+        assertNotClosed();
+
+        checkArgNotNull(mapper, cs.mapper);
+
+        return flattMap(mapper);
+    }
+
+    /**
      * Returns an {@code IntStream} consisting of the results of replacing each element of this stream with the contents
      * of a mapped stream produced by applying the provided mapping function to each element.
      *

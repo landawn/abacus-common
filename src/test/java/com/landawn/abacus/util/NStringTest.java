@@ -296,7 +296,7 @@ public class NStringTest extends AbstractParserTest {
 
         assertEquals(myBean, N.typeOf(MyEntity_1.class).valueOf(str));
 
-        assertTrue(Range.just(1).isOverlappedBy(Range.closed(1, 2)));
+        assertTrue(Range.just(1).overlaps(Range.closed(1, 2)));
     }
 
     @Test

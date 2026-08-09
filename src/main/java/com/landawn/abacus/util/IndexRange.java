@@ -47,7 +47,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Range operations
  * new IndexRange(2, 5).containsRange(new IndexRange(3, 4));   // returns true
- * new IndexRange(2, 5).isOverlappedBy(new IndexRange(4, 8));  // returns true
+ * new IndexRange(2, 5).overlaps(new IndexRange(4, 8));        // returns true
  * new IndexRange(2, 5).intersection(new IndexRange(4, 8));    // returns u.Optional.of(new IndexRange(4, 5))
  * new IndexRange(2, 5).span(new IndexRange(4, 8));            // returns new IndexRange(2, 8)
  * new IndexRange(2, 5).isEmpty();                             // returns false
@@ -156,7 +156,7 @@ public record IndexRange(int start, int end) {
      *
      * @param other the range to check for containment, {@code null} returns {@code false}
      * @return {@code true} if this range contains all indices of the specified range
-     * @see #isOverlappedBy(IndexRange)
+     * @see #overlaps(IndexRange)
      */
     public boolean containsRange(final IndexRange other) {
         if (other == null) {
@@ -212,7 +212,7 @@ public record IndexRange(int start, int end) {
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely after the specified range with no shared indices
      * @see #isBeforeRange(IndexRange)
-     * @see #isOverlappedBy(IndexRange)
+     * @see #overlaps(IndexRange)
      */
     public boolean isAfterRange(final IndexRange other) {
         if (other == null) {
@@ -264,7 +264,7 @@ public record IndexRange(int start, int end) {
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely before the specified range with no shared indices
      * @see #isAfterRange(IndexRange)
-     * @see #isOverlappedBy(IndexRange)
+     * @see #overlaps(IndexRange)
      */
     public boolean isBeforeRange(final IndexRange other) {
         if (other == null) {
@@ -287,9 +287,9 @@ public record IndexRange(int start, int end) {
      * IndexRange range3 = new IndexRange(6, 10);
      * IndexRange range4 = new IndexRange(5, 10);
      *
-     * range1.isOverlappedBy(range2);   // returns true (overlap from 3 to 5)
-     * range1.isOverlappedBy(range3);   // returns false (no overlap)
-     * range1.isOverlappedBy(range4);   // returns false (ranges touch at 5 but share no index)
+     * range1.overlaps(range2);   // returns true (overlap from 3 to 5)
+     * range1.overlaps(range3);   // returns false (no overlap)
+     * range1.overlaps(range4);   // returns false (ranges touch at 5 but share no index)
      * }</pre>
      *
      * @param other the range to test for overlap, {@code null} returns {@code false}
@@ -297,8 +297,31 @@ public record IndexRange(int start, int end) {
      * @see #intersection(IndexRange)
      * @see #isBeforeRange(IndexRange)
      * @see #isAfterRange(IndexRange)
+     * @deprecated Use {@link #overlaps(IndexRange)}. The overlap relation is symmetric, so the active name is clearer.
      */
+    @Deprecated
     public boolean isOverlappedBy(final IndexRange other) {
+        return overlaps(other);
+    }
+
+    /**
+     * Checks whether this range overlaps with the specified range.
+     * Two half-open index ranges overlap only when they share at least one index; ranges that merely touch at a
+     * boundary and empty ranges do not overlap.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * IndexRange range = new IndexRange(1, 5);
+     * range.overlaps(new IndexRange(3, 8));   // returns true
+     * range.overlaps(new IndexRange(5, 10));  // returns false
+     * range.overlaps(null);                   // returns false
+     * }</pre>
+     *
+     * @param other the range to test for overlap, {@code null} returns {@code false}
+     * @return {@code true} if this range and {@code other} share at least one index; otherwise, {@code false}
+     * @see #intersection(IndexRange)
+     */
+    public boolean overlaps(final IndexRange other) {
         return other != null && !isEmpty() && !other.isEmpty() && !isAfterRange(other) && !isBeforeRange(other);
     }
 
@@ -324,11 +347,11 @@ public record IndexRange(int start, int end) {
      * @return an {@link u.Optional}{@code <IndexRange>} containing the intersection range if the ranges overlap;
      *         {@code u.Optional.empty()} if they do not overlap (or {@code other} is {@code null},
      *         or either range is empty)
-     * @see #isOverlappedBy(IndexRange)
+     * @see #overlaps(IndexRange)
      * @see #span(IndexRange)
      */
     public Optional<IndexRange> intersection(final IndexRange other) {
-        if (!isOverlappedBy(other)) {
+        if (!overlaps(other)) {
             return Optional.empty();
         } else if (this.equals(other)) {
             return Optional.of(this);

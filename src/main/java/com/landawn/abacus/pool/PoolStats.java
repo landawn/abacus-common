@@ -76,8 +76,50 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
         long dataSize) {
 
     /**
+     * Creates a validated pool-statistics snapshot.
+     *
+     * @param capacity the maximum number of objects the pool can hold
+     * @param size the current number of objects in the pool
+     * @param putCount the total number of put/add operations performed
+     * @param getCount the total number of get/poll operations performed
+     * @param hitCount the number of successful get/poll operations
+     * @param missCount the number of unsuccessful get/poll operations
+     * @param evictionCount the total number of objects evicted from the pool
+     * @param maxMemory the maximum memory size in bytes, or {@code -1} if no memory limit is configured
+     * @param dataSize the current total data size in bytes, or {@code -1} if memory tracking is disabled
+     * @throws IllegalArgumentException if capacity, size, or an operation count is negative; if size exceeds capacity;
+     *             if hit and miss counts do not sum to the get count; or if the memory values are below {@code -1} or
+     *             do not consistently use {@code -1} to indicate disabled memory tracking
+     */
+    public PoolStats {
+        if (capacity < 0) {
+            throw new IllegalArgumentException("capacity must not be negative: " + capacity);
+        }
+
+        if (size < 0 || size > capacity) {
+            throw new IllegalArgumentException("size must be between 0 and capacity (" + capacity + "): " + size);
+        }
+
+        if (putCount < 0 || getCount < 0 || hitCount < 0 || missCount < 0 || evictionCount < 0) {
+            throw new IllegalArgumentException("operation counts must not be negative");
+        }
+
+        if (hitCount > getCount || missCount != getCount - hitCount) {
+            throw new IllegalArgumentException("hitCount + missCount must equal getCount: " + hitCount + " + " + missCount + " != " + getCount);
+        }
+
+        if (maxMemory < -1 || dataSize < -1) {
+            throw new IllegalArgumentException("maxMemory and dataSize must be -1 or non-negative: " + maxMemory + ", " + dataSize);
+        }
+
+        if ((maxMemory == -1) != (dataSize == -1)) {
+            throw new IllegalArgumentException("maxMemory and dataSize must both be -1 when memory tracking is disabled");
+        }
+    }
+
+    /**
      * Returns the cache hit rate as a fraction in {@code [0.0, 1.0]}: {@code hitCount / getCount}.
-     * This is a pure computed value (no state is read or modified).
+     * This computation does not modify the snapshot.
      *
      * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/poll operations have
      * been performed), avoiding the division-by-zero guard callers would otherwise write.</p>
@@ -91,7 +133,7 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
 
     /**
      * Returns the cache miss rate as a fraction in {@code [0.0, 1.0]}: {@code missCount / getCount}.
-     * This is a pure computed value (no state is read or modified).
+     * This computation does not modify the snapshot.
      *
      * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/poll operations have
      * been performed). Note {@code hitRate() + missRate() == 1.0} whenever {@code getCount > 0}.</p>
@@ -105,7 +147,7 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
 
     /**
      * Returns the pool utilization as a fraction in {@code [0.0, 1.0]}: {@code size / capacity}.
-     * This is a pure computed value (no state is read or modified).
+     * This computation does not modify the snapshot.
      *
      * <p>Returns {@code 0.0} when {@link #capacity()} is {@code 0} (a zero-capacity pool
      * configuration), avoiding the division-by-zero guard callers would otherwise write.</p>

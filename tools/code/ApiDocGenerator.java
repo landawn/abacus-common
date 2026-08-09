@@ -222,9 +222,8 @@ public final class ApiDocGenerator {
      * Documented marker annotations used across the code base (com.landawn.abacus.annotation)
      * that carry API contract information worth surfacing in the generated docs.
      */
-    private static final Set<String> MARKER_ANNOTATIONS = Set.of("Beta", "Internal", "Immutable", "Mutable", "Stateful", "MayReturnNull", "NotNull",
-            "NullSafe", "SequentialOnly", "ParallelSupported", "IntermediateOp", "TerminalOp", "TerminalOpTriggered", "LazyEvaluation",
-            "UnsupportedOperation");
+    private static final Set<String> MARKER_ANNOTATIONS = Set.of("Beta", "Internal", "Immutable", "Mutable", "Stateful", "MayReturnNull", "NotNull", "NullSafe",
+            "SequentialOnly", "ParallelSupported", "IntermediateOp", "TerminalOp", "TerminalOpTriggered", "LazyEvaluation", "UnsupportedOperation");
 
     private static final Set<String> CONSTRUCTOR_GENERATING_ANNOTATIONS = Set.of("lombok.AllArgsConstructor", "lombok.Builder", "lombok.Data",
             "lombok.NoArgsConstructor", "lombok.RequiredArgsConstructor", "lombok.Value", "lombok.experimental.StandardException",
@@ -233,17 +232,26 @@ public final class ApiDocGenerator {
     private static final Pattern THREAD_SAFE = Pattern.compile("\\bthread(?:-|\\s+)safe\\b");
     private static final Pattern NOT_THREAD_SAFE = Pattern.compile(
             "\\b(?:not|never)\\s+(?:generally\\s+|necessarily\\s+)?thread(?:-|\\s+)safe\\b|\\bnon(?:-|\\s+)thread(?:-|\\s+)safe\\b|\\bnot safe for concurrent\\b");
-    private static final Pattern CONDITIONAL_THREAD_SAFETY = Pattern.compile(
-            "\\bconditionally thread(?:-|\\s+)safe\\b|\\bthread(?:-|\\s+)safe[^.!?]{0,40}\\b(?:if|when)\\b|"
+    private static final Pattern CONDITIONAL_THREAD_SAFETY = Pattern
+            .compile("\\bconditionally thread(?:-|\\s+)safe\\b|\\bthread(?:-|\\s+)safe[^.!?]{0,40}\\b(?:if|when)\\b|"
                     + "\\bthread(?:-|\\s+)safety[^.!?]{0,80}\\b(?:depends|characteristics|responsibility|backing|contained)\\b|"
                     + "\\bsame safety requirements as (?:the )?backing\\b|\\bwrapping does not add synchronization\\b|"
                     + "\\binvalidates?[^.!?]{0,60}thread(?:-|\\s+)safety guarantees\\b");
-    private static final Pattern THREAD_SAFETY_DISCLAIMER = Pattern.compile(
-            "\\bdoes not[^.!?]{0,100}(?:thread(?:-|\\s+)safe|thread(?:-|\\s+)safety)\\b|\\bnot a general thread(?:-|\\s+)safety annotation\\b");
+    private static final Pattern THREAD_SAFETY_DISCLAIMER = Pattern
+            .compile("\\bdoes not[^.!?]{0,100}(?:thread(?:-|\\s+)safe|thread(?:-|\\s+)safety)\\b|\\bnot a general thread(?:-|\\s+)safety annotation\\b");
+
+    /**
+     * Parity-dependent collection contracts whose condition is expressed with an introductory
+     * {@code For ...} phrase instead of {@code if} or {@code when}. For example:
+     * "For arrays with an even number of elements, the median is ...".
+     */
+    private static final Pattern PARITY_CONTRACT_SENTENCE = Pattern.compile(
+            "^for\\s+(?:an?\\s+)?(?:arrays?|ranges?|lists?|collections?|subarrays?|subcollections?)\\s+with\\s+an?\\s+(?:odd|even)\\s+number\\s+of\\s+elements,\\s*.+",
+            Pattern.CASE_INSENSITIVE);
 
     /** Inline HTML tags that must not inject spaces around surrounding text/punctuation. */
-    private static final Set<String> INLINE_HTML_TAGS = Set.of("a", "b", "i", "u", "s", "em", "strong", "code", "span", "tt", "sub", "sup", "small",
-            "big", "font", "strike", "cite", "dfn", "var", "samp", "kbd", "abbr", "acronym", "label");
+    private static final Set<String> INLINE_HTML_TAGS = Set.of("a", "b", "i", "u", "s", "em", "strong", "code", "span", "tt", "sub", "sup", "small", "big",
+            "font", "strike", "cite", "dfn", "var", "samp", "kbd", "abbr", "acronym", "label");
 
     /** Block-ish HTML tags that separate prose; emit a single space when they open or close. */
     private static final Set<String> BLOCK_HTML_TAGS = Set.of("p", "div", "li", "ul", "ol", "tr", "td", "th", "table", "thead", "tbody", "tfoot", "h1", "h2",
@@ -450,7 +458,8 @@ public final class ApiDocGenerator {
                         ctor.examples = ctorDoc.examples;
                     }
                     if (classTree.getKind() == Tree.Kind.RECORD && (ctor.signature == null || !ctor.signature.contains("("))) {
-                        final List<ParamInfo> canonicalParams = type.recordComponents.stream().map(ApiDocGenerator::recordComponentParam)
+                        final List<ParamInfo> canonicalParams = type.recordComponents.stream()
+                                .map(ApiDocGenerator::recordComponentParam)
                                 .collect(Collectors.toList());
                         ctor.signature = recordConstructorSignature(type.name, canonicalParams);
                     }
@@ -617,8 +626,8 @@ public final class ApiDocGenerator {
         return out;
     }
 
-    private static List<RecordComponentInfo> readRecordComponents(final ClassTree classTree, final UnitData unitData,
-            final SourcePositions sourcePositions, final DocInfo typeDoc) {
+    private static List<RecordComponentInfo> readRecordComponents(final ClassTree classTree, final UnitData unitData, final SourcePositions sourcePositions,
+            final DocInfo typeDoc) {
         final List<RecordComponentInfo> out = new ArrayList<>();
         if (classTree.getKind() != Tree.Kind.RECORD) {
             return out;
@@ -762,8 +771,8 @@ public final class ApiDocGenerator {
         type.constructors.add(ctor);
     }
 
-    private static void addImplicitRecordMethod(final TypeInfo type, final String name, final String returnType, final String signature,
-            final String paramName, final String paramType) {
+    private static void addImplicitRecordMethod(final TypeInfo type, final String name, final String returnType, final String signature, final String paramName,
+            final String paramType) {
         final int paramCount = paramName == null ? 0 : 1;
         if (type.methods.stream().anyMatch(m -> name.equals(m.name) && m.params.size() == paramCount)) {
             return;
@@ -888,7 +897,7 @@ public final class ApiDocGenerator {
                 final String lower = s.toLowerCase(Locale.ROOT);
                 if (lower.contains(" o(") || lower.startsWith("o(") || lower.contains("complexity")) {
                     doc.performance = s;
-                } else if (lower.contains("must") || lower.contains("if ") || lower.contains("when ") || lower.contains("should")) {
+                } else if (isContractSentence(s, lower)) {
                     doc.contract.add(s);
                 }
             }
@@ -943,6 +952,11 @@ public final class ApiDocGenerator {
             }
         }
         return doc;
+    }
+
+    private static boolean isContractSentence(final String sentence, final String lowerCaseSentence) {
+        return lowerCaseSentence.contains("must") || lowerCaseSentence.contains("if ") || lowerCaseSentence.contains("when ")
+                || lowerCaseSentence.contains("should") || PARITY_CONTRACT_SENTENCE.matcher(sentence).matches();
     }
 
     /**
@@ -1200,12 +1214,46 @@ public final class ApiDocGenerator {
             }
 
             final String body = ((LiteralTree) tree).getBody().getBody();
-            final String code = body == null ? "" : body.strip();
+            final String code = normalizeExampleCode(body);
             if (!code.isEmpty() && (preformattedDepth > 0 || code.contains("\n") || code.contains("\r"))) {
                 out.add(code);
             }
         }
         return out;
+    }
+
+    /**
+     * Normalizes code extracted from {@code <pre>{@code ...}</pre>} consistently across JDK versions.
+     * Some DocTrees implementations discard the single continuation-line space that older generated
+     * API artifacts retained. Reintroducing that structural space keeps JSON examples stable and
+     * preserves their relative indentation when rendered as Markdown.
+     */
+    private static String normalizeExampleCode(final String body) {
+        if (body == null) {
+            return "";
+        }
+
+        final String stripped = body.strip();
+        if (stripped.isEmpty()) {
+            return "";
+        }
+
+        final String[] lines = stripped.split("\\R", -1);
+        final StringBuilder result = new StringBuilder(stripped.length() + lines.length);
+
+        for (int i = 0; i < lines.length; i++) {
+            if (i > 0) {
+                result.append('\n');
+
+                if (!lines[i].isEmpty()) {
+                    result.append(' ');
+                }
+            }
+
+            result.append(lines[i]);
+        }
+
+        return result.toString();
     }
 
     private static List<String> readMarkerAnnotations(final ModifiersTree modifiers) {

@@ -51,6 +51,13 @@ public class DoubleStreamTest extends TestBase {
     }
 
     @Test
+    public void testFlatMapJdkStreamAlias() {
+        assertArrayEquals(new double[] { 1, 1.5, 2, 2.5 },
+                DoubleStream.of(1, 2).flatMapJdkStream(e -> java.util.stream.DoubleStream.of(e, e + 0.5)).toArray());
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.of(1).flatMapJdkStream(null));
+    }
+
+    @Test
     public void testToJdkStreamCloseRunsArraySourceHandlersOnce() {
         final AtomicInteger closeCount = new AtomicInteger();
         final DoubleStream source = createDoubleStream(1d, 2d, 3d).onClose(closeCount::incrementAndGet);

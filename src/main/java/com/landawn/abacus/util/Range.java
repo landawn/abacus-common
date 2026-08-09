@@ -104,7 +104,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Range operations
  * Range<Integer> other = Range.closed(5, 15);
- * boolean overlaps = closedRange.isOverlappedBy(other);                      // returns true - ranges overlap
+ * boolean overlaps = closedRange.overlaps(other);                            // returns true - ranges overlap
  * Optional<Range<Integer>> intersection = closedRange.intersection(other);   // returns [5, 10]
  * Range<Integer> span = closedRange.span(other);                             // returns [1, 15] - encompasses both ranges
  * }</pre>
@@ -189,7 +189,7 @@ import com.landawn.abacus.util.u.Optional;
  * <ul>
  *   <li><b>Null Endpoints:</b> Endpoint values must not be {@code null}; all factory methods throw {@code IllegalArgumentException} if either endpoint is {@code null}</li>
  *   <li><b>Query Arguments:</b> Methods such as {@link #contains}, {@link #isStartedBy}, and {@link #isAfter} accept {@code null} query arguments and return {@code false} rather than throwing</li>
- *   <li><b>Range Arguments:</b> Methods such as {@link #containsRange} and {@link #isOverlappedBy} accept a {@code null} range argument and return {@code false}</li>
+ *   <li><b>Range Arguments:</b> Methods such as {@link #containsRange} and {@link #overlaps} accept a {@code null} range argument and return {@code false}</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
@@ -244,7 +244,7 @@ import com.landawn.abacus.util.u.Optional;
  *             List<Meeting> meetings, Range<LocalDateTime> timeWindow) {
  *         return meetings.stream()
  *             .map(meeting -> Range.closed(meeting.getStartTime(), meeting.getEndTime()))
- *             .filter(meetingRange -> meetingRange.isOverlappedBy(timeWindow))
+ *             .filter(meetingRange -> meetingRange.overlaps(timeWindow))
  *             .collect(Collectors.toList());
  *     }
  *
@@ -850,7 +850,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other the range to check for containment, {@code null} returns false
      * @return {@code true} if this range contains all elements of the specified range
-     * @see #isOverlappedBy(Range)
+     * @see #overlaps(Range)
      * @see #contains(Comparable)
      */
     public boolean containsRange(final Range<T> other) {
@@ -914,7 +914,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely after the specified range with no shared elements
      * @see #isBeforeRange(Range)
-     * @see #isOverlappedBy(Range)
+     * @see #overlaps(Range)
      */
     public boolean isAfterRange(final Range<T> other) {
         if (other == null) {
@@ -948,7 +948,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely before the specified range with no shared elements
      * @see #isAfterRange(Range)
-     * @see #isOverlappedBy(Range)
+     * @see #overlaps(Range)
      */
     public boolean isBeforeRange(final Range<T> other) {
         if (other == null) {
@@ -971,9 +971,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range3 = Range.closed(6, 10);
      * Range<Integer> range4 = Range.open(5, 10);
      *
-     * range1.isOverlappedBy(range2);   // returns true (overlap from 3 to 5)
-     * range1.isOverlappedBy(range3);   // returns false (no overlap)
-     * range1.isOverlappedBy(range4);   // returns false (ranges touch at 5 but not both inclusive)
+     * range1.overlaps(range2);   // returns true (overlap from 3 to 5)
+     * range1.overlaps(range3);   // returns false (no overlap)
+     * range1.overlaps(range4);   // returns false (ranges touch at 5 but not both inclusive)
      * }</pre>
      *
      * @param other the range to test for overlap, {@code null} returns false
@@ -982,15 +982,16 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #intersection(Range)
      * @see #isBeforeRange(Range)
      * @see #isAfterRange(Range)
+     * @deprecated Use {@link #overlaps(Range)}. The overlap relation is symmetric, so the active name is clearer.
      */
+    @Deprecated
     public boolean isOverlappedBy(final Range<T> other) {
-        //NOSONAR
-        return other != null && !isEmpty() && !other.isEmpty() && !isAfterRange(other) && !isBeforeRange(other);
+        return overlaps(other);
     }
 
     /**
      * Checks whether this range overlaps with the specified range.
-     * This active-form alias is equivalent to {@link #isOverlappedBy(Range)}.
+     * This is the canonical overlap operation for ranges.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1002,11 +1003,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other the range to test for overlap, {@code null} returns false
      * @return {@code true} if the specified range overlaps with this range; otherwise, false
-     * @see #isOverlappedBy(Range)
      * @see #intersection(Range)
      */
     public boolean overlaps(final Range<T> other) {
-        return isOverlappedBy(other);
+        //NOSONAR
+        return other != null && !isEmpty() && !other.isEmpty() && !isAfterRange(other) && !isBeforeRange(other);
     }
 
     /**
@@ -1038,11 +1039,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *         {@code Optional.empty()} if they do not overlap (or {@code other} is {@code null},
      *         or either range is empty); or an {@code Optional} containing this range if the
      *         two ranges are equal and non-empty
-     * @see #isOverlappedBy(Range)
+     * @see #overlaps(Range)
      * @see #span(Range)
      */
     public Optional<Range<T>> intersection(final Range<T> other) {
-        if (!this.isOverlappedBy(other)) {
+        if (!this.overlaps(other)) {
             return Optional.empty();
         } else if (this.equals(other)) {
             return Optional.of(this);

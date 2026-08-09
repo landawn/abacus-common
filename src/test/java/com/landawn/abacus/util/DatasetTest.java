@@ -4820,7 +4820,7 @@ public class DatasetTest extends AbstractTest {
         N.println(Strings.repeat("=", 80));
 
         copy = sheet.copy();
-        copy.transpose().println();
+        copy.transposed().println();
         assertNotNull(copy);
     }
 

@@ -19827,7 +19827,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(char...)
      */
     public static char min(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty"); //NOSONAR
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY); //NOSONAR
 
         return min(a, 0, a.length);
     }
@@ -19857,7 +19857,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         char min = a[fromIndex];
@@ -19890,7 +19890,7 @@ public final class N extends CommonUtil {
      * @see #max(byte...)
      */
     public static byte min(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -19920,7 +19920,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         byte min = a[fromIndex];
         for (int i = fromIndex + 1; i < toIndex; i++) {
@@ -19952,7 +19952,7 @@ public final class N extends CommonUtil {
      * @see #max(short...)
      */
     public static short min(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -19982,7 +19982,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         short min = a[fromIndex];
@@ -20016,7 +20016,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(int...)
      */
     public static int min(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -20046,7 +20046,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         int min = a[fromIndex];
@@ -20079,7 +20079,7 @@ public final class N extends CommonUtil {
      * @see #max(long...)
      */
     public static long min(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -20109,7 +20109,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         long min = a[fromIndex];
@@ -20147,7 +20147,7 @@ public final class N extends CommonUtil {
      * @see IEEE754rUtil#min(float[]) IEEE754rUtil.min(float[]), which skips NaN per IEEE 754r
      */
     public static float min(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -20183,7 +20183,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         float min = a[fromIndex];
@@ -20221,7 +20221,7 @@ public final class N extends CommonUtil {
      * @see IEEE754rUtil#min(double[]) IEEE754rUtil.min(double[]), which skips NaN per IEEE 754r
      */
     public static double min(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -20257,7 +20257,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         double min = a[fromIndex];
@@ -20293,7 +20293,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(a, 0, a.length);
     }
@@ -20353,7 +20353,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T min(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return min(a, 0, a.length, cmp);
@@ -20391,7 +20391,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
@@ -20437,7 +20437,7 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T extends Comparable<? super T>> T min(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
 
         return min(c, fromIndex, toIndex, (Comparator<T>) NULL_MAX_COMPARATOR);
     }
@@ -20474,7 +20474,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified collection or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
@@ -20578,7 +20578,7 @@ public final class N extends CommonUtil {
             return min(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, THE_SPECIFIED_COLLECTION_ITERABLE_ITERATOR_CANNOT_BE_NULL_OR_EMPTY); //NOSONAR
 
         return min(iter, cmp);
     }
@@ -20633,7 +20633,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T min(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
+        checkArgument(!isEmpty(iter), THE_SPECIFIED_COLLECTION_ITERABLE_ITERATOR_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         final boolean isNullMinComparator = cmp == NULL_MIN_COMPARATOR;
@@ -21432,7 +21432,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Comparable[])
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         T min = null;
         T max = null;
@@ -21490,7 +21490,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Object[], Comparator)
      */
     public static <T> Pair<T, T> minMax(final T[] a, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (a.length == 1) {
@@ -21543,7 +21543,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Iterable)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterable<? extends T> c) throws IllegalArgumentException {
-        checkArgNotNull(c, "The specified iterable cannot be null or empty");
+        checkArgNotNull(c, THE_SPECIFIED_ITERABLE_CANNOT_BE_NULL_OR_EMPTY);
 
         return minMax(c.iterator());
     }
@@ -21575,7 +21575,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Iterable, Comparator)
      */
     public static <T> Pair<T, T> minMax(final Iterable<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotNull(c, "The specified iterable cannot be null or empty");
+        checkArgNotNull(c, THE_SPECIFIED_ITERABLE_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return minMax(c.iterator(), cmp);
@@ -21606,7 +21606,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Iterator)
      */
     public static <T extends Comparable<? super T>> Pair<T, T> minMax(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        checkArgument(iter != null && iter.hasNext(), "The specified iterator cannot be null or empty");
+        checkArgument(iter != null && iter.hasNext(), THE_SPECIFIED_ITERATOR_CANNOT_BE_NULL_OR_EMPTY);
 
         T min = null;
         T max = null;
@@ -21656,7 +21656,7 @@ public final class N extends CommonUtil {
      * @see Iterables#minMax(Iterator, Comparator)
      */
     public static <T> Pair<T, T> minMax(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(iter != null && iter.hasNext(), "The specified iterator cannot be null or empty");
+        checkArgument(iter != null && iter.hasNext(), THE_SPECIFIED_ITERATOR_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         T next = iter.next();
@@ -22123,7 +22123,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(char...)
      */
     public static char max(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22151,7 +22151,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         char max = a[fromIndex];
@@ -22185,7 +22185,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(byte...)
      */
     public static byte max(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22213,7 +22213,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         byte max = a[fromIndex];
@@ -22247,7 +22247,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(short...)
      */
     public static short max(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22275,7 +22275,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         short max = a[fromIndex];
@@ -22309,7 +22309,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(int...)
      */
     public static int max(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22337,7 +22337,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         int max = a[fromIndex];
@@ -22371,7 +22371,7 @@ public final class N extends CommonUtil {
      * @see #lowerMedian(long...)
      */
     public static long max(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22399,7 +22399,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         long max = a[fromIndex];
@@ -22439,7 +22439,7 @@ public final class N extends CommonUtil {
      * @see IEEE754rUtil#max(float[]) IEEE754rUtil.max(float[]), which skips NaN per IEEE 754r
      */
     public static float max(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22475,7 +22475,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         float max = a[fromIndex];
@@ -22515,7 +22515,7 @@ public final class N extends CommonUtil {
      * @see IEEE754rUtil#max(double[]) IEEE754rUtil.max(double[]), which skips NaN per IEEE 754r
      */
     public static double max(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22551,7 +22551,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         double max = a[fromIndex];
@@ -22588,7 +22588,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(a, 0, a.length);
     }
@@ -22649,7 +22649,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T max(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return max(a, 0, a.length, cmp);
@@ -22687,7 +22687,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
@@ -22733,7 +22733,7 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T extends Comparable<? super T>> T max(final Collection<? extends T> c, final int fromIndex, final int toIndex)
             throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
 
         return max(c, fromIndex, toIndex, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
@@ -22770,7 +22770,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified collection or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
@@ -22874,7 +22874,7 @@ public final class N extends CommonUtil {
             return max(coll, 0, coll.size(), cmp);
         }
 
-        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, "The specified Collection/Iterable/Iterator cannot be null or empty"); //NOSONAR
+        final Iterator<? extends T> iter = Iterables.iterateNonEmpty(c, THE_SPECIFIED_COLLECTION_ITERABLE_ITERATOR_CANNOT_BE_NULL_OR_EMPTY); //NOSONAR
 
         return max(iter, cmp);
     }
@@ -22929,7 +22929,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T max(final Iterator<? extends T> iter, Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgument(!isEmpty(iter), "The specified Collection/Iterable/Iterator cannot be null or empty");
+        checkArgument(!isEmpty(iter), THE_SPECIFIED_COLLECTION_ITERABLE_ITERATOR_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         final boolean isNullMaxComparator = cmp == NULL_MAX_COMPARATOR;
@@ -24038,7 +24038,7 @@ public final class N extends CommonUtil {
      * @see Median#of(int[])
      */
     public static double median(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24072,7 +24072,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24114,7 +24114,7 @@ public final class N extends CommonUtil {
      * @see Median#of(byte[])
      */
     public static double median(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24145,7 +24145,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24187,7 +24187,7 @@ public final class N extends CommonUtil {
      * @see Median#of(short[])
      */
     public static double median(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24218,7 +24218,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24260,7 +24260,7 @@ public final class N extends CommonUtil {
      * @see Median#of(long[])
      */
     public static double median(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24291,7 +24291,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24333,7 +24333,7 @@ public final class N extends CommonUtil {
      * @see Median#of(float[])
      */
     public static double median(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24364,7 +24364,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24406,7 +24406,7 @@ public final class N extends CommonUtil {
      * @see Median#of(double[])
      */
     public static double median(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return median(a, 0, a.length);
     }
@@ -24437,7 +24437,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24477,7 +24477,7 @@ public final class N extends CommonUtil {
      * @see Median#of(char[])
      */
     public static char lowerMedian(final char... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24507,7 +24507,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24542,7 +24542,7 @@ public final class N extends CommonUtil {
      * @see Median#of(byte[])
      */
     public static byte lowerMedian(final byte... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24572,7 +24572,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24607,7 +24607,7 @@ public final class N extends CommonUtil {
      * @see Median#of(short[])
      */
     public static short lowerMedian(final short... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24637,7 +24637,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24672,7 +24672,7 @@ public final class N extends CommonUtil {
      * @see Median#of(int[])
      */
     public static int lowerMedian(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24702,7 +24702,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24737,7 +24737,7 @@ public final class N extends CommonUtil {
      * @see Median#of(long[])
      */
     public static long lowerMedian(final long... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24767,7 +24767,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24805,7 +24805,7 @@ public final class N extends CommonUtil {
      * @see Median#of(float[])
      */
     public static float lowerMedian(final float... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24838,7 +24838,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24876,7 +24876,7 @@ public final class N extends CommonUtil {
      * @see Median#of(double[])
      */
     public static double lowerMedian(final double... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24909,7 +24909,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -24948,7 +24948,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T lowerMedian(final T[] a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(a, 0, a.length);
     }
@@ -24984,7 +24984,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         return (T) lowerMedian(a, fromIndex, toIndex, NATURAL_COMPARATOR);
@@ -25019,7 +25019,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T lowerMedian(final T[] a, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return lowerMedian(a, 0, a.length, cmp);
@@ -25062,7 +25062,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         final int len = toIndex - fromIndex;
@@ -25104,7 +25104,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T lowerMedian(final Collection<? extends T> c) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
 
         return lowerMedian(c, 0, c.size());
     }
@@ -25172,7 +25172,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T lowerMedian(final Collection<? extends T> c, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return lowerMedian(c, 0, c.size(), cmp);
@@ -25216,7 +25216,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified collection or range cannot be empty"); //NOSONAR
+            throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY); //NOSONAR
         }
 
         final int len = toIndex - fromIndex;
@@ -25248,7 +25248,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(char[], int, int, int)
      */
     public static char kthLargest(final char[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25276,7 +25276,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex); //NOSONAR
 
@@ -25342,7 +25342,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(byte[], int, int, int)
      */
     public static byte kthLargest(final byte[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25370,7 +25370,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25436,7 +25436,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(short[], int, int, int)
      */
     public static short kthLargest(final short[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25464,7 +25464,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25530,7 +25530,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(int[], int, int, int)
      */
     public static int kthLargest(final int[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25558,7 +25558,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25624,7 +25624,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(long[], int, int, int)
      */
     public static long kthLargest(final long[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25652,7 +25652,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25722,7 +25722,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(float[], int, int, int)
      */
     public static float kthLargest(final float[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25754,7 +25754,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25832,7 +25832,7 @@ public final class N extends CommonUtil {
      * @see #kthLargest(double[], int, int, int)
      */
     public static double kthLargest(final double[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25865,7 +25865,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -25941,7 +25941,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final T[] a, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(a, 0, a.length, k);
     }
@@ -25972,7 +25972,7 @@ public final class N extends CommonUtil {
         checkFromToIndex(fromIndex, toIndex, len(a));
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         return kthLargest(a, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
@@ -25999,7 +25999,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(a, "The specified array cannot be null or empty");
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return kthLargest(a, 0, a.length, k, cmp);
@@ -26034,7 +26034,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified array or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
 
@@ -26061,7 +26061,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int k) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
 
         return kthLargest(c, 0, c.size(), k);
     }
@@ -26114,7 +26114,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        checkArgNotEmpty(c, "The specified collection cannot be null or empty");
+        checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
         N.checkArgNotNull(cmp, cs.cmp);
 
         return kthLargest(c, 0, c.size(), k, cmp);
@@ -26149,7 +26149,7 @@ public final class N extends CommonUtil {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException("The specified collection or range cannot be empty");
+            throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
@@ -27520,7 +27520,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Character> percentilesOfSorted(final char[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty"); //NOSONAR
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY); //NOSONAR
 
         final int len = sortedArray.length;
 
@@ -27565,7 +27565,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Byte> percentilesOfSorted(final byte[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Byte> m = newLinkedHashMap(Percentage.values().length);
@@ -27610,7 +27610,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Short> percentilesOfSorted(final short[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Short> m = newLinkedHashMap(Percentage.values().length);
@@ -27650,7 +27650,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Integer> percentilesOfSorted(final int[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Integer> m = newLinkedHashMap(Percentage.values().length);
@@ -27694,7 +27694,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Long> percentilesOfSorted(final long[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Long> m = newLinkedHashMap(Percentage.values().length);
@@ -27743,7 +27743,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Float> percentilesOfSorted(final float[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Float> m = newLinkedHashMap(Percentage.values().length);
@@ -27794,7 +27794,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static Map<Percentage, Double> percentilesOfSorted(final double[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, Double> m = newLinkedHashMap(Percentage.values().length);
@@ -27847,7 +27847,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static <T> Map<Percentage, T> percentilesOfSorted(final T[] sortedArray) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedArray, "The specified 'sortedArray' cannot be null or empty");
+        checkArgNotEmpty(sortedArray, THE_SPECIFIED_SORTED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
 
         final int len = sortedArray.length;
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);
@@ -27903,7 +27903,7 @@ public final class N extends CommonUtil {
      * @see Percentage
      */
     public static <T> Map<Percentage, T> percentilesOfSorted(final List<T> sortedList) throws IllegalArgumentException {
-        checkArgNotEmpty(sortedList, "The specified 'sortedList' cannot be null or empty");
+        checkArgNotEmpty(sortedList, THE_SPECIFIED_SORTED_LIST_CANNOT_BE_NULL_OR_EMPTY);
 
         final int size = sortedList.size();
         final Map<Percentage, T> m = newLinkedHashMap(Percentage.values().length);

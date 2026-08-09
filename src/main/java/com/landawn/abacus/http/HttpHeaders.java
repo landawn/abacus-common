@@ -1149,7 +1149,7 @@ public final class HttpHeaders {
      * Gets the raw stored value of a header.
      * The name is matched case-insensitively, as required by HTTP. The value is returned exactly as
      * it was stored (it may be a {@code Collection}, {@code Date}, {@code Instant}, or any object);
-     * use {@link #getFirst(String)} for the coerced {@code String} form.
+     * use {@link #getAsString(String)} for the coerced {@code String} form.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1159,7 +1159,7 @@ public final class HttpHeaders {
      *
      * @param headerName The name of the header to retrieve; a {@code null} name never matches
      * @return The header value, or {@code null} if not present (or if the header is stored with a {@code null} value)
-     * @see #getFirst(String)
+     * @see #getAsString(String)
      */
     public Object get(final String headerName) {
         final String storedName = findHeaderName(headerName);
@@ -1176,13 +1176,13 @@ public final class HttpHeaders {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * headers.set("Accept-Encoding", Arrays.asList("gzip", "deflate"));
-     * String value = headers.getFirst("Accept-Encoding");   // "gzip, deflate"
+     * String value = headers.getAsString("Accept-Encoding");   // "gzip, deflate"
      * }</pre>
      *
      * @param headerName The name of the header to retrieve
      * @return The coerced header value, or {@code null} if the header is not present
      */
-    public String getFirst(final String headerName) {
+    public String getAsString(final String headerName) {
         final Object value = get(headerName);
 
         return value == null ? null : valueOf(value);

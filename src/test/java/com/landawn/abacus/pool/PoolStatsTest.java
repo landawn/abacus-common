@@ -2,6 +2,7 @@ package com.landawn.abacus.pool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +55,7 @@ public class PoolStatsTest extends TestBase {
 
     @Test
     public void testRecordWithMaxValues() {
-        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE,
                 Long.MAX_VALUE, Long.MAX_VALUE);
 
         assertNotNull(stats);
@@ -63,7 +64,7 @@ public class PoolStatsTest extends TestBase {
         assertEquals(Long.MAX_VALUE, stats.putCount());
         assertEquals(Long.MAX_VALUE, stats.getCount());
         assertEquals(Long.MAX_VALUE, stats.hitCount());
-        assertEquals(Long.MAX_VALUE, stats.missCount());
+        assertEquals(0, stats.missCount());
         assertEquals(Long.MAX_VALUE, stats.evictionCount());
         assertEquals(Long.MAX_VALUE, stats.maxMemory());
         assertEquals(Long.MAX_VALUE, stats.dataSize());
@@ -143,7 +144,7 @@ public class PoolStatsTest extends TestBase {
 
     @Test
     public void testWithMaxValues() {
-        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE,
+        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE,
                 Long.MAX_VALUE, Long.MAX_VALUE);
 
         assertEquals(Integer.MAX_VALUE, stats.capacity());
@@ -151,7 +152,7 @@ public class PoolStatsTest extends TestBase {
         assertEquals(Long.MAX_VALUE, stats.putCount());
         assertEquals(Long.MAX_VALUE, stats.getCount());
         assertEquals(Long.MAX_VALUE, stats.hitCount());
-        assertEquals(Long.MAX_VALUE, stats.missCount());
+        assertEquals(0, stats.missCount());
         assertEquals(Long.MAX_VALUE, stats.evictionCount());
         assertEquals(Long.MAX_VALUE, stats.maxMemory());
         assertEquals(Long.MAX_VALUE, stats.dataSize());
@@ -218,6 +219,23 @@ public class PoolStatsTest extends TestBase {
     public void testDerivedUtilizationZeroCapacity() {
         PoolStats stats = new PoolStats(0, 0, 0, 0, 0, 0, 0, -1, -1);
         assertEquals(0.0, stats.utilization(), 0.001);
+    }
+
+    @Test
+    public void testConstructorRejectsInvalidInvariants() {
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(-1, 0, 0, 0, 0, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, -1, 0, 0, 0, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 2, 0, 0, 0, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, -1, 0, 0, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, -1, 0, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 1, -1, 2, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 1, 2, -1, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 1, 1, 0, -1, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 2, 1, 0, 0, -1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -2, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -1, -2));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, 0, -1));
     }
 
 }

@@ -41,16 +41,6 @@ public class PairTest extends TestBase {
     }
 
     @Test
-    public void testReverse() {
-        Pair<String, Integer> original = Pair.of("Hello", 42);
-        Pair<Integer, String> reversed = original.swap();
-        assertEquals(42, reversed.left());
-        assertEquals("Hello", reversed.right());
-        assertEquals("Hello", original.left());
-        assertEquals(42, original.right());
-    }
-
-    @Test
     public void testGettersAndSetters() {
         Pair<String, Integer> pair = Pair.of("initialLeft", 1);
 
@@ -105,14 +95,6 @@ public class PairTest extends TestBase {
         Pair<String, Integer> pair = Pair.of(null, null);
         assertNull(pair.left());
         assertNull(pair.right());
-    }
-
-    @Test
-    public void testReverse_withNulls() {
-        Pair<String, Integer> original = Pair.of(null, null);
-        Pair<Integer, String> reversed = original.swap();
-        assertNull(reversed.left());
-        assertNull(reversed.right());
     }
 
     @Test
@@ -579,34 +561,6 @@ public class PairTest extends TestBase {
         assertFalse(result);
         assertEquals("new", pair.left()); // unchanged
         assertEquals(2, pair.right()); // unchanged
-    }
-
-    @Test
-    public void testSwap_thenSwapBack() {
-        Pair<String, Integer> original = Pair.of("Hello", 42);
-        Pair<Integer, String> swapped = original.swap();
-        Pair<String, Integer> swappedBack = swapped.swap();
-        assertEquals(original, swappedBack);
-    }
-
-    // swap()
-    @Test
-    public void testSwap() {
-        Pair<String, Integer> original = Pair.of("Hello", 42);
-        Pair<Integer, String> swapped = original.swap();
-        assertEquals(42, swapped.left());
-        assertEquals("Hello", swapped.right());
-        // original unchanged
-        assertEquals("Hello", original.left());
-        assertEquals(42, original.right());
-    }
-
-    @Test
-    public void testSwap_withNulls() {
-        Pair<String, Integer> original = Pair.of(null, null);
-        Pair<Integer, String> swapped = original.swap();
-        assertNull(swapped.left());
-        assertNull(swapped.right());
     }
 
     @Test
@@ -1282,10 +1236,6 @@ public class PairTest extends TestBase {
     @Test
     public void testUtilityAndConversionMethods() {
         Pair<String, Integer> pair = Pair.of("A", 1);
-
-        Pair<Integer, String> reversed = pair.swap();
-        assertEquals(1, reversed.left());
-        assertEquals("A", reversed.right());
 
         Pair<String, Integer> copy = pair.copy();
         assertEquals(pair, copy);
