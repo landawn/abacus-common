@@ -70,6 +70,19 @@ public class NumberTypeTest extends TestBase {
     }
 
     @Test
+    public void testTypeCapabilitiesFollowRepresentedNumberClass() {
+        NumberType<Number> numberType = (NumberType<Number>) createType("Number");
+
+        assertFalse(numberType.isImmutable());
+        assertFalse(numberType.isComparable());
+        assertThrows(UnsupportedOperationException.class, () -> numberType.compare(1, 2));
+        assertTrue(intNumberType.isImmutable());
+        assertTrue(intNumberType.isComparable());
+        assertTrue(new NumberType<>(java.math.BigInteger.class).isImmutable());
+        assertFalse(new NumberType<>(java.util.concurrent.atomic.LongAdder.class).isImmutable());
+    }
+
+    @Test
     public void test_isCsvQuoteRequired() {
         assertFalse(intNumberType.isCsvQuoteRequired());
         assertFalse(doubleNumberType.isCsvQuoteRequired());
@@ -182,4 +195,5 @@ public class NumberTypeTest extends TestBase {
         doubleNumberType.serializeTo(writer, 123.45, config);
         verify(writer).write(123.45);
     }
+
 }

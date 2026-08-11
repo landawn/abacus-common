@@ -45,6 +45,11 @@ public class MutableIntTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableIntType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableIntType.stringOf(null);
         Assertions.assertNull(result);

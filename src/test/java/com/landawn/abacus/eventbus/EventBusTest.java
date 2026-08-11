@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -756,6 +757,29 @@ public class EventBusTest extends TestBase {
         eventBus.post("Event after interval");
 
         Assertions.assertEquals(2, eventCount.get());
+    }
+
+    @Test
+    public void testEventIntervalUsesMonotonicElapsedTimeAndHonorsBoundary() throws NoSuchMethodException {
+        class SubscriberWithInterval {
+            @Subscribe(intervalMillis = 100)
+            public void onEvent(String event) {
+                // No-op: this test exercises the interval state carried by the subscriber metadata.
+            }
+        }
+
+        final Method method = SubscriberWithInterval.class.getDeclaredMethod("onEvent", String.class);
+        final EventBus.SubIdentifier sub = new EventBus.SubIdentifier(method);
+        final long firstPostTime = 1_000_000_000L;
+        final long intervalNanos = TimeUnit.MILLISECONDS.toNanos(100);
+
+        assertFalse(sub.isWithinPostInterval(firstPostTime));
+
+        sub.recordPostTime(firstPostTime);
+
+        assertTrue(sub.isWithinPostInterval(firstPostTime + intervalNanos - 1));
+        assertFalse(sub.isWithinPostInterval(firstPostTime + intervalNanos));
+        assertFalse(sub.isWithinPostInterval(firstPostTime - 1));
     }
 
     @Test

@@ -1742,6 +1742,43 @@ public final class Multiset<E> implements Collection<E> {
     }
 
     /**
+     * Removes all occurrences of every element for which the given predicate returns {@code true}.
+     * The predicate is evaluated once per distinct element, not per occurrence; if it returns
+     * {@code true} for an element, all of that element's occurrences are removed. Elements are
+     * removed after the evaluation pass, so the predicate is never invoked on a partially modified multiset.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
+     * multiset.removeIf(s -> s.equals("a"));
+     * System.out.println(multiset.getCount("a"));   // prints 0
+     * System.out.println(multiset.getCount("b"));   // prints 1
+     * }</pre>
+     *
+     * @param filter a predicate that returns {@code true} for elements to remove; must not be {@code null}
+     * @return {@code true} if any elements were removed
+     * @throws NullPointerException if {@code filter} is {@code null}
+     */
+    @Override
+    public boolean removeIf(final Predicate<? super E> filter) {
+        N.requireNonNull(filter, cs.filter);
+
+        final List<E> removingKeys = new ArrayList<>();
+
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+            if (filter.test(entry.getKey())) {
+                removingKeys.add(entry.getKey());
+            }
+        }
+
+        for (final E key : removingKeys) {
+            removeAllOccurrencesOf(key);
+        }
+
+        return !removingKeys.isEmpty();
+    }
+
+    /**
      * Returns the total number of all occurrences of all elements in this multiset.
      * This is the sum of counts for all distinct elements.
      *
@@ -2144,9 +2181,8 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Runs the specified action for each distinct element in this multiset, and the number of
-     * occurrences of that element. For some {@code Multiset} implementations, this may be more
-     * efficient than iterating over the {@link #entrySet()} either explicitly or with {@code
-     * entrySet().forEach(action)}.
+     * occurrences of that element. This may be more efficient than iterating over the
+     * {@link #entrySet()} either explicitly or with {@code entrySet().forEach(action)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

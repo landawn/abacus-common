@@ -45,6 +45,11 @@ public class MutableByteTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableByteType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableByteType.stringOf(null);
         Assertions.assertNull(result);

@@ -1082,4 +1082,185 @@ public class BiMapTest extends AbstractTest {
         assertEquals(Integer.valueOf(9), m.get("a"));
     }
 
+    /**
+     * Map.replaceAll must work even though entrySet() yields immutable entry snapshots.
+     * Pre-fix: JDK default replaceAll called Entry.setValue → UnsupportedOperationException.
+     */
+    @Test
+    public void testReplaceAll_updatesValuesAndInverse() {
+        final BiMap<String, Integer> m = BiMap.of("a", 1, "b", 2);
+        m.replaceAll((k, v) -> v + 10);
+
+        assertEquals(11, m.get("a"));
+        assertEquals(12, m.get("b"));
+        assertEquals("a", m.getByValue(11));
+        assertEquals("b", m.getByValue(12));
+        assertNull(m.getByValue(1));
+        assertNull(m.getByValue(2));
+    }
+
+    @Test
+    public void testReplaceAll_rejectsDuplicateValuesWithoutMutating() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+
+        assertThrows(IllegalArgumentException.class, () -> m.replaceAll((k, v) -> 99));
+
+        // Atomic: the collision is detected before any entry is modified.
+        assertEquals(1, m.get("a"));
+        assertEquals(2, m.get("b"));
+        assertEquals(2, m.size());
+        assertEquals("a", m.getByValue(1));
+        assertEquals("b", m.getByValue(2));
+    }
+
+    @Test
+    public void testReplaceAll_valueCollisionUsesValueMapEquivalence() {
+        final BiMap<String, String> m = new BiMap<>(LinkedHashMap::new, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+        m.put("a", "first");
+        m.put("b", "second");
+
+        // "SAME" collides with "same" under the case-insensitive value map.
+        assertThrows(IllegalArgumentException.class, () -> m.replaceAll((k, v) -> k.equals("a") ? "same" : "SAME"));
+
+        // Atomic: both entries are unchanged after the failed replaceAll.
+        assertEquals(2, m.size());
+        assertEquals("first", m.get("a"));
+        assertEquals("second", m.get("b"));
+        assertEquals("a", m.getByValue("FIRST"));
+        assertEquals("b", m.getByValue("SECOND"));
+    }
+
+    @Test
+    public void testReplaceAll_isAtomicWhenFunctionFails() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+
+        assertThrows(IllegalArgumentException.class, () -> m.replaceAll((k, v) -> k.equals("a") ? v + 10 : null));
+
+        // Atomic: the null replacement is detected before any entry is modified.
+        assertEquals(1, m.get("a"));
+        assertEquals(2, m.get("b"));
+        assertEquals("a", m.getByValue(1));
+        assertEquals("b", m.getByValue(2));
+    }
+
+    @Test
+    public void testReplaceAll_swappingValuesSucceeds() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+
+        // Each replacement value is still held by another key until that key is processed.
+        m.replaceAll((k, v) -> k.equals("a") ? 2 : (k.equals("b") ? 1 : 3));
+
+        assertEquals(3, m.size());
+        assertEquals(2, m.get("a"));
+        assertEquals(1, m.get("b"));
+        assertEquals(3, m.get("c"));
+        assertEquals("a", m.getByValue(2));
+        assertEquals("b", m.getByValue(1));
+        assertEquals("c", m.getByValue(3));
+        assertEquals(N.asList("a", "b", "c"), new java.util.ArrayList<>(m.keySet()));
+    }
+
+    @Test
+    public void testReplaceAll_storesExactComparatorEquivalentResult() {
+        final BiMap<Integer, String> m = new BiMap<>(LinkedHashMap::new, () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+        final String replacement = new String("ALPHA");
+        m.put(1, "Alpha");
+
+        m.replaceAll((k, v) -> replacement);
+
+        assertSame(replacement, m.get(1));
+        assertSame(replacement, m.values().iterator().next());
+        assertEquals(Integer.valueOf(1), m.getByValue("alpha"));
+    }
+
+    @Test
+    public void testReplaceAll_onInverseUpdatesOriginal() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+
+        m.inverse().replaceAll((value, key) -> key.toUpperCase());
+
+        assertNull(m.get("a"));
+        assertNull(m.get("b"));
+        assertEquals(Integer.valueOf(1), m.get("A"));
+        assertEquals(Integer.valueOf(2), m.get("B"));
+        assertEquals("A", m.inverse().get(1));
+        assertEquals("B", m.inverse().get(2));
+    }
+
+    @Test
+    public void testReplaceAll_functionExceptionDoesNotMutate() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+
+        assertThrows(IllegalStateException.class, () -> m.replaceAll((k, v) -> {
+            if (k.equals("b")) {
+                throw new IllegalStateException("boom");
+            }
+
+            return v + 10;
+        }));
+
+        assertEquals(Integer.valueOf(1), m.get("a"));
+        assertEquals(Integer.valueOf(2), m.get("b"));
+        assertEquals("a", m.getByValue(1));
+        assertEquals("b", m.getByValue(2));
+    }
+
+    @Test
+    public void testReplaceAll_invokesFunctionOncePerOriginalEntry() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        final java.util.List<String> invocations = new java.util.ArrayList<>();
+        m.put("a", 1);
+        m.put("b", 2);
+
+        m.replaceAll((k, v) -> {
+            invocations.add(k + "=" + v);
+            return v + 10;
+        });
+
+        assertEquals(N.asList("a=1", "b=2"), invocations);
+    }
+
+    @Test
+    public void testReplaceAll_rejectsReusedBackingMapSupplierWithoutMutating() {
+        final Map<Integer, String> sharedValueMap = new LinkedHashMap<>();
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, () -> sharedValueMap);
+        m.put("a", 1);
+        m.put("b", 2);
+
+        assertThrows(IllegalArgumentException.class, () -> m.replaceAll((k, v) -> v + 10));
+
+        assertEquals(Integer.valueOf(1), m.get("a"));
+        assertEquals(Integer.valueOf(2), m.get("b"));
+        assertEquals("a", m.getByValue(1));
+        assertEquals("b", m.getByValue(2));
+        assertEquals(2, sharedValueMap.size());
+    }
+
+    @Test
+    public void testReplaceAll_doesNotStructurallyModifyForwardKeyMap() {
+        final BiMap<String, Integer> m = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+        final java.util.Iterator<String> keyIterator = m.keySet().iterator();
+
+        assertEquals("a", keyIterator.next());
+        m.replaceAll((k, v) -> v + 10);
+
+        assertEquals("b", keyIterator.next());
+        assertEquals("c", keyIterator.next());
+        assertFalse(keyIterator.hasNext());
+    }
+
 }

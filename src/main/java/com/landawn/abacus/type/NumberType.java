@@ -25,6 +25,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.Immutable;
 import com.landawn.abacus.util.N;
 
 /**
@@ -176,6 +177,22 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
     @Override
     public boolean isNumber() {
         return true;
+    }
+
+    @Override
+    public boolean isImmutable() {
+        final Class<?> cls = ClassUtil.wrap(javaType());
+
+        // NumberType is also the fallback for arbitrary user-defined Number subclasses. Unknown
+        // classes must be treated conservatively: being a Number (or even final) does not make the
+        // value immutable. Custom immutable numeric values can opt in through the marker interface.
+        return cls == Byte.class || cls == Short.class || cls == Integer.class || cls == Long.class || cls == Float.class || cls == Double.class
+                || cls == java.math.BigInteger.class || cls == java.math.BigDecimal.class || Immutable.class.isAssignableFrom(cls);
+    }
+
+    @Override
+    public boolean isComparable() {
+        return Comparable.class.isAssignableFrom(ClassUtil.wrap(javaType()));
     }
 
     /**

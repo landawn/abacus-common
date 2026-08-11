@@ -351,8 +351,7 @@ public class LongStreamTest extends TestBase {
 
     @Test
     public void testFlatMapJdkStreamAlias() {
-        assertArrayEquals(new long[] { 1, 11, 2, 12 },
-                LongStream.of(1, 2).flatMapJdkStream(e -> java.util.stream.LongStream.of(e, e + 10)).toArray());
+        assertArrayEquals(new long[] { 1, 11, 2, 12 }, LongStream.of(1, 2).flatMapJdkStream(e -> java.util.stream.LongStream.of(e, e + 10)).toArray());
         assertThrows(IllegalArgumentException.class, () -> LongStream.of(1).flatMapJdkStream(null));
     }
 

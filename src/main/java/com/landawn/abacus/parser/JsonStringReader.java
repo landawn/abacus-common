@@ -627,7 +627,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @param type the type descriptor for conversion
      * @return the converted value
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "cast" })
     @Override
     public <T> T readValue(final Type<? extends T> type) {
         if (nextEvent != END_DOUBLE_QUOTE && nextEvent != END_SINGLE_QUOTE) {
@@ -647,7 +647,15 @@ class JsonStringReader extends AbstractJsonReader {
                 }
             } else if (text != null) {
                 if (text.equals(NULL)) {
-                    return type.isOptionalOrNullable() ? (T) defaultOptionals.get(type.javaType()) : null;
+                    // JSON null for Optional/Nullable/Holder → empty; for primitives → type default
+                    // (e.g. 0/false) so primitive arrays unbox without NPE; for others → null.
+                    if (type.isOptionalOrNullable()) {
+                        return (T) defaultOptionals.get(type.javaType());
+                    } else if (type.isPrimitive()) {
+                        return (T) type.defaultValue();
+                    } else {
+                        return null;
+                    }
                 } else if ((text.equals(FALSE) || text.equals(TRUE)) && (type.isBoolean() || type.isObject())) {
                     return (T) (text.equals(FALSE) ? Boolean.FALSE : Boolean.TRUE);
                 } else {

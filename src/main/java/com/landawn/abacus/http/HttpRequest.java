@@ -493,6 +493,10 @@ public final class HttpRequest {
     public HttpRequest connectTimeout(final Duration connectTimeout) {
         checkSettings();
 
+        if (connectTimeout.isNegative()) {
+            throw new IllegalArgumentException("'connectTimeout' must not be negative: " + connectTimeout);
+        }
+
         settings.setConnectTimeout(connectTimeout.toMillis());
 
         return this;
@@ -541,6 +545,10 @@ public final class HttpRequest {
      */
     public HttpRequest readTimeout(final Duration readTimeout) {
         checkSettings();
+
+        if (readTimeout.isNegative()) {
+            throw new IllegalArgumentException("'readTimeout' must not be negative: " + readTimeout);
+        }
 
         settings.setReadTimeout(readTimeout.toMillis());
 

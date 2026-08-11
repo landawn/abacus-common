@@ -509,7 +509,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <T> the type of the elements in the collection
      * @param <K> the type of the keys in the SetMultimap
      * @param c the collection of elements to be added to the SetMultimap, may be {@code null} or empty
-     * @param keyExtractor the function to extract keys from elements;
+     * @param keyExtractor the function to extract keys from elements
      * @return a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
@@ -557,8 +557,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <K> the type of the keys in the SetMultimap
      * @param <E> the type of the values in the SetMultimap
      * @param c the collection of elements to be transformed, may be {@code null} or empty
-     * @param keyExtractor the function to extract keys from elements;
-     * @param valueExtractor the function to extract values from elements;
+     * @param keyExtractor the function to extract keys from elements
+     * @param valueExtractor the function to extract values from elements
      * @return a new instance of SetMultimap with extracted keys and values from the specified collection
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
@@ -783,7 +783,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param <E> the type of the elements in the set
      * @param <V> the type of the value set, which must extend {@code Set<E>}
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
-     * @param valueSupplier the supplier that provides the set to be used as the value collection;
+     * @param valueSupplier the supplier that provides the set to be used as the value collection
      * @return a SetMultimap instance backed by the provided map
      * @throws IllegalArgumentException if the provided map is {@code null}, contains a {@code null} or empty value,
      *         or if {@code valueSupplier} is {@code null}.
@@ -938,7 +938,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;
-     *                    the function receives the number of keys in this multimap as its argument;
+     *                    the function receives the number of keys in this multimap as its argument
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
      * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.

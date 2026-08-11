@@ -45,6 +45,11 @@ public class MutableLongTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableLongType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableLongType.stringOf(null);
         Assertions.assertNull(result);

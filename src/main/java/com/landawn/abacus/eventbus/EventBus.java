@@ -1300,7 +1300,9 @@ public class EventBus {
             if (sub.intervalMillis > 0 || sub.deduplicate) {
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (sub) { //NOSONAR
-                    if (sub.intervalMillis > 0 && sub.lastPostTime != 0 && System.currentTimeMillis() - sub.lastPostTime < sub.intervalMillis) {
+                    final long currentTimeNanos = sub.intervalMillis > 0 ? System.nanoTime() : 0;
+
+                    if (sub.isWithinPostInterval(currentTimeNanos)) {
                         // ignore.
                         if (logger.isDebugEnabled()) {
                             logger.debug("Ignoring event: {} to subscriber: {} because it is within the interval: {}", N.toString(event), N.toString(sub),
@@ -1316,7 +1318,9 @@ public class EventBus {
                             logger.debug("Posting event: {} to subscriber: {}", N.toString(event), N.toString(sub));
                         }
 
-                        sub.lastPostTime = System.currentTimeMillis();
+                        if (sub.intervalMillis > 0) {
+                            sub.recordPostTime(currentTimeNanos);
+                        }
 
                         if (sub.deduplicate) {
                             sub.previousEvent = event;
@@ -1389,13 +1393,32 @@ public class EventBus {
         final boolean isPossibleLambdaSubscriber;
 
         /**
-         * The system time (in milliseconds) when the last event was delivered to this subscriber;
-         * {@code 0} means that no event has been delivered yet.
+         * The monotonic time when the last event was delivered to this subscriber.
          */
-        long lastPostTime = 0;
+        long lastPostTimeNanos;
+
+        /** Whether an event-delivery attempt has already been recorded for interval throttling. */
+        boolean hasPosted;
 
         /** The most recently delivered event, used for deduplication when {@link #deduplicate} is {@code true}. */
         Object previousEvent = null;
+
+        boolean isWithinPostInterval(final long currentTimeNanos) {
+            if (intervalMillis <= 0 || !hasPosted) {
+                return false;
+            }
+
+            final long elapsedNanos = currentTimeNanos - lastPostTimeNanos;
+
+            // Fail open for an elapsed value outside nanoTime's reliable half-range (for example,
+            // an interval spanning at least 2^63 nanoseconds) instead of suppressing indefinitely.
+            return elapsedNanos >= 0 && elapsedNanos < TimeUnit.MILLISECONDS.toNanos(intervalMillis);
+        }
+
+        void recordPostTime(final long currentTimeNanos) {
+            lastPostTimeNanos = currentTimeNanos;
+            hasPosted = true;
+        }
 
         /**
          * Constructs a prototype {@code SubIdentifier} from a subscriber method.

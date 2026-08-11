@@ -24018,82 +24018,6 @@ public final class N extends CommonUtil {
     }
 
     /**
-     * Returns the conventional statistical median of the specified int array or varargs as a {@code double}.
-     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
-     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * double median1 = N.median(10, 5, 20, 15);   // returns 12.5 (the mean of the two middle values 10 and 15)
-     *
-     * int[] numbers = {5, 30, 15, 8, 20};
-     * double median2 = N.median(numbers);   // returns 15.0
-     * }</pre>
-     *
-     * @param a the array or varargs of int values, must not be {@code null} or empty
-     * @return the statistical median as a {@code double}
-     * @throws IllegalArgumentException if the array is {@code null} or empty
-     * @see #median(int[], int, int)
-     * @see #lowerMedian(int...)
-     * @see Median#of(int[])
-     */
-    public static double median(final int... a) throws IllegalArgumentException {
-        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
-
-        return median(a, 0, a.length);
-    }
-
-    /**
-     * Returns the conventional statistical median of the int values in the specified range of the array
-     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
-     * when sorted in ascending order. For ranges with an even number of elements, the median is the
-     * arithmetic mean of the two middle values.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * int[] numbers = {5, 30, 15, 8, 20};
-     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
-     *
-     * int[] evens = {500, 100, 300, 200};
-     * double evenMedian = N.median(evens, 0, 4);   // returns 250.0 (the mean of 200 and 300)
-     * }</pre>
-     *
-     * @param a the array of int values, must not be {@code null} or empty
-     * @param fromIndex the starting index (inclusive) of the range
-     * @param toIndex the ending index (exclusive) of the range
-     * @return the statistical median as a {@code double}
-     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
-     * @see #median(int...)
-     * @see #lowerMedian(int[], int, int)
-     * @see Median#of(int[], int, int)
-     */
-    public static double median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkFromToIndex(fromIndex, toIndex, len(a));
-
-        if (isEmpty(a) || toIndex - fromIndex < 1) {
-            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
-        }
-
-        final int len = toIndex - fromIndex;
-
-        if (len == 1) {
-            return a[fromIndex];
-        } else if (len == 2) {
-            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
-        } else if (len == 3) {
-            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
-        } else if (len % 2 != 0) {
-            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
-        } else {
-            final int middle = len / 2;
-            final int[] tmp = copyOfRange(a, fromIndex, toIndex);
-            sort(tmp);
-            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
-        }
-    }
-
-    /**
      * Returns the conventional statistical median of the specified byte array or varargs as a {@code double}.
      * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
      * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
@@ -24162,7 +24086,7 @@ public final class N extends CommonUtil {
             final int middle = len / 2;
             final byte[] tmp = copyOfRange(a, fromIndex, toIndex);
             sort(tmp);
-            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+            return tmp[middle - 1] / 2d + tmp[middle] / 2d;
         }
     }
 
@@ -24235,7 +24159,83 @@ public final class N extends CommonUtil {
             final int middle = len / 2;
             final short[] tmp = copyOfRange(a, fromIndex, toIndex);
             sort(tmp);
-            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+            return tmp[middle - 1] / 2d + tmp[middle] / 2d;
+        }
+    }
+
+    /**
+     * Returns the conventional statistical median of the specified int array or varargs as a {@code double}.
+     * For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+     * For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * double median1 = N.median(10, 5, 20, 15);   // returns 12.5 (the mean of the two middle values 10 and 15)
+     *
+     * int[] numbers = {5, 30, 15, 8, 20};
+     * double median2 = N.median(numbers);   // returns 15.0
+     * }</pre>
+     *
+     * @param a the array or varargs of int values, must not be {@code null} or empty
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or empty
+     * @see #median(int[], int, int)
+     * @see #lowerMedian(int...)
+     * @see Median#of(int[])
+     */
+    public static double median(final int... a) throws IllegalArgumentException {
+        checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
+
+        return median(a, 0, a.length);
+    }
+
+    /**
+     * Returns the conventional statistical median of the int values in the specified range of the array
+     * as a {@code double}. For ranges with an odd number of elements, the median is the middle value
+     * when sorted in ascending order. For ranges with an even number of elements, the median is the
+     * arithmetic mean of the two middle values.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * int[] numbers = {5, 30, 15, 8, 20};
+     * double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+     *
+     * int[] evens = {500, 100, 300, 200};
+     * double evenMedian = N.median(evens, 0, 4);   // returns 250.0 (the mean of 200 and 300)
+     * }</pre>
+     *
+     * @param a the array of int values, must not be {@code null} or empty
+     * @param fromIndex the starting index (inclusive) of the range
+     * @param toIndex the ending index (exclusive) of the range
+     * @return the statistical median as a {@code double}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty
+     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @see #median(int...)
+     * @see #lowerMedian(int[], int, int)
+     * @see Median#of(int[], int, int)
+     */
+    public static double median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkFromToIndex(fromIndex, toIndex, len(a));
+
+        if (isEmpty(a) || toIndex - fromIndex < 1) {
+            throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
+        }
+
+        final int len = toIndex - fromIndex;
+
+        if (len == 1) {
+            return a[fromIndex];
+        } else if (len == 2) {
+            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+        } else if (len == 3) {
+            return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
+        } else if (len % 2 != 0) {
+            return kthLargest(a, fromIndex, toIndex, len / 2 + 1);
+        } else {
+            final int middle = len / 2;
+            final int[] tmp = copyOfRange(a, fromIndex, toIndex);
+            sort(tmp);
+            return tmp[middle - 1] / 2d + tmp[middle] / 2d;
         }
     }
 
@@ -24299,7 +24299,7 @@ public final class N extends CommonUtil {
         if (len == 1) {
             return a[fromIndex];
         } else if (len == 2) {
-            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+            return a[fromIndex] / 2d + a[fromIndex + 1] / 2d;
         } else if (len == 3) {
             return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
         } else if (len % 2 != 0) {
@@ -24308,7 +24308,7 @@ public final class N extends CommonUtil {
             final int middle = len / 2;
             final long[] tmp = copyOfRange(a, fromIndex, toIndex);
             sort(tmp);
-            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+            return tmp[middle - 1] / 2d + tmp[middle] / 2d;
         }
     }
 
@@ -24372,7 +24372,7 @@ public final class N extends CommonUtil {
         if (len == 1) {
             return a[fromIndex];
         } else if (len == 2) {
-            return ((double) a[fromIndex] + a[fromIndex + 1]) / 2d;
+            return   a[fromIndex] / 2d + a[fromIndex + 1] / 2d;
         } else if (len == 3) {
             return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
         } else if (len % 2 != 0) {
@@ -24381,7 +24381,7 @@ public final class N extends CommonUtil {
             final int middle = len / 2;
             final float[] tmp = copyOfRange(a, fromIndex, toIndex);
             sort(tmp);
-            return ((double) tmp[middle - 1] + tmp[middle]) / 2d;
+            return tmp[middle - 1] / 2d + tmp[middle] / 2d;
         }
     }
 
@@ -24445,7 +24445,7 @@ public final class N extends CommonUtil {
         if (len == 1) {
             return a[fromIndex];
         } else if (len == 2) {
-            return (a[fromIndex] + a[fromIndex + 1]) / 2d;
+            return averageForMedian(a[fromIndex], a[fromIndex + 1]);
         } else if (len == 3) {
             return median(a[fromIndex], a[fromIndex + 1], a[fromIndex + 2]);
         } else if (len % 2 != 0) {
@@ -24454,8 +24454,16 @@ public final class N extends CommonUtil {
             final int middle = len / 2;
             final double[] tmp = copyOfRange(a, fromIndex, toIndex);
             sort(tmp);
-            return (tmp[middle - 1] + tmp[middle]) / 2d;
+            return averageForMedian(tmp[middle - 1], tmp[middle]);
         }
+    }
+
+    private static double averageForMedian(final double left, final double right) {
+        final double sum = left + right;
+
+        // Divide the operands only when adding two finite values overflowed. Always dividing first
+        // would instead underflow a pair of Double.MIN_VALUE values to zero.
+        return Double.isInfinite(sum) && Double.isFinite(left) && Double.isFinite(right) ? left / 2d + right / 2d : sum / 2d;
     }
 
     /**

@@ -45,6 +45,11 @@ public class MutableShortTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableShortType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableShortType.stringOf(null);
         Assertions.assertNull(result);

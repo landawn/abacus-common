@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -100,6 +101,49 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             }
 
             super.vacate(numberToEvict);
+        }
+    }
+
+    private static final class DeserializationEvictionProbePool extends GenericKeyedObjectPool<String, TestPoolable> {
+        private static final AtomicBoolean observedPartiallyDeserializedState = new AtomicBoolean();
+        private static volatile CountDownLatch evictionRan = new CountDownLatch(1);
+
+        private boolean subclassStateInitialized = true;
+        private transient volatile boolean deserializationProbeEnabled;
+
+        private DeserializationEvictionProbePool() {
+            super(2, 1, EvictionPolicy.LAST_ACCESS_TIME);
+        }
+
+        private void readObject(final ObjectInputStream input) throws IOException, ClassNotFoundException {
+            deserializationProbeEnabled = true;
+
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException(e);
+            }
+
+            input.defaultReadObject();
+        }
+
+        @Override
+        protected void removeExpired() {
+            if (deserializationProbeEnabled) {
+                if (!subclassStateInitialized) {
+                    observedPartiallyDeserializedState.set(true);
+                }
+
+                evictionRan.countDown();
+            }
+
+            super.removeExpired();
+        }
+
+        private static void resetProbe() {
+            observedPartiallyDeserializedState.set(false);
+            evictionRan = new CountDownLatch(1);
         }
     }
 
@@ -733,6 +777,23 @@ public class GenericKeyedObjectPoolTest extends TestBase {
 
         evictPool.close();
         deserialized.close();
+    }
+
+    @Test
+    public void testDeserializationDefersEvictionUntilSubclassStateIsRestored() throws Exception {
+        final DeserializationEvictionProbePool original = new DeserializationEvictionProbePool();
+        final byte[] bytes = serialize(original);
+        original.close();
+        DeserializationEvictionProbePool.resetProbe();
+
+        final DeserializationEvictionProbePool deserialized = deserialize(bytes);
+
+        try {
+            assertTrue(DeserializationEvictionProbePool.evictionRan.await(1, TimeUnit.SECONDS));
+            assertFalse(DeserializationEvictionProbePool.observedPartiallyDeserializedState.get());
+        } finally {
+            deserialized.close();
+        }
     }
 
     @Test

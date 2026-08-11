@@ -1270,6 +1270,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         notEmpty = newCondition(lock);
         notFull = newCondition(lock);
         cmp = createComparator();
+        // Do not publish this object to the eviction executor or JVM shutdown hooks from a
+        // superclass readObject(). A serializable subclass has not restored its own fields yet,
+        // and the scheduled task dispatches to the overridable removeExpired() method. Stream
+        // validation runs only after the complete object graph has been deserialized.
+        is.registerValidation(this::restoreTransientLifecycle, 0);
+    }
+
+    private void restoreTransientLifecycle() {
         scheduleEvictionTask();
 
         if (!isClosed) {

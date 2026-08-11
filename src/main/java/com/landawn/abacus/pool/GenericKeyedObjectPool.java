@@ -1593,6 +1593,14 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         notEmpty = newCondition(lock);
         notFull = newCondition(lock);
         cmp = createComparator();
+        // A superclass readObject() runs before a serializable subclass restores its fields.
+        // Scheduling here can therefore invoke an overridden removeExpired() on a partially
+        // deserialized subclass. Validation defers all external publication until the graph is
+        // complete while still restoring the lifecycle before readObject() returns to the caller.
+        is.registerValidation(this::restoreTransientLifecycle, 0);
+    }
+
+    private void restoreTransientLifecycle() {
         scheduleEvictionTask();
 
         if (!isClosed) {

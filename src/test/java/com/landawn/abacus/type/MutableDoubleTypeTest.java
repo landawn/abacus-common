@@ -45,6 +45,11 @@ public class MutableDoubleTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableDoubleType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableDoubleType.stringOf(null);
         Assertions.assertNull(result);

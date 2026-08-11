@@ -1,7 +1,7 @@
-# abacus-common API Index (v7.9.4)
+# abacus-core API Index (v1.0.1)
 - Build: unknown
 - Java: 17
-- Generated: 2026-08-09
+- Generated: 2026-08-10
 
 ## Packages
 - com.landawn.abacus.annotation — Annotations for describing API contracts, entity mappings, serialization behavior, mutability, nullability, and stream operation characteristics.
@@ -571,6 +571,21 @@ Indicates that the annotated method may return `null` values under certain condi
 
 ### Annotation Mutable (com.landawn.abacus.annotation.Mutable)
 Indicates that the annotated type has mutable state or that the annotated method mutates state.
+
+**Thread-safety:** unspecified
+**Nullability:** unspecified
+
+#### Public Constructors
+- (none)
+
+#### Public Static Methods
+- (none)
+
+#### Public Instance Methods
+- (none)
+
+### Annotation NonColumn (com.landawn.abacus.annotation.NonColumn)
+Explicitly marks a field as NOT mapping to a database column.
 
 **Thread-safety:** unspecified
 **Nullability:** unspecified
@@ -19711,6 +19726,102 @@ Enumeration of reasons why a poolable object might be destroyed.
   - (none)
 - **Returns:** the numeric identifier for this caller type
 
+### Class PoolableAdapter (com.landawn.abacus.pool.PoolableAdapter)
+An adapter class that makes any object poolable by implementing the Poolable interface.
+
+**Thread-safety:** unspecified
+**Nullability:** unspecified
+
+#### Public Constructors
+- `public PoolableAdapter(final T value)` — Constructs a new PoolableAdapter with infinite lifetime and idle time.
+  ```java
+  PoolableAdapter<String> adapted = new PoolableAdapter<>("cached");
+    adapted.value();                            // returns "cached"
+    adapted.activityPrint().getMaxLiveTime();   // returns Long.MAX_VALUE (never expires by lifetime)
+    adapted.activityPrint().getMaxIdleTime();   // returns Long.MAX_VALUE (never expires by idle)
+    new PoolableAdapter<>(null).value();        // returns null (a null value is permitted)
+  ```
+- `public PoolableAdapter(final T value, final long liveTime, final long maxIdleTime)` — Constructs a new PoolableAdapter with specified lifetime and idle time limits.
+  - **Throws:**
+    - `java.lang.IllegalArgumentException` — if liveTime or maxIdleTime is not positive.
+  ```java
+  PoolableAdapter<String> adapted = new PoolableAdapter<>("data", 600000, 60000);   // 10 min live, 1 min idle
+    adapted.value();                                                                  // returns "data"
+    adapted.activityPrint().getMaxLiveTime();                                         // returns 600000
+    adapted.activityPrint().getMaxIdleTime();                                         // returns 60000
+  ```
+
+#### Public Static Methods
+##### of(...) -> PoolableAdapter<T>
+- **Signature:** `public static <T> PoolableAdapter<T> of(final T value)`
+- **Summary:** Creates a new PoolableAdapter with infinite lifetime and idle time.
+- **Parameters:**
+  - `value` (`T`) — the object to adapt, can be `null`
+- **Returns:** a new PoolableAdapter containing the source object
+- **Examples:**
+  ```java
+  List<String> data = Arrays.asList("a", "b", "c");
+    PoolableAdapter<List<String>> adapted = PoolableAdapter.of(data);
+  ```
+- **Signature:** `public static <T> PoolableAdapter<T> of(final T value, final long liveTime, final long maxIdleTime)`
+- **Summary:** Creates a new PoolableAdapter with specified lifetime and idle time limits.
+- **Parameters:**
+  - `value` (`T`) — the object to adapt, can be `null`
+  - `liveTime` (`long`) — the maximum lifetime in milliseconds before expiration
+  - `maxIdleTime` (`long`) — the maximum idle time in milliseconds before expiration
+- **Returns:** a new PoolableAdapter with the specified settings
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if liveTime or maxIdleTime is not positive.
+- **Examples:**
+  ```java
+  // Cache a computed result for 5 minutes, expire after 1 minute idle
+    ComplexResult result = computeExpensiveOperation();
+    PoolableAdapter<ComplexResult> adapted = PoolableAdapter.of(
+        result, 300000, 60000
+    );
+  ```
+
+#### Public Instance Methods
+##### value(...) -> T
+- **Signature:** `public T value()`
+- **Summary:** Returns the adapted object.
+- **Parameters:**
+  - (none)
+- **Returns:** the object adapted by this PoolableAdapter, may be `null`
+- **Examples:**
+  ```java
+  PoolableAdapter<String> adapted = pool.poll();
+    if (adapted != null) {
+        String data = adapted.value();
+        // use data
+    }
+  ```
+##### destroy(...) -> void
+- **Signature:** `@Override public void destroy(final Caller caller)`
+- **Summary:** No-op implementation of destroy.
+- **Parameters:**
+  - `caller` (`Caller`) — the reason for destruction (ignored)
+##### hashCode(...) -> int
+- **Signature:** `@Override public int hashCode()`
+- **Summary:** Returns a hash code for this adapter.
+- **Parameters:**
+  - (none)
+- **Returns:** the hash code of the adapted object, or 0 if the adapted object is null
+##### equals(...) -> boolean
+- **Signature:** `@Override public boolean equals(final Object obj)`
+- **Summary:** Compares this adapter to another object for equality.
+- **Contract:**
+  - Two adapters are equal if they adapt equal objects (according to the adapted object's equals method).
+- **Parameters:**
+  - `obj` (`Object`) — the object to compare with
+- **Returns:** `true` if the adapted objects are equal, `false` otherwise
+##### toString(...) -> String
+- **Signature:** `@Override public String toString()`
+- **Summary:** Returns a string representation of this adapter.
+- **Parameters:**
+  - (none)
+- **Returns:** a string representation of this adapter
+
 ## com.landawn.abacus.spring
 ### Class JsonHttpMessageConverter (com.landawn.abacus.spring.JsonHttpMessageConverter)
 Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
@@ -29052,6 +29163,24 @@ Generic type handler for Number subclasses, providing common functionality for n
 - **Parameters:**
   - (none)
 - **Returns:** `true`, as this is a number type
+##### isImmutable(...) -> boolean
+- **Signature:** `@Override public boolean isImmutable()`
+- **Summary:** Returns `true` for this base implementation.
+- **Documentation:** inherits documentation from the overridden member
+- **Contract:**
+  - Specialized primary types may override this when their represented values are mutable.
+- **Parameters:**
+  - (none)
+- **Returns:** `true` by default
+##### isComparable(...) -> boolean
+- **Signature:** `@Override public boolean isComparable()`
+- **Summary:** Returns `true` for this base implementation.
+- **Documentation:** inherits documentation from the overridden member
+- **Contract:**
+  - Specialized primary types may override this when their represented values are not naturally comparable.
+- **Parameters:**
+  - (none)
+- **Returns:** `true` by default
 ##### isCsvQuoteRequired(...) -> boolean
 - **Signature:** `@Override public boolean isCsvQuoteRequired()`
 - **Summary:** Indicates whether values of this type require quoting in CSV format.
@@ -46321,6 +46450,17 @@ A bidirectional map that preserves the uniqueness of both keys and values, enabl
   BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
     Set<Map.Entry<String, Integer>> entries = map.entrySet();
   ```
+##### replaceAll(...) -> void
+- **Signature:** `@Override public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function)`
+- **Summary:** Replaces each entry's value with the result of applying the given function to that entry.
+- **Contract:**
+  - All replacement values are computed and staged before this BiMap is modified: the function is invoked exactly once per entry with its original key and value, each result must be non-`null`, and no two results may be equal under the value map's own equivalence (for example, a case-insensitive comparator).
+  - If function evaluation or staging fails, an exception is thrown and this BiMap is left unchanged.
+  - The function must not modify this BiMap while the replacement values are being computed.
+- **Parameters:**
+  - `function` (`BiFunction<? super K, ? super V, ? extends V>`) — the function to apply to each entry; must not be `null`
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `function` is `null`, returns `null` for any entry, or produces a replacement value equal to another entry's replacement value
 ##### inverse(...) -> BiMap<V, K>
 - **Signature:** `public BiMap<V, K> inverse()`
 - **Summary:** Returns the inverse view of this BiMap, which maps each of this BiMap's values to its associated key.
@@ -46455,7 +46595,7 @@ This is a static inner class that provides a builder for the BiMap.
 - **Signature:** `public Builder<K, V> putAll(final Map<? extends K, ? extends V> m)`
 - **Summary:** Inserts all entries from the specified map into the BiMap being built.
 - **Parameters:**
-  - `m` (`Map<? extends K, ? extends V>`) — the map whose entries are to be added to this BiMap; a `null` or empty map is silently ignored.
+  - `m` (`Map<? extends K, ? extends V>`) — the map whose entries are to be added to the BiMap being built; a `null` or empty map is silently ignored.
 - **Returns:** This Builder instance to allow for chaining of calls to builder methods.
 - **Throws:**
   - `java.lang.IllegalArgumentException` — if any key or value is `null`, or if an attempt to `put` any entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap before the exception was thrown.
@@ -109523,6 +109663,8 @@ Represents a half-open range of character indices, `\[start, end)`, within a str
     IndexRange range2 = new IndexRange(5, 7);
     IndexRange span = range1.span(range2);
     // returns new IndexRange(1, 7), which also includes the indices 3..4 that are in neither input range
+  
+    new IndexRange(1, 3).span(new IndexRange(5, 5));   // returns [1, 3) — empty adds no indices
   ```
 - **See also:** #intersection(IndexRange)
 ##### shift(...) -> IndexRange
@@ -128845,6 +128987,23 @@ A collection that supports order-independent equality, like Set, but allows dupl
     }
     // May print: a, a, b (order of identical elements not guaranteed)
   ```
+##### removeIf(...) -> boolean
+- **Signature:** `@Override public boolean removeIf(final Predicate<? super E> filter)`
+- **Summary:** Removes all occurrences of every element for which the given predicate returns `true`.
+- **Contract:**
+  - The predicate is evaluated once per distinct element, not per occurrence; if it returns `true` for an element, all of that element's occurrences are removed.
+- **Parameters:**
+  - `filter` (`Predicate<? super E>`) — a predicate that returns `true` for elements to remove; must not be `null`
+- **Returns:** `true` if any elements were removed
+- **Throws:**
+  - `java.lang.NullPointerException` — if `filter` is `null`
+- **Examples:**
+  ```java
+  Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
+    multiset.removeIf(s -> s.equals("a"));
+    System.out.println(multiset.getCount("a"));   // prints 0
+    System.out.println(multiset.getCount("b"));   // prints 1
+  ```
 ##### size(...) -> int
 - **Signature:** `@Override public int size()`
 - **Summary:** Returns the total number of all occurrences of all elements in this multiset.
@@ -142337,46 +142496,6 @@ A comprehensive utility class providing commonly used operations for primitive t
   String median = N.median("hi", "hello", "hey", Comparator.comparing(String::length));   // returns "hey"
   ```
 - **See also:** #median(Comparable, Comparable, Comparable), #lowerMedian(Object\[\], Comparator)
-- **Signature:** `public static double median(final int... a) throws IllegalArgumentException`
-- **Summary:** Returns the conventional statistical median of the specified int array or varargs as a `double`.
-- **Contract:**
-  - For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
-  - For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
-- **Parameters:**
-  - `a` (`int[]`) — the array or varargs of int values, must not be `null` or empty
-- **Returns:** the statistical median as a `double`
-- **Throws:**
-  - `java.lang.IllegalArgumentException` — if the array is `null` or empty
-- **Examples:**
-  ```java
-  double median1 = N.median(10, 5, 20, 15);   // returns 12.5 (the mean of the two middle values 10 and 15)
-  
-    int[] numbers = {5, 30, 15, 8, 20};
-    double median2 = N.median(numbers);   // returns 15.0
-  ```
-- **See also:** #median(int\[\], int, int), #lowerMedian(int...), Median#of(int\[\])
-- **Signature:** `public static double median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException`
-- **Summary:** Returns the conventional statistical median of the int values in the specified range of the array as a `double`.
-- **Contract:**
-  - For ranges with an odd number of elements, the median is the middle value when sorted in ascending order.
-  - For ranges with an even number of elements, the median is the arithmetic mean of the two middle values.
-- **Parameters:**
-  - `a` (`int[]`) — the array of int values, must not be `null` or empty
-  - `fromIndex` (`int`) — the starting index (inclusive) of the range
-  - `toIndex` (`int`) — the ending index (exclusive) of the range
-- **Returns:** the statistical median as a `double`
-- **Throws:**
-  - `java.lang.IllegalArgumentException` — if the array is `null` or the range is empty
-  - `java.lang.IndexOutOfBoundsException` — if the range is out of bounds
-- **Examples:**
-  ```java
-  int[] numbers = {5, 30, 15, 8, 20};
-    double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
-  
-    int[] evens = {500, 100, 300, 200};
-    double evenMedian = N.median(evens, 0, 4);   // returns 250.0 (the mean of 200 and 300)
-  ```
-- **See also:** #median(int...), #lowerMedian(int\[\], int, int), Median#of(int\[\], int, int)
 - **Signature:** `public static double median(final byte... a) throws IllegalArgumentException`
 - **Summary:** Returns the conventional statistical median of the specified byte array or varargs as a `double`.
 - **Contract:**
@@ -142451,6 +142570,46 @@ A comprehensive utility class providing commonly used operations for primitive t
     double median = N.median(numbers, 1, 4);   // returns 150.0 (from 300, 150, 80)
   ```
 - **See also:** #median(short...), #lowerMedian(short\[\], int, int), Median#of(short\[\], int, int)
+- **Signature:** `public static double median(final int... a) throws IllegalArgumentException`
+- **Summary:** Returns the conventional statistical median of the specified int array or varargs as a `double`.
+- **Contract:**
+  - For arrays with an odd number of elements, the median is the middle value when sorted in ascending order.
+  - For arrays with an even number of elements, the median is the arithmetic mean of the two middle values.
+- **Parameters:**
+  - `a` (`int[]`) — the array or varargs of int values, must not be `null` or empty
+- **Returns:** the statistical median as a `double`
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if the array is `null` or empty
+- **Examples:**
+  ```java
+  double median1 = N.median(10, 5, 20, 15);   // returns 12.5 (the mean of the two middle values 10 and 15)
+  
+    int[] numbers = {5, 30, 15, 8, 20};
+    double median2 = N.median(numbers);   // returns 15.0
+  ```
+- **See also:** #median(int\[\], int, int), #lowerMedian(int...), Median#of(int\[\])
+- **Signature:** `public static double median(final int[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException`
+- **Summary:** Returns the conventional statistical median of the int values in the specified range of the array as a `double`.
+- **Contract:**
+  - For ranges with an odd number of elements, the median is the middle value when sorted in ascending order.
+  - For ranges with an even number of elements, the median is the arithmetic mean of the two middle values.
+- **Parameters:**
+  - `a` (`int[]`) — the array of int values, must not be `null` or empty
+  - `fromIndex` (`int`) — the starting index (inclusive) of the range
+  - `toIndex` (`int`) — the ending index (exclusive) of the range
+- **Returns:** the statistical median as a `double`
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if the array is `null` or the range is empty
+  - `java.lang.IndexOutOfBoundsException` — if the range is out of bounds
+- **Examples:**
+  ```java
+  int[] numbers = {5, 30, 15, 8, 20};
+    double median = N.median(numbers, 1, 4);   // returns 15.0 (from 30, 15, 8)
+  
+    int[] evens = {500, 100, 300, 200};
+    double evenMedian = N.median(evens, 0, 4);   // returns 250.0 (the mean of 200 and 300)
+  ```
+- **See also:** #median(int...), #lowerMedian(int\[\], int, int), Median#of(int\[\], int, int)
 - **Signature:** `public static double median(final long... a) throws IllegalArgumentException`
 - **Summary:** Returns the conventional statistical median of the specified long array or varargs as a `double`.
 - **Contract:**
@@ -159958,197 +160117,6 @@ An abstract list iterator implementation that provides bidirectional iteration w
     // 2: c
   ```
 - **See also:** #foreachRemaining(Throwables.Consumer)
-
-### Class ObjectPool (com.landawn.abacus.util.ObjectPool)
-A thread-safe Map implementation backed by a ConcurrentHashMap, providing lock-free concurrent reads and thread-safe writes.
-
-**Thread-safety:** thread-safe
-**Nullability:** unspecified
-**Annotations:** @Internal, @Beta
-
-#### Public Constructors
-- `public ObjectPool(final int capacity)` — Constructs an ObjectPool with the specified initial capacity.
-  - **Throws:**
-    - `java.lang.IllegalArgumentException` — if `capacity` is negative.
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(128);
-    boolean empty = pool.isEmpty();   // returns true
-    pool.put("a", 1);
-    int size = pool.size();           // returns 1
-  ```
-
-#### Public Static Methods
-- (none)
-
-#### Public Instance Methods
-##### get(...) -> V
-- **Signature:** `@MayReturnNull @Override public V get(final Object key)`
-- **Annotations:** @MayReturnNull
-- **Summary:** Returns the value to which the specified key is mapped, or `null` if this map contains no mapping for the key.
-- **Parameters:**
-  - `key` (`Object`) — the key whose associated value is to be returned
-- **Returns:** the value mapped to `key`, or `null` if the key is `null` or no mapping exists (may return null)
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    pool.put("answer", 42);
-    Integer value = pool.get("answer");
-    Object result = pool.get(null);   // returns null instead of throwing
-  ```
-##### put(...) -> V
-- **Signature:** `@MayReturnNull @Override public V put(final K key, final V value)`
-- **Annotations:** @MayReturnNull
-- **Summary:** Associates the specified value with the specified key in this map.
-- **Contract:**
-  - If the map previously contained a mapping for the key, the old value is replaced.
-- **Parameters:**
-  - `key` (`K`) — key with which the specified value is to be associated
-  - `value` (`V`) — value to be associated with the specified key
-- **Returns:** the previous value associated with `key`, or `null` if there was no mapping for the key (may return null)
-- **Throws:**
-  - `java.lang.NullPointerException` — if the specified key or value is `null`
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    pool.put("answer", 42);
-    Integer oldValue = pool.put("answer", 43);  // returns 42
-  ```
-##### putIfAbsent(...) -> V
-- **Signature:** `@MayReturnNull @Override public V putIfAbsent(final K key, final V value)`
-- **Annotations:** @MayReturnNull
-- **Summary:** Atomically associates the specified value with the specified key only if the key is not already present.
-- **Parameters:**
-  - `key` (`K`) — key with which the specified value is to be associated
-  - `value` (`V`) — value to be associated with the specified key
-- **Returns:** the previous value associated with `key`, or `null` if there was no mapping for the key (may return null)
-- **Throws:**
-  - `java.lang.NullPointerException` — if the specified key or value is `null`
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    Integer prior = pool.putIfAbsent("answer", 42);
-    if (prior != null) {
-        // a mapping already existed for "answer"; it was left unchanged
-    }
-  ```
-##### putAll(...) -> void
-- **Signature:** `@Override public void putAll(final Map<? extends K, ? extends V> m)`
-- **Summary:** Copies all of the mappings from the specified map to this map.
-- **Parameters:**
-  - `m` (`Map<? extends K, ? extends V>`) — mappings to be stored in this map
-- **Throws:**
-  - `java.lang.NullPointerException` — if the specified map is `null`, or if any key or value in the specified map is `null`
-##### remove(...) -> varies by overload
-- **Signature:** `@MayReturnNull @Override public V remove(final Object key)`
-- **Annotations:** @MayReturnNull
-- **Summary:** Removes the mapping for the specified key from this map if present.
-- **Parameters:**
-  - `key` (`Object`) — key whose mapping is to be removed from the map
-- **Returns:** the removed value, or `null` if the key is `null` or no mapping existed (may return null)
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    pool.put("answer", 42);
-    Integer removed = pool.remove("answer");
-    pool.remove(null);   // returns null instead of throwing
-  ```
-- **Signature:** `@Override public boolean remove(final Object key, final Object value)`
-- **Summary:** Atomically removes the mapping for `key` only when it is currently mapped to `value`.
-- **Contract:**
-  - For consistency with this class's other null-safe query operations, this method returns `false` when either argument is `null`.
-- **Parameters:**
-  - `key` (`Object`) — key whose mapping is to be conditionally removed
-  - `value` (`Object`) — value expected to be associated with `key`
-- **Returns:** `true` if the matching mapping was removed; `false` if either argument is `null`, the key was absent, or it was mapped to a different value
-##### containsKey(...) -> boolean
-- **Signature:** `@Override public boolean containsKey(final Object key)`
-- **Summary:** Returns `true` if this map contains a mapping for the specified key.
-- **Parameters:**
-  - `key` (`Object`) — key whose presence in this map is to be tested
-- **Returns:** `true` if this map contains a mapping for the specified key; `false` if the key is `null` or not present
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    pool.put("answer", 42);
-    if (pool.containsKey("answer")) {
-        Integer value = pool.get("answer");
-    }
-    pool.containsKey(null);   // returns false instead of throwing
-  ```
-##### containsValue(...) -> boolean
-- **Signature:** `@Override public boolean containsValue(final Object value)`
-- **Summary:** Returns `true` if this map maps one or more keys to the specified value.
-- **Parameters:**
-  - `value` (`Object`) — value whose presence in this map is to be tested
-- **Returns:** `true` if this map maps one or more keys to the specified value; `false` if the value is `null` or not present
-- **Examples:**
-  ```java
-  ObjectPool<String, Integer> pool = new ObjectPool<>(16);
-    pool.put("answer", 42);
-    if (pool.containsValue(42)) {
-        // The value has been cached
-    }
-    pool.containsValue(null);   // returns false instead of throwing
-  ```
-##### keySet(...) -> Set<K>
-- **Signature:** `@Override public Set<K> keySet()`
-- **Summary:** Returns a Set view of the keys contained in this map.
-- **Parameters:**
-  - (none)
-- **Returns:** a set view of the keys contained in this map
-- **See also:** ConcurrentHashMap#keySet()
-##### values(...) -> Collection<V>
-- **Signature:** `@Override public Collection<V> values()`
-- **Summary:** Returns a Collection view of the values contained in this map.
-- **Parameters:**
-  - (none)
-- **Returns:** a collection view of the values contained in this map
-- **See also:** ConcurrentHashMap#values()
-##### entrySet(...) -> Set<Map.Entry<K, V>>
-- **Signature:** `@Override public Set<Map.Entry<K, V>> entrySet()`
-- **Summary:** Returns a Set view of the mappings contained in this map.
-- **Parameters:**
-  - (none)
-- **Returns:** a set view of the mappings contained in this map
-- **See also:** ConcurrentHashMap#entrySet()
-##### size(...) -> int
-- **Signature:** `@Override public int size()`
-- **Summary:** Returns the number of key-value mappings in this map.
-- **Parameters:**
-  - (none)
-- **Returns:** the number of key-value mappings in this map
-##### isEmpty(...) -> boolean
-- **Signature:** `@Override public boolean isEmpty()`
-- **Summary:** Returns `true` if this map contains no key-value mappings.
-- **Parameters:**
-  - (none)
-- **Returns:** `true` if this map contains no key-value mappings
-##### clear(...) -> void
-- **Signature:** `@Override public void clear()`
-- **Summary:** Removes all of the mappings from this map.
-- **Parameters:**
-  - (none)
-##### hashCode(...) -> int
-- **Signature:** `@Override public int hashCode()`
-- **Summary:** Returns the hash code value for this map, computed as the sum of the hash codes of each entry in the map's #entrySet() view.
-- **Parameters:**
-  - (none)
-- **Returns:** the hash code value for this map
-##### equals(...) -> boolean
-- **Signature:** `@Override public boolean equals(Object other)`
-- **Summary:** Compares the specified object with this map for equality.
-- **Contract:**
-  - Returns `true` if the given object is also a Map and the two maps represent the same mappings, as defined by the Map#equals(Object) contract.
-  - If `other` is also an `ObjectPool`, the comparison is performed directly between the backing ConcurrentHashMap instances for efficiency.
-- **Parameters:**
-  - `other` (`Object`) — object to be compared for equality with this map
-- **Returns:** `true` if the specified object is equal to this map
-##### toString(...) -> String
-- **Signature:** `@Override public String toString()`
-- **Summary:** Returns a string representation of this map.
-- **Parameters:**
-  - (none)
-- **Returns:** a string representation of this map
 
 ### Class Objectory (com.landawn.abacus.util.Objectory)
 A factory class for creating and recycling commonly used objects to reduce memory allocation overhead.
@@ -183986,7 +183954,7 @@ A Multimap implementation that uses Set as the value collection type, ensuring t
 - **Summary:** Creates a new instance of SetMultimap from a collection by grouping elements by keys extracted using the provided function.
 - **Parameters:**
   - `c` (`Collection<? extends T>`) — the collection of elements to be added to the SetMultimap, may be `null` or empty
-  - `keyExtractor` (`Function<? super T, ? extends K>`) — the function to extract keys from elements;
+  - `keyExtractor` (`Function<? super T, ? extends K>`) — the function to extract keys from elements
 - **Returns:** a new instance of SetMultimap with keys extracted from elements and values being the elements themselves
 - **Throws:**
   - `java.lang.IllegalArgumentException` — if `keyExtractor` is `null`.
@@ -184007,8 +183975,8 @@ A Multimap implementation that uses Set as the value collection type, ensuring t
 - **Summary:** Creates a new instance of SetMultimap from a collection by extracting both keys and values using the provided functions.
 - **Parameters:**
   - `c` (`Collection<? extends T>`) — the collection of elements to be transformed, may be `null` or empty
-  - `keyExtractor` (`Function<? super T, ? extends K>`) — the function to extract keys from elements;
-  - `valueExtractor` (`Function<? super T, ? extends E>`) — the function to extract values from elements;
+  - `keyExtractor` (`Function<? super T, ? extends K>`) — the function to extract keys from elements
+  - `valueExtractor` (`Function<? super T, ? extends E>`) — the function to extract values from elements
 - **Returns:** a new instance of SetMultimap with extracted keys and values from the specified collection
 - **Throws:**
   - `java.lang.IllegalArgumentException` — if any of `keyExtractor`, `valueExtractor` is `null`.
@@ -184134,7 +184102,7 @@ A Multimap implementation that uses Set as the value collection type, ensuring t
   - Existing map values must be `non-null`, non-empty Set instances.
 - **Parameters:**
   - `map` (`Map<K, V>`) — the map to be wrapped into a SetMultimap; must not be `null` and must not contain `null` or empty values
-  - `valueSupplier` (`Supplier<? extends V>`) — the supplier that provides the set to be used as the value collection;
+  - `valueSupplier` (`Supplier<? extends V>`) — the supplier that provides the set to be used as the value collection
 - **Returns:** a SetMultimap instance backed by the provided map
 - **Throws:**
   - `java.lang.IllegalArgumentException` — if the provided map is `null`, contains a `null` or empty value, or if `valueSupplier` is `null`.
@@ -184214,7 +184182,7 @@ A Multimap implementation that uses Set as the value collection type, ensuring t
 - **Signature:** `public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) throws IllegalArgumentException`
 - **Summary:** Converts this SetMultimap into an immutable map using a custom map supplier.
 - **Parameters:**
-  - `mapSupplier` (`IntFunction<? extends Map<K, ImmutableSet<E>>>`) — a function that creates a new map instance given an initial capacity; the function receives the number of keys in this multimap as its argument;
+  - `mapSupplier` (`IntFunction<? extends Map<K, ImmutableSet<E>>>`) — a function that creates a new map instance given an initial capacity; the function receives the number of keys in this multimap as its argument
 - **Returns:** an ImmutableMap where each key from this multimap is associated with an ImmutableSet containing all values that were associated with that key
 - **Throws:**
   - `java.lang.IllegalArgumentException` — if `mapSupplier` is `null`.
@@ -191355,7 +191323,7 @@ Utility methods for common string operations, including validation, transformati
   - `prefixSuffix` (`String`) — the string that should be the prefix and suffix of the input string.
 - **Returns:** `true` if the input string starts and ends with the prefixSuffix string, `false` otherwise.
 - **Throws:**
-  - `java.lang.IllegalArgumentException` — if prefixSuffix is empty.
+  - `java.lang.IllegalArgumentException` — if prefixSuffix is `null` or empty.
 - **Examples:**
   ```java
   Strings.isWrappedWith("'hello'", "'");        // returns true
@@ -191374,7 +191342,7 @@ Utility methods for common string operations, including validation, transformati
   - `suffix` (`String`) — the string that should be the suffix of the input string.
 - **Returns:** `true` if the input string starts with the prefix and ends with the suffix, `false` otherwise.
 - **Throws:**
-  - `java.lang.IllegalArgumentException` — if prefix or suffix is empty.
+  - `java.lang.IllegalArgumentException` — if prefix or suffix is `null` or empty.
 - **Examples:**
   ```java
   Strings.isWrappedWith("<html>content</html>", "<html>", "</html>");   // returns true
@@ -200549,7 +200517,7 @@ Utility methods for common string operations, including validation, transformati
   - `overlay` (`String`) — the String to overlay, may be `null`
   - `start` (`int`) — the position to start overlaying at; must be valid index
   - `end` (`int`) — the position to stop overlaying before; must be valid
-- **Returns:** overlayed String, or `overlay` if `null` String input
+- **Returns:** overlayed String, or `overlay` (empty string if `overlay` is also `null`) if `null` String input
 - **Throws:**
   - `java.lang.IndexOutOfBoundsException` — if start or end is negative, or end is greater than the length of str, or indices are invalid
 - **Examples:**
@@ -202894,8 +202862,8 @@ A specialized utility class providing null-safe and u.Optional-wrapped string ma
   StrUtil.tryParseFloat("123.45");     // returns OptionalFloat.of(123.45f)
     StrUtil.tryParseFloat("-67.89");     // returns OptionalFloat.of(-67.89f)
     StrUtil.tryParseFloat("1.23e4");     // returns OptionalFloat.of(12300.0f)
-    StrUtil.tryParseFloat("NaN");        // returns OptionalFloat.of(Float.NaN)
-    StrUtil.tryParseFloat("Infinity");   // returns OptionalFloat.of(Float.POSITIVE_INFINITY)
+    StrUtil.tryParseFloat("NaN");        // returns OptionalFloat.empty()
+    StrUtil.tryParseFloat("Infinity");   // returns OptionalFloat.empty()
     StrUtil.tryParseFloat("abc");        // returns OptionalFloat.empty()
     StrUtil.tryParseFloat("");           // returns OptionalFloat.empty()
     StrUtil.tryParseFloat(null);         // returns OptionalFloat.empty()
@@ -202915,8 +202883,8 @@ A specialized utility class providing null-safe and u.Optional-wrapped string ma
   StrUtil.tryParseDouble("123.456789");   // returns OptionalDouble.of(123.456789)
     StrUtil.tryParseDouble("-67.89012");    // returns OptionalDouble.of(-67.89012)
     StrUtil.tryParseDouble("1.23456e10");   // returns OptionalDouble.of(1.23456E10)
-    StrUtil.tryParseDouble("NaN");          // returns OptionalDouble.of(Double.NaN)
-    StrUtil.tryParseDouble("Infinity");     // returns OptionalDouble.of(Double.POSITIVE_INFINITY)
+    StrUtil.tryParseDouble("NaN");          // returns OptionalDouble.empty()
+    StrUtil.tryParseDouble("Infinity");     // returns OptionalDouble.empty()
     StrUtil.tryParseDouble("abc");          // returns OptionalDouble.empty()
     StrUtil.tryParseDouble("");             // returns OptionalDouble.empty()
     StrUtil.tryParseDouble(null);           // returns OptionalDouble.empty()
@@ -282624,6 +282592,958 @@ A powerful and enhanced stream processing API that extends the capabilities of J
           .forEach(System.out::println);
   ```
 - **See also:** #joinByRange(Stream, BiPredicate, Collector, BiFunction)
+##### maxWait(...) -> Stream<T>
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> maxWait(final Duration duration, final T defaultValue) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Returns at least one element in every specified interval, or the default value if no element occurs during that interval.
+- **Contract:**
+  - This is a sequential-only intermediate operation useful for handling sparse streams where you need regular output even when the source stream has periods of inactivity.
+  - When no element arrives within the specified duration, the default value is emitted to maintain a consistent flow of data.
+  - This prevents timeout issues in downstream operations and helps maintain responsive UIs when displaying real-time data streams.
+- **Parameters:**
+  - `duration` (`Duration`) — the maximum duration to wait for an element before emitting the default value; must be positive
+  - `defaultValue` (`T`) — the value to emit if no element occurs within the specified duration; can be null
+- **Returns:** a new Stream that emits elements from the original stream or the default value if no element occurs within the duration
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Ensure at least one value every 5 seconds, use 0 as default for missing data
+    Stream<Integer> sparseData = getSensorReadings();
+    sparseData.maxWait(Duration.ofSeconds(5), 0)
+              .forEach(value -> updateChart(value));
+  
+    // Handle sparse event stream with null defaults
+    eventStream.maxWait(Duration.ofSeconds(10), (Event) null)
+               .map(event -> event != null ? event : new EmptyEvent())
+               .forEach(this::processEvent);
+  ```
+- **See also:** #maxWait(Duration, Supplier), #window(Duration)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> maxWait(final Duration duration, final Supplier<? extends T> supplierForDefaultValue) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Returns at least one element in every specified interval, or a value from the supplier if no element occurs during that interval.
+- **Contract:**
+  - The supplier is called only when needed, allowing for expensive computations to be deferred or context-aware default values to be generated based on the current system state.
+  - This method is particularly useful when default values need to be computed dynamically, such as timestamps, random values, or values that depend on external state.
+- **Parameters:**
+  - `duration` (`Duration`) — the maximum duration to wait for an element before emitting a value from the supplier; must be positive
+  - `supplierForDefaultValue` (`Supplier<? extends T>`) — the supplier to provide a value if no element occurs within the specified duration; may return `null` values
+- **Returns:** a new Stream that emits elements from the original stream or values from the supplier if no element occurs within the duration
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive, or if `supplierForDefaultValue` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Generate timestamp-based default values when no data arrives
+    stream.maxWait(Duration.ofSeconds(5),
+                  () -> new Measurement("NO_DATA", System.currentTimeMillis()))
+          .forEach(measurement -> processMeasurement(measurement));
+  
+    // Use random values as defaults for missing sensor data
+    Random random = new Random();
+    sensorStream.maxWait(Duration.ofSeconds(3),
+                        () -> new Reading(random.nextDouble() * 100))
+                .forEach(reading -> updateDisplay(reading));
+  ```
+- **See also:** #maxWait(Duration, Object), #window(Duration)
+##### window(...) -> varies by overload
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<List<T>> window(final Duration duration)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Splits this stream into fixed-duration windows of elements.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+- **Returns:** a new Stream where each element is a List<T> representing a window of elements from the original Stream
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive.
+- **Examples:**
+  ```java
+  // Process events in 5-second windows
+    eventStream.window(Duration.ofSeconds(5))
+               .forEach(window -> {
+                   System.out.println("Window size: " + window.size());
+                   processWindowBatch(window);
+               });
+  
+    // Aggregate sensor readings every minute
+    sensorData.window(Duration.ofMinutes(1))
+              .map(window -> calculateAverage(window))
+              .forEach(avg -> saveToDatabase(avg));
+  ```
+- **See also:** #window(Duration, Supplier), #window(Duration, Collector), #window(Duration, Duration), #sliding(int, int, Collector), #maxWait(Duration, Object)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration duration, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Splits this stream into fixed-duration windows using a custom collection type.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `collectionSupplier` (`Supplier<? extends C>`) — a Supplier that provides a new Collection instance for each window
+- **Returns:** a new Stream where each element is a Collection<T> representing a window of elements
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive, or if `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Use LinkedHashSet to maintain order and remove duplicates within each window
+    stream.window(Duration.ofSeconds(10), LinkedHashSet::new)
+          .forEach(window -> System.out.println("Unique items: " + window.size()));
+  
+    // Use PriorityQueue for sorted windows
+    dataStream.window(Duration.ofMinutes(1), PriorityQueue::new)
+              .map(queue -> queue.poll()) // gets minimum element
+              .forEach(min -> recordMinimum(min));
+  ```
+- **See also:** #window(Duration), #window(Duration, Collector), #maxWait(Duration, Object)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration duration, final LongSupplier startTimeSupplier, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Splits this stream into fixed-duration windows with a custom start time and collection type.
+- **Contract:**
+  - The start time supplier is called once to determine when windowing begins.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `startTimeSupplier` (`LongSupplier`) — a supplier that provides the start time for the first window in milliseconds since epoch
+  - `collectionSupplier` (`Supplier<? extends C>`) — a Supplier that provides a new Collection instance for each window
+- **Returns:** a new Stream where each element is a Collection<T> representing a window of elements
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive, or if `startTimeSupplier` or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Align windows to minute boundaries
+    long minuteBoundary = System.currentTimeMillis() / 60000 * 60000;
+    stream.window(Duration.ofMinutes(1), () -> minuteBoundary, ArrayList::new)
+          .forEach(window -> processAlignedWindow(window));
+  
+    // Start windowing at a specific timestamp
+    long startTime = parseTimestamp("2024-01-01T00:00:00Z");
+    historicalData.window(Duration.ofHours(1), () -> startTime, LinkedList::new)
+                  .forEach(hourlyData -> analyzeHour(hourlyData));
+  ```
+- **See also:** #window(Duration, Supplier), #maxWait(Duration, Object)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration duration, final Collector<? super T, ?, R> collector)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Splits this stream into fixed-duration windows and applies a collector to aggregate each window.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate the elements in each window; must not be null
+- **Returns:** a new Stream where each element is the result of applying the Collector to a window
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if duration is `null` or non-positive, or if collector is null.
+- **Examples:**
+  ```java
+  // Count elements in each 5-second window
+    stream.window(Duration.ofSeconds(5), Collectors.counting())
+          .forEach(count -> System.out.println("Elements in window: " + count));
+  
+    // Calculate statistics for each minute of data
+    measurements.window(Duration.ofMinutes(1),
+                       Collectors.summarizingDouble(Measurement::getValue))
+                .forEach(stats -> {
+                    System.out.println("Min: " + stats.getMin());
+                    System.out.println("Max: " + stats.getMax());
+                    System.out.println("Avg: " + stats.getAverage());
+                });
+  ```
+- **See also:** #window(Duration), #window(Duration, Duration, Collector), #maxWait(Duration, Object)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration duration, final LongSupplier startTimeSupplier, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Splits this stream into fixed-duration windows with custom start time and applies a collector.
+- **Contract:**
+  - The start time supplier determines when the first window begins, and the collector processes each window's elements to produce an aggregated result.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `startTimeSupplier` (`LongSupplier`) — the supplier function to provide the start time for the first window in milliseconds
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate the elements in each window
+- **Returns:** a new Stream where each element is the result of applying the Collector to a window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration or collector is `null`, or if duration is non-positive, or if `startTimeSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Generate hourly reports aligned to hour boundaries
+    long hourBoundary = System.currentTimeMillis() / 3600000 * 3600000;
+    transactions.window(Duration.ofHours(1), () -> hourBoundary,
+                       Collectors.summarizingDouble(Transaction::getAmount))
+                .forEach(hourlyStats -> generateReport(hourlyStats));
+  
+    // Join strings in aligned 30-second windows
+    messages.window(Duration.ofSeconds(30), System::currentTimeMillis,
+                   Collectors.joining(", "))
+            .forEach(concatenated -> logBatch(concatenated));
+  ```
+- **See also:** #window(Duration, Collector), #maxWait(Duration, Object)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<List<T>> window(final Duration duration, final Duration increment)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows with specified duration and increment.
+- **Contract:**
+  - Sliding windows can overlap when the increment is less than the duration, providing a moving view over the stream data.
+  - When increment is less than duration, windows overlap, allowing elements to appear in multiple windows.
+  - When increment equals duration, windows are adjacent (tumbling windows).
+  - When increment exceeds duration, there are gaps between windows.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for the start of each window; must be positive
+- **Returns:** a new Stream where each element is a list of elements from the overlapping windows
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if duration or increment is `null` or non-positive.
+- **Examples:**
+  ```java
+  // Create 10-second windows that slide every 5 seconds (50% overlap)
+    stream.window(Duration.ofSeconds(10), Duration.ofSeconds(5))
+          .forEach(window -> System.out.println("Sliding window: " + window));
+  
+    // Rolling 1-minute average updated every 10 seconds
+    measurements.window(Duration.ofMinutes(1), Duration.ofSeconds(10))
+                .map(window -> calculateAverage(window))
+                .forEach(rollingAvg -> updateDisplay(rollingAvg));
+  ```
+- **See also:** #window(Duration), #window(Duration, Duration, Collector), #sliding(int, int, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration duration, final Duration increment, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows with custom collection type.
+- **Contract:**
+  - Overlapping windows will contain some of the same elements when increment is less than duration.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for window starts; must be positive
+  - `collectionSupplier` (`Supplier<? extends C>`) — the supplier function to provide a new collection for each window
+- **Returns:** a new Stream where each element is a collection from a sliding window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration or increment is `null` or non-positive, or if `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Sliding windows with unique elements only
+    stream.window(Duration.ofSeconds(30), Duration.ofSeconds(10), LinkedHashSet::new)
+          .forEach(window -> System.out.println("Unique count: " + window.size()));
+  
+    // Priority queue windows for finding top elements
+    scores.window(Duration.ofMinutes(5), Duration.ofMinutes(1),
+                 () -> new PriorityQueue<>(Comparator.reverseOrder()))
+          .map(window -> window.peek()) // gets maximum
+          .forEach(max -> recordMaximum(max));
+  ```
+- **See also:** #window(Duration, Duration), #window(Duration, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration duration, final Duration increment, final LongSupplier startTimeSupplier, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows with custom start time and collection type.
+- **Contract:**
+  - The start time supplier determines when the first window begins.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for window starts; must be positive
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for the first window's start time in milliseconds
+  - `collectionSupplier` (`Supplier<? extends C>`) — the supplier for new collection instances
+- **Returns:** a new Stream where each element is a collection from a sliding window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration or increment is `null`, or if duration or increment is non-positive, or if `startTimeSupplier` or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Align sliding windows to 5-minute boundaries
+    long fiveMinBoundary = System.currentTimeMillis() / 300000 * 300000;
+    stream.window(Duration.ofMinutes(15), Duration.ofMinutes(5),
+                 () -> fiveMinBoundary, ArrayList::new)
+          .forEach(window -> processAlignedWindow(window));
+  
+    // Synchronized sliding windows across multiple streams
+    long syncTime = getGlobalSyncTime();
+    stream1.window(Duration.ofSeconds(60), Duration.ofSeconds(15),
+                  () -> syncTime, LinkedList::new);
+    stream2.window(Duration.ofSeconds(60), Duration.ofSeconds(15),
+                  () -> syncTime, LinkedList::new);
+  ```
+- **See also:** #window(Duration, Duration, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration duration, final Duration increment, final Collector<? super T, ?, R> collector)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows and applies a collector to aggregate each window.
+- **Contract:**
+  - When windows overlap (increment < duration), elements contribute to multiple aggregations, providing smooth transitions in the results.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for window starts; must be positive
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate elements in each window
+- **Returns:** a new Stream where each element is an aggregation result from a sliding window
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if duration, increment or collector is `null`, or if durations are non-positive.
+- **Examples:**
+  ```java
+  // Calculate rolling average updated every second over 10-second windows
+    measurements.window(Duration.ofSeconds(10), Duration.ofSeconds(1),
+                       Collectors.averagingDouble(Measurement::getValue))
+                .forEach(avg -> updateRollingDisplay(avg));
+  
+    // Generate overlapping word frequency maps
+    textStream.window(Duration.ofMinutes(5), Duration.ofMinutes(1),
+                     Collectors.groupingBy(Function.identity(),
+                                          Collectors.counting()))
+              .forEach(freqMap -> analyzeWordTrends(freqMap));
+  ```
+- **See also:** #window(Duration, Duration), #window(Duration, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration duration, final Duration increment, final LongSupplier startTimeSupplier, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows with custom start time and applies a collector.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for window starts; must be positive
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for the first window's start time in milliseconds
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate elements in each window
+- **Returns:** a new Stream where each element is an aggregation result from a sliding window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration, increment or collector is `null`, or if the durations are non-positive, or if `startTimeSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Aligned rolling statistics updated every minute
+    long minuteBoundary = System.currentTimeMillis() / 60000 * 60000;
+    transactions.window(Duration.ofMinutes(10), Duration.ofMinutes(1),
+                       () -> minuteBoundary,
+                       Collectors.summarizingDouble(Transaction::getAmount))
+                .forEach(stats -> publishRollingStats(stats));
+  
+    // Synchronized string concatenation across streams
+    long sharedStartTime = getSharedStartTime();
+    stream.window(Duration.ofSeconds(30), Duration.ofSeconds(5),
+                 () -> sharedStartTime, Collectors.joining("|"))
+          .forEach(joined -> processJoinedWindow(joined));
+  ```
+- **See also:** #window(Duration, Duration, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration duration, final Duration increment, final LongSupplier startTimeSupplier, final WindowHandler<T, R> windowHandler, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates sliding windows with custom window handler and collector.
+- **Parameters:**
+  - `duration` (`Duration`) — the duration for each window; must be positive
+  - `increment` (`Duration`) — the increment duration for window starts; must be positive
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for the first window's start time
+  - `windowHandler` (`WindowHandler<T, R>`) — handler for late data and custom window operations; may be null
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate elements in each window
+- **Returns:** a new Stream with aggregated sliding window results
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if duration, increment or collector is `null`, or if duration or increment is non-positive, or if `startTimeSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Handle late arriving events with custom logic
+    WindowHandler<Event, Summary> handler = WindowHandler.<Event, Summary>builder()
+        .timeExtractor(Event::getTimestamp)
+        .onLateData((start, end, eventTime, event, result) ->
+            updateLateDataMetrics(event, result))
+        .cacheSizeForLateData(100)
+        .build();
+  
+    eventStream.window(Duration.ofMinutes(5), Duration.ofMinutes(1),
+                      System::currentTimeMillis, handler,
+                      collectorForSummary)
+               .forEach(summary -> processSummary(summary));
+  ```
+- **See also:** WindowHandler, #window(Duration, Duration, LongSupplier, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<List<T>> window(final Duration maxDuration, final int maxWindowSize)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows limited by both duration and element count.
+- **Contract:**
+  - Windows close when either the time limit expires or the maximum number of elements is reached, whichever occurs first.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window; must be positive
+  - `maxWindowSize` (`int`) — the maximum number of elements for each window; must be positive
+- **Returns:** a new Stream where each element is a list of bounded window elements
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if maxDuration is `null` or non-positive, or maxWindowSize is non-positive.
+- **Examples:**
+  ```java
+  // Windows of at most 100 elements or 5 seconds duration
+    stream.window(Duration.ofSeconds(5), 100)
+          .forEach(window -> {
+              System.out.println("Window size: " + window.size());
+              processBoundedBatch(window);
+          });
+  
+    // Prevent memory issues with high-frequency sensors
+    sensorStream.window(Duration.ofMinutes(1), 1000)
+                .map(window -> computeStatistics(window))
+                .forEach(stats -> saveStats(stats));
+  ```
+- **See also:** #window(Duration), #window(Duration, int, Collector), #sliding(int, int)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration maxDuration, final int maxWindowSize, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows with custom collection type.
+- **Contract:**
+  - Windows close and emit their contents when either limit is reached, ensuring predictable memory usage and latency bounds.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window; must be positive
+  - `maxWindowSize` (`int`) — the maximum number of elements; must be positive
+  - `collectionSupplier` (`Supplier<? extends C>`) — the supplier for new collection instances
+- **Returns:** a new Stream where each element is a bounded collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if maxDuration is `null` or non-positive, or maxWindowSize is non-positive, or if `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Bounded windows with unique elements
+    stream.window(Duration.ofSeconds(10), 500, LinkedHashSet::new)
+          .forEach(window -> processUniqueItems(window));
+  
+    // Priority queue windows with size and time limits
+    Comparator<Event> byPriority = Comparator.comparingInt(Event::getPriority);
+    events.window(Duration.ofMinutes(1), 100,
+                 () -> new PriorityQueue<>(byPriority))
+          .map(queue -> extractTopEvents(queue, 10))
+          .forEach(topEvents -> displayTopEvents(topEvents));
+  ```
+- **See also:** #window(Duration, int), #window(Duration, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTimeSupplier, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows with custom start time and collection type.
+- **Contract:**
+  - The start time supplier determines when windowing begins, enabling synchronization across streams or alignment to time boundaries while maintaining size limits for predictable resource usage.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window
+  - `maxWindowSize` (`int`) — the maximum number of elements
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for start time in milliseconds
+  - `collectionSupplier` (`Supplier<? extends C>`) — the supplier for collection instances
+- **Returns:** a new Stream where each element is a bounded collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if maxDuration is `null` or non-positive, or maxWindowSize is non-positive, or if `startTimeSupplier` or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Aligned bounded windows starting at minute boundaries
+    long minuteBoundary = System.currentTimeMillis() / 60000 * 60000;
+    stream.window(Duration.ofMinutes(1), 1000,
+                 () -> minuteBoundary, ArrayList::new)
+          .forEach(window -> processBoundedWindow(window));
+  
+    // Synchronized bounded batches across multiple streams
+    long syncTime = getGlobalSyncTime();
+    stream1.window(Duration.ofSeconds(30), 500, () -> syncTime, LinkedList::new);
+    stream2.window(Duration.ofSeconds(30), 500, () -> syncTime, LinkedList::new);
+  ```
+- **See also:** #window(Duration, int, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration maxDuration, final int maxWindowSize, final Collector<? super T, ?, R> collector)`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows and applies a collector for aggregation.
+- **Contract:**
+  - The collector processes each window independently when either limit is reached.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window
+  - `maxWindowSize` (`int`) — the maximum number of elements
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if maxDuration is `null` or non-positive, maxWindowSize is non-positive, or collector is `null`.
+- **Examples:**
+  ```java
+  // Compute statistics for bounded windows
+    measurements.window(Duration.ofSeconds(30), 1000,
+                       Collectors.summarizingDouble(Measurement::getValue))
+                .forEach(stats -> {
+                    System.out.println("Count: " + stats.getCount());
+                    System.out.println("Average: " + stats.getAverage());
+                });
+  
+    // Join strings in bounded batches
+    messages.window(Duration.ofMinutes(1), 100,
+                   Collectors.joining(" | "))
+            .forEach(batch -> sendBatchMessage(batch));
+  ```
+- **See also:** #window(Duration, int), #window(Duration, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTimeSupplier, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows with custom start time and applies a collector.
+- **Contract:**
+  - Windows start at the specified time and close when either the duration or size limit is reached.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window
+  - `maxWindowSize` (`int`) — the maximum number of elements
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for start time in milliseconds
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if maxDuration is `null` or non-positive, maxWindowSize is non-positive, or collector is `null`, or if `startTimeSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Aligned statistics for bounded windows
+    long hourBoundary = System.currentTimeMillis() / 3600000 * 3600000;
+    transactions.window(Duration.ofHours(1), 10000,
+                       () -> hourBoundary,
+                       Collectors.groupingBy(Transaction::getType,
+                                            Collectors.counting()))
+                .forEach(typeCount -> saveHourlyStats(typeCount));
+  ```
+- **See also:** #window(Duration, int, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTimeSupplier, final WindowHandler<T, R> windowHandler, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates bounded windows with window handler and collector.
+- **Contract:**
+  - Windows close when either limit is reached, with sophisticated stream processing capabilities.
+- **Parameters:**
+  - `maxDuration` (`Duration`) — the maximum duration for each window
+  - `maxWindowSize` (`int`) — the maximum number of elements
+  - `startTimeSupplier` (`LongSupplier`) — the supplier for start time
+  - `windowHandler` (`WindowHandler<T, R>`) — handler for late data and custom operations
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if maxDuration or collector is `null`, or maxDuration or maxWindowSize is non-positive, or if `startTimeSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  WindowHandler<Event, Summary> handler = WindowHandler.<Event, Summary>builder()
+        .timeExtractor(Event::getEventTime)
+        .onLateData((start, end, eventTime, event, result) ->
+            handleLateBoundedData(event, result))
+        .cacheSizeForLateData(50)
+        .build();
+  
+    eventStream.window(Duration.ofMinutes(5), 1000,
+                      System::currentTimeMillis, handler,
+                      collectorForSummary)
+               .forEach(summary -> processBoundedSummary(summary));
+  ```
+- **See also:** WindowHandler, #window(Duration, int, LongSupplier, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<List<T>> window( final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows based on a custom splitter predicate.
+- **Parameters:**
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — a QuadPredicate that returns `true` to keep the next element in the current window, `false` to start a new window
+- **Returns:** a new Stream where each element is a list from a custom window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `windowSplitter` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Split windows when gap between elements exceeds 1 second
+    stream.window((first, current, next, count) ->
+        next.timestamp() - current.timestamp() <= 1000)
+          .forEach(window -> processSessionWindow(window));
+  
+    // Split on value changes with size limit
+    dataStream.window((first, current, next, count) ->
+        current.value().getType().equals(next.value().getType()) && count < 100)
+              .forEach(window -> processHomogeneousWindow(window));
+  ```
+- **See also:** #window(QuadPredicate, Supplier), #window(QuadPredicate, Collector), NoCachingNoUpdating.Timed
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window( final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates custom windows with specified collection type.
+- **Parameters:**
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — a QuadPredicate determining when to split
+  - `collectionSupplier` (`Supplier<? extends C>`) — a Supplier for new collection instances
+- **Returns:** a new Stream where each element is a custom collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `windowSplitter` or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Session windows with unique elements
+    stream.window((first, current, next, count) ->
+        next.timestamp() - current.timestamp() <= 5000,
+        LinkedHashSet::new)
+          .forEach(session -> processUniqueSession(session));
+  
+    // Type-based windows in priority queues
+    Comparator<Event> byPriority = Comparator.comparingInt(Event::getPriority);
+    events.window((first, current, next, count) ->
+        current.value().getCategory().equals(next.value().getCategory()),
+        () -> new PriorityQueue<>(byPriority))
+          .forEach(window -> processOrderedCategory(window));
+  ```
+- **See also:** #window(QuadPredicate), NoCachingNoUpdating.Timed
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window( final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final LongSupplier startTimeSupplier, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException, IllegalStateException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates custom windows with specified collection type and start time.
+- **Contract:**
+  - The start time supplier determines when windowing begins: elements received before the supplied start time are skipped.
+- **Parameters:**
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — a QuadPredicate determining when to split
+  - `startTimeSupplier` (`LongSupplier`) — a LongSupplier for the start time
+  - `collectionSupplier` (`Supplier<? extends C>`) — a Supplier for collection instances
+- **Returns:** a new Stream where each element is a custom collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if any of `windowSplitter`, `startTimeSupplier`, or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Custom windows with provided timestamps
+    long startTime = parseTimestamp("2024-01-01T00:00:00Z");
+    stream.window((first, current, next, count) ->
+        count < 10 && next.value() <= current.value() * 2,
+        () -> startTime, ArrayList::new)
+          .forEach(window -> analyzeCustomWindow(window));
+  ```
+- **See also:** #window(QuadPredicate, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window( final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates custom windows and applies a collector for aggregation.
+- **Parameters:**
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — a QuadPredicate determining when to split
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if collector is `null`, or if `windowSplitter` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Aggregate custom gap-based windows
+    stream.window((first, current, next, count) ->
+        next.timestamp() - current.timestamp() <= 10000,
+        Collectors.summarizingDouble(Event::getValue))
+          .forEach(stats -> recordSessionStats(stats));
+  
+    // Count elements in value-change windows
+    dataStream.window((first, current, next, count) ->
+        Math.abs(next.value() - current.value()) <= 100,
+        Collectors.counting())
+              .forEach(count -> System.out.println("Stable period: " + count));
+  ```
+- **See also:** #window(QuadPredicate), Handling Late Data and Watermarking (https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#handling-late-data-and-watermarking)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window( final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final LongSupplier startTimeSupplier, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates custom windows with specified start time and collector.
+- **Contract:**
+  - The start time supplier determines when windowing begins (elements received before that time are skipped), while the window splitter determines boundaries and the collector aggregates results.
+- **Parameters:**
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — a QuadPredicate determining when to split
+  - `startTimeSupplier` (`LongSupplier`) — a LongSupplier for the start time
+  - `collector` (`Collector<? super T, ?, R>`) — a Collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if collector is `null`, or if `windowSplitter` or `startTimeSupplier` is `null`.
+- **Examples:**
+  ```java
+  // Synchronized custom windows with aggregation
+    long syncTime = getGlobalSyncTime();
+    stream.window((first, current, next, count) ->
+        next.timestamp() - first.timestamp() <= 60000 && count < 1000,
+        () -> syncTime,
+        Collectors.toMap(Event::getKey, Event::getValue, Integer::sum))
+          .forEach(aggregated -> saveWindowResult(aggregated));
+  ```
+- **See also:** #window(QuadPredicate, Collector)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<List<T>> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis, final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows with custom timeout and splitting logic.
+- **Parameters:**
+  - `maxWaitForNextInMillis` (`ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — function to calculate timeout in milliseconds
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — predicate to determine window boundaries
+- **Returns:** a new Stream where each element is a list from a timeout window
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `maxWaitForNextInMillis` or `windowSplitter` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Adaptive timeout based on window size
+    stream.window(
+        (first, current, count) -> Math.max(1000, 5000 - count * 100),
+        (first, current, next, count) ->
+            current.value().getUserId().equals(next.value().getUserId()))
+        .forEach(session -> processUserSession(session));
+  
+    // Decreasing timeout for urgency
+    priorityStream.window(
+        (first, current, count) -> 10000 / (count + 1),
+        (first, current, next, count) -> count < 50)
+        .forEach(batch -> sendUrgentBatch(batch));
+  ```
+- **See also:** #window(QuadPredicate), NoCachingNoUpdating.Timed
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window( final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis, final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows with custom timeout, splitting, and collection type.
+- **Parameters:**
+  - `maxWaitForNextInMillis` (`ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — function to calculate timeout
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — predicate to determine boundaries
+  - `collectionSupplier` (`Supplier<? extends C>`) — supplier for collection instances
+- **Returns:** a new Stream where each element is a custom collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if any of `maxWaitForNextInMillis`, `windowSplitter`, or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Session windows with unique elements and dynamic timeout
+    stream.window(
+        (first, current, count) -> count < 10 ? 5000 : 2000,
+        (first, current, next, count) ->
+            next.timestamp() - current.timestamp() <= 10000,
+        LinkedHashSet::new)
+        .forEach(session -> processUniqueSession(session));
+  ```
+- **See also:** #window(ToLongTriFunction, QuadPredicate)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <C extends Collection<T>> Stream<C> window( final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis, final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final LongSupplier startTimeSupplier, final Supplier<? extends C> collectionSupplier) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows with custom timeout, splitting, collection, and start time.
+- **Contract:**
+  - The start time supplier determines when windowing begins (elements received before that time are skipped), while the timeout function and splitter work together to determine window boundaries based on both time and content.
+- **Parameters:**
+  - `maxWaitForNextInMillis` (`ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — function to calculate timeout
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — predicate to determine boundaries
+  - `startTimeSupplier` (`LongSupplier`) — supplier for start time
+  - `collectionSupplier` (`Supplier<? extends C>`) — supplier for collections
+- **Returns:** a new Stream where each element is a custom collection
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if any of `maxWaitForNextInMillis`, `windowSplitter`, `startTimeSupplier`, or `collectionSupplier` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Synchronized adaptive windows
+    long syncTime = getGlobalSyncTime();
+    stream.window(
+        (first, current, count) -> calculateAdaptiveTimeout(first, current),
+        (first, current, next, count) -> shouldSplitWindow(current, next),
+        () -> syncTime, ArrayList::new)
+        .forEach(window -> processAdaptiveWindow(window));
+  ```
+- **See also:** #window(ToLongTriFunction, QuadPredicate, Supplier)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis, final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final Collector<? super T, ?, R> collector) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows with custom timeout, splitting, and aggregation.
+- **Contract:**
+  - Windows close when either the timeout expires (no element arrives within the calculated time) or the splitter indicates a boundary.
+- **Parameters:**
+  - `maxWaitForNextInMillis` (`ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — function to calculate timeout
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — predicate to determine boundaries
+  - `collector` (`Collector<? super T, ?, R>`) — collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if collector is `null`, or if `maxWaitForNextInMillis` or `windowSplitter` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  // Calculate statistics for adaptive sessions
+    stream.window(
+        (first, current, count) -> 5000 - Math.min(4000, count * 100),
+        (first, current, next, count) ->
+            next.value().getSessionId() == current.value().getSessionId(),
+        Collectors.summarizingDouble(Event::getScore))
+        .forEach(stats -> recordSessionStatistics(stats));
+  ```
+- **See also:** #window(ToLongTriFunction, QuadPredicate)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public <R> Stream<R> window(final ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> maxWaitForNextInMillis, final QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer> windowSplitter, final LongSupplier startTimeSupplier, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Creates windows with full customization of timeout, splitting, timing, and aggregation.
+- **Parameters:**
+  - `maxWaitForNextInMillis` (`ToLongTriFunction<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — function to calculate timeout in milliseconds
+  - `windowSplitter` (`QuadPredicate<NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, NoCachingNoUpdating.Timed<T>, Integer>`) — predicate to determine window boundaries
+  - `startTimeSupplier` (`LongSupplier`) — supplier for the start time in milliseconds
+  - `collector` (`Collector<? super T, ?, R>`) — collector to aggregate window elements
+- **Returns:** a new Stream where each element is an aggregation result
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if collector is `null`, or if any of `maxWaitForNextInMillis`, `windowSplitter`, or `startTimeSupplier` is `null`.
+- **Examples:**
+  ```java
+  // Complex adaptive windowing with all parameters
+    stream.window(
+        (first, current, count) -> calculateDynamicTimeout(first, current, count),
+        (first, current, next, count) -> detectBoundary(first, current, next, count),
+        () -> getCustomTimestamp(),
+        Collectors.groupingBy(Event::getType,
+                             Collectors.summarizingInt(Event::getValue)))
+        .forEach(typeStats -> processComplexWindow(typeStats));
+  ```
+- **See also:** #window(ToLongTriFunction, QuadPredicate, Collector)
+##### addSubscriber(...) -> Stream<T>
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> addSubscriber(final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements from the upstream.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `consumerForNewStreamWithTerminalAction` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .addSubscriber(s -> s.filter(x -> x % 2 == 0).forEach(System.out::println))
+          .filter(x -> x % 2 == 1)
+          .forEach(System.out::println);
+    // Prints odd numbers in main stream and even numbers in subscriber stream
+  ```
+- **See also:** #addSubscriber(Throwables.Consumer, int, long, Executor)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> addSubscriber(final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize, final long maxWaitForAddingElementToQueue, final Executor executor) throws IllegalStateException, IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements from the upstream.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+  - `queueSize` (`int`) — the size of the queue. Default value is 64. Must be positive.
+  - `maxWaitForAddingElementToQueue` (`long`) — max wait time to add the next element to queue for subscriber stream to consume. Default value is 30000 (unit is milliseconds). Must be positive. If the next element can't be added to queue after waiting for the period, an exception will be thrown in the subscriber stream.
+  - `executor` (`Executor`) — the executor to run the attached stream.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if any parameter is invalid, or if `consumerForNewStreamWithTerminalAction` or `executor` is `null`.
+- **Examples:**
+  ```java
+  Stream<String> thisStream = Stream.of("a", "bb", "ccc");
+    final Holder<String> resultHolder = new Holder<>();
+    Executor executor = command -> new Thread(command).start();
+    thisStream.addSubscriber(newStream -> resultHolder.setValue(newStream.filter(s -> s.length() > 1).map(String::toUpperCase).join(",")), 64, 30000, executor)
+        .count();   // resultHolder holds "BB,CCC"
+  ```
+##### filterWhileAddSubscriber(...) -> Stream<T>
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> filterWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements filtered out by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `predicate` or `consumerForNewStreamWithTerminalAction` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .filterWhileAddSubscriber(x -> x % 2 == 1,
+              s -> s.forEach(even -> System.out.println("Even: " + even)))
+          .forEach(odd -> System.out.println("Odd: " + odd));
+    // Main stream prints odd numbers, subscriber stream prints even numbers
+  ```
+- **See also:** #filterWhileAddSubscriber(Predicate, Throwables.Consumer, int, long, Executor), #addSubscriber(Throwables.Consumer, int, long, Executor), #filter(Predicate, Consumer)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> filterWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize, final long maxWaitForAddingElementToQueue, final Executor executor) throws IllegalStateException, IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements filtered out by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+  - `queueSize` (`int`) — the size of the queue. Default value is 64. Must be positive.
+  - `maxWaitForAddingElementToQueue` (`long`) — max wait time to add the next element to queue for subscriber stream to consume. Default value is 30000 (unit is milliseconds). Must be positive. If the next element can't be added to queue after waiting for the period, an exception will be thrown in the subscriber stream.
+  - `executor` (`Executor`) — the executor to run the attached stream.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if any parameter is invalid, or if any of `predicate`, `consumerForNewStreamWithTerminalAction`, or `executor` is `null`.
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .filterWhileAddSubscriber(x -> x > 3,
+              s -> s.forEach(System.out::println),
+              100, 5000, executor)
+          .forEach(System.out::println);
+  ```
+- **See also:** #addSubscriber(Throwables.Consumer, int, long, Executor), #filter(Predicate, Consumer)
+##### takeWhileAddSubscriber(...) -> Stream<T>
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> takeWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements not taken by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `predicate` or `consumerForNewStreamWithTerminalAction` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .takeWhileAddSubscriber(x -> x < 3,
+              s -> s.forEach(x -> System.out.println("Dropped: " + x)))
+          .forEach(x -> System.out.println("Taken: " + x));
+    // Main stream prints: Taken: 1, Taken: 2
+    // Subscriber stream prints: Dropped: 3, Dropped: 4, Dropped: 5
+  ```
+- **See also:** #takeWhileAddSubscriber(Predicate, Throwables.Consumer, Executor), #addSubscriber(Throwables.Consumer, int, long, Executor)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> takeWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction, final Executor executor) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements not taken by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+  - `executor` (`Executor`) — the executor to run the attached stream.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if any of `predicate`, `consumerForNewStreamWithTerminalAction`, or `executor` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .takeWhileAddSubscriber(x -> x <= 3,
+              s -> s.map(x -> x * 10).forEach(System.out::println),
+              executor)
+          .forEach(System.out::println);
+  ```
+- **See also:** #addSubscriber(Throwables.Consumer, int, long, Executor)
+##### dropWhileAddSubscriber(...) -> Stream<T>
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> dropWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction) throws IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements dropped by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `predicate` or `consumerForNewStreamWithTerminalAction` is `null`.
+  - `java.lang.IllegalStateException` — if the stream is already closed
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .dropWhileAddSubscriber(x -> x < 3,
+              s -> s.forEach(x -> System.out.println("Dropped: " + x)))
+          .forEach(x -> System.out.println("Kept: " + x));
+    // Subscriber stream prints: Dropped: 1, Dropped: 2
+    // Main stream prints: Kept: 3, Kept: 4, Kept: 5
+  ```
+- **See also:** #dropWhileAddSubscriber(Predicate, Throwables.Consumer, int, long, Executor), #addSubscriber(Throwables.Consumer, int, long, Executor), #dropWhile(Predicate, Consumer)
+- **Signature:** `@Beta @SequentialOnly @IntermediateOp public Stream<T> dropWhileAddSubscriber(final Predicate<? super T> predicate, final Throwables.Consumer<? super Stream<T>, ? extends Exception> consumerForNewStreamWithTerminalAction, final int queueSize, final long maxWaitForAddingElementToQueue, final Executor executor) throws IllegalStateException, IllegalArgumentException`
+- **Annotations:** @Beta, @SequentialOnly, @IntermediateOp
+- **Summary:** Attaches a new stream with its own terminal operation to consume elements dropped by the specified predicate.
+- **Contract:**
+  - The new thread is started when the main stream receives the first element or is closed if there are no elements.
+  - After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
+  - However, when the main stream is closed, it will wait for the attached stream to close before calling close actions, and any failure raised while waiting is propagated to the caller.
+- **Parameters:**
+  - `predicate` (`Predicate<? super T>`) — the predicate to test elements.
+  - `consumerForNewStreamWithTerminalAction` (`Throwables.Consumer<? super Stream<T>, ? extends Exception>`) — the consumer for the new stream with terminal action.
+  - `queueSize` (`int`) — the size of the queue. Default value is 64. Must be positive.
+  - `maxWaitForAddingElementToQueue` (`long`) — max wait time to add the next element to queue for subscriber stream to consume. Default value is 30000 (unit is milliseconds). Must be positive. If the next element can't be added to queue after waiting for the period, an exception will be thrown in the subscriber stream.
+  - `executor` (`Executor`) — the executor to run the attached stream.
+- **Returns:** the main stream with the attached subscriber
+- **Throws:**
+  - `java.lang.IllegalStateException` — if the stream is already closed
+  - `java.lang.IllegalArgumentException` — if any parameter is invalid, or if any of `predicate`, `consumerForNewStreamWithTerminalAction`, or `executor` is `null`.
+- **Examples:**
+  ```java
+  Stream.of(1, 2, 3, 4, 5)
+          .dropWhileAddSubscriber(x -> x <= 2,
+              s -> s.map(x -> x * 10).forEach(System.out::println),
+              100, 5000, executor)
+          .forEach(System.out::println);
+  ```
+- **See also:** #addSubscriber(Throwables.Consumer, int, long, Executor), #dropWhile(Predicate, Consumer)
 ##### runAsync(...) -> ContinuableFuture<Void>
 - **Signature:** `@Beta @TerminalOp public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Stream<T>, ? extends Exception> terminalAction) throws IllegalArgumentException`
 - **Annotations:** @Beta, @TerminalOp
@@ -282715,4 +283635,217 @@ An extension point of `Stream`.
 
 #### Public Instance Methods
 - (none)
+
+### Interface WindowHandler (com.landawn.abacus.util.stream.Stream.WindowHandler)
+Handler for windowing operations with support for late data handling.
+
+**Thread-safety:** unspecified
+**Nullability:** unspecified
+
+#### Public Constructors
+- (none)
+
+#### Public Static Methods
+##### of(...) -> WindowHandler<T, R>
+- **Signature:** `static <T, R> WindowHandler<T, R> of(final ToLongFunction<? super T> timeExtractor) throws IllegalArgumentException`
+- **Summary:** Creates a WindowHandler with the specified time extractor, leaving every other setting at its default: a late-data cache size of #DEFAULT_CACHE_SIZE_LATE_DATA, no delay for late data, and no late data action.
+- **Parameters:**
+  - `timeExtractor` (`ToLongFunction<? super T>`) — the function to extract timestamps from elements
+- **Returns:** a WindowHandler instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `timeExtractor` is `null`.
+- **See also:** #of(int, boolean, ToLongFunction, BiConsumer)
+- **Signature:** `static <T, R> WindowHandler<T, R> of(final BiConsumer<? super T, ? super R> onLateDataAction) throws IllegalArgumentException`
+- **Summary:** Creates a WindowHandler with the specified late data action, leaving every other setting at its default: a late-data cache size of #DEFAULT_CACHE_SIZE_LATE_DATA, no delay for late data, and no time extractor.
+- **Parameters:**
+  - `onLateDataAction` (`BiConsumer<? super T, ? super R>`) — the action to perform when late data is received; it is invoked with the late element and the result container of the window the element belongs to
+- **Returns:** a WindowHandler instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `onLateDataAction` is `null`.
+- **See also:** #of(int, boolean, ToLongFunction, BiConsumer)
+- **Signature:** `static <T, R> WindowHandler<T, R> of(final int cacheSize, final boolean delayForLateData, final ToLongFunction<? super T> timeExtractor, final BiConsumer<? super T, ? super R> onLateDataAction) throws IllegalArgumentException`
+- **Summary:** Creates a WindowHandler with the specified configuration.
+- **Parameters:**
+  - `cacheSize` (`int`) — the number of recent window results kept available for late data updates; must be positive
+  - `delayForLateData` (`boolean`) — whether to delay window results for late data
+  - `timeExtractor` (`ToLongFunction<? super T>`) — the function to extract timestamps from elements
+  - `onLateDataAction` (`BiConsumer<? super T, ? super R>`) — the action to perform when late data is received; it is invoked with the late element and the result container of the window the element belongs to
+- **Returns:** a WindowHandler instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `cacheSize` is not positive, or if `timeExtractor` or `onLateDataAction` is `null`.
+##### builder(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `static <T, R> WindowHandlerBuilder<T, R> builder()`
+- **Summary:** Creates a new WindowHandlerBuilder for constructing WindowHandler instances.
+- **Parameters:**
+  - (none)
+- **Returns:** a WindowHandlerBuilder instance
+
+#### Public Instance Methods
+##### cacheSizeForLateData(...) -> int
+- **Signature:** `default int cacheSizeForLateData()`
+- **Summary:** Returns the maximum window result cache size that late data can reach.
+- **Parameters:**
+  - (none)
+- **Returns:** the maximum cache size for late data (default is 9)
+##### delayForLateData(...) -> boolean
+- **Signature:** `default boolean delayForLateData()`
+- **Summary:** Returns whether to delay window result to reflect late data update.
+- **Contract:**
+  - If `false` is returned, late data update may not be reflected in the earlier window result if it's retrieved before the late data arrives.
+- **Parameters:**
+  - (none)
+- **Returns:** `true` to delay window results for late data, `false` otherwise (default is `false`)
+##### timeExtractor(...) -> ToLongFunction<T>
+- **Signature:** `default ToLongFunction<T> timeExtractor()`
+- **Summary:** Returns the time extractor function to extract timestamp from elements.
+- **Parameters:**
+  - (none)
+- **Returns:** the time extractor function, or `null` if not set (default is `null`)
+##### timeWrapper(...) -> ObjLongFunction<T, Timed<T>>
+- **Signature:** `default ObjLongFunction<T, Timed<T>> timeWrapper()`
+- **Summary:** Returns the time wrapper function to wrap elements with their timestamps.
+- **Parameters:**
+  - (none)
+- **Returns:** the time wrapper function, or `null` if not set (default is `null`)
+##### onLateDataAction(...) -> OnLateDataAction<T, R>
+- **Signature:** `default OnLateDataAction<T, R> onLateDataAction()`
+- **Summary:** Returns the action to be performed when late data is received.
+- **Parameters:**
+  - (none)
+- **Returns:** the late data action, or `null` if not set (default is `null`)
+
+### Class WindowHandlerBuilder (com.landawn.abacus.util.stream.Stream.WindowHandler.WindowHandlerBuilder)
+Builder for constructing WindowHandler instances with a fluent API.
+
+**Thread-safety:** unspecified
+**Nullability:** unspecified
+
+#### Public Constructors
+- (none)
+
+#### Public Static Methods
+- (none)
+
+#### Public Instance Methods
+##### cacheSizeForLateData(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `public WindowHandlerBuilder<T, R> cacheSizeForLateData(final int cacheSizeForLateData)`
+- **Summary:** Sets the number of recent window results kept available for late data updates.
+- **Parameters:**
+  - `cacheSizeForLateData` (`int`) — the number of recent window results kept available for late data updates; must be positive
+- **Returns:** this builder instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `cacheSizeForLateData` is not positive.
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .cacheSizeForLateData(100)
+        .build();
+  ```
+##### delayForLateData(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `public WindowHandlerBuilder<T, R> delayForLateData(final boolean delayForLateData)`
+- **Summary:** Sets whether to delay window results for late data.
+- **Parameters:**
+  - `delayForLateData` (`boolean`) — whether to delay window results for late data
+- **Returns:** this builder instance
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .delayForLateData(true)
+        .build();
+  ```
+##### timeExtractor(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `public WindowHandlerBuilder<T, R> timeExtractor(final ToLongFunction<? super T> timeExtractor) throws IllegalArgumentException`
+- **Summary:** Sets the time extractor function to extract timestamps from elements.
+- **Parameters:**
+  - `timeExtractor` (`ToLongFunction<? super T>`) — the function to extract timestamps from elements
+- **Returns:** this builder instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `timeExtractor` is `null`.
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .timeExtractor(event -> event.getTimestamp())
+        .build();
+  ```
+##### timeWrapper(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `public WindowHandlerBuilder<T, R> timeWrapper(final ObjLongFunction<? super T, Timed<T>> timeWrapper) throws IllegalArgumentException`
+- **Summary:** Sets the time wrapper function to wrap elements with their timestamps.
+- **Parameters:**
+  - `timeWrapper` (`ObjLongFunction<? super T, Timed<T>>`) — the function to wrap elements with their timestamps
+- **Returns:** this builder instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `timeWrapper` is `null`.
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .timeWrapper((event, timestamp) -> Timed.of(event, timestamp))
+        .build();
+  ```
+##### onLateData(...) -> WindowHandlerBuilder<T, R>
+- **Signature:** `public WindowHandlerBuilder<T, R> onLateData(final BiConsumer<? super T, ? super R> onLateDataAction) throws IllegalArgumentException`
+- **Summary:** Sets the action to perform when late data is received, in the simplified form that only receives the late element and the result container of the window it belongs to.
+- **Parameters:**
+  - `onLateDataAction` (`BiConsumer<? super T, ? super R>`) — the action to perform when late data is received, accepting the late element and the window result container
+- **Returns:** this builder instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `onLateDataAction` is `null`.
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .onLateData((event, list) -> System.out.println("Late event: " + event))
+        .build();
+  ```
+- **See also:** #onLateData(OnLateDataAction)
+- **Signature:** `public WindowHandlerBuilder<T, R> onLateData(final OnLateDataAction<T, R> onLateDataAction) throws IllegalArgumentException`
+- **Summary:** Sets the action to perform when late data is received, in the full form that also receives the window boundaries and the event timestamp.
+- **Parameters:**
+  - `onLateDataAction` (`OnLateDataAction<T, R>`) — the late data action
+- **Returns:** this builder instance
+- **Throws:**
+  - `java.lang.IllegalArgumentException` — if `onLateDataAction` is `null`.
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .onLateData((windowStart, windowEnd, eventTime, element, resultContainer) -> {
+            System.out.println("Late data detected for window [" + windowStart + ", " + windowEnd + "]");
+        })
+        .build();
+  ```
+- **See also:** #onLateData(BiConsumer)
+##### build(...) -> WindowHandler<T, R>
+- **Signature:** `public WindowHandler<T, R> build()`
+- **Summary:** Builds and returns a WindowHandler instance with the configured settings.
+- **Parameters:**
+  - (none)
+- **Returns:** a WindowHandler instance
+- **Examples:**
+  ```java
+  WindowHandler<Event, List<Event>> handler = WindowHandler.<Event, List<Event>>builder()
+        .cacheSizeForLateData(100)
+        .timeExtractor(event -> event.getTimestamp())
+        .build();
+  ```
+
+### Interface OnLateDataAction (com.landawn.abacus.util.stream.Stream.WindowHandler.OnLateDataAction)
+Functional interface for handling late data events in windowing operations.
+
+**Thread-safety:** unspecified
+**Nullability:** unspecified
+
+#### Public Constructors
+- (none)
+
+#### Public Static Methods
+- (none)
+
+#### Public Instance Methods
+##### accept(...) -> void
+- **Signature:** `void accept(long windowStartTime, long windowEndTime, long eventTime, T element, R windowResultContainer)`
+- **Summary:** Performs the action for late data.
+- **Parameters:**
+  - `windowStartTime` (`long`) — the start time of the window
+  - `windowEndTime` (`long`) — the end time of the window
+  - `eventTime` (`long`) — the timestamp of the late data event
+  - `element` (`T`) — the late data element
+  - `windowResultContainer` (`R`) — the window result container
 

@@ -1767,7 +1767,7 @@ public final class Strings {
      * @param str the input string to be checked, may be {@code null} or empty
      * @param prefixSuffix the string that should be the prefix and suffix of the input string.
      * @return {@code true} if the input string starts and ends with the prefixSuffix string, {@code false} otherwise.
-     * @throws IllegalArgumentException if prefixSuffix is empty.
+     * @throws IllegalArgumentException if prefixSuffix is {@code null} or empty.
      * @see #isWrappedWith(String, String, String)
      */
     public static boolean isWrappedWith(final String str, final String prefixSuffix) throws IllegalArgumentException {
@@ -1796,7 +1796,7 @@ public final class Strings {
      * @param prefix the string that should be the prefix of the input string.
      * @param suffix the string that should be the suffix of the input string.
      * @return {@code true} if the input string starts with the prefix and ends with the suffix, {@code false} otherwise.
-     * @throws IllegalArgumentException if prefix or suffix is empty.
+     * @throws IllegalArgumentException if prefix or suffix is {@code null} or empty.
      * @see #isWrappedWith(String, String)
      */
     public static boolean isWrappedWith(final String str, final String prefix, final String suffix) throws IllegalArgumentException {
@@ -2616,7 +2616,7 @@ public final class Strings {
      * @param abbrevMarker the String used as replacement marker
      * @param offset left edge of source String
      * @param maxWidth maximum length of result String, must be at least {@code abbrevMarker.length() + 1}
-     * @return abbreviated String
+     * @return abbreviated String, {@code null} if {@code null} String input
      * @throws IllegalArgumentException if the width is too small.
      * @deprecated Use {@link #abbreviate(String, String, int)} when an offset is not required.
      */
@@ -6826,8 +6826,10 @@ public final class Strings {
     /**
      * Splits the given string into an array of substrings, each of which is a line of text from the original string.
      *
-     * <p>The string is split at line terminators, which can be the carriage return character ('\r'),
-     * the newline character ('\n'), or the carriage return followed immediately by the newline character ('\r\n').
+     * <p>The string is split at line terminators, following the {@code \R} regular-expression construct:
+     * the newline character ('\n'), the carriage return character ('\r'), the carriage return followed immediately
+     * by the newline character ('\r\n'), the vertical tab (U+000B), the form feed (U+000C), the next line character
+     * (U+0085), the line separator (U+2028), or the paragraph separator (U+2029).
      * Empty lines are preserved in the result.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6857,8 +6859,10 @@ public final class Strings {
     /**
      * Splits the given string into an array of substrings, each of which is a line of text from the original string.
      *
-     * <p>The string is split at line terminators, which can be the carriage return character ('\r'),
-     * the newline character ('\n'), or the carriage return followed immediately by the newline character ('\r\n').
+     * <p>The string is split at line terminators, following the {@code \R} regular-expression construct:
+     * the newline character ('\n'), the carriage return character ('\r'), the carriage return followed immediately
+     * by the newline character ('\r\n'), the vertical tab (U+000B), the form feed (U+000C), the next line character
+     * (U+0085), the line separator (U+2028), or the paragraph separator (U+2029).
      * If the trim parameter is {@code true}, leading and trailing whitespace is removed from each line of text.
      * If the omitEmptyLines parameter is {@code true}, empty lines (after trimming, if the trim parameter is true) are not included in the resulting array.</p>
      *
@@ -16173,6 +16177,8 @@ public final class Strings {
      */
     public static List<IndexRange> substringIndicesBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex,
             final DelimiterMatchMode delimiterMatchMode) {
+        N.checkArgNotNull(delimiterMatchMode, cs.delimiterMatchMode);
+
         if (str == null || str.isEmpty()) {
             return new ArrayList<>();
         }
@@ -16312,6 +16318,8 @@ public final class Strings {
      */
     public static List<IndexRange> substringIndicesBetween(final String str, final String delimiterOfExclusiveBeginIndex,
             final String delimiterOfExclusiveEndIndex, final DelimiterMatchMode delimiterMatchMode) {
+        N.checkArgNotNull(delimiterMatchMode, cs.delimiterMatchMode);
+
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex)) {
             return new ArrayList<>();
         }
@@ -20614,7 +20622,7 @@ public final class Strings {
      * @param overlay the String to overlay, may be {@code null}
      * @param start the position to start overlaying at; must be valid index
      * @param end the position to stop overlaying before; must be valid
-     * @return overlayed String, or {@code overlay} if {@code null} String input
+     * @return overlayed String, or {@code overlay} (empty string if {@code overlay} is also {@code null}) if {@code null} String input
      * @throws IndexOutOfBoundsException if start or end is negative, or end is greater than the length of str, or indices are invalid
      * @deprecated replaced by {@code Strings.replaceRange(String, int, int, String)}. Note that the parameter order
      *             differs: this method takes the replacement ({@code overlay}) as the 2nd argument, while
@@ -24925,15 +24933,16 @@ public final class Strings {
          * and scientific notation. It returns an empty {@link u.OptionalFloat} if the string
          * is blank, {@code null}, or cannot be parsed as a valid float.</p>
          *
-         * <p>The method performs a quick validation check before attempting to parse the string.</p>
+         * <p>The method performs a quick validation check before attempting to parse the string.
+         * Non-numeric literals such as {@code "NaN"} and {@code "Infinity"} are rejected by this check and yield an empty result.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * StrUtil.tryParseFloat("123.45");     // returns OptionalFloat.of(123.45f)
          * StrUtil.tryParseFloat("-67.89");     // returns OptionalFloat.of(-67.89f)
          * StrUtil.tryParseFloat("1.23e4");     // returns OptionalFloat.of(12300.0f)
-         * StrUtil.tryParseFloat("NaN");        // returns OptionalFloat.of(Float.NaN)
-         * StrUtil.tryParseFloat("Infinity");   // returns OptionalFloat.of(Float.POSITIVE_INFINITY)
+         * StrUtil.tryParseFloat("NaN");        // returns OptionalFloat.empty()
+         * StrUtil.tryParseFloat("Infinity");   // returns OptionalFloat.empty()
          * StrUtil.tryParseFloat("abc");        // returns OptionalFloat.empty()
          * StrUtil.tryParseFloat("");           // returns OptionalFloat.empty()
          * StrUtil.tryParseFloat(null);         // returns OptionalFloat.empty()
@@ -24963,15 +24972,16 @@ public final class Strings {
          * and scientific notation. It returns an empty {@link u.OptionalDouble} if the string
          * is blank, {@code null}, or cannot be parsed as a valid double.</p>
          *
-         * <p>The method performs a quick validation check before attempting to parse the string.</p>
+         * <p>The method performs a quick validation check before attempting to parse the string.
+         * Non-numeric literals such as {@code "NaN"} and {@code "Infinity"} are rejected by this check and yield an empty result.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * StrUtil.tryParseDouble("123.456789");   // returns OptionalDouble.of(123.456789)
          * StrUtil.tryParseDouble("-67.89012");    // returns OptionalDouble.of(-67.89012)
          * StrUtil.tryParseDouble("1.23456e10");   // returns OptionalDouble.of(1.23456E10)
-         * StrUtil.tryParseDouble("NaN");          // returns OptionalDouble.of(Double.NaN)
-         * StrUtil.tryParseDouble("Infinity");     // returns OptionalDouble.of(Double.POSITIVE_INFINITY)
+         * StrUtil.tryParseDouble("NaN");          // returns OptionalDouble.empty()
+         * StrUtil.tryParseDouble("Infinity");     // returns OptionalDouble.empty()
          * StrUtil.tryParseDouble("abc");          // returns OptionalDouble.empty()
          * StrUtil.tryParseDouble("");             // returns OptionalDouble.empty()
          * StrUtil.tryParseDouble(null);           // returns OptionalDouble.empty()

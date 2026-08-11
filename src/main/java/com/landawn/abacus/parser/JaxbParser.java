@@ -355,6 +355,8 @@ final class JaxbParser extends AbstractXmlParser {
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
+        checkDeserializationConfig(config);
+
         if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
         }
@@ -524,9 +526,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
     <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
-        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
-            throw new ParsingException("'ignoredPropNames' is not supported");
-        }
+        checkDeserializationConfig(config);
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
@@ -554,9 +554,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
      */
     <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) {
-        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
-            throw new ParsingException("'ignoredPropNames' is not supported");
-        }
+        checkDeserializationConfig(config);
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
@@ -600,8 +598,23 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration, or {@code null}
      * @throws ParsingException if ignored property names are configured
      */
-    private static void checkSerializationConfig(final XmlSerConfig config) {
-        if (config != null && N.notEmpty(config.getIgnoredPropNames())) {
+    private void checkSerializationConfig(final XmlSerConfig config) {
+        if (N.notEmpty(check(config).getIgnoredPropNames())) {
+            throw new ParsingException("'ignoredPropNames' is not supported");
+        }
+    }
+
+    /**
+     * Resolves the effective deserialization configuration and rejects the option JAXB cannot honor.
+     * This must run before empty-input short-circuits as well as before unmarshalling.
+     *
+     * @param config the per-call configuration, or {@code null} to use this parser's default
+     * @throws ParsingException if ignored property names are configured
+     */
+    private void checkDeserializationConfig(final XmlDeserConfig config) {
+        final XmlDeserConfig configToUse = check(config);
+
+        if (N.notEmpty(configToUse.getIgnoredPropNames())) {
             throw new ParsingException("'ignoredPropNames' is not supported");
         }
     }

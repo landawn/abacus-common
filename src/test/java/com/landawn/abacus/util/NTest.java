@@ -14145,6 +14145,14 @@ public class NTest extends AbstractParserTest {
         assertEquals(2147483647.0d, N.median(Integer.MAX_VALUE, Integer.MAX_VALUE), 0.0d);
         assertEquals((double) Long.MAX_VALUE, N.median(Long.MAX_VALUE, Long.MAX_VALUE), 0.0d);
 
+        // The two-element shortcut used to overflow before division, while the larger even-length
+        // branch divided first and underflowed the least positive subnormal values to zero.
+        assertEquals(Double.MAX_VALUE, N.median(Double.MAX_VALUE, Double.MAX_VALUE), 0.0d);
+        assertEquals(-Double.MAX_VALUE, N.median(-Double.MAX_VALUE, -Double.MAX_VALUE), 0.0d);
+        assertEquals(Double.MIN_VALUE, N.median(Double.MIN_VALUE, Double.MIN_VALUE), 0.0d);
+        assertEquals(Double.MAX_VALUE, N.median(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE), 0.0d);
+        assertEquals(Double.MIN_VALUE, N.median(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE), 0.0d);
+
         int[] original = { 5, 30, 15, 8, 20 };
         int[] snapshot = original.clone();
         assertEquals(15.0d, N.median(original), 0.0d);

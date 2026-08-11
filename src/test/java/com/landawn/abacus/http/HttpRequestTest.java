@@ -236,6 +236,7 @@ public class HttpRequestTest extends TestBase {
     public void testconnectTimeoutDuration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         assertSame(request, request.connectTimeout(Duration.ofSeconds(5)));
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Duration.ofNanos(-1)));
     }
 
     @Test
@@ -330,6 +331,7 @@ public class HttpRequestTest extends TestBase {
     public void testReadTimeoutDuration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         assertSame(request, request.readTimeout(Duration.ofSeconds(10)));
+        assertThrows(IllegalArgumentException.class, () -> request.readTimeout(Duration.ofNanos(-1)));
     }
 
     @Test

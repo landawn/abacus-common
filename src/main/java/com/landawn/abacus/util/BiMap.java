@@ -17,11 +17,14 @@
 package com.landawn.abacus.util;
 
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
@@ -172,7 +175,7 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Null Handling:</b>
  * <ul>
- *   <li>Null keys and {@code null} values are not supported and will cause {@code IllegalArgumentException}</li>
+ *   <li>{@code null} keys and {@code null} values are not supported and will cause {@code IllegalArgumentException}</li>
  * </ul>
  *
  * <p><b>Error Conditions:</b>
@@ -1245,7 +1248,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return The key associated with the value, or {@code null} if there was no mapping for the value.
      */
     public K removeByValue(final Object value) {
-        @SuppressWarnings("SuspiciousMethodCalls")
+        //noinspection SuspiciousMethodCalls
         final K removedKey = valueMap.remove(value);
 
         if (removedKey != null) {
@@ -1392,6 +1395,84 @@ public final class BiMap<K, V> implements Map<K, V> {
                 return keyMap.size();
             }
         });
+    }
+
+    /**
+     * Replaces each entry's value with the result of applying the given function to that entry.
+     * <p>
+     * The default {@link Map#replaceAll} implementation updates values via {@code Entry.setValue},
+     * but this BiMap's {@link #entrySet()} yields immutable entry snapshots. This override applies
+     * updates through the backing maps directly so the bijective maps stay consistent.
+     * </p>
+     * <p>
+     * All replacement values are computed and staged before this BiMap is modified: the function
+     * is invoked exactly once per entry with its original key and value, each result must be
+     * non-{@code null}, and no two results may be equal under the value map's own equivalence
+     * (for example, a case-insensitive comparator). If function evaluation or staging fails, an
+     * exception is thrown and this BiMap is left unchanged. Once staging succeeds, the existing
+     * forward entries are updated in place and the reverse map is rebuilt from the staged inverse.
+     * As with other mutating operations, an exception thrown by a backing map during this final
+     * commit may leave the BiMap partially updated.
+     * </p>
+     * <p>
+     * The function must not modify this BiMap while the replacement values are being computed.
+     * </p>
+     *
+     * @param function the function to apply to each entry; must not be {@code null}
+     * @throws IllegalArgumentException if {@code function} is {@code null}, returns {@code null} for any
+     *         entry, or produces a replacement value equal to another entry's replacement value
+     */
+    @Override
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) {
+        N.checkArgNotNull(function, cs.function);
+
+        if (keyMap.isEmpty()) {
+            return;
+        }
+
+        // Constructing a temporary BiMap validates that both user-supplied factories still return
+        // non-null, empty, distinct maps. It also lets all key/value constraints be exercised before
+        // either live backing map is touched.
+        final BiMap<K, V> staged = new BiMap<>(keyMapSupplier, valueMapSupplier);
+        final int size = keyMap.size();
+        final List<ImmutableEntry<K, V>> entries = new ArrayList<>(size);
+
+        for (final Map.Entry<K, V> entry : keyMap.entrySet()) {
+            entries.add(ImmutableEntry.copyOf(entry));
+        }
+
+        // Compute all replacement values before mutating this BiMap, so a failing function leaves
+        // the map unchanged.
+        final List<V> newValues = new ArrayList<>(size);
+
+        for (ImmutableEntry<K, V> entry : entries) {
+            final V newValue = function.apply(entry.getKey(), entry.getValue());
+
+            if (newValue == null) {
+                throw new IllegalArgumentException("function returned null for key: " + entry.getKey());
+            }
+
+            newValues.add(newValue);
+        }
+
+        // put() validates each result with both staged backing maps, including comparator- or
+        // identity-based value equivalence. A complete staging pass also permits swaps and cycles.
+        for (int i = 0; i < size; i++) {
+            staged.put(entries.get(i).getKey(), newValues.get(i));
+
+            if (staged.size() != i + 1) {
+                throw new IllegalArgumentException("The key map supplier does not preserve the live key map's equivalence semantics");
+            }
+        }
+
+        // Keys do not change, so update their values without clearing keyMap. This preserves
+        // canonical key objects and avoids structural churn in insertion-ordered backing maps.
+        for (int i = 0; i < size; i++) {
+            keyMap.put(entries.get(i).getKey(), newValues.get(i));
+        }
+
+        valueMap.clear();
+        valueMap.putAll(staged.valueMap);
     }
 
     /**
@@ -1683,7 +1764,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          *     .build();
          * }</pre>
          *
-         * @param m the map whose entries are to be added to this BiMap; a {@code null} or empty map is silently ignored.
+         * @param m the map whose entries are to be added to the BiMap being built; a {@code null} or empty map is silently ignored.
          * @return This Builder instance to allow for chaining of calls to builder methods.
          * @throws IllegalArgumentException if any key or value is {@code null}, or if an attempt to {@code put} any
          *         entry fails due to a duplicate value. Note that some map entries may have been added to the BiMap

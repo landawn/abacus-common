@@ -366,6 +366,10 @@ public record IndexRange(int start, int end) {
      * input ranges. If the input ranges are connected (overlapping or touching), the span
      * is their union; if not, the span includes the gap between them.
      *
+     * <p>Empty ranges contribute no indices: spanning a non-empty range with an empty one
+     * returns the non-empty range unchanged. Spanning two empty ranges returns one of them
+     * deterministically (preferring the one with the smaller {@code start}, then {@code this}).</p>
+     *
      * <p>This operation is commutative, associative, and idempotent.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -374,6 +378,8 @@ public record IndexRange(int start, int end) {
      * IndexRange range2 = new IndexRange(5, 7);
      * IndexRange span = range1.span(range2);
      * // returns new IndexRange(1, 7), which also includes the indices 3..4 that are in neither input range
+     *
+     * new IndexRange(1, 3).span(new IndexRange(5, 5));   // returns [1, 3) — empty adds no indices
      * }</pre>
      *
      * @param other the range to span with this range, must not be {@code null}
@@ -383,6 +389,18 @@ public record IndexRange(int start, int end) {
      */
     public IndexRange span(final IndexRange other) {
         N.requireNonNull(other, "other");
+
+        if (isEmpty()) {
+            if (!other.isEmpty()) {
+                return other;
+            }
+
+            // Empty ranges are equal as sets but record different endpoints; pick deterministically
+            // so span remains commutative (prefer smaller start, then this).
+            return start <= other.start ? this : other;
+        } else if (other.isEmpty()) {
+            return this;
+        }
 
         return new IndexRange(Math.min(start, other.start), Math.max(end, other.end));
     }

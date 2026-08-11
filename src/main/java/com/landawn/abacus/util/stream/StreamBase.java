@@ -2856,8 +2856,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     }
 
     static int calculateBufferedSize(final int len, final int readThreadNum) {
-        final int min = N.max(readThreadNum * 16, 16);
-        return N.max(N.min(MAX_BUFFERED_SIZE, len * DEFAULT_BUFFERED_SIZE_PER_ITERATOR), min);
+        final int min = (int) Math.min(MAX_BUFFERED_SIZE, Math.max((long) readThreadNum * 16, 16L));
+        final int sizeForIterators = (int) Math.min(MAX_BUFFERED_SIZE, (long) len * DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
+        return N.max(sizeForIterators, min);
     }
 
     static int toInt(final long max) {

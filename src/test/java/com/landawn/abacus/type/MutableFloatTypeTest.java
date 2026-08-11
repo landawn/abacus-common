@@ -45,6 +45,11 @@ public class MutableFloatTypeTest extends TestBase {
     }
 
     @Test
+    public void testIsImmutable() {
+        Assertions.assertFalse(mutableFloatType.isImmutable());
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = mutableFloatType.stringOf(null);
         Assertions.assertNull(result);

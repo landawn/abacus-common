@@ -150,6 +150,27 @@ public class JaxbParserTest extends TestBase {
     }
 
     @Test
+    public void testConstructorSerializationConfigIsAppliedWhenCallConfigIsNull() {
+        XmlSerConfig xsc = new XmlSerConfig().setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
+        JaxbParser parserWithConfig = new JaxbParser(xsc, null);
+
+        assertThrows(ParsingException.class, () -> parserWithConfig.serialize(new Person("Test", 30), (XmlSerConfig) null));
+    }
+
+    @Test
+    public void testConstructorDeserializationConfigIsAppliedWhenCallConfigIsNull() {
+        XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
+        JaxbParser parserWithConfig = new JaxbParser(null, xdc);
+
+        assertThrows(ParsingException.class,
+                () -> parserWithConfig.deserialize("<person><name>Test</name><age>30</age></person>", null, Person.class));
+        assertThrows(ParsingException.class, () -> parserWithConfig.deserialize("", null, Person.class));
+
+        XmlDeserConfig perCallConfig = new XmlDeserConfig().setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
+        assertThrows(ParsingException.class, () -> parser.deserialize("", perCallConfig, Person.class));
+    }
+
+    @Test
     public void testSerializeToString() {
         Person person = new Person("John", 30);
         String xml = parser.serialize(person, (XmlSerConfig) null);

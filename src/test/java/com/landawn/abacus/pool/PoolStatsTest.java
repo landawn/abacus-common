@@ -55,8 +55,8 @@ public class PoolStatsTest extends TestBase {
 
     @Test
     public void testRecordWithMaxValues() {
-        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE,
-                Long.MAX_VALUE, Long.MAX_VALUE);
+        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE, Long.MAX_VALUE,
+                Long.MAX_VALUE);
 
         assertNotNull(stats);
         assertEquals(Integer.MAX_VALUE, stats.capacity());
@@ -144,8 +144,8 @@ public class PoolStatsTest extends TestBase {
 
     @Test
     public void testWithMaxValues() {
-        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE,
-                Long.MAX_VALUE, Long.MAX_VALUE);
+        PoolStats stats = new PoolStats(Integer.MAX_VALUE, Integer.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, 0, Long.MAX_VALUE, Long.MAX_VALUE,
+                Long.MAX_VALUE);
 
         assertEquals(Integer.MAX_VALUE, stats.capacity());
         assertEquals(Integer.MAX_VALUE, stats.size());

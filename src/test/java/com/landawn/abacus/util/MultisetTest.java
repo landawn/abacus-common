@@ -3852,4 +3852,37 @@ public class MultisetTest extends AbstractTest {
         assertThrows(IllegalStateException.class, multiset::toArray);
         assertThrows(IllegalStateException.class, () -> multiset.toArray(new String[0]));
     }
+
+    /**
+     * Collection.removeIf must remove matching elements. Pre-fix: iterator() had no remove(),
+     * so the JDK default removeIf threw UnsupportedOperationException on the first match.
+     */
+    @Test
+    public void testRemoveIf_removesMatchingElements() {
+        final Multiset<String> multiset = Multiset.of("a", "a", "b", "c", "c");
+        assertTrue(multiset.removeIf(s -> s.equals("a") || s.equals("c")));
+        assertEquals(0, multiset.getCount("a"));
+        assertEquals(0, multiset.getCount("c"));
+        assertEquals(1, multiset.getCount("b"));
+        assertEquals(1, multiset.size());
+
+        assertFalse(multiset.removeIf(s -> s.equals("a")));
+        assertEquals(1, multiset.getCount("b"));
+    }
+
+    @Test
+    public void testRemoveIf_evaluatesOncePerDistinctElement() {
+        final Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
+        final int[] invocationCount = { 0 };
+
+        assertTrue(multiset.removeIf(s -> {
+            invocationCount[0]++;
+            return s.equals("a");
+        }));
+
+        assertEquals(2, invocationCount[0]);
+        assertEquals(0, multiset.getCount("a"));
+        assertEquals(2, multiset.getCount("b"));
+        assertThrows(NullPointerException.class, () -> multiset.removeIf(null));
+    }
 }

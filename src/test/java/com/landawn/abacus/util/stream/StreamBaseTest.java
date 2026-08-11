@@ -1522,6 +1522,8 @@ public class StreamBaseTest extends TestBase {
         Assertions.assertEquals(6400, StreamBase.calculateBufferedSize(100, 1));
 
         Assertions.assertEquals(StreamBase.MAX_BUFFERED_SIZE, StreamBase.calculateBufferedSize(1000000, 1));
+        Assertions.assertEquals(StreamBase.MAX_BUFFERED_SIZE, StreamBase.calculateBufferedSize(Integer.MAX_VALUE, 1));
+        Assertions.assertEquals(StreamBase.MAX_BUFFERED_SIZE, StreamBase.calculateBufferedSize(1, Integer.MAX_VALUE));
 
         Assertions.assertEquals(256, StreamBase.calculateBufferedSize(1, 16));
         Assertions.assertEquals(1024, StreamBase.calculateBufferedSize(10, 64));
